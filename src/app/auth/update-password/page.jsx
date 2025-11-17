@@ -42,7 +42,11 @@ const UpdatePassword = () => {
     <div className="grid lg:grid-cols-1 grid-cols-1 w-full text-white">
       <div className="flex flex-col justify-center items-center h-auto ">
         <div>
-          <img src={"/images/forgotLogo.png"} alt="logo" className="w-[220px]" />
+          <img
+            src={"/images/forgotLogo.png"}
+            alt="logo"
+            className="w-[220px]"
+          />
         </div>
         <div className="mt-4 py-4 space-y-3 xxl:w-[400px] xxl:ml-12 text-center">
           <p className=" xxl:text-[48px] text-[32px] font-[600] capitalize">
