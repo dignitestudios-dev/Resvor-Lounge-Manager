@@ -20,7 +20,7 @@ export default function SignUp() {
     { icon: IoMdPerson, title: "Your Details" },
     { icon: IoMailOutline, title: "Verify Email" },
     { icon: IoCallOutline, title: "Verify Number" },
-    { icon: LiaIdCard, title: "Personal details" },
+    { icon: LiaIdCard, title: "Create Lounge" },
     { icon: HiOutlineCalendarDateRange, title: "Floor Plan" },
     { icon: IoMdPerson, title: "Multiple Lounge" },
     { icon: FaClipboardList, title: "Subscription" },

@@ -6,9 +6,12 @@ import EditProfileModal from "@/components/profile/EditProfileModal";
 import SuccessModal from "@/components/settings/modals/SuccessModal";
 import Edit from "@/components/icons/Edit";
 import Delete from "@/components/icons/sidebar/Delete";
+import EditFloorPlanModal from "@/components/profile/EditFloorPlanModal";
 
 const Profile = () => {
   const [openEditProfile, setOpenEditProfile] = useState(false);
+  const [openEditFloorPlan, setOpenEditFloorPlan] = useState(false);
+
   const [openSuccess, setOpenSuccess] = useState(false);
   const galleryImages = Array(12).fill("/images/lounge.jfif"); // Replace with real images later
   const locations = [
@@ -111,16 +114,24 @@ const Profile = () => {
               456 Maple Street, Anytown, NY 12345
             </p>
           </div>
-          <div className="bg-gray-100 rounded-md p-3 col-span-6">
+          {/* <div className="bg-gray-100 rounded-md p-3 col-span-6">
             <p className="text-xs text-gray-500">Birthday</p>
             <p className="text-sm font-medium">Date of Birth: 04 July 1996</p>
-          </div>
+          </div> */}
         </div>
       </section>
 
       {/* Floor Plan */}
       <section className="bg-white rounded-xl shadow-sm p-6">
-        <h2 className="text-xl font-semibold mb-4">Floor Plan</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold ">Floor Plan</h2>
+          <button
+            onClick={() => setOpenEditFloorPlan(true)}
+            className="cursor-pointer"
+          >
+            <Edit />
+          </button>
+        </div>
         <div className="w-full overflow-hidden rounded-md mb-4">
           {/* Placeholder image for now */}
           <Image
@@ -210,6 +221,19 @@ const Profile = () => {
           </div>
         </div>
       </section>
+
+      {openEditFloorPlan && (
+        <EditFloorPlanModal
+          open={openEditFloorPlan}
+          setOpen={setOpenEditFloorPlan}
+          onSave={(data) => {
+            console.log("Save floor plan:", data);
+            setOpenEditFloorPlan(false);
+            setOpenSuccess(true);
+            // TODO: Call API to update profile
+          }}
+        />
+      )}
 
       <EditProfileModal
         open={openEditProfile}
