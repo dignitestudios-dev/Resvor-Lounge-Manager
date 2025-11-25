@@ -231,7 +231,6 @@
 
 /* For auth BG */
 .backgroundImage {
-  font-family: "General Sans", sans-serif;
   background-image: url("/images/bg-image.png");
   background-size: cover;
   background-repeat: no-repeat;
