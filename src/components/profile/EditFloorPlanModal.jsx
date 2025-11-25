@@ -46,7 +46,7 @@ const EditFloorPlanModal = ({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="min-w-4xl max-w-full">
+      <DialogContent className="min-w-xl max-w-full">
         <DialogHeader>
           <DialogTitle className="text-3xl">Edit Floor Plan</DialogTitle>
         </DialogHeader>
@@ -76,6 +76,30 @@ const EditFloorPlanModal = ({
               ref={fileInputRef}
               className="hidden"
               onChange={handleImageChange}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Regular Tables
+            </label>
+            <input
+              type="text"
+              value=""
+              onChange={() => ""}
+              className="w-full px-3 py-2 rounded-md border border-gray-300"
+              placeholder="Total Number of Tables"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              VIP Tables
+            </label>
+            <input
+              type="text"
+              value=""
+              onChange={() => ""}
+              className="w-full px-3 py-2 rounded-md border border-gray-300"
+              placeholder="Total Number of VIP Tables"
             />
           </div>
         </div>

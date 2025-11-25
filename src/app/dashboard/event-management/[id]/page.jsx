@@ -1,11 +1,13 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import EventAcceptedModal from "@/components/event-management/EventAcceptedModal";
 
 const EventDetails = () => {
   const params = useParams();
   const eventId = params.id;
+  const [isAccepted, setIsAccepted] = useState(false);
 
   const handleReject = () => {
     console.log("Event ID:", eventId, "Action: Rejected");
@@ -13,6 +15,7 @@ const EventDetails = () => {
 
   const handleAccept = () => {
     console.log("Event ID:", eventId, "Action: Accepted");
+    setIsAccepted(true);
   };
 
   return (
@@ -190,6 +193,12 @@ const EventDetails = () => {
           </div>
         </div>
       </div>
+      {isAccepted && (
+        <EventAcceptedModal
+          isOpen={isAccepted}
+          onOpenChange={() => setIsAccepted(false)}
+        />
+      )}
     </div>
   );
 };
