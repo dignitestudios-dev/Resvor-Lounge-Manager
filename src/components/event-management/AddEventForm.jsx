@@ -14,6 +14,17 @@ import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import ConfirmPopup from "./ConfirmPopup";
 import Link from "next/link";
+import utils from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { locations } from "@/lib/constants";
 
 const AddEventForm = ({ isOpen, onOpenChange }) => {
   // Modal triggers
@@ -43,6 +54,29 @@ const AddEventForm = ({ isOpen, onOpenChange }) => {
             </DialogTitle>
             <DialogDescription asChild>
               <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+                <div className="col-span-2 flex flex-col gap-1">
+                  <Label className={"text-black"}>Select Lounge</Label>
+
+                  <Select>
+                    <SelectTrigger className={"w-full h-14!"}>
+                      <SelectValue placeholder="Select a Lounge" />
+                    </SelectTrigger>
+                    <SelectContent className={"h-[200px]"}>
+                      <SelectGroup>
+                        <SelectLabel>Lounge</SelectLabel>
+                        {locations.map((month) => (
+                          <SelectItem
+                            className={"text-black"}
+                            value={month.name}
+                            key={month._id}
+                          >
+                            {utils.capitalize(month.name)}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
                 {/* Event Name */}
                 <div className="flex flex-col gap-1">
                   <Label className="text-sm font-medium text-black">

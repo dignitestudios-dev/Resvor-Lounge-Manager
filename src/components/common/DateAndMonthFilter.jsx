@@ -19,12 +19,40 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-import { months } from "@/lib/constants";
+import { locations, months } from "@/lib/constants";
 import utils from "@/lib/utils";
 
-const DateAndMonthFilter = () => {
+const DateAndMonthFilter = ({ isLounge, onFilterChange }) => {
+  const [startDate, setStartDate] = React.useState("");
+  const [endDate, setEndDate] = React.useState("");
+  const [selectedMonth, setSelectedMonth] = React.useState("");
+  const [selectedLounge, setSelectedLounge] = React.useState("");
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (onFilterChange) {
+      onFilterChange({
+        startDate,
+        endDate,
+        selectedMonth,
+        selectedLounge,
+      });
+    }
+  };
+
+  const handleClear = () => {
+    setStartDate("");
+    setEndDate("");
+    setSelectedMonth("");
+    setSelectedLounge("");
+    if (onFilterChange) {
+      onFilterChange({
+        startDate: "",
+        endDate: "",
+        selectedMonth: "",
+        selectedLounge: "",
+      });
+    }
   };
 
   return (
@@ -48,6 +76,8 @@ const DateAndMonthFilter = () => {
               placeholder="Select Date"
               type={"date"}
               className={"w-40 h-14"}
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
             />
           </div>
 
@@ -57,13 +87,15 @@ const DateAndMonthFilter = () => {
               placeholder="Select Date"
               type={"date"}
               className={"w-40 h-14"}
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
             />
           </div>
 
           <div className="col-span-2 flex flex-col gap-1">
             <Label className={"text-base"}>Select Month</Label>
 
-            <Select>
+            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
               <SelectTrigger className={"w-full h-14!"}>
                 <SelectValue placeholder="Select a Month" />
               </SelectTrigger>
@@ -80,11 +112,40 @@ const DateAndMonthFilter = () => {
             </Select>
           </div>
 
-          <Button className={"!h-14"} variant={"secondary"}>
+          {isLounge && (
+            <div className="col-span-2 flex flex-col gap-1">
+              <Label className={"text-base"}>Select Lounge</Label>
+
+              <Select value={selectedLounge} onValueChange={setSelectedLounge}>
+                <SelectTrigger className={"w-full h-14!"}>
+                  <SelectValue placeholder="Select a Lounge" />
+                </SelectTrigger>
+                <SelectContent className={"h-[200px]"}>
+                  <SelectGroup>
+                    <SelectLabel>Lounge</SelectLabel>
+                    {locations.map((month) => (
+                      <SelectItem value={month.name} key={month._id}>
+                        {utils.capitalize(month.name)}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <Button
+            className={"h-14!"}
+            variant={"secondary"}
+            type="button"
+            onClick={handleClear}
+          >
             Clear
           </Button>
 
-          <Button className={"!h-14"}>Apply</Button>
+          <Button className={"h-14!"} type="submit">
+            Apply
+          </Button>
         </form>
       </PopoverContent>
     </Popover>

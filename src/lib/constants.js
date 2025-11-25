@@ -124,3 +124,18 @@ export const months = [
   "november",
   "december",
 ];
+
+export const locations = [
+  {
+    _id: 1,
+    name: "First Lounge",
+    address: "123 Bay Street, Downtown Toronto M5J",
+    hours: "9 AM - 6 PM, Monday To Saturday",
+  },
+  {
+    _id: 2,
+    name: "Second Lounge",
+    address: "123 Bay Street, Downtown Toronto M5J",
+    hours: "9 AM - 6 PM, Monday To Saturday",
+  },
+];

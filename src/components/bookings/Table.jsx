@@ -5,7 +5,9 @@ import utils from "@/lib/utils";
 import { IoIosArrowForward } from "react-icons/io";
 import { useRouter } from "next/navigation";
 
-const Table = () => {
+const Table = ({ filters = {} }) => {
+  const [filteredEvents, setFilteredEvents] = React.useState([]);
+
   const router = useRouter();
   const events = [
     {
@@ -14,6 +16,7 @@ const Table = () => {
         name: "Christine Easom",
         profileImage: "/images/profile.png",
       },
+      loungeName: "First Lounge",
       guestLimit: 20,
       eventType: "Birthday Party",
       eventDate: "Jan 02, 2025",
@@ -26,6 +29,7 @@ const Table = () => {
         name: "John Smith",
         profileImage: "/images/profile.png",
       },
+      loungeName: "First Lounge",
       guestLimit: 15,
       eventType: "Wedding Reception",
       eventDate: "Jan 03, 2025",
@@ -38,6 +42,7 @@ const Table = () => {
         name: "Sarah Johnson",
         profileImage: "/images/profile.png",
       },
+      loungeName: "First Lounge",
       guestLimit: 30,
       eventType: "Corporate Event",
       eventDate: "Jan 05, 2025",
@@ -50,6 +55,7 @@ const Table = () => {
         name: "Mike Wilson",
         profileImage: "/images/profile.png",
       },
+      loungeName: "First Lounge",
       guestLimit: 10,
       eventType: "Anniversary",
       eventDate: "Jan 07, 2025",
@@ -62,6 +68,7 @@ const Table = () => {
         name: "Emily Davis",
         profileImage: "/images/profile.png",
       },
+      loungeName: "First Lounge",
       guestLimit: 25,
       eventType: "Baby Shower",
       eventDate: "Jan 08, 2025",
@@ -74,6 +81,7 @@ const Table = () => {
         name: "Robert Brown",
         profileImage: "/images/profile.png",
       },
+      loungeName: "First Lounge",
       guestLimit: 50,
       eventType: "Conference",
       eventDate: "Jan 10, 2025",
@@ -86,6 +94,7 @@ const Table = () => {
         name: "Lisa Anderson",
         profileImage: "/images/profile.png",
       },
+      loungeName: "Second Lounge",
       guestLimit: 12,
       eventType: "Dinner Party",
       eventDate: "Jan 12, 2025",
@@ -98,6 +107,7 @@ const Table = () => {
         name: "David Miller",
         profileImage: "/images/profile.png",
       },
+      loungeName: "First Lounge",
       guestLimit: 40,
       eventType: "Product Launch",
       eventDate: "Jan 15, 2025",
@@ -110,6 +120,7 @@ const Table = () => {
         name: "Jennifer Taylor",
         profileImage: "/images/profile.png",
       },
+      loungeName: "Second Lounge",
       guestLimit: 18,
       eventType: "Graduation Party",
       eventDate: "Jan 18, 2025",
@@ -122,6 +133,7 @@ const Table = () => {
         name: "Kevin Martin",
         profileImage: "/images/profile.png",
       },
+      loungeName: "Second Lounge",
       guestLimit: 35,
       eventType: "Networking Event",
       eventDate: "Jan 20, 2025",
@@ -129,6 +141,47 @@ const Table = () => {
       ticketDoor: 32,
     },
   ];
+
+  React.useEffect(() => {
+    let filtered = [...events];
+
+    if (filters.startDate) {
+      const startDate = new Date(filters.startDate);
+      filtered = filtered.filter((event) => {
+        const eventDate = new Date(event.eventDate);
+        return eventDate >= startDate;
+      });
+    }
+
+    if (filters.endDate) {
+      const endDate = new Date(filters.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      filtered = filtered.filter((event) => {
+        const eventDate = new Date(event.eventDate);
+        return eventDate <= endDate;
+      });
+    }
+
+    if (filters.selectedMonth) {
+      const monthIndex = new Date(`${filters.selectedMonth} 1`).getMonth();
+      filtered = filtered.filter((event) => {
+        const eventDate = new Date(event.eventDate);
+        return eventDate.getMonth() === monthIndex;
+      });
+    }
+
+    if (filters.selectedLounge) {
+      filtered = filtered.filter((event) => {
+        return event.loungeName === filters.selectedLounge;
+      });
+    }
+
+    setFilteredEvents(filtered);
+  }, [filters]);
+
+  const displayedEvents = Object.keys(filters).some((key) => filters[key])
+    ? filteredEvents
+    : events;
 
   const onPageChange = (page) => {
     // getAllEvents(page);
@@ -150,6 +203,7 @@ const Table = () => {
             <tr className="bg-[#E8E8FF]">
               <th className="px-4 py-5 text-left text-nowrap">Booking ID</th>
               <th className="px-4 py-5 text-left text-nowrap">Users</th>
+              <th className="px-4 py-5 text-left text-nowrap">Lounge Name</th>
               <th className="px-4 py-5 text-left text-nowrap">Guest Limit</th>
               <th className="px-4 py-5 text-left text-nowrap">Event Type</th>
               <th className="px-4 py-5 text-left text-nowrap">Event Date</th>
@@ -159,7 +213,7 @@ const Table = () => {
             </tr>
           </thead>
           <tbody className="mt-10">
-            {events?.map((event, index) => (
+            {displayedEvents?.map((event, index) => (
               <tr
                 key={index}
                 onClick={() => handleRowClick(index)}
@@ -177,6 +231,7 @@ const Table = () => {
                     {event?.user?.name}
                   </div>
                 </td>
+                <td className="px-4 py-6">{event?.loungeName}</td>
                 <td className="px-4 py-6">
                   {utils.formatNumber(event?.guestLimit)}
                 </td>

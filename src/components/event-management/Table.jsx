@@ -5,10 +5,13 @@ import CustomPagination from "@/components/common/CustomPagination";
 import utils from "@/lib/utils";
 import { IoIosArrowForward } from "react-icons/io";
 
-const Table = () => {
+const Table = ({ filters = {} }) => {
   const router = useRouter();
+  const [filteredEvents, setFilteredEvents] = React.useState([]);
+
   const events = [
     {
+      loungeName: "First Lounge",
       eventName: "Summer Night Bash",
       user: { name: "Olivia Carter", profile: "/images/profile.png" },
       guestLimit: 150,
@@ -18,6 +21,7 @@ const Table = () => {
       ticketDoor: 25,
     },
     {
+      loungeName: "First Lounge",
       eventName: "Cocktail Friday",
       user: { name: "Ethan Moore", profile: "/images/profile.png" },
       guestLimit: 80,
@@ -27,6 +31,7 @@ const Table = () => {
       ticketDoor: 18,
     },
     {
+      loungeName: "First Lounge",
       eventName: "Winter Wonderland",
       user: { name: "Sophia Kim", profile: "/images/profile.png" },
       guestLimit: 300,
@@ -36,6 +41,7 @@ const Table = () => {
       ticketDoor: 40,
     },
     {
+      loungeName: "Second Lounge",
       eventName: "Beach Cocktail Fiesta",
       user: { name: "Liam Parker", profile: "/images/profile.png" },
       guestLimit: 200,
@@ -45,6 +51,7 @@ const Table = () => {
       ticketDoor: 30,
     },
     {
+      loungeName: "Second Lounge",
       eventName: "New Year Sparkles",
       user: { name: "Emma Davis", profile: "/images/profile.png" },
       guestLimit: 500,
@@ -54,6 +61,7 @@ const Table = () => {
       ticketDoor: 50,
     },
     {
+      loungeName: "First Lounge",
       eventName: "Birthday Bash Deluxe",
       user: { name: "Michael Reed", profile: "/images/profile.png" },
       guestLimit: 120,
@@ -63,6 +71,7 @@ const Table = () => {
       ticketDoor: 20,
     },
     {
+      loungeName: "First Lounge",
       eventName: "Wedding Afterparty",
       user: { name: "Ava Martinez", profile: "/images/profile.png" },
       guestLimit: 250,
@@ -72,6 +81,7 @@ const Table = () => {
       ticketDoor: 45,
     },
     {
+      loungeName: "Second Lounge",
       eventName: "Tech Founders Meetup",
       user: { name: "Noah Johnson", profile: "/images/profile.png" },
       guestLimit: 100,
@@ -81,6 +91,7 @@ const Table = () => {
       ticketDoor: 35,
     },
     {
+      loungeName: "First Lounge",
       eventName: "Jazz & Wine Night",
       user: { name: "Luna Garcia", profile: "/images/profile.png" },
       guestLimit: 90,
@@ -90,6 +101,7 @@ const Table = () => {
       ticketDoor: 28,
     },
     {
+      loungeName: "First Lounge",
       eventName: "Family Fun Festival",
       user: { name: "Daniel Lee", profile: "/images/profile.png" },
       guestLimit: 400,
@@ -99,6 +111,47 @@ const Table = () => {
       ticketDoor: 15,
     },
   ];
+
+  React.useEffect(() => {
+    let filtered = [...events];
+
+    if (filters.startDate) {
+      const startDate = new Date(filters.startDate);
+      filtered = filtered.filter((event) => {
+        const eventDate = new Date(event.eventDate);
+        return eventDate >= startDate;
+      });
+    }
+
+    if (filters.endDate) {
+      const endDate = new Date(filters.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      filtered = filtered.filter((event) => {
+        const eventDate = new Date(event.eventDate);
+        return eventDate <= endDate;
+      });
+    }
+
+    if (filters.selectedMonth) {
+      const monthIndex = new Date(`${filters.selectedMonth} 1`).getMonth();
+      filtered = filtered.filter((event) => {
+        const eventDate = new Date(event.eventDate);
+        return eventDate.getMonth() === monthIndex;
+      });
+    }
+
+    if (filters.selectedLounge) {
+      filtered = filtered.filter((event) => {
+        return event.loungeName === filters.selectedLounge;
+      });
+    }
+
+    setFilteredEvents(filtered);
+  }, [filters]);
+
+  const displayedEvents = Object.keys(filters).some((key) => filters[key])
+    ? filteredEvents
+    : events;
 
   const onPageChange = (page) => {
     // Pagination logic or API call
@@ -118,6 +171,7 @@ const Table = () => {
         <table className="w-full">
           <thead className="sticky top-0 z-10">
             <tr className="bg-[#E8E8FF]">
+              <th className="px-4 py-5 text-left text-nowrap">Lounge Name</th>
               <th className="px-4 py-5 text-left text-nowrap">Event Name</th>
               <th className="px-4 py-5 text-left text-nowrap">Users</th>
               <th className="px-4 py-5 text-left text-nowrap">Guest Limit</th>
@@ -130,12 +184,13 @@ const Table = () => {
           </thead>
 
           <tbody className="mt-10">
-            {events?.map((event, index) => (
+            {displayedEvents?.map((event, index) => (
               <tr
                 key={index}
                 className="border-b border-[#D4D4D4] cursor-pointer hover:bg-gray-50"
                 onClick={() => handleRowClick(index)}
               >
+                <td className="px-4 py-6">{event?.loungeName}</td>
                 <td className="px-4 py-6">{event?.eventName}</td>
                 <td className="px-4 py-6">
                   <div className="flex items-center gap-3">
