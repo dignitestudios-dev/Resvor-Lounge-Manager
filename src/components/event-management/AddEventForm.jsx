@@ -45,7 +45,9 @@ const AddEventForm = ({ isOpen, onOpenChange }) => {
     <>
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
         <DialogTrigger>
-          <Button className={"border-2 h-14 text-lg"}>Add New Event</Button>
+          <Button className={"border-2 h-12 text-[14px] px-6"}>
+            Add New Event
+          </Button>
         </DialogTrigger>
         <DialogContent className="max-w-md rounded-2xl">
           <DialogHeader>

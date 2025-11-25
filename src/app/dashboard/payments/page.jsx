@@ -167,7 +167,7 @@ const Payments = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center gap-10">
+      <div className="flex justify-between items-center gap-10 mt-2">
         <div className="flex items-center gap-8">
           <h1 className="section-heading">Payments</h1>
 
@@ -200,7 +200,7 @@ const Payments = () => {
       </div>
 
       {/* Tabs */}
-      <div className="mt-10">
+      <div className="mt-6">
         <Table
           data={activeTab === "booking" ? bookingPayments : eventsPayments}
           type={activeTab}

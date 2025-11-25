@@ -9,7 +9,7 @@ const Services = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center gap-10">
+      <div className="flex justify-between items-center gap-10 mt-2">
         <h1 className="section-heading">Services</h1>
 
         <div className="flex items-center gap-5">
@@ -18,7 +18,7 @@ const Services = () => {
         </div>
       </div>
 
-      <div className="mt-10">
+      <div className="mt-6">
         <Table />
       </div>
     </div>

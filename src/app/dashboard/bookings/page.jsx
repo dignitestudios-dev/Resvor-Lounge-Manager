@@ -16,7 +16,7 @@ const Bookings = () => {
   };
   return (
     <div>
-      <div className="flex justify-between items-center gap-10">
+      <div className="flex justify-between items-center gap-10 mt-2">
         <h1 className="section-heading">Bookings</h1>
 
         <div>
@@ -27,7 +27,7 @@ const Bookings = () => {
         </div>
       </div>
 
-      <div className="mt-10">
+      <div className="mt-6">
         <Table filters={filters} />
       </div>
     </div>

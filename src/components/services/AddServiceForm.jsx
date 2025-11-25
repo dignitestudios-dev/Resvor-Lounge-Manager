@@ -16,7 +16,12 @@ import { Upload } from "lucide-react";
 import ConfirmPopup from "./ConfirmPopup";
 import Edit2 from "../icons/Edit2";
 
-const AddServiceForm = ({ isOpen, onOpenChange, data = null, isEdit = false }) => {
+const AddServiceForm = ({
+  isOpen,
+  onOpenChange,
+  data = null,
+  isEdit = false,
+}) => {
   const [serviceImage, setServiceImage] = useState(null);
   const [confirmPopup, setConfirmPopup] = useState(false);
   const [formData, setFormData] = useState({
@@ -78,7 +83,9 @@ const AddServiceForm = ({ isOpen, onOpenChange, data = null, isEdit = false }) =
               <Edit2 className="scale-150 cursor-pointer" />
             </Button>
           ) : (
-            <Button className={"border-2 h-14 text-lg"}>Add New Service</Button>
+            <Button className={"border-2 h-12 text-[14px] px-6"}>
+              Add New Service
+            </Button>
           )}
         </DialogTrigger>
         <DialogContent className="max-w-md rounded-2xl">
@@ -178,7 +185,11 @@ const AddServiceForm = ({ isOpen, onOpenChange, data = null, isEdit = false }) =
         </DialogContent>
       </Dialog>
 
-      <ConfirmPopup isOpen={confirmPopup} onOpenChange={setConfirmPopup} isEdit={isEdit} />
+      <ConfirmPopup
+        isOpen={confirmPopup}
+        onOpenChange={setConfirmPopup}
+        isEdit={isEdit}
+      />
     </>
   );
 };

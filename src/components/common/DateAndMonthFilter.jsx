@@ -58,7 +58,7 @@ const DateAndMonthFilter = ({ isLounge, onFilterChange }) => {
   return (
     <Popover>
       <PopoverTrigger>
-        <Button className={"h-14 w-14 bg-gradient"}>
+        <Button className={"h-12 w-12 bg-gradient"}>
           <FaFilter className="h-6 w-6 min-h-6 min-w-6" />
         </Button>
       </PopoverTrigger>

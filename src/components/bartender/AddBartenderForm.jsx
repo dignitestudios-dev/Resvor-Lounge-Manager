@@ -91,7 +91,7 @@ const AddBartenderForm = ({
                 <Edit2 className="scale-150 cursor-pointer" />
               </Button>
             ) : (
-              <Button className={"border-2 h-14 text-lg"}>
+              <Button className={" border-2 h-12 text-[14px] px-6"}>
                 Add New Bartender
               </Button>
             )}

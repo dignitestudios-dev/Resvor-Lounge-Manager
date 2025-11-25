@@ -9,7 +9,7 @@ const CampaignAndFlyers = () => {
 
   return (
     <div className="h-full w-full flex flex-col">
-      <div className="flex justify-between items-center gap-10">
+      <div className="flex justify-between items-center gap-10 mt-2">
         <h1 className="section-heading">Campaign and Flyers</h1>
 
         <div>
@@ -17,7 +17,7 @@ const CampaignAndFlyers = () => {
         </div>
       </div>
 
-      <div className="mt-10 flex-1 overflow-y-auto">
+      <div className="mt-6 flex-1 overflow-y-auto">
         <CampaignAndFlyersGrid />
       </div>
     </div>

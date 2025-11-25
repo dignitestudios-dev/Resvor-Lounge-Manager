@@ -99,7 +99,9 @@ const AddShiftAndScheduling = ({
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
         {showTrigger ? (
           <DialogTrigger>
-            <Button className={"border-2 h-14 text-lg"}>Add New Shift</Button>
+            <Button className={"border-2 h-12 text-[14px] px-6"}>
+              Add New Shift
+            </Button>
           </DialogTrigger>
         ) : null}
         <DialogContent>

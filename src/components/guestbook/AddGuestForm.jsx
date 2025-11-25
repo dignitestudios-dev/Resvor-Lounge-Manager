@@ -49,7 +49,9 @@ const AddGuestForm = ({
             <Edit2 className="scale-150 cursor-pointer" />
           </Button>
         ) : (
-          <Button className={"border-2 h-14 text-lg"}>Add New Guest</Button>
+          <Button className={"border-2 h-12 text-[14px] px-6"}>
+            Add New Guest
+          </Button>
         )}
       </DialogTrigger>
       <DialogContent>

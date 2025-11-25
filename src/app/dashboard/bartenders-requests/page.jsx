@@ -6,7 +6,7 @@ const BartenderRequest = () => {
     <div>
       <h1 className="section-heading">Bartenders Requests</h1>
 
-      <div className="mt-10">
+      <div className="mt-6">
         <Table />
       </div>
     </div>
