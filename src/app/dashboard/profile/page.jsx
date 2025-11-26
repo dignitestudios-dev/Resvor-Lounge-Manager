@@ -7,11 +7,14 @@ import SuccessModal from "@/components/settings/modals/SuccessModal";
 import Edit from "@/components/icons/Edit";
 import Delete from "@/components/icons/sidebar/Delete";
 import EditFloorPlanModal from "@/components/profile/EditFloorPlanModal";
+import AddLocationModal from "@/components/profile/AddLocationModal";
 
 const Profile = () => {
   const [openEditProfile, setOpenEditProfile] = useState(false);
   const [openEditFloorPlan, setOpenEditFloorPlan] = useState(false);
-  const [selectedLounge, setSelectedLounge] = useState();
+  const [addLocation, setAddLocation] = useState(false);
+
+  const [selectedLounge, setSelectedLounge] = useState("");
 
   const [openSuccess, setOpenSuccess] = useState(false);
   const galleryImages = Array(12).fill("/images/lounge.jfif"); // Replace with real images later
@@ -122,7 +125,10 @@ const Profile = () => {
         <div className="bg-white rounded-xl shadow-sm p-6 flex flex-col h-[370px]">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold ">Locations</h2>
-            <button className="text-black underline cursor-pointer font-medium hover:underline">
+            <button
+              onClick={() => setAddLocation(true)}
+              className="text-black underline cursor-pointer font-medium hover:underline"
+            >
               Add New Location
             </button>
           </div>
@@ -221,6 +227,14 @@ const Profile = () => {
             </div>
           </section>
         </>
+      )}
+
+      {addLocation && (
+        <AddLocationModal
+          open={addLocation}
+          setOpen={setAddLocation}
+          handleNext={() => setOpenEditFloorPlan(true)}
+        />
       )}
 
       {openEditFloorPlan && (

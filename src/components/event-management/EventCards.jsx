@@ -14,19 +14,33 @@ export default function EventCards({ events }) {
             background: "linear-gradient(90deg, #E8E8FF 0%, #FFFFFF00 100%)",
           }}
         >
-          <div className="flex justify-between items-center mb-2">
-            <span className="font-bold text-lg">{event.eventName}</span>
-            <span className="font-semibold">
+          <div className="flex justify-between items-center py-2 mb-2 border-b-[1px] border-b-[#01005924]">
+            <span className="font-bold text-[14px]">{event.eventName}</span>
+            <span className="font-medium text-[12px]">
               Ticket Door: {event.ticketDoor}
             </span>
           </div>
-          <div className="grid grid-cols-2 gap-2 text-sm mb-2">
-            <div>Event Type: {event.eventType}</div>
-            <div>
-              Event Date: {new Date(event.eventDate).toLocaleDateString()}
+          <div className="grid grid-cols-2 gap-2 text-sm mb-2 py-2 border-b-[1px] border-b-[#01005924]">
+            <div className="flex flex-col">
+              <div className="text-[12px] text-[#656565]">Event Type</div>
+              <div>{event.eventType}</div>
             </div>
-            <div>Event Time: {event.eventTime}</div>
-            <div>Guest Limit: {event.guestLimit}</div>
+            <div className="flex flex-col">
+              <div className="text-[12px] text-[#656565]">Event Date</div>
+
+              <div>{new Date(event.eventDate).toLocaleDateString()}</div>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-sm mb-2 py-2 border-b-[1px] border-b-[#01005924]">
+            <div className="flex flex-col">
+              <div className="text-[12px] text-[#656565]">Event Time</div>
+              <div> {event.eventTime}</div>
+            </div>
+            <div className="flex flex-col">
+              <div className="text-[12px] text-[#656565]">Guest Limit</div>
+
+              <div>{event.guestLimit}</div>
+            </div>
           </div>
           <div className="flex items-center mt-2">
             <img

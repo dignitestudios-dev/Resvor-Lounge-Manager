@@ -22,9 +22,10 @@ const EventManagement = () => {
 
   // Calendar/List view toggle
   const [view, setView] = useState("calendar");
-  const [selectedDate, setSelectedDate] = useState(new Date());
 
-  // Use the same events as Table for now
+  const [selectedDate, setSelectedDate] = useState(null);
+
+  // Use the same events as Table for now (add dummy events across dates)
   const events = [
     {
       loungeName: "First Lounge",
@@ -36,14 +37,114 @@ const EventManagement = () => {
       eventTime: "07:00 PM - 10:00 PM",
       ticketDoor: 25,
     },
-    // ... (add all your events here, or import from a shared file)
+    {
+      loungeName: "First Lounge",
+      eventName: "Cocktail Friday",
+      user: { name: "Ethan Moore", profile: "/images/profile.png" },
+      guestLimit: 80,
+      eventType: "Corporate Meetup",
+      eventDate: "2025-08-05T20:30:00Z",
+      eventTime: "08:30 PM - 11:00 PM",
+      ticketDoor: 18,
+    },
+    {
+      loungeName: "First Lounge",
+      eventName: "Winter Wonderland",
+      user: { name: "Sophia Kim", profile: "/images/profile.png" },
+      guestLimit: 300,
+      eventType: "Charity Gala",
+      eventDate: "2025-12-20T18:00:00Z",
+      eventTime: "06:00 PM - 11:00 PM",
+      ticketDoor: 40,
+    },
+    {
+      loungeName: "Second Lounge",
+      eventName: "Beach Cocktail Fiesta",
+      user: { name: "Liam Parker", profile: "/images/profile.png" },
+      guestLimit: 200,
+      eventType: "Sunset Gathering",
+      eventDate: "2025-09-10T17:00:00Z",
+      eventTime: "05:00 PM - 09:00 PM",
+      ticketDoor: 30,
+    },
+    {
+      loungeName: "Second Lounge",
+      eventName: "New Year Sparkles",
+      user: { name: "Emma Davis", profile: "/images/profile.png" },
+      guestLimit: 500,
+      eventType: "New Year Celebration",
+      eventDate: "2025-12-31T21:00:00Z",
+      eventTime: "09:00 PM - 01:00 AM",
+      ticketDoor: 50,
+    },
+    {
+      loungeName: "First Lounge",
+      eventName: "Birthday Bash Deluxe",
+      user: { name: "Michael Reed", profile: "/images/profile.png" },
+      guestLimit: 120,
+      eventType: "Birthday Party",
+      eventDate: "2025-11-15T18:30:00Z",
+      eventTime: "06:30 PM - 10:30 PM",
+      ticketDoor: 20,
+    },
+    {
+      loungeName: "First Lounge",
+      eventName: "Wedding Afterparty",
+      user: { name: "Ava Martinez", profile: "/images/profile.png" },
+      guestLimit: 250,
+      eventType: "Wedding Celebration",
+      eventDate: "2025-10-05T19:00:00Z",
+      eventTime: "07:00 PM - 12:00 AM",
+      ticketDoor: 45,
+    },
+    {
+      loungeName: "Second Lounge",
+      eventName: "Tech Founders Meetup",
+      user: { name: "Noah Johnson", profile: "/images/profile.png" },
+      guestLimit: 100,
+      eventType: "Networking Event",
+      eventDate: "2025-11-25T17:30:00Z",
+      eventTime: "05:30 PM - 09:00 PM",
+      ticketDoor: 35,
+    },
+    {
+      loungeName: "First Lounge",
+      eventName: "Jazz & Wine Night",
+      user: { name: "Luna Garcia", profile: "/images/profile.png" },
+      guestLimit: 90,
+      eventType: "Live Music Event",
+      eventDate: "2025-12-10T20:00:00Z",
+      eventTime: "08:00 PM - 11:00 PM",
+      ticketDoor: 28,
+    },
+    {
+      loungeName: "First Lounge",
+      eventName: "Family Fun Festival",
+      user: { name: "Daniel Lee", profile: "/images/profile.png" },
+      guestLimit: 400,
+      eventType: "Community Festival",
+      eventDate: "2025-09-25T10:00:00Z",
+      eventTime: "10:00 AM - 06:00 PM",
+      ticketDoor: 15,
+    },
   ];
 
-  // Filter events for the selected date
-  const filteredEvents = events.filter(
-    (event) =>
-      new Date(event.eventDate).toDateString() === selectedDate.toDateString()
-  );
+  // Filter events for the selected date (ensure selectedDate is ISO string)
+  // If no date selected, show all events; if date selected, show only that date's events
+  const filteredEvents = selectedDate
+    ? events.filter((event) => {
+        if (!selectedDate) return false;
+        try {
+          const eventDateISO = new Date(event.eventDate)
+            .toISOString()
+            .slice(0, 10);
+          return eventDateISO === selectedDate;
+        } catch (e) {
+          return false;
+        }
+      })
+    : events;
+  console.log("🚀 ~ EventManagement ~ filteredEvents:", filteredEvents);
 
   return (
     <div>
@@ -52,9 +153,9 @@ const EventManagement = () => {
         <div className="flex items-center gap-3">
           <div className="w-[260px] flex ">
             <button
-              className={`text-[12px] py-4 px-2 rounded-l-xl w-full ${
+              className={`text-[12px] py-3.5 px-2 rounded-l-lg w-full ${
                 view === "calendar"
-                  ? "bg-[#222246] text-white"
+                  ? "bg-gradient text-white"
                   : "bg-[#FFFFFF] text-[#222246]"
               }`}
               onClick={() => setView("list")}
@@ -62,9 +163,9 @@ const EventManagement = () => {
               List View
             </button>
             <button
-              className={`text-[12px] py-4 px-2 rounded-r-xl w-full ${
+              className={`text-[12px] py-3.5 px-2 rounded-r-lg w-full ${
                 view === "list"
-                  ? "bg-[#222246] text-white"
+                  ? "bg-gradient text-white"
                   : "bg-[#FFFFFF] text-[#222246]"
               }`}
               onClick={() => setView("calendar")}
@@ -83,25 +184,31 @@ const EventManagement = () => {
       {view === "calendar" ? (
         <div className="flex gap-8 mt-6">
           {/* Event Cards */}
-          <div className="flex-1">
+          <div className="flex-1 h-[480px] overflow-y-auto">
             <h2 className="text-lg font-semibold mb-4">
-              Events on{" "}
-              {selectedDate.toLocaleDateString("en-GB", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
+              {selectedDate
+                ? `Events on ${new Date(
+                    selectedDate + "T00:00:00"
+                  ).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}`
+                : "All Events"}
             </h2>
             <EventCards events={filteredEvents} />
           </div>
           {/* Calendar */}
           <div className="w-[70%]">
-            <Calendar selected={selectedDate} onSelect={setSelectedDate} />
+            <Calendar
+              selectedDate={selectedDate}
+              onDateSelect={(iso) => setSelectedDate(iso)}
+            />
           </div>
         </div>
       ) : (
         <div className="mt-6">
-          <Table filters={filters} />
+          <Table filters={filters} events={events} />
         </div>
       )}
     </div>
