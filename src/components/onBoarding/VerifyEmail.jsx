@@ -1,10 +1,10 @@
 /* eslint-disable react/prop-types */
 import { useRef, useState } from "react";
 import AuthButton from "../auth/AuthButton";
-// import { forgotLogo } from "../../assets/export";
 import TextCountDown from "./TextCountDown";
 import AuthSuccessModal from "../auth/AuthSuccessModal";
 import { FaArrowLeftLong } from "react-icons/fa6";
+import forgotLogo from "../../../public/images/forgotLogo.png";
 
 const VerifyEmail = ({ handleNext, handlePrevious }) => {
   const inputs = useRef([]);
@@ -75,15 +75,19 @@ const VerifyEmail = ({ handleNext, handlePrevious }) => {
         </button>
       </div>
       <div className="flex flex-col justify-center items-center h-auto ">
-        {/* <div>
-          <img src={forgotLogo} alt="logo" className="w-[220px]" />
-        </div> */}
+        <div>
+          <img
+            src={"/images/forgotLogo.png"}
+            alt="logo"
+            className="w-[220px]"
+          />
+        </div>
         <div className="mt-4 py-4 space-y-3 xxl:w-[400px] xxl:ml-12 text-center">
           <p className=" xxl:text-[48px] text-[32px] font-[600] capitalize">
             verification
           </p>
           <p className="xxl:text-[26px] text-[16px] text-[#E6E6E6] w-[304px] ">
-            Please enter OTP code sent your email.
+            Please enter OTP sent to your email.
           </p>
         </div>
 
@@ -95,7 +99,7 @@ const VerifyEmail = ({ handleNext, handlePrevious }) => {
                   inputMode="numeric"
                   key={index}
                   type="password"
-                  placeholder="0"
+                  placeholder=""
                   maxLength="1"
                   value={digit}
                   onChange={(e) => handleChange(e, index)}

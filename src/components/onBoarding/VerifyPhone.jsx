@@ -75,14 +75,18 @@ const VerifyPhone = ({ handleNext, handlePrevious }) => {
         </button>
       </div>
       <div className="flex flex-col justify-center items-center h-auto ">
-        {/* <div>
-          <img src={forgotLogo} alt="logo" className="w-[220px]" />
-        </div> */}
+        <div>
+          <img
+            src={"/images/forgotLogo.png"}
+            alt="logo"
+            className="w-[220px]"
+          />
+        </div>
         <div className="mt-4 py-4 space-y-3 xxl:w-[400px] xxl:ml-12 text-center">
           <p className=" xxl:text-[48px] text-[32px] font-[600] capitalize">
             verification
           </p>
-          <p className="xxl:text-[26px] text-[16px] text-[#E6E6E6] w-[304px] ">
+          <p className="xxl:text-[26px] text-[16px] text-[#E6E6E6] w-[384px] ">
             Please enter OTP code sent your phone.
           </p>
         </div>
@@ -95,7 +99,7 @@ const VerifyPhone = ({ handleNext, handlePrevious }) => {
                   inputMode="numeric"
                   key={index}
                   type="password"
-                  placeholder="0"
+                  placeholder=""
                   maxLength="1"
                   value={digit}
                   onChange={(e) => handleChange(e, index)}

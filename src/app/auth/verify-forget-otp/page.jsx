@@ -3,6 +3,7 @@ import AuthButton from "../../../components/auth/AuthButton";
 import { useRef, useState } from "react";
 import CountDown from "../../../components/auth/CountDown";
 import { useRouter } from "next/navigation";
+import { FaArrowLeftLong } from "react-icons/fa6";
 
 const VerifyForgotOtp = () => {
   const router = useRouter();
@@ -54,8 +55,21 @@ const VerifyForgotOtp = () => {
   return (
     <div className="grid lg:grid-cols-1 grid-cols-1 w-full text-white">
       <div className="flex flex-col justify-center items-center h-auto ">
+        <div className="flex justify-start items-center absolute top-16 left-40">
+          <button
+            className="cursor-pointer"
+            type="button"
+            onClick={() => router.back()}
+          >
+            <FaArrowLeftLong color="white" size={24} />
+          </button>
+        </div>
         <div>
-          <img src={"/images/forgotLogo.png"} alt="logo" className="w-[220px]" />
+          <img
+            src={"/images/forgotLogo.png"}
+            alt="logo"
+            className="w-[220px]"
+          />
         </div>
         <div className="mt-4 py-4 space-y-3 xxl:w-[400px] xxl:ml-12 text-center">
           <p className=" xxl:text-[48px] text-[32px] font-[600] capitalize">
@@ -74,14 +88,14 @@ const VerifyForgotOtp = () => {
                   inputMode="numeric"
                   key={index}
                   type="password"
-                  placeholder="0"
+                  placeholder=""
                   maxLength="1"
                   value={digit}
                   onChange={(e) => handleChange(e, index)}
                   onKeyDown={(e) => handleKeyDown(e, index)}
                   ref={(el) => (inputs.current[index] = el)}
                   className="xxl:h-[79px] xxl:w-[79px] h-[49px] w-[49px] rounded-[12px] outline-none text-center border-[1px] border-[#D9D9D9] placeholder:text-[#181818]
-                placeholder:text-[16px] xxl:placeholder:text-[20px] focus-within:border-[#8A8A8A] flex items-center justify-center"
+                placeholder:text-[16px] placeholder:text-white xxl:placeholder:text-[20px] focus-within:border-[#8A8A8A] flex items-center justify-center"
                 />
               ))}
             </div>

@@ -72,7 +72,7 @@ const CreateAccount = ({ handleNext }) => {
           <div>
             <PhoneInput
               label={"Phone Number"}
-              value={phoneFormatter(values.number)}
+              value={values.number}
               id={"number"}
               name={"number"}
               onChange={handleChange}
@@ -125,10 +125,10 @@ const CreateAccount = ({ handleNext }) => {
       </form>
 
       <div className="flex items-center justify-center gap-2 ">
-        <p className="text-center xxl:text-[26px] text-[12px] leading-[21.6px] text-[#CACACA]">
+        <p className="text-center xxl:text-[26px] text-[15px] leading-[21.6px] text-white">
           Already have an account?
           <span
-            className="xxl:text-[26px] text-[12px] font-[600] pl-1 cursor-pointer text-white"
+            className="xxl:text-[26px] text-[14px] font-[600] pl-1 cursor-pointer text-white"
             onClick={() => router.push("/auth/login")}
           >
             Login
