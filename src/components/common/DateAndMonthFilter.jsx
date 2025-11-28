@@ -6,6 +6,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  PopoverClose,
 } from "@/components/ui/popover";
 import {
   Select,
@@ -57,7 +58,7 @@ const DateAndMonthFilter = ({ isLounge, onFilterChange }) => {
 
   return (
     <Popover>
-      <PopoverTrigger>
+      <PopoverTrigger asChild>
         <Button className={"h-12 w-12 bg-gradient"}>
           <FaFilter className="h-6 w-6 min-h-6 min-w-6" />
         </Button>
@@ -65,8 +66,11 @@ const DateAndMonthFilter = ({ isLounge, onFilterChange }) => {
       <PopoverContent align="end">
         <div className="flex gap-5 justify-between items-center border-b border-b-gray-200 pb-3">
           <p className="text-xl font-semibold">Filter</p>
-          {/* <RxCross2 className="text-black text-2xl" /> */}
-          <span />
+          <PopoverClose asChild>
+            <button className="p-1 hover:bg-gray-100 rounded-md transition-colors">
+              <RxCross2 className="h-5 w-5" />
+            </button>
+          </PopoverClose>
         </div>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-3 mt-5">

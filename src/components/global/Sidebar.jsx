@@ -34,10 +34,10 @@ const Sidebar = () => {
         <li className="mt-10">
           <Link
             href={"/auth/login"}
-            className={`w-fit flex items-center gap-2 py-2 px-5 rounded-xl text-primary bg-white`}
+            className={`w-fit mb-5 flex items-center gap-2 py-2 px-5 rounded-xl text-primary bg-white`}
           >
             <Logout />
-            <span>Logout</span>
+            <span>Log out</span>
           </Link>
         </li>
       </ul>

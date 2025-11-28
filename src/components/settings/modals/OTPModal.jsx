@@ -63,8 +63,8 @@ const OTPModal = ({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle className="text-4xl">Verification</DialogTitle>
-          <DialogDescription className="mt-2 text-gray-600">
+          <DialogTitle className="text-4xl text-center">Verification</DialogTitle>
+          <DialogDescription className="mt-2 text-gray-600 text-center">
             {label}
           </DialogDescription>
         </DialogHeader>

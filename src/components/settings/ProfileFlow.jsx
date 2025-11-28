@@ -25,6 +25,7 @@ const ProfileFlow = ({
   const [openChangeNumber, setOpenChangeNumber] = useState(false);
   const [openOTP, setOpenOTP] = useState(false);
   const [otpPurpose, setOtpPurpose] = useState(null); // 'phone' | 'email'
+  const [otpStep, setOtpStep] = useState(null); // 'current' | 'new'
   const [openAddNumber, setOpenAddNumber] = useState(false);
   const [openSuccess, setOpenSuccess] = useState(false);
   const [successTitle, setSuccessTitle] = useState("Updated!");
@@ -33,6 +34,47 @@ const ProfileFlow = ({
   );
   const [openChangeEmail, setOpenChangeEmail] = useState(false);
   const [openAddEmail, setOpenAddEmail] = useState(false);
+
+  const handleOnVerify = (code) => {
+    // route verification based on purpose and step
+    if (otpPurpose === "email") {
+      if (otpStep === "current") {
+        // verified current email, now go to add new email
+        if (onVerifyEmail) onVerifyEmail(code);
+        setOpenOTP(false);
+        setOtpStep(null);
+        setOtpPurpose(null);
+        setOpenAddEmail(true);
+      } else if (otpStep === "new") {
+        // verified new email, show success
+        if (onEmailUpdated) onEmailUpdated();
+        setSuccessTitle("Email Updated!");
+        setSuccessMessage("Your email has been updated successfully.");
+        setOpenOTP(false);
+        setOtpStep(null);
+        setOtpPurpose(null);
+        setOpenSuccess(true);
+      }
+    } else if (otpPurpose === "phone") {
+      if (otpStep === "current") {
+        // verified current phone, now go to add new number
+        if (onVerifyNumber) onVerifyNumber(code);
+        setOpenOTP(false);
+        setOtpStep(null);
+        setOtpPurpose(null);
+        setOpenAddNumber(true);
+      } else if (otpStep === "new") {
+        // verified new phone, show success
+        if (onNumberUpdated) onNumberUpdated();
+        setSuccessTitle("Number Updated!");
+        setSuccessMessage("Your number has been updated successfully.");
+        setOpenOTP(false);
+        setOtpStep(null);
+        setOtpPurpose(null);
+        setOpenSuccess(true);
+      }
+    }
+  };
 
   return (
     <>
@@ -69,43 +111,26 @@ const ProfileFlow = ({
         open={openChangeNumber}
         setOpen={setOpenChangeNumber}
         onNext={() => {
-          // start OTP for phone change
+          // start OTP for current phone verification
           setOtpPurpose("phone");
+          setOtpStep("current");
           setOpenChangeNumber(false);
           setOpenOTP(true);
         }}
       />
 
-      <OTPModal
-        open={openOTP}
-        setOpen={setOpenOTP}
-        onVerify={(code) => {
-          // route verification based on purpose
-          if (otpPurpose === "email") {
-            if (onVerifyEmail) onVerifyEmail(code);
-            setOpenOTP(false);
-            setOpenAddEmail(true);
-          } else {
-            if (onVerifyNumber) onVerifyNumber(code);
-            setOpenOTP(false);
-            setOpenAddNumber(true);
-          }
-          // reset purpose
-          setOtpPurpose(null);
-        }}
-      />
+      <OTPModal open={openOTP} setOpen={setOpenOTP} onVerify={handleOnVerify} />
 
       <AddNumberModal
         open={openAddNumber}
         setOpen={setOpenAddNumber}
         onUpdate={() => {
           if (onAddNewNumber) onAddNewNumber();
-          if (onNumberUpdated) onNumberUpdated();
-          // show tailored success for number
-          setSuccessTitle("Number Updated!");
-          setSuccessMessage("Your number has been updated successfully.");
+          // start OTP for new phone verification
+          setOtpPurpose("phone");
+          setOtpStep("new");
           setOpenAddNumber(false);
-          setOpenSuccess(true);
+          setOpenOTP(true);
         }}
       />
 
@@ -113,8 +138,9 @@ const ProfileFlow = ({
         open={openChangeEmail}
         setOpen={setOpenChangeEmail}
         onNext={() => {
-          // start OTP for email change
+          // start OTP for current email verification
           setOtpPurpose("email");
+          setOtpStep("current");
           setOpenChangeEmail(false);
           setOpenOTP(true);
         }}
@@ -125,12 +151,11 @@ const ProfileFlow = ({
         setOpen={setOpenAddEmail}
         onUpdate={() => {
           if (onAddNewEmail) onAddNewEmail();
-          if (onEmailUpdated) onEmailUpdated();
-          // show tailored success for email
-          setSuccessTitle("Email Updated!");
-          setSuccessMessage("Your email has been updated successfully.");
+          // start OTP for new email verification
+          setOtpPurpose("email");
+          setOtpStep("new");
           setOpenAddEmail(false);
-          setOpenSuccess(true);
+          setOpenOTP(true);
         }}
       />
 

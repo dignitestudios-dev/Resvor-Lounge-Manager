@@ -18,7 +18,7 @@ const CancelSubscriptionModal = ({ open, setOpen, onProceed }) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {/* Trigger is managed externally; we don't render a trigger here */}
-      <DialogContent className={"p-10 min-w-xl"}>
+      <DialogContent className={"p-10 min-w-xl"} showCloseButton={false}>
         <DialogHeader className="flex flex-col items-center text-center">
           <IoWarning className="text-red-600 size-14" />
 

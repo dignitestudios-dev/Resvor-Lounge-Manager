@@ -7,12 +7,12 @@ export default function OnboardingStepper({ steps = [], currentStep = 0 }) {
         <div
           className="
           bg-[#EFEFEF1A] border border-[#CACACA]
-          h-full
+          
           hidden-scrollbar
           overflow-auto
         flex flex-row lg:flex-col
         items-center lg:items-start
-        justify-between lg:justify-normal
+        h-[800px]
         w-full
         gap-0 lg:gap-0
         relative

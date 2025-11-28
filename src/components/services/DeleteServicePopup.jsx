@@ -11,7 +11,7 @@ import { Button } from "../ui/button";
 const DeleteServicePopup = ({ isOpen, onOpenChange, onDelete }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent showCloseButton={false}>
         <DialogHeader>
           <DialogDescription>
             <div className="flex flex-col justify-center items-center gap-3">

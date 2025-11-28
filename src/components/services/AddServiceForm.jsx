@@ -21,6 +21,7 @@ const AddServiceForm = ({
   onOpenChange,
   data = null,
   isEdit = false,
+  showTrigger = true,
 }) => {
   const [serviceImage, setServiceImage] = useState(null);
   const [confirmPopup, setConfirmPopup] = useState(false);
@@ -77,17 +78,19 @@ const AddServiceForm = ({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogTrigger>
-          {isEdit ? (
-            <Button className={"w-14! h-14!"}>
-              <Edit2 className="scale-150 cursor-pointer" />
-            </Button>
-          ) : (
-            <Button className={"border-2 h-12 text-[14px] px-6"}>
-              Add New Service
-            </Button>
-          )}
-        </DialogTrigger>
+        {showTrigger && (
+          <DialogTrigger>
+            {isEdit ? (
+              <Button className={"w-14! h-14!"}>
+                <Edit2 className="scale-150 cursor-pointer" />
+              </Button>
+            ) : (
+              <Button className={"border-2 h-12 text-[14px] px-6"}>
+                Add New Service
+              </Button>
+            )}
+          </DialogTrigger>
+        )}
         <DialogContent className="max-w-md rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold">

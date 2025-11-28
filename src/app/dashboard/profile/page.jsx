@@ -8,11 +8,14 @@ import Edit from "@/components/icons/Edit";
 import Delete from "@/components/icons/sidebar/Delete";
 import EditFloorPlanModal from "@/components/profile/EditFloorPlanModal";
 import AddLocationModal from "@/components/profile/AddLocationModal";
+import AddGalleryImagesModal from "@/components/profile/AddGalleryImagesModal";
 
 const Profile = () => {
   const [openEditProfile, setOpenEditProfile] = useState(false);
   const [openEditFloorPlan, setOpenEditFloorPlan] = useState(false);
   const [addLocation, setAddLocation] = useState(false);
+  const [editingFloorPlan, setEditingFloorPlan] = useState(false);
+  const [openAddGalleryImages, setOpenAddGalleryImages] = useState(false);
 
   const [selectedLounge, setSelectedLounge] = useState("");
 
@@ -57,70 +60,20 @@ const Profile = () => {
     },
   ];
 
-  const handleAddNewImages = () => {
-    console.log("Add new images");
+  const handleAddNewImages = (images) => {
+    console.log("Add new images:", images);
+    // TODO: Call API to add images to gallery
+  };
+
+  const onOpenEditFloorPlan = () => {
+    setOpenEditFloorPlan(true);
+    setEditingFloorPlan(true);
   };
 
   return (
     <div className="w-full bg-gray-50 p-6 space-y-6 overflow-auto">
       {/* Business Details */}
       <div className="grid grid-cols-2 gap-2">
-        <section className="bg-white rounded-xl shadow-sm p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Lounge Details</h2>
-            <button
-              onClick={() => setOpenEditProfile(true)}
-              className="cursor-pointer"
-            >
-              <Edit />
-            </button>
-          </div>
-
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 rounded-full overflow-hidden">
-              <Image
-                src="/images/profile.png"
-                alt="Business"
-                width={64}
-                height={64}
-                className="object-cover"
-              />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold">Lounge Name</h3>
-              <p className="text-gray-500 text-sm">Lounge Manager</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-12 gap-2">
-            <div className="bg-gray-100 rounded-md p-3 col-span-6">
-              <p className="text-xs text-gray-500">Business Email Address</p>
-              <p className="text-sm font-medium">designer@gmail.com</p>
-            </div>
-            <div className="bg-gray-100 rounded-md p-3 col-span-6">
-              <p className="text-xs text-gray-500">Business Phone Number</p>
-              <p className="text-sm font-medium">+1 856 558 0215</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-12 gap-2 mt-2">
-            <div className="bg-gray-100 rounded-md p-3 col-span-6">
-              <p className="text-xs text-gray-500">Operating Hours</p>
-              <p className="text-sm font-medium">08:00 AM - 10:00 PM</p>
-            </div>
-            <div className="bg-gray-100 rounded-md p-3 col-span-6">
-              <p className="text-xs text-gray-500">Highlight Specialization</p>
-              <p className="text-sm font-medium">+1 856 558 0215</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-12 gap-2 mt-2">
-            <div className="bg-gray-100 rounded-md p-3 col-span-12">
-              <p className="text-xs text-gray-500">Business Location</p>
-              <p className="text-sm font-medium">
-                456 Maple Street, Anytown, NY 12345
-              </p>
-            </div>
-          </div>
-        </section>
         {/* Multiple Locations */}
         <div className="bg-white rounded-xl shadow-sm p-6 flex flex-col h-[370px]">
           <div className="flex justify-between items-center mb-4">
@@ -156,6 +109,67 @@ const Profile = () => {
             ))}
           </div>
         </div>
+
+        {selectedLounge && (
+          <section className="bg-white rounded-xl shadow-sm p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Lounge Details</h2>
+              <button
+                onClick={() => setOpenEditProfile(true)}
+                className="cursor-pointer"
+              >
+                <Edit />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-16 h-16 rounded-full overflow-hidden">
+                <Image
+                  src="/images/lounge.jfif"
+                  alt="Business"
+                  width={64}
+                  height={64}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold">Lounge Name</h3>
+                <p className="text-gray-500 text-sm">Lounge Manager</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-12 gap-2">
+              <div className="bg-gray-100 rounded-md p-3 col-span-6">
+                <p className="text-xs text-gray-500">Business Email Address</p>
+                <p className="text-sm font-medium">designer@gmail.com</p>
+              </div>
+              <div className="bg-gray-100 rounded-md p-3 col-span-6">
+                <p className="text-xs text-gray-500">Business Phone Number</p>
+                <p className="text-sm font-medium">+1 856 558 0215</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-12 gap-2 mt-2">
+              <div className="bg-gray-100 rounded-md p-3 col-span-6">
+                <p className="text-xs text-gray-500">Operating Hours</p>
+                <p className="text-sm font-medium">08:00 AM - 10:00 PM</p>
+              </div>
+              <div className="bg-gray-100 rounded-md p-3 col-span-6">
+                <p className="text-xs text-gray-500">
+                  Highlight Specialization
+                </p>
+                <p className="text-sm font-medium">Lorem Ipsum dollar</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-12 gap-2 mt-2">
+              <div className="bg-gray-100 rounded-md p-3 col-span-12">
+                <p className="text-xs text-gray-500">Business Location</p>
+                <p className="text-sm font-medium">
+                  456 Maple Street, Anytown, NY 12345
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
       </div>
 
       {selectedLounge && (
@@ -163,10 +177,7 @@ const Profile = () => {
           <section className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold ">Floor Plan</h2>
-              <button
-                onClick={() => setOpenEditFloorPlan(true)}
-                className="cursor-pointer"
-              >
+              <button onClick={onOpenEditFloorPlan} className="cursor-pointer">
                 <Edit />
               </button>
             </div>
@@ -207,7 +218,7 @@ const Profile = () => {
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">Gallery</h2>
                 <button
-                  onClick={handleAddNewImages}
+                  onClick={() => setOpenAddGalleryImages(true)}
                   className="text-black underline font-medium hover:underline cursor-pointer"
                 >
                   Add New Images
@@ -237,18 +248,23 @@ const Profile = () => {
         />
       )}
 
-      {openEditFloorPlan && (
-        <EditFloorPlanModal
-          open={openEditFloorPlan}
-          setOpen={setOpenEditFloorPlan}
-          onSave={(data) => {
-            console.log("Save floor plan:", data);
-            setOpenEditFloorPlan(false);
-            setOpenSuccess(true);
-            // TODO: Call API to update profile
-          }}
-        />
-      )}
+      <AddGalleryImagesModal
+        open={openAddGalleryImages}
+        setOpen={setOpenAddGalleryImages}
+        onAdd={handleAddNewImages}
+      />
+
+      <EditFloorPlanModal
+        open={openEditFloorPlan}
+        setOpen={setOpenEditFloorPlan}
+        isEdit={editingFloorPlan}
+        onEditChange={setEditingFloorPlan}
+        onSave={(data) => {
+          console.log("Save floor plan:", data);
+          setOpenEditFloorPlan(false);
+          setOpenSuccess(true);
+        }}
+      />
 
       <EditProfileModal
         open={openEditProfile}

@@ -27,7 +27,7 @@ const PaymentDetails = ({ isOpen, onOpenChange, data }) => {
         <DialogHeader>
           <div className="flex items-center justify-between border-b pb-5">
             <DialogTitle className={"text-2xl font-bold"}>
-              Event Payment
+              Booking Payment
             </DialogTitle>
           </div>
 
@@ -37,7 +37,7 @@ const PaymentDetails = ({ isOpen, onOpenChange, data }) => {
                 <div className="font-semibold mb-2 text-black text-lg">
                   Payment Summary
                 </div>
-                <div className="border-t border-gray-200 pt-3 space-y-2">
+                <div className="border-t border-gray-300 pt-3 space-y-2">
                   {summary.map((item, idx) => (
                     <div
                       key={idx}

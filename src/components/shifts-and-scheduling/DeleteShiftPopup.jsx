@@ -12,7 +12,7 @@ import { Button } from "../ui/button";
 const DeleteShiftPopup = ({ isOpen, onOpenChange, onDelete }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent showCloseButton={false}>
         <DialogHeader>
           <DialogDescription>
             <div className="flex flex-col justify-center items-center gap-3">
@@ -20,14 +20,26 @@ const DeleteShiftPopup = ({ isOpen, onOpenChange, onDelete }) => {
                 <Delete2 />
               </div>
 
-              <h3 className="text-[#181818] text-2xl font-bold text-center">Delete This Shift</h3>
-              <p className="text-[#565656] text-center">Are you sure you want delete this shift. Please confirm to proceed.</p>
+              <h3 className="text-[#181818] text-2xl font-bold text-center">
+                Delete This Shift
+              </h3>
+              <p className="text-[#565656] text-center">
+                Are you sure you want delete this shift. Please confirm to
+                proceed.
+              </p>
 
               <div className="w-full flex gap-5">
-                <Button variant={"secondary"} className={"flex-1"} onClick={() => onOpenChange(false)}>
+                <Button
+                  variant={"secondary"}
+                  className={"flex-1"}
+                  onClick={() => onOpenChange(false)}
+                >
                   No
                 </Button>
-                <Button className={"flex-1 bg-red-400 hover:bg-red-500"} onClick={onDelete}>
+                <Button
+                  className={"flex-1 bg-red-400 hover:bg-red-500"}
+                  onClick={onDelete}
+                >
                   Yes
                 </Button>
               </div>

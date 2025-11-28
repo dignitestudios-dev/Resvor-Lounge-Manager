@@ -18,8 +18,8 @@ const AddEmailModal = ({ open, setOpen, onUpdate }) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle className="text-4xl">Add New Email</DialogTitle>
-          <DialogDescription className="mt-2 text-gray-600">
+          <DialogTitle className="text-4xl text-center">Add New Email</DialogTitle>
+          <DialogDescription className="mt-2 text-gray-600 text-center">
             Please enter your new email address.
           </DialogDescription>
         </DialogHeader>

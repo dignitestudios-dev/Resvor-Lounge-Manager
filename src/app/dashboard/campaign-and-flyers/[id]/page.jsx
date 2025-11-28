@@ -15,6 +15,7 @@ import {
 import RichTextEditor from "@/components/global/RichTextEditor";
 import Image from "next/image";
 import TemplateCarousel from "@/components/campaign-and-flyers/TemplateCarousel";
+import { Button } from "@/components/ui/button";
 
 const CampaignAndFlyersDetails = () => {
   const params = useParams();
@@ -149,7 +150,7 @@ const CampaignAndFlyersDetails = () => {
             </div>
           </div>
           <div className="flex justify-center">
-            <div className="min-w-sm w-[500px]">
+            <div className="min-w-sm w-[400px]">
               <h3 className="section-heading text-2xl font-bold mb-2">
                 Card Preview
               </h3>
@@ -188,6 +189,7 @@ const CampaignAndFlyersDetails = () => {
           initialContent="<p>Start editing here...</p>"
           onChange={setEditorContent}
         />{" "}
+        <Button className={"h-14! w-xl"}>Save</Button>
       </div>{" "}
     </div>
   );

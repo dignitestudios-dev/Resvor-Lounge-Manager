@@ -111,7 +111,7 @@ const Table = () => {
                   {utils.formatCurrency(service.price)}
                 </td>
                 <td>
-                  <div className="flex items-center justify-center gap-4">
+                  <div className="flex items-center justify-center">
                     <Button
                       variant={"ghost"}
                       onClick={() => {
@@ -137,6 +137,14 @@ const Table = () => {
           </tbody>
         </table>
       </div>
+
+      <AddServiceForm
+        isOpen={openEditForm}
+        onOpenChange={setOpenEditForm}
+        data={selectedService}
+        isEdit={true}
+        showTrigger={false}
+      />
 
       <DeleteServicePopup
         isOpen={openDeletePopup}

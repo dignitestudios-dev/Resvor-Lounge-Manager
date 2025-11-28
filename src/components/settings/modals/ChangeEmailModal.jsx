@@ -18,8 +18,8 @@ const ChangeEmailModal = ({ open, setOpen, onNext }) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle className="text-4xl">Change Email</DialogTitle>
-          <DialogDescription className="mt-2 text-gray-600">
+          <DialogTitle className="text-4xl text-center">Change Email</DialogTitle>
+          <DialogDescription className="mt-2 text-gray-600 text-center">
             Please enter your current email address.
           </DialogDescription>
         </DialogHeader>

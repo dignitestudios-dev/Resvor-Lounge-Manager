@@ -16,7 +16,7 @@ const EditProfileModal = ({
   setOpen,
   onSave = () => console.log("save profile (parent)"),
 }) => {
-  const [loungeImage, setLoungeImage] = useState("/images/profile.png");
+  const [loungeImage, setLoungeImage] = useState("/images/lounge.jfif");
   const [loungeName, setLoungeName] = useState("Mike Smith");
   const [businessEmail, setBusinessEmail] = useState("designer@gmail.com");
   const [businessPhone, setBusinessPhone] = useState("+1 462 849 558");
@@ -52,7 +52,7 @@ const EditProfileModal = ({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="min-w-4xl max-w-full">
         <DialogHeader>
-          <DialogTitle className="text-3xl">Edit Profile</DialogTitle>
+          <DialogTitle className="text-3xl">Edit Lounge Profile</DialogTitle>
         </DialogHeader>
 
         <div className="mt-6 space-y-6">
@@ -64,12 +64,12 @@ const EditProfileModal = ({
                 alt="Lounge"
                 width={80}
                 height={80}
-                className="object-cover"
+                className="w-full h-full object-cover"
               />
             </div>
             <label
               htmlFor="image-upload"
-              className="absolute bottom-0 right-0 bg-white rounded-full p-1 cursor-pointer border border-gray-300 hover:bg-gray-50"
+              className="absolute h-8 flex justify-center items-center w-8 bottom-0 right-0 bg-white rounded-full p-1 cursor-pointer border border-gray-300 hover:bg-gray-50"
             >
               <span className="text-xl">+</span>
             </label>

@@ -73,80 +73,74 @@ const EventDetails = () => {
 
             <div className="grid grid-cols-5 gap-6 py-5">
               <div>
-                <p className="text-gray-600 text-sm font-semibold mb-2">
-                  Event Type
+                <p className="text-black font-semibold mb-2">Event Type</p>
+                <p className="text-gray-600 text-sm font-semibold">
+                  Birthday Party
                 </p>
-                <p className="text-black font-semibold">Birthday Party</p>
               </div>
               <div>
-                <p className="text-gray-600 text-sm font-semibold mb-2">
-                  Check-in Date
+                <p className="text-black font-semibold mb-2">Check-in Date</p>
+                <p className="text-gray-600 text-sm font-semibold">
+                  26 Dec, 2024
                 </p>
-                <p className="text-black font-semibold">26 Dec, 2024</p>
               </div>
               <div>
-                <p className="text-gray-600 text-sm font-semibold mb-2">
-                  Check-in Time
-                </p>
-                <p className="text-black font-semibold">06:00 PM</p>
+                <p className="text-black font-semibold mb-2">Check-in Time</p>
+                <p className="text-gray-600 text-sm font-semibold">06:00 PM</p>
               </div>
               <div>
-                <p className="text-gray-600 text-sm font-semibold mb-2">
-                  Check-out Time
-                </p>
-                <p className="text-black font-semibold">10:00 PM</p>
+                <p className="text-black font-semibold mb-2">Check-out Time</p>
+                <p className="text-gray-600 text-sm font-semibold">10:00 PM</p>
               </div>
               <div>
-                <p className="text-gray-600 text-sm font-semibold mb-2">
-                  Guest Count
-                </p>
-                <p className="text-black font-semibold">30 Guests</p>
+                <p className="text-black font-semibold mb-2">Guest Count</p>
+                <p className="text-gray-600 text-sm font-semibold">30 Guests</p>
               </div>
 
               {/* Second row - 4 columns */}
               <div>
-                <p className="text-gray-600 text-sm font-semibold mb-2">
-                  Preferred Music
+                <p className="text-black font-semibold mb-2">Preferred Music</p>
+                <p className="text-gray-600 text-sm font-semibold">
+                  Hip Hop, REB, Rock
                 </p>
-                <p className="text-black font-semibold">Hip Hop, REB, Rock</p>
               </div>
               <div>
-                <p className="text-gray-600 text-sm font-semibold mb-2">
-                  Special Request
+                <p className="text-black font-semibold mb-2">Special Request</p>
+                <p className="text-gray-600 text-sm font-semibold">
+                  Birthday Signage
                 </p>
-                <p className="text-black font-semibold">Birthday Signage</p>
               </div>
               <div>
-                <p className="text-gray-600 text-sm font-semibold mb-2">
-                  Budget
-                </p>
-                <p className="text-black font-semibold">$1000</p>
+                <p className="text-black font-semibold mb-2">Budget</p>
+                <p className="text-gray-600 text-sm font-semibold">$1000</p>
               </div>
               <div>
-                <p className="text-gray-600 text-sm font-semibold mb-2">
+                <p className="text-black font-semibold mb-2">
                   Ticket at Door{" "}
                   <span className="text-gray-400 font-normal">(optional)</span>
                 </p>
-                <p className="text-black font-semibold">None</p>
+                <p className="text-gray-600 text-sm font-semibold">None</p>
               </div>
             </div>
 
             <div className="border-t pt-6 mb-8">
-              <div className="grid grid-cols-2 gap-12">
+              <div className="flex gap-12">
                 <div>
-                  <p className="text-gray-600 text-sm font-semibold mb-2">
+                  <p className="text-black font-semibold mb-2">
                     Services and Packages
                   </p>
-                  <p className="text-black font-semibold">
+                  <p className="text-gray-600 text-sm font-semibold">
                     Food and Drink Package
                   </p>
-                  <p className="text-black font-semibold">Bottle Package</p>
+                  <p className="text-gray-600 text-sm font-semibold">
+                    Bottle Package
+                  </p>
                 </div>
                 <div className="border-l pl-12">
-                  <p className="text-gray-600 text-sm font-semibold mb-2">
+                  <p className="text-black font-semibold mb-2">
                     Preferred Seating Area
                   </p>
-                  <p className="text-black font-semibold">
+                  <p className="text-gray-600 text-sm font-semibold">
                     Outdoor Terrace/ Rooftop
                   </p>
                 </div>
@@ -154,7 +148,7 @@ const EventDetails = () => {
             </div>
 
             <div className="border-t pt-6">
-              <p className="text-gray-600 text-sm font-semibold mb-3">
+              <p className="font-semibold mb-3">
                 Any Instructions{" "}
                 <span className="text-gray-400 font-normal">(Optional)</span>
               </p>
@@ -174,20 +168,22 @@ const EventDetails = () => {
           <div className="bg-white rounded-2xl p-6">
             <div className="grid grid-cols-3 gap-12">
               <div>
-                <p className="text-gray-600 text-sm font-semibold mb-2">Name</p>
-                <p className="text-black font-semibold">Mike Smith</p>
+                <p className="text-black font-semibold mb-2">Name</p>
+                <p className="text-gray-600 text-sm font-semibold">
+                  Mike Smith
+                </p>
               </div>
               <div>
-                <p className="text-gray-600 text-sm font-semibold mb-2">
-                  Email Address
+                <p className="text-black font-semibold mb-2">Email Address</p>
+                <p className="text-gray-600 text-sm font-semibold">
+                  designer@gmail.com
                 </p>
-                <p className="text-black font-semibold">designer@gmail.com</p>
               </div>
               <div>
-                <p className="text-gray-600 text-sm font-semibold mb-2">
-                  Phone Number
+                <p className="text-black font-semibold mb-2">Phone Number</p>
+                <p className="text-gray-600 text-sm font-semibold">
+                  +1 462 849 558
                 </p>
-                <p className="text-black font-semibold">+1 462 849 558</p>
               </div>
             </div>
           </div>

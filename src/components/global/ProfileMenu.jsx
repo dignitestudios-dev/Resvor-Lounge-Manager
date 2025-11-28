@@ -25,7 +25,7 @@ const ProfileMenu = () => {
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen} className="w-20! max-w-20!">
       <PopoverTrigger asChild>
         <Button className="flex items-center gap-2 bg-transparent hover:bg-transparent p-0">
           <div className="h-11 w-11 bg-[url(/images/profile.png)] bg-cover bg-center rounded-full" />
@@ -36,7 +36,7 @@ const ProfileMenu = () => {
 
       <PopoverContent
         align="end"
-        className="w-48 p-0 rounded-lg shadow-md border border-gray-200"
+        className="w-40! max-w-40! min-w-40! p-0 rounded-lg shadow-md border border-gray-200"
       >
         <div className="flex flex-col">
           <Link

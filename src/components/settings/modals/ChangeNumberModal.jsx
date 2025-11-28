@@ -20,7 +20,7 @@ import {
 import COUNTRY_CODES from "@/lib/countryCodes";
 
 const ChangeNumberModal = ({ open, setOpen, onNext }) => {
-  const [country, setCountry] = useState(COUNTRY_CODES[0].code);
+  const [country, setCountry] = useState(COUNTRY_CODES[194].code);
   const [number, setNumber] = useState("");
   // show all countries (no search inside dropdown per request)
   const filtered = COUNTRY_CODES;
@@ -35,8 +35,8 @@ const ChangeNumberModal = ({ open, setOpen, onNext }) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle className="text-4xl">Change Number</DialogTitle>
-          <DialogDescription className="mt-2 text-gray-600">
+          <DialogTitle className="text-4xl text-center">Change Number</DialogTitle>
+          <DialogDescription className="mt-2 text-gray-600 text-center">
             Please enter your current phone number.
           </DialogDescription>
         </DialogHeader>

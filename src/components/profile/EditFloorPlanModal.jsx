@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button";
 const EditFloorPlanModal = ({
   open,
   setOpen,
+  onEditChange,
+  isEdit,
   onSave = () => console.log("save profile (parent)"),
 }) => {
   const [floorPlanImage, setFloorPlanImage] = useState(
@@ -33,22 +35,25 @@ const EditFloorPlanModal = ({
   }
 
   function handleSave() {
-    if (onSave) {
-      onSave({
-        loungeName,
-        operatingHours,
-        specialization,
-        businessLocation,
-        businessLocation2,
-      });
+    if (isEdit) {
+      console.log("Editing floor plan...");
+      onEditChange(false);
+    } else {
+      if (onSave) {
+        // call on save and pass data
+      }
     }
+
+    setOpen(false);
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="min-w-xl max-w-full">
         <DialogHeader>
-          <DialogTitle className="text-3xl">Edit Floor Plan</DialogTitle>
+          <DialogTitle className="text-3xl">
+            {isEdit ? "Edit Floor Plan" : "Add Floor Plan"}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="mt-6 space-y-6">
@@ -83,9 +88,7 @@ const EditFloorPlanModal = ({
               Regular Tables
             </label>
             <input
-              type="text"
-              value=""
-              onChange={() => ""}
+              type="number"
               className="w-full px-3 py-2 rounded-md border border-gray-300"
               placeholder="Total Number of Tables"
             />
@@ -95,9 +98,7 @@ const EditFloorPlanModal = ({
               VIP Tables
             </label>
             <input
-              type="text"
-              value=""
-              onChange={() => ""}
+              type="number"
               className="w-full px-3 py-2 rounded-md border border-gray-300"
               placeholder="Total Number of VIP Tables"
             />

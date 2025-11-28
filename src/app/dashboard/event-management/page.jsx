@@ -21,7 +21,7 @@ const EventManagement = () => {
   };
 
   // Calendar/List view toggle
-  const [view, setView] = useState("calendar");
+  const [view, setView] = useState("list");
 
   const [selectedDate, setSelectedDate] = useState(null);
 
@@ -147,14 +147,14 @@ const EventManagement = () => {
   console.log("🚀 ~ EventManagement ~ filteredEvents:", filteredEvents);
 
   return (
-    <div>
+    <div className="h-full flex flex-col">
       <div className="flex justify-between items-center gap-10 mt-2">
         <h1 className="section-heading">Event Management</h1>
         <div className="flex items-center gap-3">
           <div className="w-[260px] flex ">
             <button
               className={`text-[12px] py-3.5 px-2 rounded-l-lg w-full ${
-                view === "calendar"
+                view === "list"
                   ? "bg-gradient text-white"
                   : "bg-[#FFFFFF] text-[#222246]"
               }`}
@@ -164,7 +164,7 @@ const EventManagement = () => {
             </button>
             <button
               className={`text-[12px] py-3.5 px-2 rounded-r-lg w-full ${
-                view === "list"
+                view === "calendar"
                   ? "bg-gradient text-white"
                   : "bg-[#FFFFFF] text-[#222246]"
               }`}
@@ -174,17 +174,19 @@ const EventManagement = () => {
             </button>
           </div>
           <AddEventForm isOpen={openForm} onOpenChange={setOpenForm} />
-          <DateAndMonthFilter
-            isLounge={true}
-            onFilterChange={handleFilterChange}
-          />
+          {view === "list" && (
+            <DateAndMonthFilter
+              isLounge={true}
+              onFilterChange={handleFilterChange}
+            />
+          )}
         </div>
       </div>
 
       {view === "calendar" ? (
-        <div className="flex gap-8 mt-6">
+        <div className="flex-1 flex gap-8 mt-6 w-full overflow-y-auto">
           {/* Event Cards */}
-          <div className="flex-1 h-[480px] overflow-y-auto">
+          <div className="flex overflow-y-auto flex-col bg-white rounded-2xl p-4">
             <h2 className="text-lg font-semibold mb-4">
               {selectedDate
                 ? `Events on ${new Date(
@@ -196,10 +198,12 @@ const EventManagement = () => {
                   })}`
                 : "All Events"}
             </h2>
-            <EventCards events={filteredEvents} />
+            <div className="h-full overflow-y-auto">
+              <EventCards events={filteredEvents} />
+            </div>
           </div>
           {/* Calendar */}
-          <div className="w-[70%]">
+          <div className="flex-1">
             <Calendar
               selectedDate={selectedDate}
               onDateSelect={(iso) => setSelectedDate(iso)}

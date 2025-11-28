@@ -56,7 +56,7 @@ const Calendar = ({ selectedDate, onDateSelect, initialMonth }) => {
     setCurrentMonth((m) => new Date(m.getFullYear(), m.getMonth() + 1, 1));
 
   return (
-    <div className="w-full max-w-[780px] bg-white rounded-3xl p-6 shadow-custom-sm">
+    <div className="w-full h-full bg-white rounded-3xl p-6 shadow-custom-sm">
       {/* Header with Month/Year and Nav Buttons */}
       <div className="flex items-center justify-between mb-6">
         <button

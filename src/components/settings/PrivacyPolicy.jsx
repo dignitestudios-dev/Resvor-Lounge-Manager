@@ -64,12 +64,6 @@ const PrivacyPolicy = () => {
             </p>
           </section>
         </div>
-
-        <DialogFooter className="mt-6">
-          <div className="w-full flex justify-end">
-            <Button onClick={() => setOpen(false)}>Close</Button>
-          </div>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

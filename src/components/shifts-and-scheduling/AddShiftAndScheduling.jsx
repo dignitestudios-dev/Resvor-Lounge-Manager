@@ -67,13 +67,15 @@ const AddShiftAndScheduling = ({
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
     onOpenChange(false);
     setReviewPopup(true);
   };
 
+  const handleSaveTemplate = () => {
+    onOpenChange(false);
+  };
+
   const handleEdit = (e) => {
-    e.preventDefault();
     onOpenChange(false);
     // If onUpdateSubmit provided (from bartender requests), call it directly
     if (typeof onUpdateSubmit === "function") {
@@ -110,10 +112,7 @@ const AddShiftAndScheduling = ({
               {isEdit ? "Edit Shift" : "Add New Shift"}
             </DialogTitle>
             <DialogDescription>
-              <form
-                onSubmit={isEdit ? handleEdit : handleSubmit}
-                className="mt-4 grid grid-cols-2 gap-4"
-              >
+              <div className="mt-4 grid grid-cols-2 gap-4">
                 <div className="w-full flex flex-col gap-1">
                   <Label className={"text-base text-black"}>Date</Label>
                   <Input placeholder="Date" type={"date"} className={"h-14"} />
@@ -143,7 +142,9 @@ const AddShiftAndScheduling = ({
                 </div>
 
                 <div className="col-span-2 flex flex-col gap-1">
-                  <Label className={"text-base"}>Assign Bartender</Label>
+                  <Label className={"text-base text-black"}>
+                    Assign Bartender
+                  </Label>
 
                   <Select>
                     <SelectTrigger className={"w-full !h-14"}>
@@ -162,10 +163,22 @@ const AddShiftAndScheduling = ({
                   </Select>
                 </div>
 
-                <Button className={"col-span-2 w-full h-14 text-lg"}>
+                <Button
+                  onClick={isEdit ? handleEdit : handleSubmit}
+                  className={"col-span-2 w-full h-14 text-lg"}
+                >
                   {isEdit ? "Update" : "Save"}
                 </Button>
-              </form>
+
+                <Button
+                  onClick={handleSaveTemplate}
+                  className={
+                    "bg-gray-200 hover:bg-gray-100 text-black! col-span-2 w-full h-14 text-lg"
+                  }
+                >
+                  Save This Template
+                </Button>
+              </div>
             </DialogDescription>
           </DialogHeader>
         </DialogContent>

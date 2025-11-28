@@ -27,10 +27,7 @@ const ShiftDetails = ({
             <h2 className="text-3xl font-bold">Shift Details</h2>
           </div>
 
-          <div className="mt-4 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <span className="font-semibold">Shift Details</span>
-            </div>
+          <div className="mt-4 flex items-center justify-end">
             <div className="flex items-center gap-4">
               <button
                 className="cursor-pointer scale-125"

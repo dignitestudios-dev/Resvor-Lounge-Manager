@@ -12,7 +12,7 @@ import utils from "@/lib/utils";
 const RequestDetails = ({ isOpen, onOpenChange, data, onReject, onAccept }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="min-w-xl! w-xl!">
         <DialogHeader>
           <h2 className="text-3xl font-bold">Request Details</h2>
 
@@ -89,7 +89,7 @@ const RequestDetails = ({ isOpen, onOpenChange, data, onReject, onAccept }) => {
                   </Button>
                   <Button
                     type="button"
-                    className="flex-1 h-12 bg-green-600 hover:bg-green-700 text-white font-semibold"
+                    className="flex-1 h-12 bg-green-500 hover:bg-green-600 text-white font-semibold"
                     onClick={onAccept}
                   >
                     Accept

@@ -18,7 +18,8 @@ const Topbar = () => {
       pathname.includes("/dashboard/event-management/") ||
       pathname.includes("/dashboard/event-management/") ||
       pathname.includes("/dashboard/bookings/") ||
-      pathname.includes("/dashboard/campaign-and-flyers/"),
+      pathname.includes("/dashboard/campaign-and-flyers/") ||
+      pathname.includes("/dashboard/settings/subscription-plans"),
     [pathname]
   );
 

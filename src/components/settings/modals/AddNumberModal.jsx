@@ -20,7 +20,7 @@ import {
 import COUNTRY_CODES from "@/lib/countryCodes";
 
 const AddNumberModal = ({ open, setOpen, onUpdate }) => {
-  const [country, setCountry] = useState(COUNTRY_CODES[0].code);
+  const [country, setCountry] = useState(COUNTRY_CODES[194].code);
   const [number, setNumber] = useState("");
 
   function onNumberChange(e) {
@@ -35,8 +35,8 @@ const AddNumberModal = ({ open, setOpen, onUpdate }) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle className="text-4xl">Add New Number</DialogTitle>
-          <DialogDescription className="mt-2 text-gray-600">
+          <DialogTitle className="text-4xl text-center">Add New Number</DialogTitle>
+          <DialogDescription className="mt-2 text-gray-600 text-center">
             Please enter your new phone number.
           </DialogDescription>
         </DialogHeader>

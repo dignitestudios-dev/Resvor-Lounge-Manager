@@ -409,7 +409,7 @@ export default function ChatUI() {
   const currentChats = selectedUser ? chats[selectedUser.id] || [] : [];
 
   return (
-    <div className="h-full flex bg-gray-50 rounded-2xl overflow-hidden">
+    <div className="flex bg-gray-50 rounded-2xl overflow-hidden">
       {/* Left Sidebar */}
       <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
         {/* Header */}
@@ -506,7 +506,7 @@ export default function ChatUI() {
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
               {/* Today Label */}
               <div className="flex justify-center">
-                <span className="px-3 py-1 bg-gray-200 text-gray-600 text-xs rounded-full">
+                <span className="px-3 py-1 bg-gray-200 text-gray-800 text-xs rounded-sm">
                   Today
                 </span>
               </div>
@@ -545,14 +545,14 @@ export default function ChatUI() {
 
             {/* Input Area */}
             <div className="bg-white border-t border-gray-200 p-4">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 p-2 bg-gray-100 rounded-lg">
                 <input
                   type="text"
                   placeholder="Type Here..."
-                  className="flex-1 px-4 py-3 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="flex-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 />
-                <button className="w-12 h-12 bg-primary text-white rounded-lg flex items-center justify-center hover:bg-primary/90 transition-all">
-                  <Send className="w-5 h-5" />
+                <button className="w-10 h-10 bg-primary text-white rounded-md flex items-center justify-center hover:bg-primary/90 transition-all">
+                  <Send className="w-4 h-4" />
                 </button>
               </div>
             </div>
