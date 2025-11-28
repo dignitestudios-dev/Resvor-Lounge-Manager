@@ -111,7 +111,7 @@ const PersonalDetails = ({ handleNext, handlePrevious }) => {
               <AuthInput
                 label={"Lounge Name"}
                 text={"loungeName"}
-                placeholder={"Enter your name"}
+                placeholder={"Enter your lounge name"}
                 type={"text"}
                 id={"name"}
                 name={"name"}

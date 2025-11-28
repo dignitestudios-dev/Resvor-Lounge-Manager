@@ -5,8 +5,15 @@ import { MdEdit } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
 import AuthButton from "../auth/AuthButton";
 import { useState } from "react";
+import Link from "next/link";
 
-const MultipleLounge = ({ handleNext, handlePrevious, loungeData, floorPlan }) => {
+const MultipleLounge = ({
+  handleNext,
+  handlePrevious,
+  setCurrentStep,
+  loungeData,
+  floorPlan,
+}) => {
   // Sample lounge data - replace with actual data from props or state management
   const [lounge, setLounge] = useState(
     loungeData || {
@@ -51,7 +58,10 @@ const MultipleLounge = ({ handleNext, handlePrevious, loungeData, floorPlan }) =
 
       <div className="space-y-6 mt-10">
         {/* Add New Lounge Button */}
-        <div className="border-2 border-dashed border-white/30 rounded-[20px] p-8 flex flex-col items-center justify-center min-h-[120px]">
+        <div
+          onClick={() => setCurrentStep(3)}
+          className="border-2 border-dashed cursor-pointer border-white/30 rounded-[20px] p-8 flex flex-col items-center justify-center min-h-[120px]"
+        >
           <div className="text-center text-white/70">
             <div className="text-2xl mb-2">+</div>
             <p className="underline">Add a New Lounge Profile</p>
@@ -107,7 +117,11 @@ const MultipleLounge = ({ handleNext, handlePrevious, loungeData, floorPlan }) =
           <div className="rounded-[20px] border-2 border-white/20 bg-white/5 backdrop-blur p-4">
             <p className="text-white font-[500] mb-3">Floor Plan</p>
             <img
-              src={typeof floorPlan === "string" ? floorPlan : URL.createObjectURL(floorPlan)}
+              src={
+                typeof floorPlan === "string"
+                  ? floorPlan
+                  : URL.createObjectURL(floorPlan)
+              }
               alt="floor plan"
               className="w-full h-[200px] object-cover rounded-lg"
             />

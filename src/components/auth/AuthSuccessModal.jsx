@@ -22,7 +22,7 @@ const AuthSuccessModal = ({ onClick, title, description }) => {
         <div className="flex flex-col justify-center items-center lg:h-auto md:h-screen">
           <div>
             <img
-              src={"/images/successCheck.png"}
+              src={"/images/SuccessCheck.png"}
               alt="success"
               className="w-[120px]"
             />

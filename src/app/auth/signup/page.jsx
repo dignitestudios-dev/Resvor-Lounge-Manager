@@ -80,6 +80,7 @@ export default function SignUp() {
             <MultipleLounge
               handleNext={handleNext}
               handlePrevious={handlePrevious}
+              setCurrentStep={setCurrentStep}
             />
           ) : currentStep === 6 ? (
             <Subscription

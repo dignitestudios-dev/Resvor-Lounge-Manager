@@ -115,7 +115,7 @@ const BuySubscriptionModal = ({ onClick, setCompleted, isVip }) => {
                 <p className=" xxl:text-[48px] text-[32px] text-[#181818] font-[600] capitalize">
                   Congratulations
                 </p>
-                <p className="xxl:text-[26px] text-[16px] text-[#565656] capitalize ">
+                <p className="xxl:text-[26px] text-[16px] text-[#565656]">
                   You have successfully subscribed to Gold Plan.
                 </p>
               </div>

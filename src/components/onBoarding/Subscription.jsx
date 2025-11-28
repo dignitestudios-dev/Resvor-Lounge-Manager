@@ -79,7 +79,7 @@ const Subscription = ({ handlePrevious }) => {
                 </ul>
                 <button
                   onClick={() => setSubscriptionModal(true)}
-                  className="w-full bg-white text-[#181818] font-semibold py-3 rounded-[12px] hover:bg-gray-100 transition"
+                  className="w-full bg-white text-[#181818] font-semibold py-3 rounded-[12px] hover:bg-gray-100 transition text-sm"
                 >
                   Buy Now
                 </button>
@@ -108,7 +108,7 @@ const Subscription = ({ handlePrevious }) => {
                 </ul>
                 <button
                   onClick={() => setSubscriptionModal(true)}
-                  className="w-full bg-white text-[#181818] font-semibold py-3 rounded-[12px] hover:bg-gray-100 transition"
+                  className="w-full bg-white text-[#181818] font-semibold py-3 rounded-[12px] hover:bg-gray-100 transition text-sm"
                 >
                   Buy Now
                 </button>
@@ -137,7 +137,7 @@ const Subscription = ({ handlePrevious }) => {
                 </ul>
                 <button
                   onClick={() => setSubscriptionModal(true)}
-                  className="w-full bg-white text-[#181818] font-semibold py-3 rounded-[12px] hover:bg-gray-100 transition"
+                  className="w-full bg-white text-[#181818] font-semibold py-3 rounded-[12px] hover:bg-gray-100 transition text-sm"
                 >
                   Buy Now
                 </button>
