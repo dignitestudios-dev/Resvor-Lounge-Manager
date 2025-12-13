@@ -10,6 +10,10 @@ const Table = () => {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [updateOpen, setUpdateOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
+  const [sortConfig, setSortConfig] = useState({
+    key: "name",
+    direction: "asc",
+  });
 
   const handleRowClick = (req) => {
     if (req.status.toLowerCase() === "pending") {
@@ -129,12 +133,51 @@ const Table = () => {
     }
   };
 
+  const sortedBartenders = [...bartenderRequests].sort((a, b) => {
+    if (!sortConfig.key) return 0;
+
+    let valA = a.bartender[sortConfig.key];
+    let valB = b.bartender[sortConfig.key];
+
+    // Convert guestLimit to number for numeric sorting
+    if (sortConfig.key === "qty") {
+      valA = parseInt(valA, 10);
+      valB = parseInt(valB, 10);
+    }
+
+    if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
+    if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  const requestSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+
   return (
     <div className="bg-white rounded-xl overflow-y-auto shadow-sm">
       <table className="w-full">
         <thead className="sticky top-0 z-10 bg-[#E8E8FF]">
           <tr>
-            <th className="px-4 py-5 text-left text-nowrap">Bartender</th>
+            <th
+              onClick={() => requestSort("name")}
+              className="px-4 py-5 text-left text-nowrap"
+            >
+              Bartender
+              {sortConfig.key === "name" ? (
+                sortConfig.direction === "asc" ? (
+                  <span className="cursor-pointer">↑</span>
+                ) : (
+                  <span className="cursor-pointer">↓</span>
+                )
+              ) : (
+                ""
+              )}
+            </th>
             <th className="px-4 py-5 text-left text-nowrap">Date</th>
             <th className="px-4 py-5 text-left text-nowrap">Time</th>
             <th className="px-4 py-5 text-left text-nowrap">Type</th>
@@ -144,7 +187,7 @@ const Table = () => {
           </tr>
         </thead>
         <tbody>
-          {bartenderRequests.map((req, index) => (
+          {sortedBartenders.map((req, index) => (
             <tr
               key={index}
               className="border-b border-[#D4D4D4] hover:bg-gray-50 cursor-pointer"

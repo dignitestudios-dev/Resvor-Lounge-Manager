@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
 import utils from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -69,8 +69,38 @@ const Table = () => {
     },
   ];
 
+  const [sortConfig, setSortConfig] = useState({
+    key: "guestName",
+    direction: "asc",
+  });
+
   const handleGoToGuestDetailsPage = (guestId) => {
     router.push(`/dashboard/guestbook/${guestId}`);
+  };
+
+  const sortedGuests = [...guests].sort((a, b) => {
+    if (!sortConfig.key) return 0;
+
+    let valA = a[sortConfig.key];
+    let valB = b[sortConfig.key];
+
+    // Convert guestLimit to number for numeric sorting
+    if (sortConfig.key === "qty") {
+      valA = parseInt(valA, 10);
+      valB = parseInt(valB, 10);
+    }
+
+    if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
+    if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  const requestSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
   };
 
   return (
@@ -78,7 +108,21 @@ const Table = () => {
       <table className="w-full">
         <thead className="sticky top-0 z-10">
           <tr className="bg-[#E8E8FF]">
-            <th className="px-4 py-5 text-left text-nowrap">Guest Name</th>
+            <th
+              onClick={() => requestSort("guestName")}
+              className="px-4 py-5 text-left text-nowrap"
+            >
+              Guest Name
+              {sortConfig.key === "guestName" ? (
+                sortConfig.direction === "asc" ? (
+                  <span className="cursor-pointer">↑</span>
+                ) : (
+                  <span className="cursor-pointer">↓</span>
+                )
+              ) : (
+                ""
+              )}
+            </th>
             <th className="px-4 py-5 text-left text-nowrap">Guest Email</th>
             <th className="px-4 py-5 text-left text-nowrap">Guest Number</th>
             <th className="px-4 py-5 text-left text-nowrap">Birthday</th>
@@ -86,7 +130,7 @@ const Table = () => {
           </tr>
         </thead>
         <tbody>
-          {guests.map((guest, index) => (
+          {sortedGuests.map((guest, index) => (
             <tr
               onClick={() => handleGoToGuestDetailsPage(index)}
               key={index}

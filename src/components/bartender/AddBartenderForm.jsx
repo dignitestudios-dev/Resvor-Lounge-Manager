@@ -92,7 +92,7 @@ const AddBartenderForm = ({
               </Button>
             ) : (
               <Button className={" border-2 h-12 text-[14px] px-6"}>
-                Add New Bartender
+                Add New Worker
               </Button>
             )}
           </DialogTrigger>
@@ -100,7 +100,7 @@ const AddBartenderForm = ({
         <DialogContent>
           <DialogHeader>
             <DialogTitle className={"text-3xl font-bold"}>
-              {isEdit ? "Update Bartender" : "Add New Bartender"}
+              {isEdit ? "Update Worker" : "Add New Worker"}
             </DialogTitle>
             <DialogDescription>
               <form
@@ -125,7 +125,7 @@ const AddBartenderForm = ({
                       )}
                     </div>
                     <p className="text-primary font-semibold">
-                      Add Bartender Image{" "}
+                      Add Worker Image{" "}
                       <span className="text-primary/30"> (Optional)</span>
                     </p>
                     <Input

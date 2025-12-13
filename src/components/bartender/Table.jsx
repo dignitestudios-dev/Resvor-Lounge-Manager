@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
 
 const Table = () => {
@@ -12,6 +12,7 @@ const Table = () => {
       number: "+1 202-555-0123",
       address: "Dallas, TX – 802 PainEase Plaza",
       loungeName: "First Lounge",
+      date: "25-10-2025",
     },
     {
       bartenderName: "Jane Smith",
@@ -19,6 +20,7 @@ const Table = () => {
       number: "+1 312-555-0456",
       address: "Chicago, IL – 1204 Windy Lane",
       loungeName: "First Lounge",
+      date: "25-10-2025",
     },
     {
       bartenderName: "Michael Johnson",
@@ -26,6 +28,7 @@ const Table = () => {
       number: "+1 415-555-0789",
       address: "San Francisco, CA – 55 Market Street",
       loungeName: "Second Lounge",
+      date: "25-10-2025",
     },
     {
       bartenderName: "Emily Davis",
@@ -33,6 +36,7 @@ const Table = () => {
       number: "+1 646-555-0145",
       address: "New York, NY – 9 Empire Blvd",
       loungeName: "Second Lounge",
+      date: "25-10-2025",
     },
     {
       bartenderName: "Robert Wilson",
@@ -40,6 +44,7 @@ const Table = () => {
       number: "+1 702-555-0933",
       address: "Las Vegas, NV – 450 Sunset Avenue",
       loungeName: "First Lounge",
+      date: "25-10-2025",
     },
     {
       bartenderName: "Olivia Martinez",
@@ -47,6 +52,7 @@ const Table = () => {
       number: "+1 617-555-0234",
       address: "Boston, MA – 132 Beacon Street",
       loungeName: "First Lounge",
+      date: "25-10-2025",
     },
     {
       bartenderName: "James Brown",
@@ -54,6 +60,7 @@ const Table = () => {
       number: "+1 303-555-0678",
       address: "Denver, CO – 78 Rocky Road",
       loungeName: "First Lounge",
+      date: "25-10-2025",
     },
     {
       bartenderName: "Sophia Turner",
@@ -61,6 +68,7 @@ const Table = () => {
       number: "+1 213-555-0199",
       address: "Los Angeles, CA – 901 Hollywood Blvd",
       loungeName: "First Lounge",
+      date: "25-10-2025",
     },
     {
       bartenderName: "William Anderson",
@@ -68,6 +76,7 @@ const Table = () => {
       number: "+1 512-555-0345",
       address: "Austin, TX – 300 Tech Park Drive",
       loungeName: "second Lounge",
+      date: "25-10-2025",
     },
     {
       bartenderName: "Ava Clark",
@@ -75,11 +84,42 @@ const Table = () => {
       number: "+1 480-555-0721",
       address: "Phoenix, AZ – 18 Desert View Lane",
       loungeName: "second Lounge",
+      date: "25-10-2025",
     },
   ];
 
+  const [sortConfig, setSortConfig] = useState({
+    key: "bartenderName",
+    direction: "asc",
+  });
+
   const handleGoToDetailsPage = (id) => {
     router.push(`/dashboard/bartenders/${id}`);
+  };
+
+  const sortedBartenders = [...bartenders].sort((a, b) => {
+    if (!sortConfig.key) return 0;
+
+    let valA = a[sortConfig.key];
+    let valB = b[sortConfig.key];
+
+    // Convert guestLimit to number for numeric sorting
+    if (sortConfig.key === "qty") {
+      valA = parseInt(valA, 10);
+      valB = parseInt(valB, 10);
+    }
+
+    if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
+    if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  const requestSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
   };
 
   return (
@@ -87,17 +127,33 @@ const Table = () => {
       <table className="w-full">
         <thead className="sticky top-0 z-10">
           <tr className="bg-[#E8E8FF]">
-            <th className="px-4 py-5 text-left text-nowrap">Bartender Name</th>
+            <th
+              onClick={() => requestSort("bartenderName")}
+              className="px-4 py-5 text-left text-nowrap"
+            >
+              Bartender Name
+              {sortConfig.key === "bartenderName" ? (
+                sortConfig.direction === "asc" ? (
+                  <span className="cursor-pointer">↑</span>
+                ) : (
+                  <span className="cursor-pointer">↓</span>
+                )
+              ) : (
+                ""
+              )}
+            </th>
             <th className="px-4 py-5 text-left text-nowrap">Email Address</th>
             <th className="px-4 py-5 text-left text-nowrap">Number</th>
             <th className="px-4 py-5 text-left text-nowrap">Lounge Name</th>
             <th className="px-4 py-5 text-left text-nowrap">Address</th>
+            <th className="px-4 py-5 text-left text-nowrap">Date of Joining</th>
+            <th className="px-4 py-5 text-left text-nowrap">Status</th>
 
             <th className="px-4 py-5 text-center text-nowrap">Action</th>
           </tr>
         </thead>
         <tbody>
-          {bartenders.map((bartender, index) => (
+          {sortedBartenders?.map((bartender, index) => (
             <tr
               onClick={() => handleGoToDetailsPage(index)}
               key={index}
@@ -119,6 +175,14 @@ const Table = () => {
               <td className="px-4 py-6">{bartender?.loungeName}</td>
 
               <td className="px-4 py-6">{bartender?.address}</td>
+              <td className="px-4 py-6">{bartender?.date}</td>
+              <td
+                className={`px-4 py-6 ${
+                  index % 2 === 0 ? "text-green-700" : "text-red-600"
+                }`}
+              >
+                {index % 2 === 0 ? "Active" : "Inactive"}
+              </td>
               <td className="px-4 py-6 text-nowrap">
                 <div className="flex justify-center items-center cursor-pointer">
                   <IoIosArrowForward size={24} />

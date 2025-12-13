@@ -6,9 +6,13 @@ import { IoIosArrowForward } from "react-icons/io";
 import { useRouter } from "next/navigation";
 
 const Table = ({ filters = {} }) => {
-  const [filteredEvents, setFilteredEvents] = React.useState([]);
-
   const router = useRouter();
+  const [filteredEvents, setFilteredEvents] = React.useState([]);
+  const [sortConfig, setSortConfig] = React.useState({
+    key: "loungeName",
+    direction: "asc",
+  });
+
   const events = [
     {
       bookingId: "AD111515",
@@ -191,6 +195,31 @@ const Table = ({ filters = {} }) => {
     router.push(`/dashboard/bookings/${index}`);
   };
 
+  const sortedServices = [...displayedEvents].sort((a, b) => {
+    if (!sortConfig.key) return 0;
+
+    let valA = a[sortConfig.key];
+    let valB = b[sortConfig.key];
+
+    // Convert guestLimit to number for numeric sorting
+    if (sortConfig.key === "qty") {
+      valA = parseInt(valA, 10);
+      valB = parseInt(valB, 10);
+    }
+
+    if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
+    if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  const requestSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+
   return (
     <CustomPagination
       loading={false}
@@ -203,7 +232,21 @@ const Table = ({ filters = {} }) => {
             <tr className="bg-[#E8E8FF]">
               <th className="px-4 py-5 text-left text-nowrap">Booking ID</th>
               <th className="px-4 py-5 text-left text-nowrap">Users</th>
-              <th className="px-4 py-5 text-left text-nowrap">Lounge Name</th>
+              <th
+                onClick={() => requestSort("loungeName")}
+                className="px-4 py-5 text-left text-nowrap"
+              >
+                Lounge Name
+                {sortConfig.key === "loungeName" ? (
+                  sortConfig.direction === "asc" ? (
+                    <span className="cursor-pointer">↑</span>
+                  ) : (
+                    <span className="cursor-pointer">↓</span>
+                  )
+                ) : (
+                  ""
+                )}
+              </th>
               <th className="px-4 py-5 text-left text-nowrap">Guest Limit</th>
               <th className="px-4 py-5 text-left text-nowrap">Event Type</th>
               <th className="px-4 py-5 text-left text-nowrap">Event Date</th>
@@ -213,7 +256,7 @@ const Table = ({ filters = {} }) => {
             </tr>
           </thead>
           <tbody className="mt-10">
-            {displayedEvents?.map((event, index) => (
+            {sortedServices?.map((event, index) => (
               <tr
                 key={index}
                 onClick={() => handleRowClick(index)}

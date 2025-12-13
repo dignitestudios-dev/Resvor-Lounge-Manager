@@ -446,7 +446,7 @@ export default function ChatUI() {
                   : "bg-white text-[#181818] hover:bg-white"
               }`}
             >
-              Bartenders
+              Work Force
             </Button>
           </div>
         </div>

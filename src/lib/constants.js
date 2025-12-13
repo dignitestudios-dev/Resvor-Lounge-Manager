@@ -25,7 +25,7 @@ export const navLinks = [
     selectedIcon: <Guestbook color="#010053" />,
   },
   {
-    name: "Bartenders",
+    name: "Work Force",
     path: "/dashboard/bartenders",
     icon: <Bartenders />,
     selectedIcon: <Bartenders color="#010053" />,
@@ -37,7 +37,7 @@ export const navLinks = [
     selectedIcon: <Shift color="#010053" />,
   },
   {
-    name: "Bartenders Requests",
+    name: "Work Force Requests",
     path: "/dashboard/bartenders-requests",
     icon: <BartendersRequests />,
     selectedIcon: <BartendersRequests color="#010053" />,

@@ -22,7 +22,7 @@ const ConfirmPopup = ({ isOpen, onOpenChange }) => {
                 Invitation Sent{" "}
               </h3>
               <p className="text-[#565656] text-center">
-                Your invitation sent to all guests{" "}
+                Your invitation sent to all guests via Email and SMS
               </p>
             </div>
           </DialogDescription>

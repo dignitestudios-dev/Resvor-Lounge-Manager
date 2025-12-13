@@ -13,6 +13,8 @@ import { Input } from "../ui/input";
 import { Camera, Eye, EyeOff, Upload } from "lucide-react";
 import SendInvitationForm from "./SendInvitationForm";
 import ConfirmPopup from "./ConfirmPopup";
+import { Textarea } from "../ui/textarea";
+import { Label } from "../ui/label";
 
 const AddFlyerForm = ({ isOpen, onOpenChange }) => {
   const [flyerImage, setFlyerImage] = useState(null);
@@ -86,6 +88,17 @@ const AddFlyerForm = ({ isOpen, onOpenChange }) => {
                       onChange={handleImageChange}
                     />
                   </label>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <Label className="text-sm font-medium text-black">
+                    Additional Description
+                  </Label>
+                  <Textarea
+                    name="description"
+                    placeholder="Describe your event"
+                    className="min-h-[100px]"
+                  />
                 </div>
 
                 <Button className={"w-full h-14 text-lg"}>Add</Button>

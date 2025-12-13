@@ -25,7 +25,7 @@ const BartenderDetails = () => {
   return (
     <>
       <div className="flex-1 flex flex-col overflow-y-auto">
-        <h1 className="section-heading">Bartender Details</h1>
+        <h1 className="section-heading">Work Force Details</h1>
 
         <div className="mt-10 flex-1 bg-white rounded-2xl p-5 overflow-y-auto">
           <div className="flex flex-col bg-[#F5F5F5] rounded-2xl h-full p-5 space-y-5 overflow-y-auto">

@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import CustomPagination from "@/components/common/CustomPagination";
 import utils from "@/lib/utils";
 import { IoIosArrowForward } from "react-icons/io";
@@ -98,6 +98,11 @@ const Table = () => {
     },
   ];
 
+  const [sortConfig, setSortConfig] = useState({
+    key: "customerName",
+    direction: "asc",
+  });
+
   const onPageChange = (page) => {
     // getAllUsers(page);
   };
@@ -117,6 +122,31 @@ const Table = () => {
     }
   };
 
+  const sortedOrders = [...orders].sort((a, b) => {
+    if (!sortConfig.key) return 0;
+
+    let valA = a[sortConfig.key];
+    let valB = b[sortConfig.key];
+
+    // Convert guestLimit to number for numeric sorting
+    if (sortConfig.key === "qty") {
+      valA = parseInt(valA, 10);
+      valB = parseInt(valB, 10);
+    }
+
+    if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
+    if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  const requestSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+
   return (
     <CustomPagination
       loading={false}
@@ -128,7 +158,21 @@ const Table = () => {
           <thead className="sticky top-0 z-10">
             <tr className="bg-[#E8E8FF]">
               <th className="px-4 py-5 text-left text-nowrap">Order ID</th>
-              <th className="px-4 py-5 text-left text-nowrap">Customer Name</th>
+              <th
+                onClick={() => requestSort("customerName")}
+                className="px-4 py-5 text-left text-nowrap"
+              >
+                Customer Name
+                {sortConfig.key === "customerName" ? (
+                  sortConfig.direction === "asc" ? (
+                    <span className="cursor-pointer">↑</span>
+                  ) : (
+                    <span className="cursor-pointer">↓</span>
+                  )
+                ) : (
+                  ""
+                )}
+              </th>
               <th className="px-4 py-5 text-left text-nowrap">Booking</th>
               <th className="px-4 py-5 text-left text-nowrap">Delivery Type</th>
               <th className="px-4 py-5 text-left text-nowrap">Qty</th>
@@ -138,7 +182,7 @@ const Table = () => {
             </tr>
           </thead>
           <tbody className="mt-10">
-            {orders?.map((order, index) => (
+            {sortedOrders?.map((order, index) => (
               <tr key={index} className="border-b border-[#D4D4D4]">
                 <td className="px-4 py-6">{order?.orderId}</td>
                 <td className="px-4 py-6">

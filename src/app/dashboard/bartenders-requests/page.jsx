@@ -4,7 +4,7 @@ import Table from "@/components/bartenders-requests/Table";
 const BartenderRequest = () => {
   return (
     <div>
-      <h1 className="section-heading">Bartenders Requests</h1>
+      <h1 className="section-heading">Work Force Requests</h1>
 
       <div className="mt-6">
         <Table />
