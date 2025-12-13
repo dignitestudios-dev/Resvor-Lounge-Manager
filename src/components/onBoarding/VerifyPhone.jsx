@@ -87,7 +87,7 @@ const VerifyPhone = ({ handleNext, handlePrevious }) => {
             verification
           </p>
           <p className="xxl:text-[26px] text-[16px] text-[#E6E6E6] w-[384px] ">
-            Please enter OTP code sent your phone.
+            Please enter OTP sent to your phone.
           </p>
         </div>
 
@@ -112,7 +112,7 @@ const VerifyPhone = ({ handleNext, handlePrevious }) => {
             </div>
             <div className="flex items-center justify-center gap-2  mt-4 mb-3 relative z-10">
               <p className="text-center text-[16px] leading-[21.6px] text-white ">
-                Didn&apos;t receive the code yet?
+                Didn’t receive the OTP?
                 {isActive ? (
                   <TextCountDown
                     isActive={isActive}

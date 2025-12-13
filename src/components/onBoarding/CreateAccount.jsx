@@ -5,9 +5,12 @@ import AuthInput from "../auth/AuthInput";
 import PhoneInput from "../auth/PhoneInput";
 import { phoneFormatter } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 const CreateAccount = ({ handleNext }) => {
   const router = useRouter();
+  const [acceptedPolicy, setAcceptedPolicy] = useState(false);
+
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
     useFormik({
       initialValues: "",
@@ -117,7 +120,32 @@ const CreateAccount = ({ handleNext }) => {
             />
           </div>
         </div>
-        <div className="mt-6 ">
+        <div className="mt-6 flex items-start gap-2 text-[12px] text-[#CACACA]">
+          <input
+            type="checkbox"
+            checked={acceptedPolicy}
+            onChange={() => setAcceptedPolicy(!acceptedPolicy)}
+            className="mt-[2px] h-3 w-3 cursor-pointer accent-indigo-600"
+          />
+
+          <span>
+            I accept the{" "}
+            <span
+              className="text-[#E6E6E6] font-semibold cursor-pointer"
+              onClick={() => router.push("/auth/terms")}
+            >
+              Terms & Conditions
+            </span>{" "}
+            and{" "}
+            <span
+              className="text-[#E6E6E6] font-semibold cursor-pointer"
+              onClick={() => router.push("/auth/privacy")}
+            >
+              Privacy Policy
+            </span>
+          </span>
+        </div>
+        <div className="mt-1 ">
           <div className="xxl:w-[650px] w-[350px] mt-1 mb-4">
             <AuthButton text={"Sign Up"} />
           </div>
@@ -134,22 +162,6 @@ const CreateAccount = ({ handleNext }) => {
             Login
           </span>
         </p>
-      </div>
-      <div className="mt-6 text-[12px] text-[#CACACA] ">
-        I accept the{" "}
-        <span
-          className="text-[#E6E6E6] font-semibold cursor-pointer"
-          onClick={() => console.log("first")}
-        >
-          Terms & Conditions
-        </span>{" "}
-        and{" "}
-        <span
-          className="text-[#E6E6E6] font-semibold cursor-pointer"
-          onClick={() => console.log("second")}
-        >
-          Privacy Policy
-        </span>
       </div>
     </div>
   );

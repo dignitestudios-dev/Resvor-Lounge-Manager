@@ -131,7 +131,7 @@ const Table = () => {
               onClick={() => requestSort("bartenderName")}
               className="px-4 py-5 text-left text-nowrap"
             >
-              Bartender Name
+              Name
               {sortConfig.key === "bartenderName" ? (
                 sortConfig.direction === "asc" ? (
                   <span className="cursor-pointer">↑</span>

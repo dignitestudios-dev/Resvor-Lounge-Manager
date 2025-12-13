@@ -82,12 +82,13 @@ const VerifyEmail = ({ handleNext, handlePrevious }) => {
             className="w-[220px]"
           />
         </div>
-        <div className="mt-4 py-4 space-y-3 xxl:w-[400px] xxl:ml-12 text-center">
+        <div className="mt-4 py-4 space-y-3 xxl:w-[400px]  xxl:ml-12 text-center">
           <p className=" xxl:text-[48px] text-[32px] font-[600] capitalize">
             verification
           </p>
-          <p className="xxl:text-[26px] text-[16px] text-[#E6E6E6] w-[304px] ">
-            Please enter OTP sent to your email.
+          <p className="text-[14px] sm:text-[16px] lg:text-[18px] text-[#E6E6E6] w-[440px]">
+            A One-Time Password (OTP) has been sent to your registered email (
+            example@gmail.com). Please enter it to proceed.
           </p>
         </div>
 
@@ -112,7 +113,7 @@ const VerifyEmail = ({ handleNext, handlePrevious }) => {
             </div>
             <div className="flex items-center justify-center gap-2 pl-4 mt-4 mb-3 relative z-10">
               <p className="text-center text-[14px] leading-[21.6px] text-white ">
-                Didn&apos;t receive the code yet?
+                Didn’t receive the OTP?
                 {isActive ? (
                   <TextCountDown
                     isActive={isActive}

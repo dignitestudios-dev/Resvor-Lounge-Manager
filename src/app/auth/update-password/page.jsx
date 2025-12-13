@@ -52,8 +52,8 @@ const UpdatePassword = () => {
           <p className=" xxl:text-[48px] text-[32px] font-[600] capitalize">
             create new password
           </p>
-          <p className="xxl:text-[26px] text-[16px] text-[#E6E6E6]  ">
-            Enter new password to reset.
+          <p className="xxl:text-[26px] text-[16px] text-[#E6E6E6] font-[400] ">
+            Enter a strong, secure password to update your account.
           </p>
         </div>
 
@@ -106,8 +106,8 @@ const UpdatePassword = () => {
             setRequestSendModal(false);
             router.push("/auth/login");
           }}
-          title="Password Updated"
-          description="Your password has been updated successfully."
+          title="Password Reset Successful"
+          description="You can now log in with your new password."
         />
       )}
     </div>

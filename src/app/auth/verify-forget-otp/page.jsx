@@ -1,17 +1,19 @@
 "use client";
 import AuthButton from "../../../components/auth/AuthButton";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import CountDown from "../../../components/auth/CountDown";
 import { useRouter } from "next/navigation";
 import { FaArrowLeftLong } from "react-icons/fa6";
 
 const VerifyForgotOtp = () => {
   const router = useRouter();
+
   const [otp, setOtp] = useState(Array(6).fill(""));
   const inputs = useRef([]);
 
   const [isActive, setIsActive] = useState(true);
   const [seconds, setSeconds] = useState(30);
+  const [email, setEmail] = useState("");
 
   const handleChange = (e, index) => {
     const { value } = e.target;
@@ -52,6 +54,11 @@ const VerifyForgotOtp = () => {
     router.push("/auth/update-password");
   };
 
+  useEffect(() => {
+    const email = localStorage.getItem("resetEmail");
+    setEmail(email);
+  }, []);
+
   return (
     <div className="grid lg:grid-cols-1 grid-cols-1 w-full text-white">
       <div className="flex flex-col justify-center items-center h-auto ">
@@ -71,12 +78,13 @@ const VerifyForgotOtp = () => {
             className="w-[220px]"
           />
         </div>
-        <div className="mt-4 py-4 space-y-3 xxl:w-[400px] xxl:ml-12 text-center">
-          <p className=" xxl:text-[48px] text-[32px] font-[600] capitalize">
-            check your email
+        <div className="text-center space-y-2 max-w-[38%] mb-6">
+          <p className="text-[24px] sm:text-[32px] lg:text-[42px] font-semibold">
+            Verify OTP
           </p>
-          <p className="xxl:text-[26px] text-[16px] text-[#E6E6E6] w-[304px] ">
-            We have sent a password recover instructions to your email.
+          <p className="text-[14px] sm:text-[16px] lg:text-[18px] text-[#E6E6E6]">
+            A One-Time Password (OTP) has been sent to your registered email (
+            example@gmail.com). Please enter it to proceed.
           </p>
         </div>
 
@@ -99,7 +107,15 @@ const VerifyForgotOtp = () => {
                 />
               ))}
             </div>
-            <div className="xxl:w-[600px] lg:w-[370px] md:w-[550px] w-full mt-3 space-y-4 ">
+            <div
+              className=" w-full 
+          max-w-[300px]
+          sm:max-w-[350px]
+          md:max-w-[400px]
+          lg:max-w-[450px]
+          xl:max-w-[450px]
+          flex flex-col gap-4"
+            >
               <AuthButton text="Verify" />
               <CountDown
                 isActive={isActive}
@@ -107,6 +123,16 @@ const VerifyForgotOtp = () => {
                 seconds={seconds}
                 setSeconds={setSeconds}
               />
+              <button
+                onClick={() => router.push("/auth/forget-password")}
+                type="button"
+                className=" px-4 py-2 text-sm font-semibold text-red-500 
+             border border-red-400 rounded-lg 
+             hover:bg-red-50 hover:text-red-600 
+             transition-colors duration-200 ease-in-out"
+              >
+                Wrong email? Change it
+              </button>
             </div>
           </div>
         </form>

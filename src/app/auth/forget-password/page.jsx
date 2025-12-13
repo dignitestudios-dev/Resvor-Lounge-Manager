@@ -24,7 +24,9 @@ const ForgotPassword = () => {
           email: values?.email,
           password: values?.password,
         };
+        localStorage.setItem("resetEmail", values.email);
         router.push("/auth/verify-forget-otp");
+
         postData("/admin/login", false, null, data, processLogin);
 
         // Use the loading state to show loading spinner

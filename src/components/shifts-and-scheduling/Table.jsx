@@ -242,7 +242,7 @@ const Table = () => {
               <th className="px-4 py-5 text-left text-nowrap">Time</th>
               <th className="px-4 py-5 text-left text-nowrap">Role</th>
               <th className="px-4 py-5 text-left text-nowrap">Event</th>
-              <th className="px-4 py-5 text-left text-nowrap">Bartender</th>
+              <th className="px-4 py-5 text-left text-nowrap">Worker</th>
               <th className="px-4 py-5 text-left text-nowrap">Status</th>
               <th className="px-4 py-5 text-center text-nowrap">Action</th>
             </tr>
