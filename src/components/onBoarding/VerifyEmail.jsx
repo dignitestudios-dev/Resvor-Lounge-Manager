@@ -113,7 +113,7 @@ const VerifyEmail = ({ handleNext, handlePrevious }) => {
             </div>
             <div className="flex items-center justify-center gap-2 pl-4 mt-4 mb-3 relative z-10">
               <p className="text-center text-[14px] leading-[21.6px] text-white ">
-                Didn’t receive the OTP?
+                {isActive ? "OTP resend in" : "Didn’t receive the OTP?"}
                 {isActive ? (
                   <TextCountDown
                     isActive={isActive}
@@ -128,7 +128,7 @@ const VerifyEmail = ({ handleNext, handlePrevious }) => {
                     onClick={handleResendOtp}
                     className="font-[600] pl-1 cursor-pointer"
                   >
-                    Resend now
+                    Resend
                     {/* {resendLoading ? "Resending..." : "Resend"} */}
                   </span>
                 )}
@@ -138,6 +138,18 @@ const VerifyEmail = ({ handleNext, handlePrevious }) => {
               <div className="w-[360px] ">
                 <AuthButton text="Verify" />
               </div>
+            </div>
+            <div className="w-full flex justify-center pl-4 mt-4 space-y-4 ">
+              <button
+                onClick={() => handlePrevious()}
+                type="button"
+                className="w-[360px] px-4 py-2 text-sm font-semibold text-red-500 
+             border border-red-400 rounded-lg 
+             hover:bg-red-50 hover:text-red-600 
+             transition-colors duration-200 ease-in-out"
+              >
+                Wrong email? Change it
+              </button>
             </div>
           </div>
         </form>
