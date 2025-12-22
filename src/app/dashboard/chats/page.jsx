@@ -14,7 +14,6 @@ const Chats = () => {
           </Button>{" "}
         </div>
       </div>
-
       <ChatUI />
     </>
   );

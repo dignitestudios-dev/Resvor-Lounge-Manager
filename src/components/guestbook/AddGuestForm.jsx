@@ -14,6 +14,17 @@ import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import { Camera } from "lucide-react";
 import Edit2 from "../icons/Edit2";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { locations } from "@/lib/constants";
+import utils from "@/lib/utils";
 
 const AddGuestForm = ({
   isOpen,
@@ -114,6 +125,29 @@ const AddGuestForm = ({
               <div className="w-full flex flex-col gap-1">
                 <Label className={"text-base text-black"}>Date of Birth</Label>
                 <Input type={"date"} className={"h-14"} />
+              </div>
+              <div className="col-span-2 flex flex-col gap-1">
+                <Label className={"text-black"}>Select Lounge</Label>
+
+                <Select>
+                  <SelectTrigger className={"w-full h-14!"}>
+                    <SelectValue placeholder="Select a Lounge" />
+                  </SelectTrigger>
+                  <SelectContent className={"h-[200px]"}>
+                    <SelectGroup>
+                      <SelectLabel>Lounge</SelectLabel>
+                      {locations.map((month) => (
+                        <SelectItem
+                          className={"text-black"}
+                          value={month.name}
+                          key={month._id}
+                        >
+                          {utils.capitalize(month.name)}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="w-full flex flex-col gap-1">
