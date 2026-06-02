@@ -10,6 +10,16 @@ const nextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: '/api/:path*',
+          destination: 'https://35ppzgmv-3050.inc1.devtunnels.ms/:path*',
+        },
+      ],
+    };
+  },
 };
 
 export default nextConfig;

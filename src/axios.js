@@ -1,7 +1,11 @@
 import axios from "axios";
+import FingerprintJS from "@fingerprintjs/fingerprintjs";
 
-export const baseUrl = "https://necessi.erdumadnan.com/api";
-// export const baseUrl = "https://155e-45-199-187-86.ngrok-free.app";
+// Proxy configuration - similar to Vite setup
+export const baseUrl =
+  process.env.NODE_ENV === "development"
+    ? "/api" // Use Next.js rewrites proxy in development
+    : "https://35ppzgmv-3050.inc1.devtunnels.ms"; // Use direct URL in production
 
 async function getDeviceFingerprint() {
   const fp = await FingerprintJS.load();
@@ -12,52 +16,64 @@ async function getDeviceFingerprint() {
 
 const instance = axios.create({
   baseURL: baseUrl,
+  withCredentials: true, // Enable automatic HTTP-only cookie handling
   headers: {
-    // devicemodel: await getDeviceFingerprint(),
-    // deviceuniqueid: await getDeviceFingerprint(),
+    "Content-Type": "application/json",
+    Accept: "application/json",
   },
   timeout: 10000, // 10 seconds timeout
 });
 
-instance.interceptors.request.use((request) => {
-  // const token = Cookies.get("token");
-  // if (!navigator.onLine) {
-  //   // No internet connection
-  //   ErrorToast(
-  //     "No internet connection. Please check your network and try again."
-  //   );
-  //   return;
-  //   // return Promise.reject(new Error("No internet connection"));
-  // }
+instance.interceptors.request.use(async (request) => {
+  if (!navigator.onLine) {
+    ErrorToast(
+      "No internet connection. Please check your network and try again.",
+    );
+    return Promise.reject(new Error("No internet connection"));
+  }
 
-  // // Merge existing headers with token
-  // request.headers = {
-  //   ...request.headers, // Keep existing headers like devicemodel and deviceuniqueid
-  //   Accept: "application/json, text/plain, */*",
-  //   ...(token && { Authorization: `Bearer ${token}` }), // Add Authorization only if token exists
-  // };
+  // Ensure credentials are sent with every request
+  request.withCredentials = true;
+
+  // Get device fingerprint and add to headers
+  const fingerprint = await getDeviceFingerprint();
+
+  // Add device headers and Content-Type
+  request.headers = {
+    ...request.headers,
+    "Content-Type": "application/json",
+    devicemodel: fingerprint,
+    deviceuniqueid: fingerprint,
+  };
 
   return request;
 });
 
 instance.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log("✅ Response received:", response.config.url, {
+      status: response.status,
+      headers: response.headers,
+      data: response.data,
+    });
+    return response;
+  },
   (error) => {
-    // if (error.code === "ECONNABORTED") {
-    //   // Slow internet or request timeout
-    //   ErrorToast("Your internet connection is slow. Please try again.");
-    // }
+    console.error("❌ Request error:", error.config?.url, {
+      status: error.response?.status,
+      message: error.message,
+    });
 
-    // if (error.response && error.response.status === 401) {
-    //   // Unauthorized error
-    //   Cookies.remove("token");
-    //   Cookies.remove("user");
-    //   ErrorToast("Session expired. Please relogin");
-    //   // window.location.href = "/";s
-    // }
+    if (error.code === "ECONNABORTED") {
+      ErrorToast("Your internet connection is slow. Please try again.");
+    }
+
+    if (error.response && error.response.status === 401) {
+      ErrorToast("Session expired. Please relogin");
+    }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default instance;

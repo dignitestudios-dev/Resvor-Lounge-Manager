@@ -3,11 +3,14 @@
 import AuthButton from "../auth/AuthButton";
 import { useFormik } from "formik";
 import AuthInput from "../auth/AuthInput";
-import { useState } from "react";
 import { FaArrowLeftLong } from "react-icons/fa6";
+import { floorPlanSetupValues } from "@/lib/init/floorPlanSetupValues";
+import { floorPlanSetupSchema } from "@/lib/schema/onboarding/floorPlanSetupSchema";
+import { ErrorToast } from "../ui/toaster";
+import { useCreateLounge } from "@/lib/hooks/mutations/OnBoardingMutations";
 
-const FloorPlanSetup = ({ handleNext, handlePrevious }) => {
-  const [floorPlan, setFloorPlan] = useState(null);
+const FloorPlanSetup = ({ handleNext, handlePrevious, combinedData = {} }) => {
+  const createLoungeMutation = useCreateLounge();
 
   const {
     values,
@@ -18,23 +21,32 @@ const FloorPlanSetup = ({ handleNext, handlePrevious }) => {
     touched,
     setFieldValue,
   } = useFormik({
-    initialValues: {
-      floorPlan: null,
-      regularTables: "",
-      vipTables: "",
-    },
+    initialValues: floorPlanSetupValues(combinedData),
+    validationSchema: floorPlanSetupSchema,
     validateOnChange: true,
     validateOnBlur: true,
-    onSubmit: async (values, action) => {
-      console.log("🚀 ~ FloorPlanSetup ~ values:", values);
-      handleNext();
+    onSubmit: async (values) => {
+      try {
+        console.log("🚀 ~ FloorPlanSetup ~ complete data:", values);
+        // Submit combined data to API
+        const response = await createLoungeMutation.mutateAsync(values);
+        console.log("🚀 ~ Lounge Created:", response);
+        handleNext();
+      } catch (error) {
+        console.error(error);
+        ErrorToast(
+          error.response?.data?.message ||
+            error.message ||
+            "An error occurred. Please try again.",
+        );
+      }
     },
   });
+  console.log("🚀 ~ FloorPlanSetup ~ errors:", errors);
 
   const handleFloorPlanChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFloorPlan(file);
       setFieldValue("floorPlan", file);
     }
   };
@@ -72,13 +84,20 @@ const FloorPlanSetup = ({ handleNext, handlePrevious }) => {
               <p className="underline">Upload Floor Plan</p>
             </div>
           </div>
+          {touched.floorPlan && errors.floorPlan && (
+            <p className="text-red-600 text-xs mt-1">{errors.floorPlan}</p>
+          )}
 
           {/* Floor Plan Preview */}
           {values.floorPlan && (
             <div className="rounded-[20px] border-2 border-white/20 bg-white/5 backdrop-blur p-4">
               <p className="text-white font-[500] mb-3">Floor Plan Preview</p>
               <img
-                src={typeof values.floorPlan === "string" ? values.floorPlan : URL.createObjectURL(values.floorPlan)}
+                src={
+                  typeof values.floorPlan === "string"
+                    ? values.floorPlan
+                    : URL.createObjectURL(values.floorPlan)
+                }
                 alt="floor plan preview"
                 className="w-full h-[200px] object-cover rounded-lg"
               />
@@ -122,7 +141,13 @@ const FloorPlanSetup = ({ handleNext, handlePrevious }) => {
 
         <div className="mt-6">
           <div className="xxl:w-[650px] w-[350px] mt-1 mb-4">
-            <AuthButton text={"Next"} />
+            <AuthButton
+              text={"Submit"}
+              disabled={
+                Object.keys(errors).length > 0 || createLoungeMutation.isPending
+              }
+              loading={createLoungeMutation.isPending}
+            />
           </div>
         </div>
       </form>

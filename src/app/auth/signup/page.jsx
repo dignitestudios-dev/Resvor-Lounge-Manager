@@ -14,8 +14,13 @@ import FloorPlanSetup from "../../../components/onBoarding/FloorPlanSetup";
 import MultipleLounge from "../../../components/onBoarding/MultipleLounge";
 import { FaClipboardList } from "react-icons/fa";
 import Subscription from "../../../components/onBoarding/Subscription";
+import PersonalDetailsRemaining from "@/components/onBoarding/PersonalDetailsRemaining";
 export default function SignUp() {
   const [currentStep, setCurrentStep] = useState(0);
+  const [email, setEmail] = useState("");
+  const [currentState, setCurrentState] = useState("createAccount");
+  const [personalDetailsData, setPersonalDetailsData] = useState(null);
+
   const providerSteps = [
     { icon: IoMdPerson, title: "Your Details" },
     { icon: IoMailOutline, title: "Verify Email" },
@@ -25,14 +30,14 @@ export default function SignUp() {
     { icon: IoMdPerson, title: "Multiple Lounge" },
     { icon: FaClipboardList, title: "Subscription" },
   ];
-  const [email, setEmail] = useState("");
+
   const steps = providerSteps.map((step, index) => ({
     ...step,
     completed: index < currentStep,
     active: index === currentStep,
   }));
 
-  const handleNext = () => {
+  const handleNext = (data = null) => {
     if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
     }
@@ -52,37 +57,39 @@ export default function SignUp() {
         <div
           className={`w-full relative flex justify-center flex-col items-center h-full `}
         >
-          {currentStep === 0 ? (
-            <CreateAccount setEmail={setEmail} handleNext={handleNext} />
-          ) : currentStep === 1 ? (
+          {currentStep === 0 && currentState === "createAccount" ? (
+            <CreateAccount
+              setEmail={setEmail}
+              handleNext={handleNext}
+              setCurrentState={setCurrentState}
+            />
+          ) : currentStep === 1 && currentState === "verify_email" ? (
             <VerifyEmail
               email={email}
               handleNext={handleNext}
               handlePrevious={handlePrevious}
+              setCurrentState={setCurrentState}
             />
-          ) : currentStep === 2 ? (
+          ) : currentStep === 2 && currentState === "verify_mobile" ? (
             <VerifyPhone
               email={email}
               handleNext={handleNext}
               handlePrevious={handlePrevious}
+              setCurrentState={setCurrentState}
             />
-          ) : currentStep === 3 ? (
+          ) : currentStep === 3 && currentState === "personalDetails" ? (
             <PersonalDetails
               handleNext={handleNext}
               handlePrevious={handlePrevious}
+              setCurrentState={setCurrentState}
             />
-          ) : currentStep === 4 ? (
-            <FloorPlanSetup
-              handleNext={handleNext}
-              handlePrevious={handlePrevious}
-            />
-          ) : currentStep === 5 ? (
+          ) : currentStep === 4 && currentState === "multipleLounge" ? (
             <MultipleLounge
               handleNext={handleNext}
               handlePrevious={handlePrevious}
               setCurrentStep={setCurrentStep}
             />
-          ) : currentStep === 6 ? (
+          ) : currentStep === 5 && currentState === "subscription" ? (
             <Subscription
               handleNext={handleNext}
               handlePrevious={handlePrevious}

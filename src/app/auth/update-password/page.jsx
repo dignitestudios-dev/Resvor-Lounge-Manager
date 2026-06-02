@@ -6,36 +6,34 @@ import AuthButton from "../../../components/auth/AuthButton";
 import { useState } from "react";
 import AuthSuccessModal from "../../../components/auth/AuthSuccessModal";
 import { useRouter } from "next/navigation";
-
-const loginValues = {
-  email: "",
-  password: "",
-};
+import { updatePasswordSchema } from "@/lib/schema/authentication/loginSchema";
+import { useUpdatePassword } from "@/lib/hooks/mutations/AuthMutations";
 
 const UpdatePassword = () => {
   const router = useRouter();
   const [requestSendModal, setRequestSendModal] = useState(false);
 
-  const { loading } = useLogin();
+  const updatePasswordMutation = useUpdatePassword();
 
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
     useFormik({
       initialValues: { password: "", confPassword: "" },
-      validationSchema: "",
+      validationSchema: updatePasswordSchema,
       validateOnChange: true,
       validateOnBlur: true,
       onSubmit: async (values, action) => {
-        console.log("🚀 ~ ForgotPassword ~ action:", action);
-        setRequestSendModal(true);
-        // const data = {
-        //   email: values?.email,
-        //   password: values?.password,
-        // };
-        // postData("/auth/login", false, null, data, processLogin);
+        console.log("🚀 ~ UpdatePassword ~ action:", action);
+        try {
+          const data = {
+            password: values?.password,
+          };
 
-        // Use the loading state to show loading spinner
-        // Use the response if you want to perform any specific functionality
-        // Otherwise you can just pass a callback that will process everything
+          const response = await updatePasswordMutation.mutateAsync(data);
+          console.log("🚀 ~ UpdatePassword ~ response:", response);
+          // onClick={() => router.push("/dashboard")}
+        } catch (error) {
+          console.log("🚀 ~ UpdatePassword ~ error:", error);
+        }
       },
     });
   return (
@@ -95,7 +93,11 @@ const UpdatePassword = () => {
             </div>
           </div>
           <div className="xxl:w-[650px] w-[360px] mt-6 mb-4">
-            <AuthButton text={"Update"} loading={loading} disabled={loading} />
+            <AuthButton
+              text={"Update"}
+              loading={updatePasswordMutation.isLoading}
+              disabled={updatePasswordMutation.isLoading}
+            />
           </div>
         </form>
       </div>

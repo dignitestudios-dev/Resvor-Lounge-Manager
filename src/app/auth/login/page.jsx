@@ -1,11 +1,11 @@
 "use client";
-import { useLogin } from "../../../lib/hooks/api/Post";
-import { processLogin } from "../../../lib/utils";
 import { useFormik } from "formik";
-import { signInSchema } from "../../../lib/schema/authentication/dummyLoginSchema";
 import AuthInput from "../../../components/auth/AuthInput";
 import AuthButton from "../../../components/auth/AuthButton";
 import { useRouter } from "next/navigation";
+import { loginSchema } from "./../../../lib/schema/authentication/loginSchema";
+import { useLogin } from "../../../lib/hooks/mutations/AuthMutations";
+import { ErrorToast } from "@/components/ui/toaster";
 
 const loginValues = {
   email: "",
@@ -14,26 +14,32 @@ const loginValues = {
 
 const Login = () => {
   const router = useRouter();
-
-  const { loading, postData } = useLogin();
+  const loginMutation = useLogin();
 
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
     useFormik({
       initialValues: loginValues,
-      validationSchema: signInSchema,
+      validationSchema: loginSchema,
       validateOnChange: true,
       validateOnBlur: true,
-      onSubmit: async (values, action) => {
-        console.log("🚀 ~ Login ~ action:", action);
-        const data = {
-          email: values?.email,
-          password: values?.password,
-        };
-        postData("/admin/login", false, null, data, processLogin);
+      onSubmit: async (values) => {
+        try {
+          const data = {
+            email: values?.email,
+            password: values?.password,
+            role: "lounge_manager",
+          };
 
-        // Use the loading state to show loading spinner
-        // Use the response if you want to perform any specific functionality
-        // Otherwise you can just pass a callback that will process everything
+          const response = await loginMutation.mutateAsync(data);
+          console.log("🚀 ~ Login ~ response:", response);
+          // onClick={() => router.push("/dashboard")}
+        } catch (error) {
+          console.log("🚀 ~ Login ~ error:", error);
+          ErrorToast(
+            error.response?.data?.message ||
+              "An error occurred. Please try again.",
+          );
+        }
       },
     });
 
@@ -112,11 +118,10 @@ const Login = () => {
 
             <div className="xxl:w-[650px] w-[350px] mt-1 mb-4">
               <AuthButton
-                onClick={() => router.push("/dashboard")}
-                type="button"
+                type="submit"
                 text={"Login"}
-                loading={loading}
-                disabled={loading}
+                loading={loginMutation.isPending}
+                disabled={loginMutation.isPending}
               />
             </div>
           </div>

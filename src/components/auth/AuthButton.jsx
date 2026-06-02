@@ -1,13 +1,13 @@
 /* eslint-disable react/prop-types */
 import { RiLoader5Line } from "react-icons/ri";
 
-const AuthButton = ({ text, onClick, loading, type }) => {
+const AuthButton = ({ text, onClick, loading, type, disabled }) => {
   return (
     <button
-      disabled={loading}
+      disabled={disabled || loading}
       type={type}
       onClick={onClick}
-      className="w-full py-3 bg-white text-black text-sm font-[700] rounded-[12px] hover:opacity-90 transition"
+      className="w-full py-3 bg-white text-black text-sm font-[700] rounded-[12px] hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
     >
       <div className="flex justify-center items-center">
         <span className="mr-1">{text}</span>

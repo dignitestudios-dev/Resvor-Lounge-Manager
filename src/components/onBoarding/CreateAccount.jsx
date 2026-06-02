@@ -3,34 +3,57 @@ import { useFormik } from "formik";
 import AuthButton from "../auth/AuthButton";
 import AuthInput from "../auth/AuthInput";
 import PhoneInput from "../auth/PhoneInput";
-import { phoneFormatter } from "@/lib/utils";
+import { phoneFormatter, phoneToE164 } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { userDetailsValues } from "@/lib/init/signUpValues";
+import { userDetailsSchema } from "@/lib/schema/authentication/signupSchema";
+import { ErrorToast } from "../ui/toaster";
+import { useSignUp } from "@/lib/hooks/mutations/OnBoardingMutations";
 
-const CreateAccount = ({ handleNext }) => {
+const CreateAccount = ({ handleNext, setCurrentState }) => {
   const router = useRouter();
-  const [acceptedPolicy, setAcceptedPolicy] = useState(false);
+  const signUpMutation = useSignUp();
 
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
     useFormik({
-      initialValues: "",
-      validationSchema: "",
+      initialValues: userDetailsValues,
+      validationSchema: userDetailsSchema,
       validateOnChange: true,
       validateOnBlur: true,
-      onSubmit: async (values, action) => {
-        console.log("🚀 ~ CreateAccount ~ action:", action);
-        console.log("🚀 ~ CreateAccount ~ values:", values);
-        handleNext();
+      onSubmit: async (values) => {
+        try {
+          const data = {
+            email: values.email,
+            password: values.password,
+            role: "lounge_manager",
+            fullName: values.name,
+            phoneNumber: phoneToE164(values.number),
+          };
+          const response = await signUpMutation.mutateAsync(data);
+          console.log("🚀 ~ CreateAccount ~ response:", response);
+
+          setCurrentState("verify_email");
+          handleNext();
+        } catch (error) {
+          console.error(error);
+          ErrorToast(
+            error.response?.data?.message ||
+              "An error occurred. Please try again.",
+          );
+        }
 
         // Use the loading state to show loading spinner
         // Use the response if you want to perform any specific functionality
         // Otherwise you can just pass a callback that will process everything
       },
     });
+  console.log("🚀 ~ CreateAccount ~53---?> errors:", errors);
+
   return (
     <div className="flex flex-col justify-center items-center h-auto ">
       <div className="mt-4 xxl:w-[400px] xxl:ml-12 text-center space-y-4">
-        <p className="xxl:text-[48px] text-[32px] text-[#E6E6E6] font-[600] capitalize">
+        <p className="xxl:text-[48px] text-[32px] text-[#E6E6E6] font-semibold capitalize">
           sign up
         </p>
         <p className="xxl:text-[26px] text-[16px] text-[#E6E6E6] ">
@@ -49,11 +72,11 @@ const CreateAccount = ({ handleNext }) => {
               id={"name"}
               name={"name"}
               maxLength={30}
-              value={values.email}
+              value={values.name}
               onChange={handleChange}
               onBlur={handleBlur}
-              error={errors?.email}
-              touched={touched?.email}
+              error={errors?.name}
+              touched={touched?.name}
             />
           </div>
           <div className=" w-full">
@@ -75,7 +98,7 @@ const CreateAccount = ({ handleNext }) => {
           <div>
             <PhoneInput
               label={"Phone Number"}
-              value={values.number}
+              value={phoneFormatter(values.number)}
               id={"number"}
               name={"number"}
               onChange={handleChange}
@@ -94,7 +117,7 @@ const CreateAccount = ({ handleNext }) => {
               id={"password"}
               name={"password"}
               showToggle={true}
-              maxLength={250}
+              maxLength={60}
               value={values.password}
               onChange={handleChange}
               onBlur={handleBlur}
@@ -107,24 +130,27 @@ const CreateAccount = ({ handleNext }) => {
               label={"Confirm Password"}
               text={"Password"}
               placeholder={"Re-enter password here"}
-              type={"password"}
-              id={"confPassword"}
-              name={"confPassword"}
+              type={"cPassword"}
+              id={"cPassword"}
+              name={"cPassword"}
               showToggle={true}
-              maxLength={250}
-              value={values.password}
+              maxLength={60}
+              value={values.cPassword}
               onChange={handleChange}
               onBlur={handleBlur}
-              error={errors?.password}
-              touched={touched?.password}
+              error={errors?.cPassword}
+              touched={touched?.cPassword}
             />
           </div>
         </div>
         <div className="mt-6 flex items-start gap-2 text-[12px] text-[#CACACA]">
           <input
             type="checkbox"
-            checked={acceptedPolicy}
-            onChange={() => setAcceptedPolicy(!acceptedPolicy)}
+            checked={values.acceptedPolicy}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            id="acceptedPolicy"
+            name="acceptedPolicy"
             className="mt-[2px] h-3 w-3 cursor-pointer accent-indigo-600"
           />
 
@@ -145,9 +171,18 @@ const CreateAccount = ({ handleNext }) => {
             </span>
           </span>
         </div>
+        {errors.acceptedPolicy && touched.acceptedPolicy && (
+          <p className="text-red-500 text-[11px] font-medium mb-2">
+            {errors.acceptedPolicy}
+          </p>
+        )}
         <div className="mt-1 ">
           <div className="xxl:w-[650px] w-[350px] mt-1 mb-4">
-            <AuthButton text={"Sign Up"} />
+            <AuthButton
+              text={"Sign Up"}
+              disabled={signUpMutation.isPending}
+              loading={signUpMutation.isPending}
+            />
           </div>
         </div>
       </form>

@@ -1,30 +1,58 @@
 /* eslint-disable react/prop-types */
 import { useRef, useState } from "react";
+import { useFormik } from "formik";
 import AuthButton from "../auth/AuthButton";
 import TextCountDown from "./TextCountDown";
 import AuthSuccessModal from "../auth/AuthSuccessModal";
-import { FaArrowLeftLong } from "react-icons/fa6";
-import forgotLogo from "../../../public/images/forgotLogo.png";
+import { verifyEmailValues } from "@/lib/init/verifyEmailValues";
+import { verifyEmailSchema } from "@/lib/schema/authentication/verifyEmailSchema";
+import { useVerifyEmail } from "@/lib/hooks/mutations/OnBoardingMutations";
+import { ErrorToast } from "../ui/toaster";
 
-const VerifyEmail = ({ handleNext, handlePrevious }) => {
+const VerifyEmail = ({ handleNext, handlePrevious, setCurrentState }) => {
   const inputs = useRef([]);
-  const [otp, setOtp] = useState(Array(6).fill(""));
+  const verifyEmailMutation = useVerifyEmail();
+
+  const [otpDisplay, setOtpDisplay] = useState(Array(6).fill(""));
 
   const [isActive, setIsActive] = useState(true);
   const [seconds, setSeconds] = useState(30);
   const [requestSendModal, setRequestSendModal] = useState(false);
 
-  const handleChange = (e, index) => {
+  const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
+    useFormik({
+      initialValues: verifyEmailValues,
+      validationSchema: verifyEmailSchema,
+      validateOnChange: true,
+      validateOnBlur: true,
+      onSubmit: async (values) => {
+        try {
+          const response = await verifyEmailMutation.mutateAsync(values);
+          console.log("🚀 ~ VerifyEmail ~ response:", response);
+          setRequestSendModal(true);
+        } catch (error) {
+          ErrorToast(error.response.data.message);
+        }
+      },
+    });
+
+  const handleOtpChange = (e, index) => {
     const { value } = e.target;
 
     if (/^\d$/.test(value)) {
-      const newOtp = [...otp];
-      newOtp[index] = value;
-      setOtp(newOtp);
+      const newOtpDisplay = [...otpDisplay];
+      newOtpDisplay[index] = value;
+      setOtpDisplay(newOtpDisplay);
+
+      // Update formik value with concatenated OTP
+      const otpString = newOtpDisplay.join("");
+      handleChange({
+        target: { name: "otp", value: otpString },
+      });
 
       // Move to next only if next is empty
       const nextIndex = index + 1;
-      if (nextIndex < otp.length && !newOtp[nextIndex]) {
+      if (nextIndex < newOtpDisplay.length && !newOtpDisplay[nextIndex]) {
         inputs.current[nextIndex].focus();
       }
     }
@@ -33,29 +61,33 @@ const VerifyEmail = ({ handleNext, handlePrevious }) => {
   const handleKeyDown = (e, index) => {
     if (e.key === "Backspace") {
       e.preventDefault(); // prevent default backspace behavior
-      const newOtp = [...otp];
+      const newOtpDisplay = [...otpDisplay];
 
-      if (otp[index]) {
+      if (otpDisplay[index]) {
         // Just clear current input if not already empty
-        newOtp[index] = "";
-        setOtp(newOtp);
+        newOtpDisplay[index] = "";
+        setOtpDisplay(newOtpDisplay);
       } else if (index > 0) {
         // Move focus back and clear previous
         inputs.current[index - 1].focus();
-        newOtp[index - 1] = "";
-        setOtp(newOtp);
+        newOtpDisplay[index - 1] = "";
+        setOtpDisplay(newOtpDisplay);
       }
-    }
-  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setRequestSendModal(true);
+      // Update formik value with concatenated OTP
+      const otpString = newOtpDisplay.join("");
+      handleChange({
+        target: { name: "otp", value: otpString },
+      });
+    }
   };
 
   const handleResendOtp = async () => {
     try {
-      setOtp(Array(6).fill("")); // Reset OTP fields
+      setOtpDisplay(Array(6).fill("")); // Reset OTP display
+      handleChange({
+        target: { name: "otp", value: "" },
+      });
       handleRestart();
     } catch (err) {
       console.log("🚀 ~ handleResendOtp ~ err:", err);
@@ -69,11 +101,11 @@ const VerifyEmail = ({ handleNext, handlePrevious }) => {
 
   return (
     <div className="grid lg:grid-cols-1 grid-cols-1 w-full text-white">
-      <div className="flex justify-start items-center">
+      {/* <div className="flex justify-start items-center">
         <button type="button" onClick={() => handlePrevious()}>
           <FaArrowLeftLong color="white" size={24} />
         </button>
-      </div>
+      </div> */}
       <div className="flex flex-col justify-center items-center h-auto ">
         <div>
           <img
@@ -95,7 +127,7 @@ const VerifyEmail = ({ handleNext, handlePrevious }) => {
         <form onSubmit={handleSubmit}>
           <div className="xxl:space-y-8 space-y-6 xxl:w-[650px] lg:w-[460px] md:w-[550px] w-[320px] mt-4">
             <div className="xxl:w-[600px] xxl:m-4 grid grid-cols-6 gap-20 xl:w-[340px] lg:w-[360px] md:w-[550px] w-full ">
-              {otp.map((digit, index) => (
+              {otpDisplay.map((digit, index) => (
                 <input
                   inputMode="numeric"
                   key={index}
@@ -103,16 +135,22 @@ const VerifyEmail = ({ handleNext, handlePrevious }) => {
                   placeholder=""
                   maxLength="1"
                   value={digit}
-                  onChange={(e) => handleChange(e, index)}
+                  onChange={(e) => handleOtpChange(e, index)}
                   onKeyDown={(e) => handleKeyDown(e, index)}
+                  onBlur={handleBlur}
                   ref={(el) => (inputs.current[index] = el)}
                   className="xxl:h-[79px] xxl:w-[79px] h-[70px] w-[70px] rounded-[12px] outline-none text-center border-[1px] bg-white/10 backdrop-blur-[28.9px] placeholder:text-[#E6E6F0]
                 placeholder:text-[16px] xxl:placeholder:text-[20px] focus-within:border-[#CACACA] flex items-center justify-center"
                 />
               ))}
             </div>
+            {errors.otp && touched.otp && (
+              <div className="text-red-500 text-sm text-center">
+                {errors.otp}
+              </div>
+            )}
             <div className="flex items-center justify-center gap-2 pl-4 mt-4 mb-3 relative z-10">
-              <p className="text-center text-[14px] leading-[21.6px] text-white ">
+              <span className="text-center text-[14px] leading-[21.6px] text-white ">
                 {isActive ? "OTP resend in" : "Didn’t receive the OTP?"}
                 {isActive ? (
                   <TextCountDown
@@ -132,14 +170,18 @@ const VerifyEmail = ({ handleNext, handlePrevious }) => {
                     {/* {resendLoading ? "Resending..." : "Resend"} */}
                   </span>
                 )}
-              </p>
+              </span>
             </div>
             <div className="w-full flex justify-center pl-4 mt-4 space-y-4 ">
               <div className="w-[360px] ">
-                <AuthButton text="Verify" />
+                <AuthButton
+                  text="Verify"
+                  disabled={verifyEmailMutation.isPending}
+                  loading={verifyEmailMutation.isPending}
+                />
               </div>
             </div>
-            <div className="w-full flex justify-center pl-4 mt-4 space-y-4 ">
+            {/* <div className="w-full flex justify-center pl-4 mt-4 space-y-4 ">
               <button
                 onClick={() => handlePrevious()}
                 type="button"
@@ -150,7 +192,7 @@ const VerifyEmail = ({ handleNext, handlePrevious }) => {
               >
                 Wrong email? Change it
               </button>
-            </div>
+            </div> */}
           </div>
         </form>
       </div>
@@ -160,6 +202,7 @@ const VerifyEmail = ({ handleNext, handlePrevious }) => {
           onClick={() => {
             setRequestSendModal(false);
             handleNext();
+            setCurrentState("verify_mobile");
           }}
           title="Email verified"
           description="Your email has been verified successfully."

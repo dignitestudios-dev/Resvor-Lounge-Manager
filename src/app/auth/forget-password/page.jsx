@@ -1,39 +1,52 @@
 "use client";
-import { useLogin } from "../../../lib/hooks/api/Post";
+import {
+  useForgotPassword,
+  useLogin,
+} from "../../../lib/hooks/mutations/AuthMutations";
 import { processLogin } from "../../../lib/utils";
 import { useFormik } from "formik";
 import AuthInput from "../../../components/auth/AuthInput";
 import AuthButton from "../../../components/auth/AuthButton";
 import { MdOutlineChevronLeft } from "react-icons/md";
 import { useRouter } from "next/navigation";
+import { forgotPasswordSchema } from "@/lib/schema/authentication/loginSchema";
+import { ErrorToast } from "@/components/ui/toaster";
 
 const ForgotPassword = () => {
   const router = useRouter();
 
-  const { loading, postData } = useLogin();
+  const forgotPasswordMutation = useForgotPassword();
 
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
     useFormik({
-      initialValues: "",
-      validationSchema: "",
+      initialValues: { email: "" },
+      validationSchema: forgotPasswordSchema,
       validateOnChange: true,
       validateOnBlur: true,
       onSubmit: async (values, action) => {
         console.log("🚀 ~ ForgotPassword ~ action:", action);
-        const data = {
-          email: values?.email,
-          password: values?.password,
-        };
-        localStorage.setItem("resetEmail", values.email);
-        router.push("/auth/verify-forget-otp");
 
-        postData("/admin/login", false, null, data, processLogin);
+        try {
+          const data = {
+            email: values?.email,
+            password: values?.password,
+          };
 
-        // Use the loading state to show loading spinner
-        // Use the response if you want to perform any specific functionality
-        // Otherwise you can just pass a callback that will process everything
+          const response = await forgotPasswordMutation.mutateAsync(data);
+          console.log("🚀 ~ ForgotPassword ~ response:", response);
+          router.push("/auth/verify-forget-otp");
+
+          sessionStorage.setItem("resetEmail", values.email);
+        } catch (error) {
+          console.log("🚀 ~ ForgotPassword ~ error:", error);
+          ErrorToast(
+            error?.response?.data?.message ||
+              "Something went wrong. Please try again.",
+          );
+        }
       },
     });
+  console.log("🚀 ~ ForgotPassword ~ errors:", errors);
 
   return (
     <div className="grid lg:grid-cols-1 grid-cols-1 w-full text-white">
@@ -75,9 +88,10 @@ const ForgotPassword = () => {
           </div>
           <div className="xxl:w-[650px] w-[350px] mt-6 mb-4">
             <AuthButton
+              type="submit"
               text={"Send OTP"}
-              loading={loading}
-              disabled={loading}
+              loading={forgotPasswordMutation.isPending}
+              disabled={forgotPasswordMutation.isPending}
             />
           </div>
         </form>

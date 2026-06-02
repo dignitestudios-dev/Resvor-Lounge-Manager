@@ -4,16 +4,27 @@ import { useEffect, useRef, useState } from "react";
 import CountDown from "../../../components/auth/CountDown";
 import { useRouter } from "next/navigation";
 import { FaArrowLeftLong } from "react-icons/fa6";
+import {
+  useVerifyForgotEmail,
+  useResendForgotOtp,
+} from "@/lib/hooks/mutations/AuthMutations";
+import { ErrorToast } from "@/components/ui/toaster";
 
 const VerifyForgotOtp = () => {
   const router = useRouter();
+  const verifyEmailMutation = useVerifyForgotEmail();
+  const resendOtpMutation = useResendForgotOtp();
 
-  const [otp, setOtp] = useState(Array(6).fill(""));
+  const [otp, setOtp] = useState(Array(5).fill(""));
   const inputs = useRef([]);
 
   const [isActive, setIsActive] = useState(true);
   const [seconds, setSeconds] = useState(30);
   const [email, setEmail] = useState("");
+  const [validationError, setValidationError] = useState("");
+
+  // Check if all OTP fields are filled
+  const isOtpComplete = otp.every((digit) => digit !== "");
 
   const handleChange = (e, index) => {
     const { value } = e.target;
@@ -22,6 +33,7 @@ const VerifyForgotOtp = () => {
       const newOtp = [...otp];
       newOtp[index] = value;
       setOtp(newOtp);
+      setValidationError(""); // Clear error on input
 
       // Move to next only if next is empty
       const nextIndex = index + 1;
@@ -51,13 +63,55 @@ const VerifyForgotOtp = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    router.push("/auth/update-password");
+
+    // Validate OTP
+    if (!isOtpComplete) {
+      setValidationError("Please enter all 5 digits of the OTP");
+      return;
+    }
+
+    try {
+      const response = await verifyEmailMutation.mutateAsync({
+        otp: otp.join(""),
+        email,
+      });
+
+      if (response?.success) {
+        router.push("/auth/update-password");
+      } else {
+        ErrorToast(
+          response?.message || "Something went wrong. Please try again.",
+        );
+      }
+    } catch (err) {
+      console.error("Email verification error:", err);
+      ErrorToast(
+        err?.response?.data?.message ||
+          "Something went wrong. Please try again.",
+      );
+    }
   };
 
   useEffect(() => {
-    const email = localStorage.getItem("resetEmail");
+    const email = sessionStorage.getItem("resetEmail");
     setEmail(email);
   }, []);
+
+  const handleResendOtp = async () => {
+    try {
+      await resendOtpMutation.mutateAsync({ email });
+      setOtp(Array(5).fill(""));
+      setSeconds(30);
+      setIsActive(true);
+      setValidationError("");
+    } catch (err) {
+      console.error("Resend OTP error:", err);
+      ErrorToast(
+        err?.response?.data?.message ||
+          "Failed to resend OTP. Please try again.",
+      );
+    }
+  };
 
   return (
     <div className="grid lg:grid-cols-1 grid-cols-1 w-full text-white">
@@ -83,14 +137,15 @@ const VerifyForgotOtp = () => {
             Verify OTP
           </p>
           <p className="text-[14px] sm:text-[16px] lg:text-[18px] text-[#E6E6E6]">
-            A One-Time Password (OTP) has been sent to your registered email (
-            example@gmail.com). Please enter it to proceed.
+            A One-Time Password (OTP) has been sent to your registered email{" "}
+            {`(${email})`}. Please enter it to proceed. Please enter it to
+            proceed.
           </p>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="xxl:space-y-8 space-y-6 xxl:w-[650px] lg:w-[360px] md:w-[550px] w-[320px] mt-4">
-            <div className="xxl:w-[600px] xxl:m-4 grid grid-cols-6 gap-16 xl:w-[300px] lg:w-[360px] md:w-[550px] w-full ">
+            <div className="xxl:w-[600px] xxl:m-4 grid grid-cols-5 gap-16 ml-2 xl:w-[300px] lg:w-[380px] md:w-[550px] w-full ">
               {otp.map((digit, index) => (
                 <input
                   inputMode="numeric"
@@ -107,6 +162,11 @@ const VerifyForgotOtp = () => {
                 />
               ))}
             </div>
+            {validationError && (
+              <div className="text-red-500 text-sm font-medium text-center">
+                {validationError}
+              </div>
+            )}
             <div
               className=" w-full 
           max-w-[300px]
@@ -116,12 +176,18 @@ const VerifyForgotOtp = () => {
           xl:max-w-[450px]
           flex flex-col gap-4"
             >
-              <AuthButton text="Verify" />
+              <AuthButton
+                text="Verify"
+                loading={verifyEmailMutation.isPending}
+                disabled={!isOtpComplete || verifyEmailMutation.isPending}
+              />
               <CountDown
                 isActive={isActive}
                 setIsActive={setIsActive}
                 seconds={seconds}
                 setSeconds={setSeconds}
+                onResend={handleResendOtp}
+                isLoading={resendOtpMutation.isPending}
               />
               <button
                 onClick={() => router.push("/auth/forget-password")}

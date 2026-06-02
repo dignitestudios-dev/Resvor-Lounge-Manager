@@ -30,12 +30,12 @@ const PhoneInput = ({
 
   return (
     <div>
-      <label htmlFor="" className="text-[14px] font-[500] text-white ">
+      <label htmlFor="" className="text-[14px] font-[500] text-white">
         {label}
       </label>
       <div
         className={`flex  items-center p-0 w-full pl-2 outline-none font-[500] rounded-[15px]
-      border border-[#CACACA] placeholder:text-[12px] placeholder:font-[400]
+      border border-[#CACACA] placeholder:text-[12px] placeholder:font-[400] mt-[5px]
       placeholder:text-[#E6E6F0] text-[#E6E6F0] bg-white/10 backdrop-blur-[28.9px] h-full px-3 text-sm`}
       >
         <span className="text-xl pr-2">
