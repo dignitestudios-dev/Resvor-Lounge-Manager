@@ -5,7 +5,7 @@ import AuthButton from "../../../components/auth/AuthButton";
 import { useRouter } from "next/navigation";
 import { loginSchema } from "./../../../lib/schema/authentication/loginSchema";
 import { useLogin } from "../../../lib/hooks/mutations/AuthMutations";
-import { ErrorToast } from "@/components/ui/toaster";
+import { ErrorToast } from "../../../components/ui/toaster";
 
 const loginValues = {
   email: "",

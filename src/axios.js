@@ -1,11 +1,12 @@
 import axios from "axios";
 import FingerprintJS from "@fingerprintjs/fingerprintjs";
+import { ErrorToast } from "./components/ui/toaster";
 
 // Proxy configuration - similar to Vite setup
 export const baseUrl =
   process.env.NODE_ENV === "development"
     ? "/api" // Use Next.js rewrites proxy in development
-    : "https://35ppzgmv-3050.inc1.devtunnels.ms"; // Use direct URL in production
+    : "http://54.81.22.252:3001"; // Use direct URL in production
 
 async function getDeviceFingerprint() {
   const fp = await FingerprintJS.load();
@@ -18,7 +19,6 @@ const instance = axios.create({
   baseURL: baseUrl,
   withCredentials: true, // Enable automatic HTTP-only cookie handling
   headers: {
-    "Content-Type": "application/json",
     Accept: "application/json",
   },
   timeout: 10000, // 10 seconds timeout
@@ -32,16 +32,19 @@ instance.interceptors.request.use(async (request) => {
     return Promise.reject(new Error("No internet connection"));
   }
 
-  // Ensure credentials are sent with every request
   request.withCredentials = true;
 
-  // Get device fingerprint and add to headers
   const fingerprint = await getDeviceFingerprint();
 
-  // Add device headers and Content-Type
+  const isFormData = request.data instanceof FormData;
+
   request.headers = {
     ...request.headers,
-    "Content-Type": "application/json",
+    ...(isFormData
+      ? {}
+      : {
+          "Content-Type": "application/json",
+        }),
     devicemodel: fingerprint,
     deviceuniqueid: fingerprint,
   };

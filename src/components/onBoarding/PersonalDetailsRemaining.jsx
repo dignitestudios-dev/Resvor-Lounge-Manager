@@ -137,7 +137,7 @@ const PersonalDetailsRemaining = ({
           <div className="xxl:w-[650px] w-[350px] mt-1 mb-4">
             <AuthButton
               text={"Next"}
-              disabled={Object.keys(errors).length > 0}
+              // disabled={Object.keys(errors).length > 0}
             />
           </div>
         </div>

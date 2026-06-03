@@ -14,8 +14,8 @@ const nextConfig = {
     return {
       beforeFiles: [
         {
-          source: '/api/:path*',
-          destination: 'https://35ppzgmv-3050.inc1.devtunnels.ms/:path*',
+          source: "/api/:path*",
+          destination: "http://54.81.22.252:3001/:path*",
         },
       ],
     };

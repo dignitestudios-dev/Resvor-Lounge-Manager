@@ -11,7 +11,7 @@ import { userDetailsSchema } from "@/lib/schema/authentication/signupSchema";
 import { ErrorToast } from "../ui/toaster";
 import { useSignUp } from "@/lib/hooks/mutations/OnBoardingMutations";
 
-const CreateAccount = ({ handleNext, setCurrentState }) => {
+const CreateAccount = ({ handleNext, setCurrentState, setEmail }) => {
   const router = useRouter();
   const signUpMutation = useSignUp();
 
@@ -23,6 +23,7 @@ const CreateAccount = ({ handleNext, setCurrentState }) => {
       validateOnBlur: true,
       onSubmit: async (values) => {
         try {
+          setEmail(values.email);
           const data = {
             email: values.email,
             password: values.password,

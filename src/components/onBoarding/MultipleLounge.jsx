@@ -4,133 +4,169 @@ import { FaArrowLeftLong } from "react-icons/fa6";
 import { MdEdit } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
 import AuthButton from "../auth/AuthButton";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import axiosInstance from "../../axios";
 
 const MultipleLounge = ({
   handleNext,
-  handlePrevious,
+  // handlePrevious,
   setCurrentStep,
-  loungeData,
-  floorPlan,
+  setCurrentState,
+  // loungeData,
+  // floorPlan,
 }) => {
-  // Sample lounge data - replace with actual data from props or state management
-  const [lounge, setLounge] = useState(
-    loungeData || {
-      name: "John Alex",
-      email: "john.alex@gmail.com",
-      phone: "+000 0000 00",
-      hours: "08:00pm - 01:00am",
-      specialization: "Specialization Title",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-      image: null,
-    }
-  );
+  const [lounges, setLounges] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handleEdit = () => {
+  // Fetch lounges from API
+  useEffect(() => {
+    const fetchLounges = async () => {
+      try {
+        setLoading(true);
+        const response = await axiosInstance.get("/lounges/list");
+        if (response.data.success && response.data.data) {
+          setLounges(response.data.data);
+        }
+      } catch (err) {
+        console.error("Error fetching lounges:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLounges();
+  }, []);
+
+  const handleEdit = (lounge) => {
     console.log("Edit lounge:", lounge);
     // Add edit functionality here
   };
 
-  const handleDelete = () => {
+  const handleDelete = (lounge) => {
     console.log("Delete lounge:", lounge);
     // Add delete functionality here
   };
 
   return (
-    <div className="flex flex-col justify-center items-center h-auto w-[550px]">
-      <div className="flex justify-start items-center absolute top-12 left-0">
-        <button type="button" onClick={() => handlePrevious()}>
-          <FaArrowLeftLong color="white" size={24} />
-        </button>
-      </div>
-
-      <div className="mt-4 text-center space-y-4">
-        <p className="xxl:text-[48px] text-[32px] text-[#E6E6E6] font-[600] capitalize">
+    <div className="flex flex-col items-center w-full max-w-[550px] mx-auto px-4">
+      {/* Heading */}
+      <div className="mt-4 text-center space-y-4 shrink-0">
+        <p className="xxl:text-[48px] text-[32px] text-[#E6E6E6] font-[600] capitalize leading-tight">
           Multiple Lounge <br />
           Account
         </p>
+
         <p className="xxl:text-[26px] text-[16px] text-[#E6E6E6]">
           Register your Lounge to start Booking online.
         </p>
       </div>
 
-      <div className="space-y-6 mt-10">
-        {/* Add New Lounge Button */}
-        <div
-          onClick={() => setCurrentStep(3)}
-          className="border-2 border-dashed cursor-pointer border-white/30 rounded-[20px] p-8 flex flex-col items-center justify-center min-h-[120px]"
-        >
-          <div className="text-center text-white/70">
-            <div className="text-2xl mb-2">+</div>
-            <p className="underline">Add a New Lounge Profile</p>
-          </div>
-        </div>
+      {/* Scrollable Content Area */}
+      <div className="w-full mt-10 flex flex-col min-h-0">
+        <div className="space-y-6 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+          {/* Add New Lounge Button */}
+          {/* <div
+            onClick={() => {
+              setCurrentStep(3);
+              setCurrentState("personalDetails");
+            }}
+            className="border-2 border-dashed cursor-pointer border-white/30 rounded-[20px] p-8 flex flex-col items-center justify-center min-h-[120px]"
+          >
+            <div className="text-center text-white/70">
+              <div className="text-2xl mb-2">+</div>
+              <p className="underline">Add a New Lounge Profile</p>
+            </div>
+          </div> */}
 
-        {/* Lounge Card */}
-        <div className="rounded-[20px] border-2 border-white/20 bg-white/5 backdrop-blur p-6 space-y-4">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-[80px] h-[80px] rounded-full overflow-hidden">
-                <img
-                  src="/images/profile.png"
-                  alt="lounge"
-                  className="w-full h-full object-cover"
-                />
+          {/* Loading State */}
+          {loading && (
+            <div className="rounded-[20px] border-2 border-white/20 bg-white/5 backdrop-blur p-6 text-center text-white">
+              <p>Loading lounges...</p>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && (
+            <div className="rounded-[20px] border-2 border-red-500/50 bg-red-500/10 backdrop-blur p-6 text-center text-red-400">
+              <p>Error: {error}</p>
+            </div>
+          )}
+
+          {/* Lounge Cards */}
+          {!loading && !error && lounges.length > 0 && (
+            <div
+              key={lounges[0]._id}
+              className="rounded-[20px] border-2 border-white/20 bg-white/5 backdrop-blur p-6 space-y-4"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="w-[60px] h-[60px] rounded-full overflow-hidden shrink-0">
+                    <img
+                      src={
+                        lounges[0].logo?.location || "/images/dummyAvatar.png"
+                      }
+                      alt={lounges[0].name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="text-white font-[600] text-lg truncate">
+                      {lounges[0].name}
+                    </p>
+
+                    <p className="text-[#BEC2C9] text-sm break-all">
+                      {lounges[0].businessEmail}
+                    </p>
+
+                    <p className="text-[#BEC2C9] text-sm">
+                      {lounges[0].businessPhone}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 shrink-0">
+                  <button
+                    onClick={() => handleEdit(lounges[0])}
+                    className="p-2 hover:bg-white/10 rounded-lg transition"
+                  >
+                    <MdEdit color="white" size={20} />
+                  </button>
+
+                  <button
+                    onClick={() => handleDelete(lounges[0])}
+                    className="p-2 hover:bg-red-500/20 rounded-lg transition"
+                  >
+                    <MdDelete color="#ef4444" size={20} />
+                  </button>
+                </div>
               </div>
-              <div>
-                <p className="text-white font-[600] text-lg">{lounge.name}</p>
-                <p className="text-[#BEC2C9] text-sm">{lounge.email}</p>
-                <p className="text-[#BEC2C9] text-sm">{lounge.phone}</p>
+
+              <div className="border-t border-white/10 pt-4 space-y-2">
+                <p className="text-[#BEC2C9] text-sm leading-relaxed">
+                  <span className="text-white font-[500]">
+                    {lounges[0].operatingHours?.open} -{" "}
+                    {lounges[0].operatingHours?.close}
+                  </span>{" "}
+                  |{" "}
+                  <span className="text-white font-[500]">
+                    {lounges[0].specialization}
+                  </span>
+                </p>
+
+                <p className="text-[#BEC2C9] text-sm break-words">
+                  {lounges[0].description}
+                </p>
               </div>
             </div>
-            <div className="flex gap-3">
-              <button
-                onClick={handleEdit}
-                className="p-2 hover:bg-white/10 rounded-lg transition"
-              >
-                <MdEdit color="white" size={20} />
-              </button>
-              <button
-                onClick={handleDelete}
-                className="p-2 hover:bg-red-500/20 rounded-lg transition"
-              >
-                <MdDelete color="#ef4444" size={20} />
-              </button>
-            </div>
-          </div>
-
-          <div className="border-t border-white/10 pt-4 space-y-2">
-            <p className="text-[#BEC2C9] text-sm">
-              <span className="text-white font-[500]">{lounge.hours}</span> |{" "}
-              <span className="text-white font-[500]">
-                {lounge.specialization}
-              </span>
-            </p>
-            <p className="text-[#BEC2C9] text-sm">{lounge.description}</p>
-          </div>
+          )}
         </div>
 
-        {/* Floor Plan Preview */}
-        {floorPlan && (
-          <div className="rounded-[20px] border-2 border-white/20 bg-white/5 backdrop-blur p-4">
-            <p className="text-white font-[500] mb-3">Floor Plan</p>
-            <img
-              src={
-                typeof floorPlan === "string"
-                  ? floorPlan
-                  : URL.createObjectURL(floorPlan)
-              }
-              alt="floor plan"
-              className="w-full h-[200px] object-cover rounded-lg"
-            />
-          </div>
-        )}
-      </div>
-
-      <div className="mt-6">
-        <div className="xxl:w-[650px] w-[350px] mt-1 mb-4">
+        {/* Fixed Bottom Button */}
+        <div className="w-full mt-6 shrink-0">
           <AuthButton text={"Next"} onClick={handleNext} />
         </div>
       </div>

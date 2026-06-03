@@ -9,7 +9,12 @@ import { floorPlanSetupSchema } from "@/lib/schema/onboarding/floorPlanSetupSche
 import { ErrorToast } from "../ui/toaster";
 import { useCreateLounge } from "@/lib/hooks/mutations/OnBoardingMutations";
 
-const FloorPlanSetup = ({ handleNext, handlePrevious, combinedData = {} }) => {
+const FloorPlanSetup = ({
+  handleNext,
+  handlePrevious,
+  combinedData = {},
+  setCurrentState,
+}) => {
   const createLoungeMutation = useCreateLounge();
 
   const {
@@ -31,6 +36,7 @@ const FloorPlanSetup = ({ handleNext, handlePrevious, combinedData = {} }) => {
         // Submit combined data to API
         const response = await createLoungeMutation.mutateAsync(values);
         console.log("🚀 ~ Lounge Created:", response);
+        setCurrentState("subscription");
         handleNext();
       } catch (error) {
         console.error(error);
@@ -53,11 +59,11 @@ const FloorPlanSetup = ({ handleNext, handlePrevious, combinedData = {} }) => {
 
   return (
     <div className="flex flex-col justify-center items-center h-auto">
-      <div className="flex justify-start items-center absolute top-12 left-0">
+      {/* <div className="flex justify-start items-center absolute top-12 left-0">
         <button type="button" onClick={() => handlePrevious()}>
           <FaArrowLeftLong color="white" size={24} />
         </button>
-      </div>
+      </div> */}
       <div className="mt-4 xxl:w-[400px] xxl:ml-12 text-center space-y-4">
         <p className="xxl:text-[48px] text-[32px] text-[#E6E6E6] font-[600] capitalize">
           Set Up Your <br />
@@ -143,9 +149,9 @@ const FloorPlanSetup = ({ handleNext, handlePrevious, combinedData = {} }) => {
           <div className="xxl:w-[650px] w-[350px] mt-1 mb-4">
             <AuthButton
               text={"Submit"}
-              disabled={
-                Object.keys(errors).length > 0 || createLoungeMutation.isPending
-              }
+              // disabled={
+              //   Object.keys(errors).length > 0 || createLoungeMutation.isPending
+              // }
               loading={createLoungeMutation.isPending}
             />
           </div>

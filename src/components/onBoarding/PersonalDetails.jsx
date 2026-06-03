@@ -14,7 +14,7 @@ import { phoneFormatter } from "@/lib/utils";
 import PersonalDetailsRemaining from "./PersonalDetailsRemaining";
 import FloorPlanSetup from "./FloorPlanSetup";
 
-const PersonalDetails = ({ handleNext, handlePrevious }) => {
+const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
   const [userImage, setUserImage] = useState("");
   console.log("🚀 ~ PersonalDetails ~ userImage:", userImage);
   const [remainingDetails, setRemainingDetails] = useState(false);
@@ -75,6 +75,7 @@ const PersonalDetails = ({ handleNext, handlePrevious }) => {
           handleNext={handleNext}
           handlePrevious={handlePrevious}
           combinedData={combinedData}
+          setCurrentState={setCurrentState}
         />
       ) : (
         <div className="flex flex-col justify-center items-center h-auto ">

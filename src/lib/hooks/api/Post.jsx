@@ -81,9 +81,11 @@ export const submitCreateLounge = async (payload) => {
 
   // Images Array
   if (payload.images && Array.isArray(payload.images)) {
-    payload.images.forEach((image, index) => {
-      formData.append(`images[${index}]`, image);
-    });
+    formData.append(`images`, payload.images[0]);
+
+    // payload.images.forEach((image, index) => {
+    //   formData.append(`images[${index}]`, image);
+    // });
   }
 
   // Floor Plan Image
@@ -92,9 +94,9 @@ export const submitCreateLounge = async (payload) => {
   }
 
   for (let pair of formData.entries()) {
-    console.log(pair[0], pair[1]);
+    console.log("formdata--->", pair[0], pair[1]);
   }
-  console.log(formData instanceof FormData);
+  console.log("test", formData instanceof FormData);
 
   const { data } = await axios.post("/lounges", formData, {
     headers: {
