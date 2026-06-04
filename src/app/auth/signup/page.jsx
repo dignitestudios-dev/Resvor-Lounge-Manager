@@ -34,7 +34,7 @@ export default function SignUp() {
       const sessionType = authData.sessionType;
 
       // If user has access_token, redirect to dashboard
-      if (sessionType === "access_token") {
+      if (sessionType === "access_token" && onboardingStep === "completed") {
         router.push("/dashboard");
         return;
       }
@@ -46,13 +46,10 @@ export default function SignUp() {
       } else if (onboardingStep === "verify_mobile") {
         setCurrentStep(2);
         setCurrentState("verify_mobile");
-      } else if (
-        onboardingStep === "completed" &&
-        sessionType === "registration_token"
-      ) {
+      } else if (onboardingStep === "create_lounge") {
         setCurrentStep(3);
         setCurrentState("personalDetails");
-      } else if (onboardingStep === "personalDetails_completed") {
+      } else if (onboardingStep === "completed") {
         setCurrentStep(4);
         setCurrentState("subscription");
       }

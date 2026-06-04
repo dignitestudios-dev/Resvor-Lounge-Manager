@@ -10,7 +10,10 @@ import { FaArrowLeftLong } from "react-icons/fa6";
 import { personalDetailsValues } from "@/lib/init/personalDetailsValues";
 import { personalDetailsSchema } from "@/lib/schema/onboarding/personalDetailsSchema";
 import { ErrorToast } from "../ui/toaster";
-import { phoneFormatter } from "@/lib/utils";
+import {
+  handleFormattedOperatingHoursChange,
+  phoneFormatter,
+} from "@/lib/utils";
 import PersonalDetailsRemaining from "./PersonalDetailsRemaining";
 import FloorPlanSetup from "./FloorPlanSetup";
 
@@ -61,6 +64,29 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
   const handleRemainingData = (data) => {
     setCombinedData(data);
     setRemainingDetails("floorPlan");
+  };
+
+  const handleFormattedOperatingHoursChange = (e) => {
+    let digits = e.target.value.replace(/\D/g, "").slice(0, 8);
+
+    let startHour = digits.slice(0, 2);
+    let startMin = digits.slice(2, 4);
+    let endHour = digits.slice(4, 6);
+    let endMin = digits.slice(6, 8);
+
+    if (startHour && Number(startHour) > 23) return;
+    if (startMin && Number(startMin) > 59) return;
+    if (endHour && Number(endHour) > 23) return;
+    if (endMin && Number(endMin) > 59) return;
+
+    let formatted = "";
+
+    if (digits.length >= 1) formatted += startHour;
+    if (digits.length >= 3) formatted += ":" + startMin;
+    if (digits.length >= 5) formatted += " - " + endHour;
+    if (digits.length >= 7) formatted += ":" + endMin;
+
+    setFieldValue("operatingHours", formatted);
   };
   return (
     <>
@@ -187,7 +213,7 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
                     name={"operatingHours"}
                     maxLength={30}
                     value={values.operatingHours}
-                    onChange={handleChange}
+                    onChange={handleFormattedOperatingHoursChange}
                     onBlur={handleBlur}
                     error={errors?.operatingHours}
                     touched={touched?.operatingHours}

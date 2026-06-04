@@ -84,6 +84,48 @@ const VerifyEmail = ({ handleNext, email, setCurrentState }) => {
     }
   };
 
+  const handlePaste = async (e, index) => {
+    e.preventDefault();
+
+    try {
+      const pastedText = await navigator.clipboard.readText();
+      const digits = pastedText.replace(/\D/g, "").split("");
+
+      if (digits.length > 0) {
+        const newOtpDisplay = [...otpDisplay];
+
+        // Fill OTP fields starting from current index
+        for (
+          let i = 0;
+          i < digits.length && index + i < newOtpDisplay.length;
+          i++
+        ) {
+          if (/^\d$/.test(digits[i])) {
+            newOtpDisplay[index + i] = digits[i];
+          }
+        }
+
+        setOtpDisplay(newOtpDisplay);
+
+        // Update formik value
+        const otpString = newOtpDisplay.join("");
+        handleChange({
+          target: { name: "otp", value: otpString },
+        });
+
+        // Move focus to the next empty field or last field
+        const nextEmptyIndex = newOtpDisplay.findIndex(
+          (val, idx) => idx >= index && val === "",
+        );
+        const focusIndex =
+          nextEmptyIndex === -1 ? newOtpDisplay.length - 1 : nextEmptyIndex;
+        inputs.current[focusIndex]?.focus();
+      }
+    } catch (err) {
+      console.log("Paste failed:", err);
+    }
+  };
+
   const handleResendOtp = async () => {
     try {
       await resendOtpMutation.mutateAsync({ email });
@@ -144,6 +186,7 @@ const VerifyEmail = ({ handleNext, email, setCurrentState }) => {
                   value={digit}
                   onChange={(e) => handleOtpChange(e, index)}
                   onKeyDown={(e) => handleKeyDown(e, index)}
+                  onPaste={(e) => handlePaste(e, index)}
                   onBlur={handleBlur}
                   ref={(el) => (inputs.current[index] = el)}
                   className="xxl:h-[79px] xxl:w-[79px] h-[70px] w-[70px] rounded-[12px] outline-none text-center border-[1px] bg-white/10 backdrop-blur-[28.9px] placeholder:text-[#E6E6F0]

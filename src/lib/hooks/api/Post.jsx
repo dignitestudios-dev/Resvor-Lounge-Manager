@@ -81,11 +81,11 @@ export const submitCreateLounge = async (payload) => {
 
   // Images Array
   if (payload.images && Array.isArray(payload.images)) {
-    formData.append(`images`, payload.images[0]);
+    // formData.append(`images`, payload.images[0]);
 
-    // payload.images.forEach((image, index) => {
-    //   formData.append(`images[${index}]`, image);
-    // });
+    payload.images.forEach((image, index) => {
+      formData.append(`images`, image);
+    });
   }
 
   // Floor Plan Image

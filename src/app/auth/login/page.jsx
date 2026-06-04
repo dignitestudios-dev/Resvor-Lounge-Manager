@@ -31,9 +31,15 @@ const Login = () => {
           };
 
           const response = await loginMutation.mutateAsync(data);
-          console.log("🚀 ~ Login ~ response:", response);
-
-          router.push("/dashboard");
+          if (
+            response?.data?.tokenType === "access_token" &&
+            response?.data?.onboardingStep === "completed"
+          ) {
+            router.push("/dashboard");
+          }
+          if (response?.data?.tokenType === "registration_token") {
+            router.push("/auth/signup");
+          }
         } catch (error) {
           console.log("🚀 ~ Login ~ error:", error);
           ErrorToast(

@@ -232,4 +232,58 @@ export const phoneToE164 = (formattedPhone, countryCode = "+1") => {
   return `${countryCode}${normalized}`;
 };
 
+export const handleFormattedOperatingHoursChange = (e) => {
+  let digits = e.target.value.replace(/\D/g, "").slice(0, 8);
+
+  let startHour = digits.slice(0, 2);
+  let startMin = digits.slice(2, 4);
+  let endHour = digits.slice(4, 6);
+  let endMin = digits.slice(6, 8);
+
+  if (startHour && Number(startHour) > 23) return;
+  if (startMin && Number(startMin) > 59) return;
+  if (endHour && Number(endHour) > 23) return;
+  if (endMin && Number(endMin) > 59) return;
+
+  let formatted = "";
+
+  if (digits.length >= 1) formatted += startHour;
+  if (digits.length >= 3) formatted += ":" + startMin;
+  if (digits.length >= 5) formatted += " - " + endHour;
+  if (digits.length >= 7) formatted += ":" + endMin;
+
+  setFieldValue("operatingHours", formatted);
+};
+
+export const handleOperatingHoursChange = (e) => {
+  let value = e.target.value;
+
+  // Remove everything except numbers
+  const digits = value.replace(/\D/g, "").slice(0, 8);
+
+  let formatted = "";
+
+  // First time
+  if (digits.length > 0) {
+    formatted += digits.slice(0, 2);
+  }
+
+  // First colon
+  if (digits.length >= 3) {
+    formatted += ":" + digits.slice(2, 4);
+  }
+
+  // Separator
+  if (digits.length >= 5) {
+    formatted += " - " + digits.slice(4, 6);
+  }
+
+  // Second colon
+  if (digits.length >= 7) {
+    formatted += ":" + digits.slice(6, 8);
+  }
+
+  setFieldValue("operatingHours", formatted);
+};
+
 export default utils;
