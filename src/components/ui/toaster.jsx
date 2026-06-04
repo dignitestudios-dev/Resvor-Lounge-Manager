@@ -2,7 +2,7 @@ import { toast } from "react-hot-toast";
 
 let toastId = null;
 
-export const SuccessToast = () => {
+export const SuccessToast = (msg) => {
   if (toastId) toast.dismiss(toastId);
   toastId = toast.success(msg, {
     className: "toast-slide",

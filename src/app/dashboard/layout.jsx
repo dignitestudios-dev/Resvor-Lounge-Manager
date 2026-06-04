@@ -1,9 +1,21 @@
 import Sidebar from "@/components/global/Sidebar";
 import Topbar from "@/components/global/Topbar";
+import LoungeModalWrapper from "@/components/dashboard/LoungeModalWrapper";
+import { Suspense } from "react";
+
 
 export default function DashboardLayout({ children }) {
   return (
     <div className="w-full flex gap-4 h-screen">
+      <Suspense
+      fallback={
+        <div>
+          <p>loading...</p>
+        </div>
+      }
+    >
+      <LoungeModalWrapper />
+      </Suspense>
       <div className="py-6 pl-6">
         <Sidebar />
       </div>

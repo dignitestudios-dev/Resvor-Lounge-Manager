@@ -31,14 +31,23 @@ const Login = () => {
           };
 
           const response = await loginMutation.mutateAsync(data);
+          // router.push("/dashboard");
           if (
             response?.data?.tokenType === "access_token" &&
             response?.data?.onboardingStep === "completed"
           ) {
-            router.push("/dashboard");
+            console.log("🚀 ~ Login ~ tokenType:", response?.data?.tokenType);
+            console.log(
+              "🚀 ~ Login ~ onboardingStep:",
+              response?.data?.onboardingStep,
+            );
+
+            router.push("/dashboard?fromLogin=true");
+            return
           }
-          if (response?.data?.tokenType === "registration_token") {
+          if (response?.data?.tokenType === "access_token") {
             router.push("/auth/signup");
+            return
           }
         } catch (error) {
           console.log("🚀 ~ Login ~ error:", error);

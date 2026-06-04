@@ -3,7 +3,7 @@ import { useLogin } from "../../../lib/hooks/api/Post";
 import { useFormik } from "formik";
 import AuthInput from "../../../components/auth/AuthInput";
 import AuthButton from "../../../components/auth/AuthButton";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AuthSuccessModal from "../../../components/auth/AuthSuccessModal";
 import { useRouter } from "next/navigation";
 import { updatePasswordSchema } from "@/lib/schema/authentication/loginSchema";
@@ -14,6 +14,12 @@ const UpdatePassword = () => {
   const [requestSendModal, setRequestSendModal] = useState(false);
 
   const updatePasswordMutation = useUpdatePassword();
+  const [resetToken, setResetToken] = useState(null);
+
+  useEffect(() => {
+    const token = sessionStorage.getItem("resetToken");
+    setResetToken(token);
+  }, []);
 
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
     useFormik({
@@ -26,12 +32,17 @@ const UpdatePassword = () => {
         try {
           const data = {
             password: values?.password,
+            resetToken,
           };
 
           const response = await updatePasswordMutation.mutateAsync(data);
           console.log("🚀 ~ UpdatePassword ~ response:", response);
-          // onClick={() => router.push("/dashboard")}
+          setRequestSendModal(true)
         } catch (error) {
+          ErrorToast(
+            error?.response?.data?.message ||
+              "Something went wrong. Please try again.",
+          );
           console.log("🚀 ~ UpdatePassword ~ error:", error);
         }
       },

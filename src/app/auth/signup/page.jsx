@@ -46,10 +46,16 @@ export default function SignUp() {
       } else if (onboardingStep === "verify_mobile") {
         setCurrentStep(2);
         setCurrentState("verify_mobile");
-      } else if (onboardingStep === "create_lounge") {
+      } else if (
+        sessionType === "access_token" &&
+        onboardingStep === "create_lounge"
+      ) {
         setCurrentStep(3);
         setCurrentState("personalDetails");
-      } else if (onboardingStep === "completed") {
+      } else if (
+        sessionType === "access_token" &&
+        onboardingStep === "completed"
+      ) {
         setCurrentStep(4);
         setCurrentState("subscription");
       }

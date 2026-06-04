@@ -73,6 +73,8 @@ export const submitCreateLounge = async (payload) => {
   formData.append("location[address]", payload.location);
   formData.append("location[coordinates][lat]", 0); // Default or from payload
   formData.append("location[coordinates][lng]", 1); // Default or from payload
+  formData.append("regularTables", payload.regularTables);
+  formData.append("vipTables", payload.vipTables);
 
   // Logo File
   if (payload.userImage) {

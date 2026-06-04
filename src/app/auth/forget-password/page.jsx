@@ -29,7 +29,7 @@ const ForgotPassword = () => {
         try {
           const data = {
             email: values?.email,
-            password: values?.password,
+            role: "lounge_manager",
           };
 
           const response = await forgotPasswordMutation.mutateAsync(data);
@@ -46,7 +46,6 @@ const ForgotPassword = () => {
         }
       },
     });
-  console.log("🚀 ~ ForgotPassword ~ errors:", errors);
 
   return (
     <div className="grid lg:grid-cols-1 grid-cols-1 w-full text-white">

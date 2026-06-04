@@ -6,14 +6,15 @@ import { useRouter } from "next/navigation";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import {
   useVerifyForgotEmail,
-  useResendForgotOtp,
+  useForgotPassword,
 } from "@/lib/hooks/mutations/AuthMutations";
-import { ErrorToast } from "@/components/ui/toaster";
+import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
 
 const VerifyForgotOtp = () => {
   const router = useRouter();
   const verifyEmailMutation = useVerifyForgotEmail();
-  const resendOtpMutation = useResendForgotOtp();
+  // const resendOtpMutation = useResendForgotOtp();
+  const resendOtpMutation = useForgotPassword();
 
   const [otp, setOtp] = useState(Array(5).fill(""));
   const inputs = useRef([]);
@@ -61,6 +62,48 @@ const VerifyForgotOtp = () => {
     }
   };
 
+  const handlePaste = async (e, index) => {
+    e.preventDefault();
+
+    try {
+      const pastedText = await navigator.clipboard.readText();
+      const digits = pastedText.replace(/\D/g, "").split("");
+
+      if (digits.length > 0) {
+        const newOtpDisplay = [...otp];
+
+        // Fill OTP fields starting from current index
+        for (
+          let i = 0;
+          i < digits.length && index + i < newOtpDisplay.length;
+          i++
+        ) {
+          if (/^\d$/.test(digits[i])) {
+            newOtpDisplay[index + i] = digits[i];
+          }
+        }
+
+        setOtp(newOtpDisplay);
+
+        // Update formik value
+        const otpString = newOtpDisplay.join("");
+        handleChange({
+          target: { name: "otp", value: otpString },
+        });
+
+        // Move focus to the next empty field or last field
+        const nextEmptyIndex = newOtpDisplay.findIndex(
+          (val, idx) => idx >= index && val === "",
+        );
+        const focusIndex =
+          nextEmptyIndex === -1 ? newOtpDisplay.length - 1 : nextEmptyIndex;
+        inputs.current[focusIndex]?.focus();
+      }
+    } catch (err) {
+      console.log("Paste failed:", err);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -77,6 +120,7 @@ const VerifyForgotOtp = () => {
       });
 
       if (response?.success) {
+        sessionStorage.setItem("resetToken", response?.data?.resetToken);
         router.push("/auth/update-password");
       } else {
         ErrorToast(
@@ -99,13 +143,14 @@ const VerifyForgotOtp = () => {
 
   const handleResendOtp = async () => {
     try {
-      await resendOtpMutation.mutateAsync({ email });
+      await resendOtpMutation.mutateAsync({ email, role: "lounge_manager" });
       setOtp(Array(5).fill(""));
       setSeconds(30);
       setIsActive(true);
       setValidationError("");
+      SuccessToast("OTP resent successfully");
     } catch (err) {
-      console.error("Resend OTP error:", err);
+      console.log("err===> --> ", err);
       ErrorToast(
         err?.response?.data?.message ||
           "Failed to resend OTP. Please try again.",
@@ -156,6 +201,7 @@ const VerifyForgotOtp = () => {
                   value={digit}
                   onChange={(e) => handleChange(e, index)}
                   onKeyDown={(e) => handleKeyDown(e, index)}
+                  onPaste={(e) => handlePaste(e, index)}
                   ref={(el) => (inputs.current[index] = el)}
                   className="xxl:h-[79px] xxl:w-[79px] h-[49px] w-[49px] rounded-[12px] outline-none text-center border-[1px] border-[#D9D9D9] placeholder:text-[#181818]
                 placeholder:text-[16px] placeholder:text-white xxl:placeholder:text-[20px] focus-within:border-[#8A8A8A] flex items-center justify-center"
