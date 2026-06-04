@@ -19,7 +19,7 @@ const nextConfig = {
       beforeFiles: [
         {
           source: "/api/:path*",
-          destination: "https://api-staging.resvor.com/:path*",
+          destination: "https://api-dev.resvor.com/:path*",
         },
       ],
     };
