@@ -11,6 +11,9 @@ export const useAuthMe = () => {
   return useQuery({
     queryKey: ["auth-me"],
     queryFn: fetchAuthMe,
-    retry: true,
+    // retry: false,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 };

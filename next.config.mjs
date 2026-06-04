@@ -15,7 +15,7 @@ const nextConfig = {
       beforeFiles: [
         {
           source: "/api/:path*",
-          destination: "http://54.81.22.252:3001/:path*",
+          destination: "https://api-dev.resvor.com/:path*",
         },
       ],
     };

@@ -32,6 +32,7 @@ const Login = () => {
 
           const response = await loginMutation.mutateAsync(data);
           console.log("🚀 ~ Login ~ response:", response);
+
           router.push("/dashboard");
         } catch (error) {
           console.log("🚀 ~ Login ~ error:", error);

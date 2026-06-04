@@ -3,10 +3,15 @@ import FingerprintJS from "@fingerprintjs/fingerprintjs";
 import { ErrorToast } from "./components/ui/toaster";
 
 // Proxy configuration - similar to Vite setup
-export const baseUrl =
+// export const baseUrl =
+//   process.env.NODE_ENV === "development"
+//     ? "/api" // Use Next.js rewrites proxy in development
+//     : "http://54.81.22.252:3001"; // Use direct URL in production
+
+    export const baseUrl =
   process.env.NODE_ENV === "development"
     ? "/api" // Use Next.js rewrites proxy in development
-    : "http://54.81.22.252:3001"; // Use direct URL in production
+    : "https://api-dev.resvor.com"; // Use direct URL in production
 
 async function getDeviceFingerprint() {
   const fp = await FingerprintJS.load();

@@ -2,29 +2,59 @@ import * as Yup from "yup";
 
 export const userDetailsSchema = Yup.object({
   name: Yup.string()
-    .required("First name is required.")
+    .required("Full name is required.")
+    .min(1, "Full name must be at least 1 character.")
+    .max(64, "Full name cannot exceed 64 characters.")
+
+    // Not empty after trim
     .test(
       "not-empty-after-trim",
-      "First name cannot be empty or just spaces.",
+      "Full name cannot be empty or only spaces.",
       (value) => value?.trim().length > 0,
     )
+
+    // No leading spaces
     .test(
       "no-leading-space",
-      "First name cannot start with a space.",
+      "Full name cannot start with a space.",
       (value) => (value ? !value.startsWith(" ") : true),
     )
+
+    // No multiple consecutive spaces
     .test(
       "no-multiple-spaces",
-      "First name cannot contain multiple spaces.",
+      "Full name cannot contain multiple consecutive spaces.",
       (value) => (value ? !/ {2,}/.test(value) : true),
     )
-    .test("no-numbers", "First name cannot contain numbers.", (value) =>
+
+    // Only allowed characters:
+    // Unicode letters, spaces, apostrophes, hyphens
+    .matches(
+      /^[\p{L}' -]+$/u,
+      "Full name can only contain letters, spaces, hyphens (-), and apostrophes (').",
+    )
+
+    // Prevent numbers
+    .test("no-numbers", "Full name cannot contain numbers.", (value) =>
       value ? !/\d/.test(value) : true,
     )
+
+    // Prevent HTML/script tags
+    .test("no-html", "HTML or script content is not allowed.", (value) =>
+      value ? !/<[^>]*>|<\/[^>]*>/g.test(value) : true,
+    )
+
+    // Sentence Case / Title Case validation
     .test(
-      "first-letter-uppercase",
-      "First letter must be uppercase.",
-      (value) => (value ? /^[A-Z]/.test(value.trim()) : true),
+      "sentence-case",
+      "Each word must start with a capital letter.",
+      (value) =>
+        value
+          ? value
+              .trim()
+              .split(" ")
+              .every((word) => /^[A-ZÀ-Ÿ][\p{L}'-]*$/u.test(word))
+          : true,
     ),
   email: Yup.string()
     .required("Email is required")
@@ -36,7 +66,10 @@ export const userDetailsSchema = Yup.object({
       "Email cannot contain spaces.",
       (value) => (value ? value.trim() === value && !/\s/.test(value) : false),
     )
-    .matches(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/, "Invalid email format."),
+    .matches(
+      /^[A-Za-z0-9._+-]+@[A-Za-z0-9-]+\.[A-Za-z]{2,}(\.[A-Za-z]{2,})?$/,
+      "Invalid email format.",
+    ),
 
   number: Yup.string()
     .transform((value) => value.replace(/\D/g, "")) // Remove all non-numeric chars
