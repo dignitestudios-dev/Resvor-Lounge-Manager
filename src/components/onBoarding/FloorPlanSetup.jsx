@@ -8,6 +8,7 @@ import { floorPlanSetupValues } from "@/lib/init/floorPlanSetupValues";
 import { floorPlanSetupSchema } from "@/lib/schema/onboarding/floorPlanSetupSchema";
 import { ErrorToast } from "../ui/toaster";
 import { useCreateLounge } from "@/lib/hooks/mutations/OnBoardingMutations";
+import { validateImageResolution } from "@/lib/utils";
 
 const FloorPlanSetup = ({
   handleNext,
@@ -16,6 +17,19 @@ const FloorPlanSetup = ({
   setCurrentState,
 }) => {
   const createLoungeMutation = useCreateLounge();
+  const handleTablesChange = (e) => {
+    const { name, value } = e.target;
+
+    // Keep digits only
+    let sanitizedValue = value.replace(/\D/g, "");
+
+    // Restrict max value
+    if (Number(sanitizedValue) > 999) {
+      sanitizedValue = "999";
+    }
+
+    setFieldValue(name, sanitizedValue);
+  };
 
   const {
     values,
@@ -50,10 +64,34 @@ const FloorPlanSetup = ({
   });
   console.log("🚀 ~ FloorPlanSetup ~ errors:", errors);
 
-  const handleFloorPlanChange = (e) => {
-    const file = e.target.files[0];
+  const handleFloorPlanChange = async (e) => {
+    const file = e.currentTarget.files?.[0];
+
     if (file) {
+      // JPEG/PNG validation
+      if (!["image/jpeg", "image/png"].includes(file.type)) {
+        ErrorToast("Only JPEG and PNG formats are allowed");
+        return;
+      }
+
+      // 10MB validation
+      if (file.size > 10 * 1024 * 1024) {
+        ErrorToast("File size must not exceed 10MB");
+        return;
+      }
+
+      // Resolution validation
+      const isValidResolution = await validateImageResolution(file);
+
+      if (!isValidResolution) {
+        ErrorToast("Image resolution must be at least 215x215");
+        return;
+      }
+
       setFieldValue("floorPlan", file);
+
+      // Reset input
+      e.target.value = "";
     }
   };
 
@@ -78,24 +116,58 @@ const FloorPlanSetup = ({
       <form onSubmit={handleSubmit}>
         <div className="xxl:space-y-8 space-y-6 xxl:w-[650px] lg:w-[350px] md:w-[550px] w-[320px] mt-10">
           {/* Floor Plan Upload */}
-          <div className="border-2 border-dashed border-white/30 rounded-[20px] p-8 flex flex-col items-center justify-center min-h-[200px] relative">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFloorPlanChange}
-              className="absolute inset-0 opacity-0 cursor-pointer"
-            />
-            <div className="text-center text-white/70">
-              <div className="text-2xl mb-2">+</div>
-              <p className="underline">Upload Floor Plan</p>
+          {/* Floor Plan Upload */}
+          <div className="space-y-2">
+            <label className="text-[14px] font-medium text-white block">
+              Upload Floor Plan
+            </label>
+
+            <div className="relative w-full h-[220px] rounded-[20px] overflow-hidden border-2 border-dashed border-white/30 bg-white/10">
+              <input
+                type="file"
+                accept="image/jpeg,image/png"
+                onChange={handleFloorPlanChange}
+                className="absolute inset-0 opacity-0 cursor-pointer z-20"
+              />
+
+              {values.floorPlan ? (
+                <>
+                  <img
+                    src={
+                      typeof values.floorPlan === "string"
+                        ? values.floorPlan
+                        : URL.createObjectURL(values.floorPlan)
+                    }
+                    alt="Floor Plan Preview"
+                    className="w-full h-full object-cover"
+                  />
+
+                  {/* Overlay */}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition flex flex-col items-center justify-center text-white z-10">
+                    <div className="text-2xl mb-2">+</div>
+                    <p className="underline text-sm">
+                      Click to change floor plan
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center text-white/70">
+                  <div className="text-2xl mb-2">+</div>
+                  <p className="underline">Upload Floor Plan</p>
+                </div>
+              )}
             </div>
+
+            {touched.floorPlan && errors.floorPlan && (
+              <p className="text-red-600 text-xs">{errors.floorPlan}</p>
+            )}
           </div>
           {touched.floorPlan && errors.floorPlan && (
             <p className="text-red-600 text-xs mt-1">{errors.floorPlan}</p>
           )}
 
           {/* Floor Plan Preview */}
-          {values.floorPlan && (
+          {/* {values.floorPlan && (
             <div className="rounded-[20px] border-2 border-white/20 bg-white/5 backdrop-blur p-4">
               <p className="text-white font-[500] mb-3">Floor Plan Preview</p>
               <img
@@ -108,7 +180,7 @@ const FloorPlanSetup = ({
                 className="w-full h-[200px] object-cover rounded-lg"
               />
             </div>
-          )}
+          )} */}
 
           {/* Regular Tables */}
           <div className="mt-4">
@@ -116,14 +188,15 @@ const FloorPlanSetup = ({
               label={"Regular Tables"}
               text={"regularTables"}
               placeholder={"Enter number of tables"}
-              type={"number"}
+              type={"text"}
               id={"regularTables"}
               name={"regularTables"}
               value={values.regularTables}
-              onChange={handleChange}
+              onChange={handleTablesChange}
               onBlur={handleBlur}
               error={errors?.regularTables}
               touched={touched?.regularTables}
+              maxLength={3}
             />
           </div>
 
@@ -133,14 +206,15 @@ const FloorPlanSetup = ({
               label={"VIP Tables"}
               text={"vipTables"}
               placeholder={"Enter number of VIP tables"}
-              type={"number"}
+              type={"text"}
               id={"vipTables"}
               name={"vipTables"}
               value={values.vipTables}
-              onChange={handleChange}
+              onChange={handleTablesChange}
               onBlur={handleBlur}
               error={errors?.vipTables}
               touched={touched?.vipTables}
+              maxLength={3}
             />
           </div>
         </div>

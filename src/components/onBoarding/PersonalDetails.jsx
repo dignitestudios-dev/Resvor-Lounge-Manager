@@ -13,6 +13,7 @@ import { ErrorToast } from "../ui/toaster";
 import {
   handleFormattedOperatingHoursChange,
   phoneFormatter,
+  validateImageResolution,
 } from "@/lib/utils";
 import PersonalDetailsRemaining from "./PersonalDetailsRemaining";
 import FloorPlanSetup from "./FloorPlanSetup";
@@ -22,6 +23,7 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
   console.log("🚀 ~ PersonalDetails ~ userImage:", userImage);
   const [remainingDetails, setRemainingDetails] = useState(false);
   const [combinedData, setCombinedData] = useState({});
+  const [imageError, setImageError] = useState("");
 
   const {
     values,
@@ -48,17 +50,39 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
     },
   });
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  const handleFileChange = async (e) => {
+    const file = e.currentTarget.files?.[0];
+    setImageError("");
+
     if (file) {
+      // Check file type
+      if (!["image/jpeg", "image/png"].includes(file.type)) {
+        const errorMsg = "Only JPEG and PNG formats are allowed";
+        setImageError(errorMsg);
+        ErrorToast(errorMsg);
+        return;
+      }
+
+      // Check file size (10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        const errorMsg = "File size must not exceed 10MB";
+        setImageError(errorMsg);
+        ErrorToast(errorMsg);
+        return;
+      }
+
+      // Check image resolution (215x215)
+      const isValidResolution = await validateImageResolution(file);
+      if (!isValidResolution) {
+        const errorMsg = "Image resolution must be at least 215x215";
+        setImageError(errorMsg);
+        ErrorToast(errorMsg);
+        return;
+      }
+
       setUserImage(file);
       setFieldValue("userImage", file);
     }
-  };
-
-  const handleImagesChange = (e) => {
-    const files = Array.from(e.target.files || []);
-    setFieldValue("images", files);
   };
 
   const handleRemainingData = (data) => {
@@ -148,6 +172,9 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
                       />
                     </span>
                   </p>
+                  {imageError && (
+                    <p className="text-red-600 text-xs mt-1">{imageError}</p>
+                  )}
                   {touched.userImage && errors.userImage && (
                     <p className="text-red-600 text-xs mt-1">
                       {errors.userImage}

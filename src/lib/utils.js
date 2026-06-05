@@ -286,4 +286,26 @@ export const handleOperatingHoursChange = (e) => {
   setFieldValue("operatingHours", formatted);
 };
 
+export const validateImageResolution = (file) => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    const img = new Image();
+
+    reader.onload = (e) => {
+      img.onload = () => {
+        if (img.width >= 215 && img.height >= 215) {
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      };
+      img.onerror = () => resolve(false);
+      img.src = e.target.result;
+    };
+
+    reader.onerror = () => resolve(false);
+    reader.readAsDataURL(file);
+  });
+};
+
 export default utils;

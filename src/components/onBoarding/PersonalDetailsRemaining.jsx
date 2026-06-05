@@ -6,6 +6,7 @@ import { Upload } from "lucide-react";
 import { personalDetailsRemainingValues } from "@/lib/init/personalDetailsRemainingValues";
 import { personalDetailsRemainingSchema } from "@/lib/schema/onboarding/personalDetailsRemainingSchema";
 import { ErrorToast } from "../ui/toaster";
+import { validateImageResolution } from "@/lib/utils";
 
 const PersonalDetailsRemaining = ({
   handleNext,
@@ -36,6 +37,52 @@ const PersonalDetailsRemaining = ({
       }
     },
   });
+
+  const handleMultipleImagesChange = async (e) => {
+    const selectedFiles = Array.from(e.target.files || []);
+
+    // Existing images
+    const existingImages = values.images || [];
+
+    // Max 5 images validation
+    if (existingImages.length + selectedFiles.length > 5) {
+      ErrorToast("Maximum 5 images are allowed");
+      return;
+    }
+
+    const validFiles = [];
+
+    for (const file of selectedFiles) {
+      // File type validation
+      if (!["image/jpeg", "image/png"].includes(file.type)) {
+        ErrorToast(`${file.name}: Only JPEG and PNG formats are allowed`);
+        continue;
+      }
+
+      // File size validation (10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        ErrorToast(`${file.name}: File size must not exceed 10MB`);
+        continue;
+      }
+
+      // Resolution validation
+      const isValidResolution = await validateImageResolution(file);
+
+      if (!isValidResolution) {
+        ErrorToast(`${file.name}: Image resolution must be at least 215x215`);
+        continue;
+      }
+
+      validFiles.push(file);
+    }
+
+    // Merge previous + new images
+    setFieldValue("images", [...existingImages, ...validFiles]);
+
+    // Reset input value so same image can be selected again
+    e.target.value = "";
+  };
+
   return (
     <div className="flex flex-col justify-center items-center h-auto ">
       {/* <div className="flex justify-start items-center absolute top-12 left-0">
@@ -82,12 +129,9 @@ const PersonalDetailsRemaining = ({
               <div className="w-full h-[70px] rounded-[12px] border-2 border-dashed border-white/30 bg-white/10 flex items-center justify-center relative">
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png"
                   multiple
-                  onChange={(e) => {
-                    const files = Array.from(e.target.files || []);
-                    setFieldValue("images", files);
-                  }}
+                  onChange={handleMultipleImagesChange}
                   className="absolute inset-0 opacity-0 cursor-pointer"
                 />
                 <div className="text-center text-white/70 flex flex-col items-center gap-2">
@@ -96,14 +140,29 @@ const PersonalDetailsRemaining = ({
                 </div>
               </div>
               {values.images && values.images.length > 0 && (
-                <div className="flex gap-2 mt-2">
+                <div className="flex flex-wrap gap-2 mt-2">
                   {values.images.map((f, i) => (
-                    <img
-                      key={i}
-                      src={typeof f === "string" ? f : URL.createObjectURL(f)}
-                      alt={`img-${i}`}
-                      className="w-16 h-12 object-cover rounded"
-                    />
+                    <div key={i} className="relative">
+                      <img
+                        src={typeof f === "string" ? f : URL.createObjectURL(f)}
+                        alt={`img-${i}`}
+                        className="w-16 h-12 object-cover rounded"
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updatedImages = values.images.filter(
+                            (_, index) => index !== i,
+                          );
+
+                          setFieldValue("images", updatedImages);
+                        }}
+                        className="absolute -top-1 -right-1 bg-red-500 text-white w-5 h-5 rounded-full text-[10px]"
+                      >
+                        ×
+                      </button>
+                    </div>
                   ))}
                 </div>
               )}

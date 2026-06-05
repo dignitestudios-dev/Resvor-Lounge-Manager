@@ -123,14 +123,16 @@ export const floorPlanSetupSchema = Yup.object({
     ),
 
   regularTables: Yup.number()
-    .required("Number of regular tables is required")
-    .positive("Regular tables must be a positive number")
-    .integer("Regular tables must be a whole number")
-    .max(999, "Regular tables must not exceed 999"),
+    .typeError("Regular tables must be a number")
+    .required("Regular tables is required")
+    .integer("Must be a whole number")
+    .min(1, "Minimum is 1")
+    .max(999, "Maximum is 999"),
 
   vipTables: Yup.number()
-    .required("Number of VIP tables is required")
-    .positive("VIP tables must be a positive number")
-    .integer("VIP tables must be a whole number")
-    .max(999, "VIP tables must not exceed 999"),
+    .typeError("VIP tables must be a number")
+    .required("VIP tables is required")
+    .integer("Must be a whole number")
+    .min(1, "Minimum is 1")
+    .max(999, "Maximum is 999"),
 });
