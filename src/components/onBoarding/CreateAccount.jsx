@@ -37,11 +37,14 @@ const CreateAccount = ({ handleNext, setCurrentState, setEmail }) => {
           setCurrentState("verify_email");
           handleNext();
         } catch (error) {
-          console.error(error);
-          ErrorToast(
-            error.response?.data?.message ||
-              "An error occurred. Please try again.",
-          );
+          if (error.code === "NO_INTERNET") {
+            ErrorToast(error.message);
+          } else {
+            ErrorToast(
+              error.response?.data?.message ||
+                "An error occurred during logout. Please try again.",
+            );
+          }
         }
 
         // Use the loading state to show loading spinner
@@ -72,7 +75,7 @@ const CreateAccount = ({ handleNext, setCurrentState, setEmail }) => {
               type={"text"}
               id={"name"}
               name={"name"}
-              maxLength={30}
+              maxLength={50}
               value={values.name}
               onChange={handleChange}
               onBlur={handleBlur}

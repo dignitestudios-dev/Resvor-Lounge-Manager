@@ -9,8 +9,14 @@ import { verifyEmailSchema } from "@/lib/schema/authentication/verifyEmailSchema
 import { useVerifyEmail } from "@/lib/hooks/mutations/OnBoardingMutations";
 import { ErrorToast } from "../ui/toaster";
 import { useResendForgotOtp } from "@/lib/hooks/mutations/AuthMutations";
+import { LogOutIcon } from "lucide-react";
 
-const VerifyEmail = ({ handleNext, email, setCurrentState }) => {
+const VerifyEmail = ({
+  handleNext,
+  email,
+  setCurrentState,
+  handlePrevious,
+}) => {
   const inputs = useRef([]);
   const verifyEmailMutation = useVerifyEmail();
   const resendOtpMutation = useResendForgotOtp();
@@ -33,7 +39,14 @@ const VerifyEmail = ({ handleNext, email, setCurrentState }) => {
           console.log("🚀 ~ VerifyEmail ~ response:", response);
           setRequestSendModal(true);
         } catch (error) {
-          ErrorToast(error.response.data.message);
+          if (error.code === "NO_INTERNET") {
+            ErrorToast(error.message);
+          } else {
+            ErrorToast(
+              error.response?.data?.message ||
+                "An error occurred during logout. Please try again.",
+            );
+          }
         }
       },
     });
@@ -128,18 +141,20 @@ const VerifyEmail = ({ handleNext, email, setCurrentState }) => {
 
   const handleResendOtp = async () => {
     try {
-      await resendOtpMutation.mutateAsync({ email });
+      await resendOtpMutation.mutateAsync({ email, role: "lounge_manager" });
       setOtpDisplay(Array(5).fill("")); // Reset OTP display
       handleChange({
         target: { name: "otp", value: "" },
       });
       handleRestart();
     } catch (err) {
-      console.log("🚀 ~ handleResendOtp ~ err:", err);
-      ErrorToast(
-        err.response?.data?.message ||
-          "Failed to resend OTP. Please try again.",
-      );
+      if (err.code === "NO_INTERNET") {
+        ErrorToast(err.message);
+      } else {
+        ErrorToast(
+          err.response?.data?.message || "An error occurred. Please try again.",
+        );
+      }
     }
   };
 
@@ -150,11 +165,20 @@ const VerifyEmail = ({ handleNext, email, setCurrentState }) => {
 
   return (
     <div className="grid lg:grid-cols-1 grid-cols-1 w-full text-white">
-      {/* <div className="flex justify-start items-center">
-        <button type="button" onClick={() => handlePrevious()}>
-          <FaArrowLeftLong color="white" size={24} />
+      <div className="flex justify-end mr-16 -mt-10">
+        <button
+          className="group relative bg-white rounded-md p-2 cursor-pointer"
+          type="button"
+          onClick={() => handlePrevious()}
+        >
+          {/* Tooltip text */}
+          <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 scale-0 rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-all group-hover:scale-100 group-hover:opacity-100">
+            Logout
+          </span>
+
+          <LogOutIcon color="black" size={24} />
         </button>
-      </div> */}
+      </div>
       <div className="flex flex-col justify-center items-center h-auto ">
         <div>
           <img
@@ -180,7 +204,7 @@ const VerifyEmail = ({ handleNext, email, setCurrentState }) => {
                 <input
                   inputMode="numeric"
                   key={index}
-                  type="password"
+                  // type="password"
                   placeholder=""
                   maxLength="1"
                   value={digit}
@@ -210,15 +234,14 @@ const VerifyEmail = ({ handleNext, email, setCurrentState }) => {
                     setSeconds={setSeconds}
                   />
                 ) : (
-                  <span
+                  <button
                     type="button"
-                    // disabled={resendLoading}
                     onClick={handleResendOtp}
-                    className="font-[600] pl-1 cursor-pointer"
+                    disabled={resendOtpMutation.isPending}
+                    className="font-[600] pl-1 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
                   >
-                    Resend
-                    {/* {resendLoading ? "Resending..." : "Resend"} */}
-                  </span>
+                    {resendOtpMutation.isPending ? "Resending..." : "Resend"}
+                  </button>
                 )}
               </span>
             </div>

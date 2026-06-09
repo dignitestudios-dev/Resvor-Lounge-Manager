@@ -10,6 +10,7 @@ import { verifyPhoneValues } from "@/lib/init/verifyPhoneValues";
 import { verifyPhoneSchema } from "@/lib/schema/authentication/verifyPhoneSchema";
 import { useVerifyMobileNumber } from "@/lib/hooks/mutations/OnBoardingMutations";
 import { ErrorToast } from "../ui/toaster";
+import { LogOutIcon } from "lucide-react";
 
 const VerifyPhone = ({ handleNext, handlePrevious, setCurrentState }) => {
   const inputs = useRef([]);
@@ -33,11 +34,14 @@ const VerifyPhone = ({ handleNext, handlePrevious, setCurrentState }) => {
           console.log("🚀 ~ VerifyPhone ~ response:", response);
           setRequestSendModal(true);
         } catch (error) {
-          console.log("🚀 ~ VerifyPhone ~ error:", error);
-          ErrorToast(
-            error.response?.data?.message ||
-              "An error occurred. Please try again.",
-          );
+          if (error.code === "NO_INTERNET") {
+            ErrorToast(error.message);
+          } else {
+            ErrorToast(
+              error.response?.data?.message ||
+                "An error occurred during logout. Please try again.",
+            );
+          }
         }
       },
     });
@@ -149,11 +153,20 @@ const VerifyPhone = ({ handleNext, handlePrevious, setCurrentState }) => {
 
   return (
     <div className="grid lg:grid-cols-1 grid-cols-1 w-full text-white">
-      {/* <div className="flex justify-start items-center">
-        <button type="button" onClick={() => handlePrevious()}>
-          <FaArrowLeftLong color="white" size={24} />
+      <div className="flex justify-end mr-16 -mt-10">
+        <button
+          className="group relative bg-white rounded-md p-2 cursor-pointer"
+          type="button"
+          onClick={() => handlePrevious()}
+        >
+          {/* Tooltip text */}
+          <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 scale-0 rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-all group-hover:scale-100 group-hover:opacity-100">
+            Logout
+          </span>
+
+          <LogOutIcon color="black" size={24} />
         </button>
-      </div> */}
+      </div>
       <div className="flex flex-col justify-center items-center h-auto ">
         <div>
           <img
@@ -178,7 +191,7 @@ const VerifyPhone = ({ handleNext, handlePrevious, setCurrentState }) => {
                 <input
                   inputMode="numeric"
                   key={index}
-                  type="password"
+                  // type="password"
                   placeholder=""
                   maxLength="1"
                   value={digit}

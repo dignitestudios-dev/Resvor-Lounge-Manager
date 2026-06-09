@@ -38,11 +38,14 @@ const ForgotPassword = () => {
 
           sessionStorage.setItem("resetEmail", values.email);
         } catch (error) {
-          console.log("🚀 ~ ForgotPassword ~ error:", error);
-          ErrorToast(
-            error?.response?.data?.message ||
-              "Something went wrong. Please try again.",
-          );
+          if (error.code === "NO_INTERNET") {
+            ErrorToast(error.message);
+          } else {
+            ErrorToast(
+              error.response?.data?.message ||
+                "An error occurred. Please try again.",
+            );
+          }
         }
       },
     });

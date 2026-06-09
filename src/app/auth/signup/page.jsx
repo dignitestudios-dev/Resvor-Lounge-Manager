@@ -17,15 +17,20 @@ import { FaClipboardList } from "react-icons/fa";
 import Subscription from "../../../components/onBoarding/Subscription";
 import PersonalDetailsRemaining from "@/components/onBoarding/PersonalDetailsRemaining";
 import { useAuthMe } from "@/lib/hooks/queries/useQueries";
+import { useLogout } from "@/lib/hooks/mutations/AuthMutations";
+import { ErrorToast } from "@/components/ui/toaster";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function SignUp() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { data: authData, isLoading } = useAuthMe();
+  const logoutMutation = useLogout();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
   const [currentStep, setCurrentStep] = useState(0);
   const [email, setEmail] = useState("");
   const [currentState, setCurrentState] = useState("createAccount");
-
-  const [personalDetailsData, setPersonalDetailsData] = useState(null);
 
   // Handle navigation based on authData onboardingStep
   useEffect(() => {
@@ -85,9 +90,27 @@ export default function SignUp() {
     }
   };
 
-  const handlePrevious = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+  const handlePrevious = async () => {
+    // if (currentStep > 0) {
+    //   setCurrentStep(currentStep - 1);
+    // }
+
+    try {
+      setIsLoggingOut(true);
+      await logoutMutation.mutateAsync();
+      queryClient.setQueryData(["auth-me"], null);
+      router.push("/auth/login");
+    } catch (error) {
+      if (error.code === "NO_INTERNET") {
+        ErrorToast(error.message);
+      } else {
+        ErrorToast(
+          error.response?.data?.message ||
+            "An error occurred during logout. Please try again.",
+        );
+      }
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -99,7 +122,7 @@ export default function SignUp() {
         <div
           className={`w-full relative flex justify-center flex-col items-center h-full `}
         >
-          {isLoading ? (
+          {isLoading || isLoggingOut ? (
             <div className="text-center text-white">
               <p className="text-xl">Loading...</p>
             </div>
@@ -111,14 +134,14 @@ export default function SignUp() {
             />
           ) : currentStep === 1 && currentState === "verify_email" ? (
             <VerifyEmail
-              email={email}
+              email={email || authData?.user?.email}
               handleNext={handleNext}
               handlePrevious={handlePrevious}
               setCurrentState={setCurrentState}
             />
           ) : currentStep === 2 && currentState === "verify_mobile" ? (
             <VerifyPhone
-              email={email}
+              email={email || authData?.user?.email}
               handleNext={handleNext}
               handlePrevious={handlePrevious}
               setCurrentState={setCurrentState}

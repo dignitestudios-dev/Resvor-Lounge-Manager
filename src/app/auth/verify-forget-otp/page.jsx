@@ -127,12 +127,15 @@ const VerifyForgotOtp = () => {
           response?.message || "Something went wrong. Please try again.",
         );
       }
-    } catch (err) {
-      console.error("Email verification error:", err);
-      ErrorToast(
-        err?.response?.data?.message ||
-          "Something went wrong. Please try again.",
-      );
+    } catch (error) {
+      if (error.code === "NO_INTERNET") {
+        ErrorToast(error.message);
+      } else {
+        ErrorToast(
+          error.response?.data?.message ||
+            "An error occurred. Please try again.",
+        );
+      }
     }
   };
 
@@ -149,19 +152,22 @@ const VerifyForgotOtp = () => {
       setIsActive(true);
       setValidationError("");
       SuccessToast("OTP resent successfully");
-    } catch (err) {
-      console.log("err===> --> ", err);
-      ErrorToast(
-        err?.response?.data?.message ||
-          "Failed to resend OTP. Please try again.",
-      );
+    } catch (error) {
+      if (error.code === "NO_INTERNET") {
+            ErrorToast(error.message);
+          } else {
+            ErrorToast(
+              error.response?.data?.message ||
+                "An error occurred. Please try again.",
+            );
+          }
     }
   };
 
   return (
     <div className="grid lg:grid-cols-1 grid-cols-1 w-full text-white">
       <div className="flex flex-col justify-center items-center h-auto ">
-        <div className="flex justify-start items-center absolute top-16 left-40">
+        {/* <div className="flex justify-start items-center absolute top-16 left-40">
           <button
             className="cursor-pointer"
             type="button"
@@ -169,7 +175,7 @@ const VerifyForgotOtp = () => {
           >
             <FaArrowLeftLong color="white" size={24} />
           </button>
-        </div>
+        </div> */}
         <div>
           <img
             src={"/images/forgotLogo.png"}
@@ -183,8 +189,7 @@ const VerifyForgotOtp = () => {
           </p>
           <p className="text-[14px] sm:text-[16px] lg:text-[18px] text-[#E6E6E6]">
             A One-Time Password (OTP) has been sent to your registered email{" "}
-            {`(${email})`}. Please enter it to proceed. Please enter it to
-            proceed.
+            {`(${email})`}. Please enter it to proceed.
           </p>
         </div>
 
@@ -195,7 +200,7 @@ const VerifyForgotOtp = () => {
                 <input
                   inputMode="numeric"
                   key={index}
-                  type="password"
+                  // type="password"
                   placeholder=""
                   maxLength="1"
                   value={digit}

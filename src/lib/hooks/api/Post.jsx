@@ -31,6 +31,11 @@ export const submitResendForgotOtp = async (credentials) => {
   return data;
 };
 
+export const submitLogout = async () => {
+  const { data } = await axios.post("/auth/logout");
+  return data;
+};
+
 export const submitSignUp = async (payload) => {
   const { data } = await axios.post("/auth/onboarding/register", payload);
   return data;

@@ -27,8 +27,7 @@ const UpdatePassword = () => {
       validationSchema: updatePasswordSchema,
       validateOnChange: true,
       validateOnBlur: true,
-      onSubmit: async (values, action) => {
-        console.log("🚀 ~ UpdatePassword ~ action:", action);
+      onSubmit: async (values) => {
         try {
           const data = {
             password: values?.password,
@@ -36,14 +35,16 @@ const UpdatePassword = () => {
           };
 
           const response = await updatePasswordMutation.mutateAsync(data);
-          console.log("🚀 ~ UpdatePassword ~ response:", response);
-          setRequestSendModal(true)
+          setRequestSendModal(true);
         } catch (error) {
-          ErrorToast(
-            error?.response?.data?.message ||
-              "Something went wrong. Please try again.",
-          );
-          console.log("🚀 ~ UpdatePassword ~ error:", error);
+          if (error.code === "NO_INTERNET") {
+            ErrorToast(error.message);
+          } else {
+            ErrorToast(
+              error.response?.data?.message ||
+                "An error occurred. Please try again.",
+            );
+          }
         }
       },
     });
@@ -106,8 +107,8 @@ const UpdatePassword = () => {
           <div className="xxl:w-[650px] w-[360px] mt-6 mb-4">
             <AuthButton
               text={"Update"}
-              loading={updatePasswordMutation.isLoading}
-              disabled={updatePasswordMutation.isLoading}
+              loading={updatePasswordMutation.isPending}
+              disabled={updatePasswordMutation.isPending}
             />
           </div>
         </form>

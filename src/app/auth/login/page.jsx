@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { loginSchema } from "./../../../lib/schema/authentication/loginSchema";
 import { useLogin } from "../../../lib/hooks/mutations/AuthMutations";
 import { ErrorToast } from "../../../components/ui/toaster";
+import { useQueryClient } from "@tanstack/react-query";
 
 const loginValues = {
   email: "",
@@ -15,6 +16,7 @@ const loginValues = {
 const Login = () => {
   const router = useRouter();
   const loginMutation = useLogin();
+  const queryClient = useQueryClient();
 
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
     useFormik({
@@ -32,29 +34,25 @@ const Login = () => {
 
           const response = await loginMutation.mutateAsync(data);
           // router.push("/dashboard");
+          await queryClient.refetchQueries({ queryKey: ["auth-me"] });
           if (
             response?.data?.tokenType === "access_token" &&
             response?.data?.onboardingStep === "completed"
           ) {
-            console.log("🚀 ~ Login ~ tokenType:", response?.data?.tokenType);
-            console.log(
-              "🚀 ~ Login ~ onboardingStep:",
-              response?.data?.onboardingStep,
-            );
-
             router.push("/dashboard?fromLogin=true");
-            return
-          }
-          if (response?.data?.tokenType === "access_token") {
+            return;
+          } else {
             router.push("/auth/signup");
-            return
           }
         } catch (error) {
-          console.log("🚀 ~ Login ~ error:", error);
-          ErrorToast(
-            error.response?.data?.message ||
-              "An error occurred. Please try again.",
-          );
+          if (error.code === "NO_INTERNET") {
+            ErrorToast(error.message);
+          } else {
+            ErrorToast(
+              error.response?.data?.message ||
+                "An error occurred. Please try again.",
+            );
+          }
         }
       },
     });
@@ -95,7 +93,7 @@ const Login = () => {
                 type={"email"}
                 id={"email"}
                 name={"email"}
-                maxLength={30}
+                maxLength={60}
                 value={values.email}
                 onChange={handleChange}
                 onBlur={handleBlur}
@@ -147,7 +145,7 @@ const Login = () => {
           <p className="text-center xxl:text-[26px] text-[15px] leading-[21.6px] text-white">
             Don’t have an account?
             <span
-              className="bg-gradient-to-l to-[#63CFAC] from-[#29ABE2] bg-clip-text xxl:text-[26px] text-[16px] font-[500] pl-1 cursor-pointer "
+              className="bg-gradient-to-l to-[#63CFAC] from-[#29ABE2] bg-clip-text text-transparent xxl:text-[26px] text-[16px] font-[500] pl-1 cursor-pointer "
               onClick={() => router.push("/auth/signup")}
             >
               Sign Up

@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import {
   submitForgotPassword,
   submitLogin,
+  submitLogout,
   submitResendForgotOtp,
   submitUpdatePassword,
   submitVerifyForgotEmail,
@@ -34,5 +35,11 @@ export const useUpdatePassword = () => {
 export const useResendForgotOtp = () => {
   return useMutation({
     mutationFn: submitResendForgotOtp,
+  });
+};
+
+export const useLogout = () => {
+  return useMutation({
+    mutationFn: submitLogout,
   });
 };

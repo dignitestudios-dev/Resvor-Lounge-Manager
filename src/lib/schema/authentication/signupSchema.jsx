@@ -67,10 +67,9 @@ export const userDetailsSchema = Yup.object({
       (value) => (value ? value.trim() === value && !/\s/.test(value) : false),
     )
     .matches(
-      /^[A-Za-z0-9._+-]+@[A-Za-z0-9-]+\.[A-Za-z]{2,}(\.[A-Za-z]{2,})?$/,
+      /^(?!.*\.\.)(?!.*\.$)[A-Za-z0-9][A-Za-z0-9._+-]*@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/,
       "Invalid email format.",
     ),
-
   number: Yup.string()
     .transform((value) => value.replace(/\D/g, "")) // Remove all non-numeric chars
     .matches(/^[0-9]{10}$/, "Phone number must be exactly 10 digits.")
@@ -83,7 +82,7 @@ export const userDetailsSchema = Yup.object({
     .matches(/\d/, "Password must contain at least one number.")
     .matches(
       /[!@#$%^&*(),.?":{}|<>]/,
-      "Password must contain at least one @ special character.",
+      "Password must contain at least one special character.",
     )
     .matches(/^[^\s]*$/, "Password should not contain spaces.")
     .trim()

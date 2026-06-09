@@ -78,7 +78,7 @@ export const personalDetailsRemainingSchema = Yup.object({
       (value) => value?.trim().length > 0,
     )
     .min(10, "Specialization must be at least 10 characters long")
-    .max(500, "Specialization must not exceed 500 characters"),
+    .max(250, "Specialization must not exceed 250 characters"),
 
   images: Yup.array()
     .of(

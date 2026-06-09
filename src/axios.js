@@ -26,20 +26,35 @@ const instance = axios.create({
   headers: {
     Accept: "application/json",
   },
-  timeout: 60000, // 10 seconds timeout
+  timeout: 1000, // 10 seconds timeout
 });
 
 instance.interceptors.request.use(async (request) => {
+  // Internet check
   if (!navigator.onLine) {
-    ErrorToast(
-      "No internet connection. Please check your network and try again.",
-    );
-    return Promise.reject(new Error("No internet connection"));
+    console.log("what==> ", navigator.onLine);
+    return Promise.reject({
+      code: "NO_INTERNET",
+      message: "No internet connection",
+    });
   }
 
   request.withCredentials = true;
 
-  const fingerprint = await getDeviceFingerprint();
+  let fingerprint = "unknown-device";
+
+  // Prevent hanging
+  try {
+    fingerprint = await Promise.race([
+      getDeviceFingerprint(),
+
+      new Promise((resolve) =>
+        setTimeout(() => resolve("unknown-device"), 3000),
+      ),
+    ]);
+  } catch (e) {
+    console.log("Fingerprint failed");
+  }
 
   const isFormData = request.data instanceof FormData;
 

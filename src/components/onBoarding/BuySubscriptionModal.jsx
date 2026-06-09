@@ -106,7 +106,7 @@ const BuySubscriptionModal = ({ onClick, setCompleted, isVip }) => {
             <div className="flex flex-col justify-center items-center lg:h-auto md:h-screen mb-10">
               <div>
                 <img
-                  src={"/images/successCheck.png"}
+                  src={"/images/SuccessCheck.png"}
                   alt="success"
                   className="w-[120px]"
                 />

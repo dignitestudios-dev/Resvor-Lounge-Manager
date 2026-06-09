@@ -9,6 +9,7 @@ import { floorPlanSetupSchema } from "@/lib/schema/onboarding/floorPlanSetupSche
 import { ErrorToast } from "../ui/toaster";
 import { useCreateLounge } from "@/lib/hooks/mutations/OnBoardingMutations";
 import { validateImageResolution } from "@/lib/utils";
+import { LogOutIcon } from "lucide-react";
 
 const FloorPlanSetup = ({
   handleNext,
@@ -53,12 +54,14 @@ const FloorPlanSetup = ({
         setCurrentState("subscription");
         handleNext();
       } catch (error) {
-        console.error(error);
-        ErrorToast(
-          error.response?.data?.message ||
-            error.message ||
-            "An error occurred. Please try again.",
-        );
+        if (error.code === "NO_INTERNET") {
+          ErrorToast(error.message);
+        } else {
+          ErrorToast(
+            error.response?.data?.message ||
+              "An error occurred during logout. Please try again.",
+          );
+        }
       }
     },
   });
@@ -97,24 +100,33 @@ const FloorPlanSetup = ({
 
   return (
     <div className="flex flex-col justify-center items-center h-auto">
-      {/* <div className="flex justify-start items-center absolute top-12 left-0">
-        <button type="button" onClick={() => handlePrevious()}>
-          <FaArrowLeftLong color="white" size={24} />
+      <div className="flex justify-end absolute top-20 w-[600px]">
+        <button
+          className="group relative bg-white rounded-md p-2 cursor-pointer"
+          type="button"
+          onClick={() => handlePrevious()}
+        >
+          {/* Tooltip text */}
+          <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 scale-0 rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-all group-hover:scale-100 group-hover:opacity-100">
+            Logout
+          </span>
+
+          <LogOutIcon color="black" size={24} />
         </button>
-      </div> */}
+      </div>
       <div className="mt-4 xxl:w-[400px] xxl:ml-12 text-center space-y-4">
         <p className="xxl:text-[48px] text-[32px] text-[#E6E6E6] font-[600] capitalize">
           Set Up Your <br />
           Lounge Floor Plan
         </p>
         <p className="xxl:text-[26px] text-[16px] text-[#E6E6E6]">
-          Upload your lounge&apos;s floor plan to give guests a visual seating
+          Upload your lounge&apos;s floor plan to give guests <br /> seating
           experience.
         </p>
       </div>
 
       <form onSubmit={handleSubmit}>
-        <div className="xxl:space-y-8 space-y-6 xxl:w-[650px] lg:w-[350px] md:w-[550px] w-[320px] mt-10">
+        <div className="xxl:space-y-8 space-y-6 xxl:w-[650px] lg:w-[450px] md:w-[550px] w-[320px] mt-10">
           {/* Floor Plan Upload */}
           {/* Floor Plan Upload */}
           <div className="space-y-2">
@@ -162,9 +174,6 @@ const FloorPlanSetup = ({
               <p className="text-red-600 text-xs">{errors.floorPlan}</p>
             )}
           </div>
-          {touched.floorPlan && errors.floorPlan && (
-            <p className="text-red-600 text-xs mt-1">{errors.floorPlan}</p>
-          )}
 
           {/* Floor Plan Preview */}
           {/* {values.floorPlan && (
@@ -220,7 +229,7 @@ const FloorPlanSetup = ({
         </div>
 
         <div className="mt-6">
-          <div className="xxl:w-[650px] w-[350px] mt-1 mb-4">
+          <div className="xxl:w-[650px] w-[450px] mt-1 mb-4">
             <AuthButton
               text={"Submit"}
               // disabled={

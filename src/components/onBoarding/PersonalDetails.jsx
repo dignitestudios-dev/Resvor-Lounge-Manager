@@ -17,10 +17,11 @@ import {
 } from "@/lib/utils";
 import PersonalDetailsRemaining from "./PersonalDetailsRemaining";
 import FloorPlanSetup from "./FloorPlanSetup";
+import { LogOutIcon } from "lucide-react";
+import TimeRangeInput from "../auth/TimeRangeInput";
 
 const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
   const [userImage, setUserImage] = useState("");
-  console.log("🚀 ~ PersonalDetails ~ userImage:", userImage);
   const [remainingDetails, setRemainingDetails] = useState(false);
   const [combinedData, setCombinedData] = useState({});
   const [imageError, setImageError] = useState("");
@@ -44,8 +45,14 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
         // Pass data to next step
         setRemainingDetails("remainingDetails");
       } catch (error) {
-        console.error(error);
-        ErrorToast(error.message || "An error occurred. Please try again.");
+        if (error.code === "NO_INTERNET") {
+          ErrorToast(error.message);
+        } else {
+          ErrorToast(
+            error.response?.data?.message ||
+              "An error occurred during logout. Please try again.",
+          );
+        }
       }
     },
   });
@@ -64,7 +71,7 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
       }
 
       // Check file size (10MB)
-      if (file.size > 10 * 1024 * 1024) {
+      if (file.size > 11 * 1024 * 1024) {
         const errorMsg = "File size must not exceed 10MB";
         setImageError(errorMsg);
         ErrorToast(errorMsg);
@@ -90,35 +97,29 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
     setRemainingDetails("floorPlan");
   };
 
-  const handleFormattedOperatingHoursChange = (e) => {
-    let digits = e.target.value.replace(/\D/g, "").slice(0, 8);
+  const formatTo12Hour = (time) => {
+    const [hour, minute] = time?.split(":");
 
-    let startHour = digits.slice(0, 2);
-    let startMin = digits.slice(2, 4);
-    let endHour = digits.slice(4, 6);
-    let endMin = digits.slice(6, 8);
+    const h = Number(hour);
 
-    if (startHour && Number(startHour) > 23) return;
-    if (startMin && Number(startMin) > 59) return;
-    if (endHour && Number(endHour) > 23) return;
-    if (endMin && Number(endMin) > 59) return;
+    const ampm = h >= 12 ? "PM" : "AM";
 
-    let formatted = "";
+    const formattedHour = h % 12 || 12;
 
-    if (digits.length >= 1) formatted += startHour;
-    if (digits.length >= 3) formatted += ":" + startMin;
-    if (digits.length >= 5) formatted += " - " + endHour;
-    if (digits.length >= 7) formatted += ":" + endMin;
-
-    setFieldValue("operatingHours", formatted);
+    return `${formattedHour}:${minute} ${ampm}`;
   };
+
+  const operatingHours = `${formatTo12Hour(
+    values.openingTime,
+  )} - ${formatTo12Hour(values.closingTime)}`;
+
   return (
     <>
       {remainingDetails === "remainingDetails" ? (
         <PersonalDetailsRemaining
           handleNext={handleRemainingData}
           handlePrevious={handlePrevious}
-          previousData={values}
+          previousData={{ ...values, operatingHours: operatingHours }}
         />
       ) : remainingDetails === "floorPlan" ? (
         <FloorPlanSetup
@@ -129,12 +130,21 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
         />
       ) : (
         <div className="flex flex-col justify-center items-center h-auto ">
-          {/* <div className="flex justify-start items-center absolute top-12 left-0">
-        <button type="button" onClick={() => handlePrevious()}>
-          <FaArrowLeftLong color="white" size={24} />
-        </button>
-      </div> */}
-          <div className="mt-4 xxl:w-[400px] xxl:ml-12 text-center space-y-4">
+          <div className="flex justify-end absolute top-10 w-[600px]">
+            <button
+              className="group relative bg-white rounded-md p-2 cursor-pointer"
+              type="button"
+              onClick={() => handlePrevious()}
+            >
+              {/* Tooltip text */}
+              <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 scale-0 rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-all group-hover:scale-100 group-hover:opacity-100">
+                Logout
+              </span>
+
+              <LogOutIcon color="black" size={24} />
+            </button>
+          </div>
+          <div className="mt-4 xxl:w-[400px] lg:w-[500px] xxl:ml-12 text-center space-y-4">
             <p className="xxl:text-[48px] text-[32px] text-[#E6E6E6] font-[600] capitalize">
               Create Your <br />
               Lounge Account
@@ -145,7 +155,7 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div className="xxl:space-y-8 space-y-6 xxl:w-[650px] lg:w-[350px] md:w-[550px] w-[320px] mt-10">
+            <div className="xxl:space-y-8 space-y-6 xxl:w-[650px] lg:w-[600px] md:w-[550px] w-[320px] mt-10">
               <div className="flex items-center xl:w-[500px] lg:w-[400px] md:w-[500px] w-[320px]">
                 <div className="md:w-[80px] w-[60px] md:h-[80px] h-[60px] rounded-full  overflow-hidden">
                   <img
@@ -191,7 +201,7 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
                     type={"text"}
                     id={"name"}
                     name={"name"}
-                    maxLength={50}
+                    maxLength={100}
                     value={values.name}
                     onChange={handleChange}
                     onBlur={handleBlur}
@@ -231,7 +241,7 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
                   />
                 </div>
                 <div className=" w-full">
-                  <AuthInput
+                  {/* <AuthInput
                     label={"Operating Hours"}
                     text={"operatingHours"}
                     placeholder={"00:00 - 00:00"}
@@ -244,12 +254,23 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
                     onBlur={handleBlur}
                     error={errors?.operatingHours}
                     touched={touched?.operatingHours}
+                  /> */}
+                  <TimeRangeInput
+                    label="Operating Hours"
+                    startName="openingTime"
+                    endName="closingTime"
+                    startValue={values.openingTime}
+                    endValue={values.closingTime}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={errors.openingTime || errors.closingTime}
+                    touched={touched.openingTime || touched.closingTime}
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="w-full">
+              <div className="grid grid-cols-1 gap-3">
+                {/* <div className="w-full">
                   <AuthInput
                     label={"Highlight Specialization"}
                     text={"specialization"}
@@ -264,7 +285,7 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
                     error={errors?.specialization}
                     touched={touched?.specialization}
                   />
-                </div>
+                </div> */}
                 <div className="w-full">
                   <AuthInput
                     label={"Highlight Offers"}
@@ -273,7 +294,7 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
                     type={"text"}
                     id={"offers"}
                     name={"offers"}
-                    maxLength={60}
+                    maxLength={250}
                     value={values.offers}
                     onChange={handleChange}
                     onBlur={handleBlur}
@@ -336,7 +357,7 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
               </div>
             </div>
             <div className="mt-6 ">
-              <div className="xxl:w-[650px] w-[350px] mt-1 mb-4">
+              <div className="xxl:w-[650px] w-[600px] mt-1 mb-4">
                 <AuthButton text={"Next"} />
               </div>
             </div>
