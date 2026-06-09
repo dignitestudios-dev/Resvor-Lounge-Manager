@@ -31,7 +31,6 @@ const VerifyPhone = ({ handleNext, handlePrevious, setCurrentState }) => {
         try {
           const response = await verifyMobileMutation.mutateAsync(values);
 
-          console.log("🚀 ~ VerifyPhone ~ response:", response);
           setRequestSendModal(true);
         } catch (error) {
           if (error.code === "NO_INTERNET") {

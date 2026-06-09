@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import Cookies from "js-cookie";
 import {
   Popover,
   PopoverContent,
@@ -12,9 +13,12 @@ import { useRouter } from "next/navigation";
 import { useLogout } from "@/lib/hooks/mutations/AuthMutations";
 import { ErrorToast } from "../ui/toaster";
 import LogoutConfirmationModal from "../common/LogoutConfirmationModal";
+import { useQueryClient } from "@tanstack/react-query";
 
 const ProfileMenu = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
+
   const [open, setOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
@@ -28,6 +32,11 @@ const ProfileMenu = () => {
   const handleConfirmLogout = async () => {
     try {
       await logoutMutation.mutateAsync();
+      queryClient.setQueryData(["auth-me"], null);
+      // Explicitly clear cookies
+      Cookies.remove("authorization");
+      Cookies.remove("tokenType");
+
       setIsLogoutModalOpen(false);
       router.push("/auth/login");
     } catch (error) {

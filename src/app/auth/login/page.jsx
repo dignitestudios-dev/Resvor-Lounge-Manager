@@ -7,7 +7,7 @@ import { loginSchema } from "./../../../lib/schema/authentication/loginSchema";
 import { useLogin } from "../../../lib/hooks/mutations/AuthMutations";
 import { ErrorToast } from "../../../components/ui/toaster";
 import { useQueryClient } from "@tanstack/react-query";
-
+import Cookies from "js-cookie";
 const loginValues = {
   email: "",
   password: "",
@@ -35,6 +35,8 @@ const Login = () => {
           const response = await loginMutation.mutateAsync(data);
           // router.push("/dashboard");
           await queryClient.refetchQueries({ queryKey: ["auth-me"] });
+          Cookies.set("tokenType", response?.data?.tokenType);
+
           if (
             response?.data?.tokenType === "access_token" &&
             response?.data?.onboardingStep === "completed"
@@ -145,7 +147,7 @@ const Login = () => {
           <p className="text-center xxl:text-[26px] text-[15px] leading-[21.6px] text-white">
             Don’t have an account?
             <span
-              className="bg-gradient-to-l to-[#63CFAC] from-[#29ABE2] bg-clip-text text-transparent xxl:text-[26px] text-[16px] font-[500] pl-1 cursor-pointer "
+              className="text-white bg-clip-text text-transparent xxl:text-[26px] text-[16px] font-[500] pl-1 cursor-pointer "
               onClick={() => router.push("/auth/signup")}
             >
               Sign Up

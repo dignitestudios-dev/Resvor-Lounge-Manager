@@ -8,11 +8,15 @@ import Logout from "../icons/sidebar/Logout";
 import { useLogout } from "@/lib/hooks/mutations/AuthMutations";
 import { ErrorToast } from "../ui/toaster";
 import LogoutConfirmationModal from "../common/LogoutConfirmationModal";
+import Cookies from "js-cookie";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Sidebar = () => {
   const pathname = usePathname();
   const router = useRouter();
   const logoutMutation = useLogout();
+  const queryClient = useQueryClient();
+
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   const handleLogoutClick = () => {
@@ -22,6 +26,11 @@ const Sidebar = () => {
   const handleConfirmLogout = async () => {
     try {
       await logoutMutation.mutateAsync();
+      queryClient.setQueryData(["auth-me"], null);
+
+      // Clear auth-me data from cache
+      Cookies.remove("authorization");
+      Cookies.remove("tokenType");
       setIsLogoutModalOpen(false);
       router.push("/auth/login");
     } catch (error) {

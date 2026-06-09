@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 import { IoMailOutline, IoCallOutline } from "react-icons/io5";
 import { LiaIdCard } from "react-icons/lia";
 import { IoMdPerson } from "react-icons/io";
@@ -24,13 +25,23 @@ import { useQueryClient } from "@tanstack/react-query";
 export default function SignUp() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { data: authData, isLoading } = useAuthMe();
+  const { data: authData, isLoading, refetch } = useAuthMe();
+
   const logoutMutation = useLogout();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const [currentStep, setCurrentStep] = useState(0);
   const [email, setEmail] = useState("");
   const [currentState, setCurrentState] = useState("createAccount");
+
+  // Refetch auth data when middleware redirects with registration_token
+  useEffect(() => {
+    const tokenType = Cookies.get("tokenType");
+    if (tokenType === "registration_token") {
+      // Fresh fetch when user is in registration flow (redirected by middleware)
+      refetch();
+    }
+  }, [refetch]);
 
   // Handle navigation based on authData onboardingStep
   useEffect(() => {
@@ -99,6 +110,9 @@ export default function SignUp() {
       setIsLoggingOut(true);
       await logoutMutation.mutateAsync();
       queryClient.setQueryData(["auth-me"], null);
+      // Explicitly clear cookies
+      Cookies.remove("authorization");
+      Cookies.remove("tokenType");
       router.push("/auth/login");
     } catch (error) {
       if (error.code === "NO_INTERNET") {
