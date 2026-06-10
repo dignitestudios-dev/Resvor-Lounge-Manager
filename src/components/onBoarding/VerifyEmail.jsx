@@ -17,6 +17,7 @@ const VerifyEmail = ({
   setCurrentState,
   handlePrevious,
 }) => {
+  console.log("🚀 ~ VerifyEmail ~ email:", email);
   const inputs = useRef([]);
   const verifyEmailMutation = useVerifyEmail();
   const resendOtpMutation = useResendForgotOtp();
@@ -36,7 +37,6 @@ const VerifyEmail = ({
       onSubmit: async (values) => {
         try {
           const response = await verifyEmailMutation.mutateAsync(values);
-          console.log("🚀 ~ VerifyEmail ~ response:", response);
           setRequestSendModal(true);
         } catch (error) {
           if (error.code === "NO_INTERNET") {
@@ -192,8 +192,8 @@ const VerifyEmail = ({
             verification
           </p>
           <p className="text-[14px] sm:text-[16px] lg:text-[18px] text-[#E6E6E6] w-[440px]">
-            A One-Time Password (OTP) has been sent to your registered email.
-            Please enter it to proceed.
+            A One-Time Password (OTP) has been sent to your registered email{" "}
+            {`(${email})`}. Please enter it to proceed.
           </p>
         </div>
 

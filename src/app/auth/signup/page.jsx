@@ -26,6 +26,7 @@ export default function SignUp() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: authData, isLoading, refetch } = useAuthMe();
+  console.log("🚀 ~ SignUp ~ authData:", authData);
 
   const logoutMutation = useLogout();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -37,7 +38,7 @@ export default function SignUp() {
   // Refetch auth data when middleware redirects with registration_token
   useEffect(() => {
     const tokenType = Cookies.get("tokenType");
-    if (tokenType === "registration_token") {
+    if (tokenType === "registration_token" && !authData) {
       // Fresh fetch when user is in registration flow (redirected by middleware)
       refetch();
     }

@@ -17,6 +17,7 @@ export function proxy(request: NextRequest) {
   const isPublicAuth = ["/auth/login", "/auth/signup"].includes(pathname);
 
   const isAuthRoute = pathname.startsWith("/auth");
+  console.log("🚀 ~ proxy ~ isAuthRoute:", isAuthRoute);
 
   // Step-wise tokenType condition for registration flow
   if (tokenType === "registration_token") {
