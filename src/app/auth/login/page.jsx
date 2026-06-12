@@ -15,7 +15,7 @@ const loginValues = {
 };
 
 const Login = () => {
- const router = useRouter();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const loginMutation = useLogin();
 
@@ -46,13 +46,15 @@ const Login = () => {
             // Middleware will guard the route; onboardingStep is already in cache
             router.push("/auth/signup");
           } else {
-            router.push("/dashboard");
+            // router.push("/dashboard");
+            router.replace("/dashboard");
           }
         } catch (error) {
           ErrorToast(
             error?.code === "NO_INTERNET"
               ? error.message
-              : error.response?.data?.message ?? "An error occurred. Please try again.",
+              : (error.response?.data?.message ??
+                  "An error occurred. Please try again."),
           );
         }
       },
