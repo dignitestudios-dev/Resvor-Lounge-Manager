@@ -41,12 +41,13 @@ const FloorPlanSetup = ({ handlePrevious, combinedData = {} }) => {
             onboardingStep: "completed",
           });
         } catch (error) {
+          console.log("error==> 44", error);
           if (error.code === "NO_INTERNET") {
             ErrorToast(error.message);
           } else {
             ErrorToast(
               error.response?.data?.message ||
-                "An error occurred during logout. Please try again.",
+                "An error occurred. Please try again.",
             );
           }
         }
