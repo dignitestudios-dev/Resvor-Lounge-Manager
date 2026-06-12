@@ -36,11 +36,15 @@ const FloorPlanSetup = ({ handlePrevious, combinedData = {} }) => {
         try {
           // Submit combined data to API
           const response = await createLoungeMutation.mutateAsync(values);
+          // updateAuthCache(queryClient, {
+          //   data: {
+          //     sessionType: response?.data?.tokenType,
+          //     onboardingStep: "completed",
+          //   },
+          // });
           updateAuthCache(queryClient, {
-            data: {
-              sessionType: response?.data?.tokenType,
-              onboardingStep: "completed",
-            },
+            sessionType: response?.data?.tokenType,
+            onboardingStep: "completed",
           });
         } catch (error) {
           console.log("error==> 44", error);
