@@ -10,62 +10,48 @@ import { ErrorToast } from "../ui/toaster";
 import { useCreateLounge } from "@/lib/hooks/mutations/OnBoardingMutations";
 import { validateImageResolution } from "@/lib/utils";
 import { LogOutIcon } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
-const FloorPlanSetup = ({
-  handleNext,
-  handlePrevious,
-  combinedData = {},
-  setCurrentState,
-}) => {
+const FloorPlanSetup = ({ handlePrevious, combinedData = {} }) => {
   const createLoungeMutation = useCreateLounge();
+  const queryClient = useQueryClient();
   const handleTablesChange = (e) => {
     const { name, value } = e.target;
-
     // Keep digits only
     let sanitizedValue = value.replace(/\D/g, "");
-
     // Restrict max value
     if (Number(sanitizedValue) > 999) {
       sanitizedValue = "999";
     }
-
     setFieldValue(name, sanitizedValue);
   };
 
-  const {
-    values,
-    handleBlur,
-    handleChange,
-    handleSubmit,
-    errors,
-    touched,
-    setFieldValue,
-  } = useFormik({
-    initialValues: floorPlanSetupValues(combinedData),
-    validationSchema: floorPlanSetupSchema,
-    validateOnChange: true,
-    validateOnBlur: true,
-    onSubmit: async (values) => {
-      try {
-        console.log("🚀 ~ FloorPlanSetup ~ complete data:", values);
-        // Submit combined data to API
-        const response = await createLoungeMutation.mutateAsync(values);
-        console.log("🚀 ~ Lounge Created:", response);
-        setCurrentState("subscription");
-        handleNext();
-      } catch (error) {
-        if (error.code === "NO_INTERNET") {
-          ErrorToast(error.message);
-        } else {
-          ErrorToast(
-            error.response?.data?.message ||
-              "An error occurred during logout. Please try again.",
-          );
+  const { values, handleBlur, handleSubmit, errors, touched, setFieldValue } =
+    useFormik({
+      initialValues: floorPlanSetupValues(combinedData),
+      validationSchema: floorPlanSetupSchema,
+      validateOnChange: true,
+      validateOnBlur: true,
+      onSubmit: async (values) => {
+        try {
+          // Submit combined data to API
+          const response = await createLoungeMutation.mutateAsync(values);
+          updateAuthCache(queryClient, {
+            sessionType: response?.data?.tokenType,
+            onboardingStep: "completed",
+          });
+        } catch (error) {
+          if (error.code === "NO_INTERNET") {
+            ErrorToast(error.message);
+          } else {
+            ErrorToast(
+              error.response?.data?.message ||
+                "An error occurred during logout. Please try again.",
+            );
+          }
         }
-      }
-    },
-  });
-  console.log("🚀 ~ FloorPlanSetup ~ errors:", errors);
+      },
+    });
 
   const handleFloorPlanChange = async (e) => {
     const file = e.currentTarget.files?.[0];

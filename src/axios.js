@@ -12,6 +12,8 @@ export const baseUrl =
   process.env.NODE_ENV === "development"
     ? "/api" // Use Next.js rewrites proxy in development
     : "https://api-dev.resvor.com"; // Use direct URL in production
+// https://35ppzgmv-3050.inc1.devtunnels.ms/
+// https://api-dev.resvor.com
 
 async function getDeviceFingerprint() {
   const fp = await FingerprintJS.load();
@@ -32,7 +34,6 @@ const instance = axios.create({
 instance.interceptors.request.use(async (request) => {
   // Internet check
   if (!navigator.onLine) {
-    console.log("what==> ", navigator.onLine);
     return Promise.reject({
       code: "NO_INTERNET",
       message: "No internet connection",

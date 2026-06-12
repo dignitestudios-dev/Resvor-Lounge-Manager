@@ -12,4 +12,5 @@ export const personalDetailsValues = {
   role: "lounge_manager",
   openingTime: "",
   closingTime: "",
+  loungeTags: [],
 };

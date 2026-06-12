@@ -11,10 +11,12 @@ import { verifyPhoneSchema } from "@/lib/schema/authentication/verifyPhoneSchema
 import { useVerifyMobileNumber } from "@/lib/hooks/mutations/OnBoardingMutations";
 import { ErrorToast } from "../ui/toaster";
 import { LogOutIcon } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
-const VerifyPhone = ({ handleNext, handlePrevious, setCurrentState }) => {
+const VerifyPhone = ({ handleNext, handlePrevious }) => {
   const inputs = useRef([]);
   const verifyMobileMutation = useVerifyMobileNumber();
+  const queryClient = useQueryClient();
 
   const [otpDisplay, setOtpDisplay] = useState(Array(6).fill(""));
   const [isActive, setIsActive] = useState(true);
@@ -30,6 +32,8 @@ const VerifyPhone = ({ handleNext, handlePrevious, setCurrentState }) => {
       onSubmit: async (values) => {
         try {
           const response = await verifyMobileMutation.mutateAsync(values);
+
+          updateAuthCache(queryClient, { onboardingStep: response?.data?.onboardingStep });
 
           setRequestSendModal(true);
         } catch (error) {
@@ -150,6 +154,21 @@ const VerifyPhone = ({ handleNext, handlePrevious, setCurrentState }) => {
     setIsActive(true);
   };
 
+  const handleModalClose = async () => {
+    try {
+      // // await queryClient.invalidateQueries({
+      // //   queryKey: ["auth-me"],
+      // // });
+      // queryClient.removeQueries({
+      //   queryKey: ["auth-me"],
+      // });
+
+      setRequestSendModal(false);
+    } catch (error) {
+      console.log("🚀 ~ handleModalClose ~ error:", error);
+    }
+  };
+
   return (
     <div className="grid lg:grid-cols-1 grid-cols-1 w-full text-white">
       <div className="flex justify-end mr-16 -mt-10">
@@ -248,9 +267,7 @@ const VerifyPhone = ({ handleNext, handlePrevious, setCurrentState }) => {
         <AuthSuccessModal
           isOpen={requestSendModal}
           onClick={() => {
-            setRequestSendModal(false);
-            setCurrentState("personalDetails");
-            handleNext();
+            handleModalClose();
           }}
           title="Number verified"
           description="Your number has been verified successfully."

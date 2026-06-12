@@ -1,19 +1,20 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "../../../axios";
 
 const fetchAuthMe = async () => {
   const { data } = await axios.get("/auth/me");
-  console.log("🚀 ~ fetchAuthMe ~ data:", data);
-  return data?.data || null; // Always return a value, never undefined
+  return data?.data || null;
 };
 
 export const useAuthMe = () => {
   return useQuery({
     queryKey: ["auth-me"],
     queryFn: fetchAuthMe,
-    // retry: true,
+    retry: false,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+    staleTime: Infinity,
+    gcTime: Infinity,
   });
 };

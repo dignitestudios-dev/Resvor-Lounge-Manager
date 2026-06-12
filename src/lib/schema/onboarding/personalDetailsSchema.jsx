@@ -84,19 +84,18 @@ export const personalDetailsSchema = Yup.object({
 
   openingTime: Yup.string().required("Opening time is required"),
 
-  closingTime: Yup.string()
-    .required("Closing time is required")
-    .test(
-      "is-after-opening",
-      "Closing time must be after opening time",
-      function (value) {
-        const { openingTime } = this.parent;
+  closingTime: Yup.string().required("Closing time is required"),
+  // .test(
+  //   "is-after-opening",
+  //   "Closing time must be after opening time",
+  //   function (value) {
+  //     const { openingTime } = this.parent;
 
-        if (!openingTime || !value) return true;
+  //     if (!openingTime || !value) return true;
 
-        return value > openingTime;
-      },
-    ),
+  //     return value > openingTime;
+  //   },
+  // ),
 
   location: Yup.string()
     .required("Business location is required")

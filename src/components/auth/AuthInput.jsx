@@ -52,7 +52,9 @@ export default function AuthInput({
           </button>
         )}
       </div>
-      {error && touched && <p className="text-red-600 text-[12px]">{error}</p>}
+      {error && touched && (
+        <p className="text-red-600 text-[12px] mt-1">{error}</p>
+      )}
     </div>
   );
 }

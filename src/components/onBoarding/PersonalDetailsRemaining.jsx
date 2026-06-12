@@ -7,6 +7,7 @@ import { personalDetailsRemainingValues } from "@/lib/init/personalDetailsRemain
 import { personalDetailsRemainingSchema } from "@/lib/schema/onboarding/personalDetailsRemainingSchema";
 import { ErrorToast } from "../ui/toaster";
 import { validateImageResolution } from "@/lib/utils";
+import AddServicesAndPackages from "./Servicespackages";
 
 const PersonalDetailsRemaining = ({
   handleNext,
@@ -28,18 +29,17 @@ const PersonalDetailsRemaining = ({
     validateOnBlur: true,
     onSubmit: async (values) => {
       try {
-        console.log("🚀 ~ PersonalDetailsRemaining ~ combined values:", values);
         // Pass combined data to parent component
         handleNext(values);
       } catch (error) {
         if (error.code === "NO_INTERNET") {
-                ErrorToast(error.message);
-              } else {
-                ErrorToast(
-                  error.response?.data?.message ||
-                    "An error occurred during logout. Please try again.",
-                );
-              }
+          ErrorToast(error.message);
+        } else {
+          ErrorToast(
+            error.response?.data?.message ||
+              "An error occurred during logout. Please try again.",
+          );
+        }
       }
     },
   });
@@ -127,15 +127,22 @@ const PersonalDetailsRemaining = ({
                 value={values.specialization}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                placeholder="Enter Details"
+                placeholder="Enter Lounge Specialization"
                 className="w-full h-20 rounded-[12px] border-2 border-white bg-white/10 placeholder:text-gray-400 text-[#E6E6F0] p-3"
               />
               {touched.specialization && errors.specialization && (
-                <p className="text-red-600 text-xs mt-1">
+                <p className="text-red-600 text-xs mt-0">
                   {errors.specialization}
                 </p>
               )}
             </div>
+
+            <AddServicesAndPackages
+              services={values.services}
+              onChange={(updatedServices) =>
+                setFieldValue("services", updatedServices)
+              }
+            />
 
             <div>
               <label className="text-[14px] font-medium text-white block mb-1">
@@ -182,7 +189,7 @@ const PersonalDetailsRemaining = ({
                 </div>
               )}
               {touched.images && errors.images && (
-                <p className="text-red-600 text-xs mt-1">{errors.images}</p>
+                <p className="text-red-600 text-xs mt-1.5">{errors.images}</p>
               )}
             </div>
 
@@ -200,7 +207,7 @@ const PersonalDetailsRemaining = ({
                 className="w-full h-20 rounded-[12px] border-2 border-white bg-white/10 placeholder:text-gray-400 text-[#E6E6F0] p-3"
               />
               {touched.description && errors.description && (
-                <p className="text-red-600 text-xs mt-1">
+                <p className="text-red-600 text-xs mt-0">
                   {errors.description}
                 </p>
               )}

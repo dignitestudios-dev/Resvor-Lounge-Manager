@@ -10,15 +10,11 @@ import { useVerifyEmail } from "@/lib/hooks/mutations/OnBoardingMutations";
 import { ErrorToast } from "../ui/toaster";
 import { useResendForgotOtp } from "@/lib/hooks/mutations/AuthMutations";
 import { LogOutIcon } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
-const VerifyEmail = ({
-  handleNext,
-  email,
-  setCurrentState,
-  handlePrevious,
-}) => {
-  console.log("🚀 ~ VerifyEmail ~ email:", email);
+const VerifyEmail = ({ email, handlePrevious }) => {
   const inputs = useRef([]);
+  const queryClient = useQueryClient();
   const verifyEmailMutation = useVerifyEmail();
   const resendOtpMutation = useResendForgotOtp();
 
@@ -37,8 +33,14 @@ const VerifyEmail = ({
       onSubmit: async (values) => {
         try {
           const response = await verifyEmailMutation.mutateAsync(values);
+
+          updateAuthCache(queryClient, {
+            onboardingStep: response?.data?.onboardingStep,
+          });
+
           setRequestSendModal(true);
         } catch (error) {
+          console.log("query client ---> ", error);
           if (error.code === "NO_INTERNET") {
             ErrorToast(error.message);
           } else {
@@ -163,6 +165,18 @@ const VerifyEmail = ({
     setIsActive(true);
   };
 
+  const handleModalClose = async () => {
+    try {
+      // queryClient.removeQueries({
+      //   queryKey: ["auth-me"],
+      // });
+      // queryClient.invalidateQueries({ queryKey: ["auth-me"] });
+      setRequestSendModal(false);
+    } catch (error) {
+      console.log("🚀 ~ handleModalClose ~ error:", error);
+    }
+  };
+
   return (
     <div className="grid lg:grid-cols-1 grid-cols-1 w-full text-white">
       <div className="flex justify-end mr-16 -mt-10">
@@ -273,9 +287,7 @@ const VerifyEmail = ({
         <AuthSuccessModal
           isOpen={requestSendModal}
           onClick={() => {
-            setRequestSendModal(false);
-            handleNext();
-            setCurrentState("verify_mobile");
+            handleModalClose();
           }}
           title="Email verified"
           description="Your email has been verified successfully."

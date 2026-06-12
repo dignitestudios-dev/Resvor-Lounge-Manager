@@ -26,14 +26,16 @@ const Sidebar = () => {
   const handleConfirmLogout = async () => {
     try {
       await logoutMutation.mutateAsync();
-      queryClient.setQueryData(["auth-me"], null);
+      queryClient.removeQueries({
+        queryKey: ["auth-me"],
+      });
 
-      // Clear auth-me data from cache
-      Cookies.remove("authorization");
-      Cookies.remove("tokenType");
+      // queryClient.invalidateQueries({ queryKey: ["auth-me"] });
+
       setIsLogoutModalOpen(false);
       router.push("/auth/login");
     } catch (error) {
+      console.log(error, "error===<12");
       if (error.code === "NO_INTERNET") {
         ErrorToast(error.message);
       } else {

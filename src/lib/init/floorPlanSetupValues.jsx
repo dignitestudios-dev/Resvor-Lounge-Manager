@@ -18,4 +18,6 @@ export const floorPlanSetupValues = (previousData = {}) => ({
   floorPlan: previousData.floorPlan || null,
   regularTables: previousData.regularTables || "",
   vipTables: previousData.vipTables || "",
+  services: previousData.services || [],
+  loungeTags: previousData.loungeTags || [],
 });

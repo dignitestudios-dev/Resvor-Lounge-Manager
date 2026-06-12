@@ -73,7 +73,7 @@ export const userDetailsSchema = Yup.object({
   number: Yup.string()
     .transform((value) => value.replace(/\D/g, "")) // Remove all non-numeric chars
     .matches(/^[0-9]{10}$/, "Phone number must be exactly 10 digits.")
-    .required("Please enter your phone number"),
+    .required("Phone number is required."),
 
   password: Yup.string()
     .min(8, "Password must be at least 8 characters long.")
@@ -86,10 +86,10 @@ export const userDetailsSchema = Yup.object({
     )
     .matches(/^[^\s]*$/, "Password should not contain spaces.")
     .trim()
-    .required("Please enter your password"),
+    .required("Password is required."),
   cPassword: Yup.string()
     .oneOf([Yup.ref("password")], "Passwords must match")
-    .required("Confirm Password is required"),
+    .required("Confirm Password is required."),
   acceptedPolicy: Yup.boolean()
     .required("You must accept the Terms & Conditions and Privacy Policy")
     .oneOf([true], "You must accept the Terms & Conditions and Privacy Policy"),

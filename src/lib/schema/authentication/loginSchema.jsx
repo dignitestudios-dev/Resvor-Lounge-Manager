@@ -17,7 +17,7 @@ export const loginSchema = Yup.object({
     ),
   password: Yup.string()
     .min(8, "Password must contain at least 8 alphanumeric characters.")
-    .required("Please enter your password"),
+    .required("Password is required"),
 });
 
 export const forgotPasswordSchema = Yup.object({

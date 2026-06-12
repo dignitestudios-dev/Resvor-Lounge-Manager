@@ -10,10 +10,12 @@ import { userDetailsValues } from "@/lib/init/signUpValues";
 import { userDetailsSchema } from "@/lib/schema/authentication/signupSchema";
 import { ErrorToast } from "../ui/toaster";
 import { useSignUp } from "@/lib/hooks/mutations/OnBoardingMutations";
+import { useQueryClient } from "@tanstack/react-query";
 
-const CreateAccount = ({ handleNext, setCurrentState, setEmail }) => {
+const CreateAccount = ({ setEmail }) => {
   const router = useRouter();
   const signUpMutation = useSignUp();
+  const queryClient = useQueryClient();
 
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
     useFormik({
@@ -32,17 +34,18 @@ const CreateAccount = ({ handleNext, setCurrentState, setEmail }) => {
             phoneNumber: phoneToE164(values.number),
           };
           const response = await signUpMutation.mutateAsync(data);
-          console.log("🚀 ~ CreateAccount ~ response:", response);
-
-          setCurrentState("verify_email");
-          handleNext();
+          updateAuthCache(queryClient, {
+            onboardingStep: response?.data?.onboardingStep,
+            user: { email: values.email }, // keep email available downstream
+          });
         } catch (error) {
+          console.log("🚀 ~ CreateAccount ~39---?> errors:", error);
           if (error.code === "NO_INTERNET") {
             ErrorToast(error.message);
           } else {
             ErrorToast(
               error.response?.data?.message ||
-                "An error occurred during logout. Please try again.",
+                "An error occurred. Please try again.",
             );
           }
         }
@@ -52,7 +55,6 @@ const CreateAccount = ({ handleNext, setCurrentState, setEmail }) => {
         // Otherwise you can just pass a callback that will process everything
       },
     });
-  console.log("🚀 ~ CreateAccount ~53---?> errors:", errors);
 
   return (
     <div className="flex flex-col justify-center items-center h-auto ">

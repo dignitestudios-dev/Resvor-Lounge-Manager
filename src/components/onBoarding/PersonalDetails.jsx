@@ -19,6 +19,7 @@ import PersonalDetailsRemaining from "./PersonalDetailsRemaining";
 import FloorPlanSetup from "./FloorPlanSetup";
 import { LogOutIcon } from "lucide-react";
 import TimeRangeInput from "../auth/TimeRangeInput";
+import LoungeTags from "./LoungeTags";
 
 const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
   const [userImage, setUserImage] = useState("");
@@ -41,7 +42,6 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
     validateOnBlur: true,
     onSubmit: async (values) => {
       try {
-        console.log("🚀 ~ PersonalDetails ~ values:", values);
         // Pass data to next step
         setRemainingDetails("remainingDetails");
       } catch (error) {
@@ -270,22 +270,6 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
               </div>
 
               <div className="grid grid-cols-1 gap-3">
-                {/* <div className="w-full">
-                  <AuthInput
-                    label={"Highlight Specialization"}
-                    text={"specialization"}
-                    placeholder={"Enter your Specialization"}
-                    type={"text"}
-                    id={"specialization"}
-                    name={"specialization"}
-                    maxLength={60}
-                    value={values.specialization}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={errors?.specialization}
-                    touched={touched?.specialization}
-                  />
-                </div> */}
                 <div className="w-full">
                   <AuthInput
                     label={"Highlight Offers"}
@@ -302,6 +286,17 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
                     touched={touched?.offers}
                   />
                 </div>
+              </div>
+
+              <div className="mt-4">
+                <LoungeTags
+                  label="Lounge Tags"
+                  value={values.loungeTags}
+                  onChange={(tags) => setFieldValue("loungeTags", tags)}
+                  placeholder="Type tag and press Enter..."
+                  error={errors?.loungeTags}
+                  touched={touched?.loungeTags}
+                />
               </div>
 
               <div className="mt-4">

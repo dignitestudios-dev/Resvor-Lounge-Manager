@@ -13,4 +13,6 @@ export const personalDetailsRemainingValues = (previousData = {}) => ({
   specialization: previousData.specialization || "",
   images: previousData.images || [],
   description: previousData.description || "",
+  services: previousData.services || [],
+  loungeTags: previousData.loungeTags || [],
 });

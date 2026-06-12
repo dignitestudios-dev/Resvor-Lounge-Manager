@@ -2,6 +2,24 @@ import { useMutation } from "@tanstack/react-query";
 import axios from "../../../axios";
 import { phoneToE164 } from "@/lib/utils";
 
+// Helper function to convert data URL to File object
+const dataURLtoFile = (dataurl, filename) => {
+  try {
+    const arr = dataurl.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  } catch (error) {
+    console.error("Error converting data URL to File:", error);
+    return null;
+  }
+};
+
 // Example: Login Mutation
 export const submitLogin = async (credentials) => {
   const { data } = await axios.post("/auth/login", credentials);
@@ -100,10 +118,45 @@ export const submitCreateLounge = async (payload) => {
     formData.append("floorPlanImage", payload.floorPlan);
   }
 
-  for (let pair of formData.entries()) {
-    console.log("formdata--->", pair[0], pair[1]);
+  // Lounge Tags
+  if (payload.loungeTags && Array.isArray(payload.loungeTags)) {
+    payload.loungeTags.forEach((tag) => {
+      formData.append("tags", tag);
+    });
   }
-  console.log("test", formData instanceof FormData);
+
+  // Services
+  if (payload.services && Array.isArray(payload.services)) {
+    payload.services.forEach((service, serviceIndex) => {
+      // Add service basic fields
+      formData.append(`services[${serviceIndex}][name]`, service.serviceName);
+      formData.append(`services[${serviceIndex}][price]`, service.price);
+      formData.append(
+        `services[${serviceIndex}][description]`,
+        service.description,
+      );
+
+      // Add service images
+      if (service.images && Array.isArray(service.images)) {
+        service.images.forEach((image) => {
+          let imageFile = image;
+
+          // Check if image is a File object or data URL string
+          if (image instanceof File) {
+            imageFile = image;
+          } else if (typeof image === "object" && image.url) {
+            // Image is an object with url property (base64 data URL)
+            imageFile = dataURLtoFile(image.url, image.name);
+          }
+
+          // Append image to FormData
+          if (imageFile) {
+            formData.append(`serviceImages_${serviceIndex}`, imageFile);
+          }
+        });
+      }
+    });
+  }
 
   const { data } = await axios.post("/lounges", formData, {
     headers: {

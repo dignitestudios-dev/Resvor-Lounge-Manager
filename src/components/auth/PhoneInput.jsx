@@ -67,7 +67,7 @@ const PhoneInput = ({
         />
       </div>
       {error && touched && (
-        <p className="text-red-600 text-[12px] mt-3">{error}</p>
+        <p className="text-red-600 text-[12px] mt-1">{error}</p>
       )}
     </div>
   );

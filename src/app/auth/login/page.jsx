@@ -8,15 +8,16 @@ import { useLogin } from "../../../lib/hooks/mutations/AuthMutations";
 import { ErrorToast } from "../../../components/ui/toaster";
 import { useQueryClient } from "@tanstack/react-query";
 import Cookies from "js-cookie";
+import { updateAuthCache } from "@/lib/utils";
 const loginValues = {
   email: "",
   password: "",
 };
 
 const Login = () => {
-  const router = useRouter();
-  const loginMutation = useLogin();
+ const router = useRouter();
   const queryClient = useQueryClient();
+  const loginMutation = useLogin();
 
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
     useFormik({
@@ -26,35 +27,33 @@ const Login = () => {
       validateOnBlur: true,
       onSubmit: async (values) => {
         try {
-          const data = {
-            email: values?.email,
-            password: values?.password,
+          const response = await loginMutation.mutateAsync({
+            email: values.email,
+            password: values.password,
             role: "lounge_manager",
-          };
+          });
 
-          const response = await loginMutation.mutateAsync(data);
-          // router.push("/dashboard");
-          await queryClient.refetchQueries({ queryKey: ["auth-me"] });
-          Cookies.set("tokenType", response?.data?.tokenType);
+          const { tokenType, onboardingStep, user } = response?.data ?? {};
 
-          if (
-            response?.data?.tokenType === "access_token" &&
-            response?.data?.onboardingStep === "completed"
-          ) {
-            router.push("/dashboard?fromLogin=true");
-            return;
-          } else {
+          // Seed the cache so AuthLayout / signup page never needs to refetch
+          updateAuthCache(queryClient, {
+            sessionType: tokenType,
+            onboardingStep,
+            user,
+          });
+
+          if (tokenType === "registration_token") {
+            // Middleware will guard the route; onboardingStep is already in cache
             router.push("/auth/signup");
+          } else {
+            router.push("/dashboard");
           }
         } catch (error) {
-          if (error.code === "NO_INTERNET") {
-            ErrorToast(error.message);
-          } else {
-            ErrorToast(
-              error.response?.data?.message ||
-                "An error occurred. Please try again.",
-            );
-          }
+          ErrorToast(
+            error?.code === "NO_INTERNET"
+              ? error.message
+              : error.response?.data?.message ?? "An error occurred. Please try again.",
+          );
         }
       },
     });

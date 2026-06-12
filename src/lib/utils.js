@@ -308,4 +308,22 @@ export const validateImageResolution = (file) => {
   });
 };
 
+export function updateAuthCache(queryClient, patch) {
+  queryClient.setQueryData(["auth-me"], (old) => {
+    const existing = old?.data ?? {};
+    return {
+      ...(old ?? {}),
+      data: {
+        ...existing,
+        ...patch,
+        // merge user object deeply so partial updates don't wipe fields
+        user:
+          patch.user !== undefined
+            ? { ...(existing.user ?? {}), ...(patch.user ?? {}) }
+            : existing.user,
+      },
+    };
+  });
+}
+
 export default utils;
