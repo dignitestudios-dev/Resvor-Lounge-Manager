@@ -8,7 +8,7 @@ import { floorPlanSetupValues } from "@/lib/init/floorPlanSetupValues";
 import { floorPlanSetupSchema } from "@/lib/schema/onboarding/floorPlanSetupSchema";
 import { ErrorToast } from "../ui/toaster";
 import { useCreateLounge } from "@/lib/hooks/mutations/OnBoardingMutations";
-import { validateImageResolution } from "@/lib/utils";
+import { updateAuthCache, validateImageResolution } from "@/lib/utils";
 import { LogOutIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 

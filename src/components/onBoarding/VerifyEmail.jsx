@@ -11,6 +11,7 @@ import { ErrorToast } from "../ui/toaster";
 import { useResendForgotOtp } from "@/lib/hooks/mutations/AuthMutations";
 import { LogOutIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { updateAuthCache } from "@/lib/utils";
 
 const VerifyEmail = ({ email, handlePrevious }) => {
   const inputs = useRef([]);

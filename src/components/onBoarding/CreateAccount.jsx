@@ -3,7 +3,7 @@ import { useFormik } from "formik";
 import AuthButton from "../auth/AuthButton";
 import AuthInput from "../auth/AuthInput";
 import PhoneInput from "../auth/PhoneInput";
-import { phoneFormatter, phoneToE164 } from "@/lib/utils";
+import { phoneFormatter, phoneToE164, updateAuthCache } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { userDetailsValues } from "@/lib/init/signUpValues";

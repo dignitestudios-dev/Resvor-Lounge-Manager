@@ -12,6 +12,7 @@ import { useVerifyMobileNumber } from "@/lib/hooks/mutations/OnBoardingMutations
 import { ErrorToast } from "../ui/toaster";
 import { LogOutIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { updateAuthCache } from "@/lib/utils";
 
 const VerifyPhone = ({ handleNext, handlePrevious }) => {
   const inputs = useRef([]);
@@ -33,7 +34,9 @@ const VerifyPhone = ({ handleNext, handlePrevious }) => {
         try {
           const response = await verifyMobileMutation.mutateAsync(values);
 
-          updateAuthCache(queryClient, { onboardingStep: response?.data?.onboardingStep });
+          updateAuthCache(queryClient, {
+            onboardingStep: response?.data?.onboardingStep,
+          });
 
           setRequestSendModal(true);
         } catch (error) {
