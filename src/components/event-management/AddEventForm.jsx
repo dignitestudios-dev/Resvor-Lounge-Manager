@@ -1,184 +1,451 @@
-"use client";
-import React, { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+/* eslint-disable react/prop-types */
+import { RxCross2 } from "react-icons/rx";
+import { useState } from "react";
+import InputField from "../auth/InputField";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { Textarea } from "../ui/textarea";
-import ConfirmPopup from "./ConfirmPopup";
-import Link from "next/link";
-import utils from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { locations } from "@/lib/constants";
+import { ErrorToast } from "../ui/toaster";
+import DatePickerField from "./../common/DatePickerField";
+import SelectField from "../common/SelectField";
+import { eventTypeOptions } from "@/lib/constants";
 
-const AddEventForm = ({ isOpen, onOpenChange }) => {
-  // Modal triggers
-  const [confirmPopup, setConfirmPopup] = useState(false);
+const AddEventForm = ({ onClose, onNext }) => {
+  const [startDate, setStartDate] = useState(null);
+  const [startTime, setStartTime] = useState(null);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Event Added");
-    onOpenChange(false);
-    setConfirmPopup(true);
+  // const [selectedType, setSelectedType] = useState([]);
+
+  const [formData, setFormData] = useState({
+    eventType: "",
+    eventName: "",
+    name: "",
+    email: "",
+    phone: "",
+    guestCount: "",
+    preferredMusic: "",
+    specialRequest: "",
+    budget: "",
+    ticketAtDoor: "",
+    description: "",
+  });
+
+  const [endDate, setEndDate] = useState("");
+  const [formErrors, setFormErrors] = useState({});
+
+  // const handleSelect = (option) => {
+  //   const name = option?.name || option;
+  //   setSelectedType([name]);
+  //   // setSelectedType((prev) => {
+  //   //   const exists = prev.some((item) => item.name === name);
+
+  //   //   if (exists) {
+  //   //     return prev.filter((item) => item.name !== name);
+  //   //   } else {
+  //   //     return [...prev, { name }];
+  //   //   }
+  //   // });
+  // };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    if (formErrors[name]) {
+      setFormErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
   };
 
-  const handleFlyerInvite = () => {
-    console.log("Send Flyer Invitation clicked!");
+  const normalizeEventType = (value) => {
+    const normalized = String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "_");
+
+    const aliasMap = {
+      birthday_party: "birthday",
+      birthday: "birthday",
+      wedding: "wedding",
+      engagement: "engagement",
+      ceremony: "ceremony",
+      meeting: "meeting",
+      private_party: "private_party",
+      "private party": "private_party",
+      maintenance: "maintenance",
+      closed: "closed",
+      other: "other",
+    };
+
+    return aliasMap[normalized] || normalized;
+  };
+
+  const handleEventTypeChange = (value) => {
+    setFormData((prev) => ({
+      ...prev,
+      eventType: value,
+    }));
+
+    if (formErrors.eventType) {
+      setFormErrors((prev) => ({
+        ...prev,
+        eventType: "",
+      }));
+    }
+  };
+
+  const validate = () => {
+    const errors = {};
+    const normalizedEventType = normalizeEventType(formData.eventType);
+
+    if (!formData.eventType) {
+      errors.eventType = "Event type is required";
+    } else if (
+      ![
+        "birthday",
+        "wedding",
+        "engagement",
+        "ceremony",
+        "meeting",
+        "private_party",
+        "maintenance",
+        "closed",
+        "other",
+      ].includes(normalizedEventType)
+    ) {
+      errors.eventType = "Enter a valid event type";
+    }
+    if (!formData.eventName) errors.eventName = "Event name is required";
+    if (!startDate) errors.startDate = "Date is required";
+    if (!startTime) errors.startTime = "Start time is required";
+    if (!endDate) errors.endTime = "End time is required";
+    if (!formData.name) errors.name = "Full name is required";
+    if (!formData.email) {
+      errors.email = "Email is required";
+    } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.email)) {
+      errors.email = "Invalid email format";
+    }
+    if (!formData.phone) errors.phone = "Phone number is required";
+    if (!formData.guestCount) {
+      errors.guestCount = "Guest count is required";
+    } else if (isNaN(formData.guestCount) || Number(formData.guestCount) <= 0) {
+      errors.guestCount = "Enter a valid guest count";
+    }
+    if (!formData.budget) {
+      errors.budget = "Budget is required";
+    } else if (isNaN(formData.budget) || Number(formData.budget) <= 0) {
+      errors.budget = "Enter a valid budget";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleNext = () => {
+    if (!validate()) {
+      ErrorToast("Please fill all the required fields.");
+      return;
+    }
+
+    // Prepare startDateTime and endDateTime
+    const startDateTime = new Date(startDate);
+    const [startH, startM] = startTime.split(":");
+    startDateTime.setHours(parseInt(startH), parseInt(startM));
+
+    const endDateTime = new Date(startDate);
+    const [endH, endM] = endDate.split(":");
+    endDateTime.setHours(parseInt(endH), parseInt(endM));
+
+    const eventData = {
+      title: formData.eventName,
+      eventName: formData.eventName,
+      eventType: normalizeEventType(formData.eventType),
+      description: formData.description || formData.eventName,
+      date: startDate.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+      }),
+      startTime: startTime,
+      endTime: endDate,
+      startDateTime: startDateTime.toISOString(),
+      endDateTime: endDateTime.toISOString(),
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      guestCount: Number(formData.guestCount),
+      preferredMusic: formData.preferredMusic || "None",
+      specialRequest: formData.specialRequest || "None",
+      budget: Number(formData.budget),
+      ticketAtDoor: formData.ticketAtDoor || "None",
+      instructions: formData.instructions || "",
+    };
+    onNext(eventData);
   };
 
   return (
-    <>
-      <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogTrigger>
-          <Button className={"border-2 h-12 text-[14px] px-6"}>
-            Add New Event
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="max-w-md rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">
-              Add New Event
-            </DialogTitle>
-            <DialogDescription asChild>
-              <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                <div className="col-span-2 flex flex-col gap-1">
-                  <Label className={"text-black"}>Select Lounge</Label>
+    <div className="fixed inset-0 bg-[#0A150F80] bg-opacity-0 z-50 flex items-center justify-center">
+      <div className="bg-white rounded-[12px] w-[440px] pb-2 h-[700px] overflow-y-scroll ">
+        <div
+          className={`flex justify-between items-center  px-8 pt-4 border-b-2 border-b-gray-300`}
+        >
+          <h2 className="text-[28px] font-bold mb-4">Request Event</h2>
+          <div onClick={onClose} className="cursor-pointer">
+            <RxCross2 className="text-[28px] text-[#181818]" />
+          </div>
+        </div>
+        <div className="px-8 py-4">
+          <div className=" mx-1">
+            <SelectField
+              label="Event Type"
+              name={`eventType`}
+              placeholder="Select Event Type"
+              value={formData.eventType}
+              onChange={handleEventTypeChange}
+              error={formErrors.eventType}
+              touched={!!formErrors.eventType}
+              options={eventTypeOptions}
+            />
+            {/* <FilterSelectableField
+              label="Event Type"
+              placeholder={"Select Event Type"}
+              options={["Anniversary Party", "Birthday Party", "corporate"]}
+              value={selectedType}
+              onChange={handleSelect}
+            /> */}
+          </div>
+          <div className=" mx-1 pt-2">
+            <InputField
+              label="Event Name"
+              text="eventName"
+              placeholder="Event Name"
+              type="text"
+              id={`eventName`}
+              name={`eventName`}
+              maxLength={30}
+              value={formData.eventName}
+              onChange={handleInputChange}
+              error={formErrors.eventName}
+              touched={!!formErrors.eventName}
+            />
+          </div>
+          <div className=" mx-1 pt-2">
+            <InputField
+              label="Description"
+              text="description"
+              placeholder="Event description"
+              type="text"
+              id={`description`}
+              name={`description`}
+              maxLength={100}
+              value={formData.description}
+              onChange={handleInputChange}
+            />
+          </div>
+          <div className="my-2 mx-1">
+            <DatePickerField
+              label="Select Date"
+              value={startDate}
+              onChange={(date) => {
+                setStartDate(date);
+                setFormErrors((prev) => ({ ...prev, startDate: "" }));
+              }}
+            />
+            {formErrors.startDate && (
+              <p className="text-red-600 text-[12px] mt-1">
+                {formErrors.startDate}
+              </p>
+            )}
+          </div>
+          <div className="w-full flex items-center gap-2 my-2 px-1">
+            <div className="w-full">
+              <label className="block text-[14px] font-[500] text-[#181818] mb-2">
+                Start Time
+              </label>
+              <input
+                type="time"
+                data-slot="input"
+                className={`text-black w-full px-4 py-2 text-sm rounded-[15px] bg-white/10 backdrop-blur-[28.9px] ring-1 ${formErrors.startTime ? "ring-red-500" : "ring-[#CACACA]"}
+  focus:ring-2 focus:ring-gray-200 focus:outline-none  placeholder:font-light placeholder:text-[12px] placeholder:text-[#E6E6F0]
+  }`}
+                value={startTime}
+                onChange={(e) => {
+                  setStartTime(e.target.value);
+                  setFormErrors((prev) => ({ ...prev, startTime: "" }));
+                }}
+              />
+              {formErrors.startTime && (
+                <p className="text-red-600 text-[12px] mt-1">
+                  {formErrors.startTime}
+                </p>
+              )}
+            </div>
 
-                  <Select>
-                    <SelectTrigger className={"w-full h-14!"}>
-                      <SelectValue placeholder="Select a Lounge" />
-                    </SelectTrigger>
-                    <SelectContent className={"h-[200px]"}>
-                      <SelectGroup>
-                        <SelectLabel>Lounge</SelectLabel>
-                        {locations.map((month) => (
-                          <SelectItem
-                            className={"text-black"}
-                            value={month.name}
-                            key={month._id}
-                          >
-                            {utils.capitalize(month.name)}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-                {/* Event Name */}
-                <div className="flex flex-col gap-1">
-                  <Label className="text-sm font-medium text-black">
-                    Event Name
-                  </Label>
-                  <Input
-                    name="eventName"
-                    placeholder="Text Here"
-                    className="h-12"
-                  />
-                </div>
+            {/* <TimePickerField
+              text="Start Time"
+              label="Select Time"
+              value={startTime}
+              onChange={setStartTime}
+              open={openField === "start"}
+              onOpen={() =>
+                setOpenField(openField === "start" ? null : "start")
+              }
+              position={"-left-4"}
+            />*/}
 
-                {/* Event Type */}
-                <div className="flex flex-col gap-1">
-                  <Label className="text-sm font-medium text-black">
-                    Event Type
-                  </Label>
-                  <Input
-                    name="eventType"
-                    placeholder="Text Here"
-                    className="h-12"
-                  />
-                </div>
+            <div className="w-full">
+              <label className="block text-[14px] font-[500] text-[#181818] mb-2">
+                End Time
+              </label>
+              <input
+                type="time"
+                data-slot="input"
+                className={`text-black w-full px-4 py-2 text-sm rounded-[15px] bg-white/10 backdrop-blur-[28.9px] ring-1 ${formErrors.endTime ? "ring-red-500" : "ring-[#CACACA]"}
+  focus:ring-2 focus:ring-gray-200 focus:outline-none  placeholder:font-light placeholder:text-[12px] placeholder:text-[#E6E6F0]
+  }`}
+                value={endDate}
+                onChange={(e) => {
+                  setEndDate(e.target.value);
+                  setFormErrors((prev) => ({ ...prev, endTime: "" }));
+                }}
+              />
+              {formErrors.endTime && (
+                <p className="text-red-600 text-[12px] mt-1">
+                  {formErrors.endTime}
+                </p>
+              )}
+            </div>
+            {/*
+            <TimePickerField
+              text="End Time"
+              label="Select Time"
+              value={endDate}
+              onChange={setEndDate}
+              open={openField === "end"}
+              onOpen={() => setOpenField(openField === "end" ? null : "end")}
+              position={"-right-6"}
+            /> */}
+          </div>
+          <div className="w-full flex items-center gap-2 my-2 px-1">
+            <InputField
+              label="Full Name"
+              text="name"
+              placeholder="Full Name"
+              type="text"
+              id={`name`}
+              name={`name`}
+              maxLength={30}
+              value={formData.name}
+              onChange={handleInputChange}
+              error={formErrors.name}
+              touched={!!formErrors.name}
+            />
+            <InputField
+              label="Email address"
+              text="email"
+              placeholder="example@gamil.com"
+              type="email"
+              id={`email`}
+              name={`email`}
+              maxLength={30}
+              value={formData.email}
+              onChange={handleInputChange}
+              error={formErrors.email}
+              touched={!!formErrors.email}
+            />
+          </div>
+          <div className="w-full flex items-center gap-2 my-2 px-1">
+            <InputField
+              label="Phone number"
+              text="phone"
+              placeholder="Phone number"
+              type="text"
+              id={`phone`}
+              name={`phone`}
+              maxLength={30}
+              value={formData.phone}
+              onChange={handleInputChange}
+              error={formErrors.phone}
+              touched={!!formErrors.phone}
+            />
+            <InputField
+              label="Guest Count"
+              text="guest"
+              placeholder="Add here"
+              type="text"
+              id={`guest`}
+              name={`guestCount`}
+              maxLength={30}
+              value={formData.guestCount}
+              onChange={handleInputChange}
+              error={formErrors.guestCount}
+              touched={!!formErrors.guestCount}
+            />
+          </div>
+          <div className="w-full flex items-center gap-2 my-2 px-1">
+            <InputField
+              label="Preferred Music Genre"
+              text="music"
+              placeholder="Add here"
+              type="text"
+              id={`music`}
+              name={`preferredMusic`}
+              maxLength={30}
+              value={formData.preferredMusic}
+              onChange={handleInputChange}
+            />
+            <InputField
+              label="Special Requests"
+              text="special"
+              placeholder="Add here"
+              type="text"
+              id={`special`}
+              name={`specialRequest`}
+              maxLength={30}
+              value={formData.specialRequest}
+              onChange={handleInputChange}
+            />
+          </div>
+          <div className="w-full flex items-center gap-2 my-2 px-1">
+            <InputField
+              label="Budget"
+              text="budget"
+              placeholder="Add here"
+              type="text"
+              id={`budget`}
+              name={`budget`}
+              maxLength={30}
+              value={formData.budget}
+              onChange={handleInputChange}
+              error={formErrors.budget}
+              touched={!!formErrors.budget}
+            />
+            <InputField
+              label="Ticket at door (optional)"
+              text="ticket"
+              placeholder="Add here"
+              type="text"
+              id={`ticket`}
+              name={`ticketAtDoor`}
+              maxLength={30}
+              value={formData.ticketAtDoor}
+              onChange={handleInputChange}
+            />
+          </div>
 
-                {/* Guest Count */}
-                <div className="flex flex-col gap-1">
-                  <Label className="text-sm font-medium text-black">
-                    Guest Count
-                  </Label>
-                  <Input
-                    name="guestCount"
-                    type="number"
-                    placeholder="Text Here"
-                    className="h-12"
-                  />
-                </div>
-
-                {/* Packages */}
-                <div className="flex flex-col gap-1">
-                  <Label className="text-sm font-medium text-black">
-                    Packages
-                  </Label>
-                  <Input
-                    name="packages"
-                    placeholder="Text Here"
-                    className="h-12"
-                  />
-                </div>
-
-                {/* Music */}
-                <div className="flex flex-col gap-1">
-                  <Label className="text-sm font-medium text-black">
-                    Music
-                  </Label>
-                  <Input
-                    name="music"
-                    placeholder="Text Here"
-                    className="h-12"
-                  />
-                </div>
-
-                {/* Description */}
-                <div className="flex flex-col gap-1">
-                  <Label className="text-sm font-medium text-black">
-                    Additional Description
-                  </Label>
-                  <Textarea
-                    name="description"
-                    placeholder="Describe your event"
-                    className="min-h-[100px]"
-                  />
-                </div>
-
-                {/* Buttons */}
-                <div className="space-y-3 pt-2">
-                  <Button type="submit" className="w-full h-12 text-lg">
-                    Add Now
-                  </Button>
-                  <Link
-                    href={"/dashboard/campaign-and-flyers"}
-                    className="w-full"
-                  >
-                    <Button
-                      type="button"
-                      onClick={handleFlyerInvite}
-                      className="w-full h-12 text-lg bg-gray-200 text-gray-800 hover:bg-gray-300"
-                      variant="secondary"
-                    >
-                      Send Flyer Invitation
-                    </Button>
-                  </Link>
-                </div>
-              </form>
-            </DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
-
-      <ConfirmPopup isOpen={confirmPopup} onOpenChange={setConfirmPopup} />
-    </>
+          <div>
+            <div className="mt-4 px-1">
+              <Button type="button" onClick={handleNext}>
+                {" "}
+                Submit{" "}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

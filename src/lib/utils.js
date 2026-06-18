@@ -326,4 +326,29 @@ export function updateAuthCache(queryClient, patch) {
   });
 }
 
+export const getBookingStatusStyles = (status) => {
+  switch (status) {
+    case "awaiting_payment":
+      return " text-yellow-800";
+
+    case "confirmed":
+      return " text-green-700";
+
+    case "failed":
+      return " text-red-700";
+
+    case "cancelled":
+      return " text-gray-700";
+
+    case "rejected":
+      return " text-rose-700";
+
+    case "completed":
+      return " text-blue-700";
+
+    default:
+      return " text-slate-700";
+  }
+};
+
 export default utils;

@@ -7,23 +7,23 @@ export default function LoungeTags({
   value = [],
   onChange,
   placeholder = "Type and press Enter to add tags",
-  className,
+  className = "",
   error,
   touched,
   maxTags,
+  variant = "dark", // dark | light
 }) {
   const [inputValue, setInputValue] = useState("");
+
+  const isDark = variant === "dark";
 
   const handleAddTag = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
 
-      // Trim the input value to remove leading and trailing spaces
       const trimmedValue = inputValue.trim();
 
-      // Validate: don't add empty strings or duplicates
       if (trimmedValue && !value.includes(trimmedValue)) {
-        // Check max tags limit
         if (maxTags && value.length >= maxTags) {
           return;
         }
@@ -44,11 +44,16 @@ export default function LoungeTags({
 
   return (
     <div>
-      <label className="block text-[14px] font-[500] text-white mb-2">
+      {/* Label */}
+      <label
+        className={`block text-[14px] font-[500] mb-2 ${
+          isDark ? "text-white" : "text-gray-700"
+        }`}
+      >
         {label}
       </label>
 
-      {/* Input Field */}
+      {/* Input */}
       <div className="relative mb-3">
         <input
           type="text"
@@ -56,25 +61,78 @@ export default function LoungeTags({
           onChange={handleInputChange}
           onKeyDown={handleAddTag}
           placeholder={placeholder}
-          className={`w-full px-4 py-2 text-white text-sm rounded-[15px] bg-white/10 backdrop-blur-[28.9px] ring-1 ring-[#CACACA]
-  focus:ring-2 focus:ring-gray-200 focus:outline-none placeholder:font-light placeholder:text-[12px] placeholder:text-[#E6E6F0] ${
-    className || ""
-  }`}
+          className={`
+            w-full px-4 py-3 text-sm rounded-[15px]
+            focus:outline-none transition-all duration-200
+            placeholder:text-[12px] placeholder:font-light
+            disabled:opacity-50 disabled:cursor-not-allowed
+            ${className}
+
+            ${
+              isDark
+                ? `
+                  text-white
+                  bg-white/10
+                  backdrop-blur-[28px]
+                  border border-white/20
+                  placeholder:text-gray-300
+                  focus:ring-2 focus:ring-white/20
+                `
+                : `
+                  text-gray-800
+                  bg-white
+                  border border-gray-300
+                  placeholder:text-gray-400
+                  focus:ring-2 focus:ring-blue-200
+                  focus:border-blue-500
+                `
+            }
+          `}
         />
       </div>
-      {/* Tags Display */}
+
+      {/* Tags */}
       {value.length > 0 && (
-        <div className=" flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2">
           {value.map((tag, index) => (
             <div
               key={index}
-              className="flex items-center gap-2 bg-white/20 backdrop-blur-[28.9px] px-3 py-1 rounded-full ring-1 ring-[#CACACA]"
+              className={`
+                flex items-center gap-2 px-3 py-1 rounded-full
+                transition-all duration-200
+                ${
+                  isDark
+                    ? `
+                      bg-white/20
+                      backdrop-blur-[28px]
+                      border border-white/20
+                    `
+                    : `
+                      bg-gray-100
+                      border border-gray-300
+                    `
+                }
+              `}
             >
-              <span className="text-white text-sm">{tag}</span>
+              <span
+                className={`text-sm ${
+                  isDark ? "text-white" : "text-gray-800"
+                }`}
+              >
+                {tag}
+              </span>
+
               <button
                 type="button"
                 onClick={() => handleRemoveTag(index)}
-                className="text-white hover:text-red-400 transition-colors flex items-center justify-center"
+                className={`
+                  transition-colors flex items-center justify-center
+                  ${
+                    isDark
+                      ? "text-white hover:text-red-400"
+                      : "text-gray-600 hover:text-red-500"
+                  }
+                `}
               >
                 <IoMdClose size={16} />
               </button>
@@ -83,14 +141,18 @@ export default function LoungeTags({
         </div>
       )}
 
-      {/* Error Message */}
+      {/* Error */}
       {error && touched && (
-        <p className="text-red-600 text-[12px] mt-1">{error}</p>
+        <p className="text-red-500 text-[12px] mt-1">{error}</p>
       )}
 
-      {/* Max Tags Info */}
+      {/* Max Tags Count */}
       {maxTags && (
-        <p className="text-[#A0A0A0] text-[12px] mt-1">
+        <p
+          className={`text-[12px] mt-1 ${
+            isDark ? "text-gray-400" : "text-gray-500"
+          }`}
+        >
           {value.length}/{maxTags} tags
         </p>
       )}

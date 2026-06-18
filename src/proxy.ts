@@ -40,10 +40,23 @@ export function proxy(request: NextRequest) {
   | STATE 1 — FULLY AUTHENTICATED USER (access_token)
   |--------------------------------------------------------------------------
   */
+  // if (token && tokenType === "access_token") {
+  //   if (isAuthRoute) {
+  //     return NextResponse.redirect(new URL(DEFAULT_REDIRECT, request.url));
+  //   }
+  //   return NextResponse.next();
+  // }
+
   if (token && tokenType === "access_token") {
-    if (isAuthRoute) {
-      return NextResponse.redirect(new URL(DEFAULT_REDIRECT, request.url));
+    // Allow authenticated users to access signup temporarily
+    if (pathname === "/auth/signup") {
+      return NextResponse.next();
     }
+
+    if (isAuthRoute) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+
     return NextResponse.next();
   }
 

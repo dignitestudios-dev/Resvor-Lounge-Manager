@@ -1,32 +1,49 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import LoungeModal from "./LoungeModal";
+import CreateLoungeModal from "../lounge-components/CreateLoungeModal";
 
 export default function LoungeModalWrapper() {
   const [isOpen, setIsOpen] = useState(false);
-  const searchParams = useSearchParams();
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
-    // Only open modal if user is coming from login screen
-    const fromLogin = searchParams.get("fromLogin");
+
+    const fromLogin = localStorage.getItem("fromLogin");
 
     if (fromLogin === "true") {
       setIsOpen(true);
+      localStorage.removeItem("fromLogin");
     }
-  }, [searchParams]);
+  }, []);
 
   if (!isMounted) return null;
 
+  const handleAddLounge = () => {
+    setIsOpen(false);
+    setIsCreateOpen(true);
+  };
+
   return (
-    <LoungeModal
-      isOpen={isOpen}
-      onClose={() => {
-        setIsOpen(false);
-      }}
-    />
+    <>
+      <LoungeModal
+        isOpen={isOpen}
+        onClose={() => {
+          setIsOpen(false);
+          localStorage.removeItem("fromLogin");
+        }}
+        onAddLounge={handleAddLounge}
+      />
+      <CreateLoungeModal
+        open={isCreateOpen}
+        setOpen={setIsCreateOpen}
+        handleNext={() => {
+          setIsCreateOpen(false);
+        }}
+      />
+    </>
   );
 }

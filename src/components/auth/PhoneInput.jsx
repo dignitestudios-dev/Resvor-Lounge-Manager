@@ -11,16 +11,9 @@ const PhoneInput = ({
   error,
   touched,
   label,
+  variant = "dark", // dark | light
 }) => {
-  // const handlePhoneChange = (e) => {
-  //   const formattedValue = e.target.value.replace(/[^0-9]/g, "");
-  //   onChange({
-  //     target: {
-  //       name: e.target.name,
-  //       value: formattedValue,
-  //     },
-  //   });
-  // };
+  const isDark = variant === "dark";
 
   const handleKeyPress = (e) => {
     if (!/[0-9]/.test(e.key)) {
@@ -30,44 +23,99 @@ const PhoneInput = ({
 
   return (
     <div>
-      <label htmlFor="" className="text-[14px] font-[500] text-white">
+      {/* Label */}
+      <label
+        htmlFor={id}
+        className={`block text-[14px] font-[500] mb-2 ${
+          isDark ? "text-white" : "text-gray-700"
+        }`}
+      >
         {label}
       </label>
+
+      {/* Wrapper */}
       <div
-        className={`flex  items-center p-0 w-full pl-2 outline-none font-[500] rounded-[15px]
-      border border-[#CACACA] placeholder:text-[12px] placeholder:font-[400] mt-[5px]
-      placeholder:text-[#E6E6F0] text-[#E6E6F0] bg-white/10 backdrop-blur-[28.9px] h-full px-3 text-sm`}
+        className={`
+          flex items-center w-full px-3 py-2 rounded-[15px]
+          transition-all duration-200
+          ${
+            isDark
+              ? `
+                bg-white/10
+                backdrop-blur-[28px]
+                border border-white/20
+                text-white
+                focus-within:ring-2 focus-within:ring-white/20
+              `
+              : `
+                bg-white
+                border border-gray-300
+                text-gray-800
+                focus-within:ring-2 focus-within:ring-blue-200
+                focus-within:border-blue-500
+              `
+          }
+        `}
       >
-        <span className="text-xl pr-2">
-          <img
-            src="https://flagcdn.com/w320/us.png"
-            alt="US flag"
-            className="w-6 h-4 mr-2"
-          />
+        {/* Flag */}
+        <img
+          src="https://flagcdn.com/w320/us.png"
+          alt="US flag"
+          className="w-6 h-4 mr-2 rounded-sm object-cover"
+        />
+
+        {/* Country Code */}
+        <span
+          className={`text-[13px] font-[500] w-[40px] text-center ${
+            isDark ? "text-gray-200" : "text-gray-700"
+          }`}
+        >
+          +1
         </span>
 
-        <span className="text-[12px] font-[400] w-[40px] text-center">+1</span>
+        {/* Divider */}
+        <div
+          className={`border-l h-6 mx-2 ${
+            isDark ? "border-white/20" : "border-gray-300"
+          }`}
+        />
 
-        <div className="border-l h-6 mx-2"></div>
-
+        {/* Input */}
         <input
           type="text"
-          className={`w-full text-white py-2 text-sm rounded-[15px] bg-transparent ring-1 ring-transparent 
-            focus:ring-2 focus:ring-transparent focus:outline-none placeholder:font-light placeholder:text-[12px] placeholder:text-[#E6E6F0]`}
-          placeholder="Enter Phone Number"
           value={value}
           onChange={onChange}
           onBlur={onBlur}
           onKeyPress={handleKeyPress}
           id={id}
-          maxLength={14}
           name={name}
+          maxLength={14}
           disabled={isDisabled}
           autoComplete={autoComplete}
+          placeholder="Enter Phone Number"
+          className={`
+            w-full bg-transparent text-sm py-1
+            focus:outline-none
+            placeholder:text-[12px] placeholder:font-light
+            disabled:opacity-50 disabled:cursor-not-allowed
+            ${
+              isDark
+                ? `
+                  text-white
+                  placeholder:text-gray-300
+                `
+                : `
+                  text-gray-800
+                  placeholder:text-gray-400
+                `
+            }
+          `}
         />
       </div>
+
+      {/* Error */}
       {error && touched && (
-        <p className="text-red-600 text-[12px] mt-1">{error}</p>
+        <p className="text-red-500 text-[12px] mt-1">{error}</p>
       )}
     </div>
   );

@@ -47,6 +47,7 @@ const Login = () => {
             router.push("/auth/signup");
           } else {
             // router.push("/dashboard");
+            localStorage.setItem("fromLogin", "true");
             router.replace("/dashboard");
           }
         } catch (error) {

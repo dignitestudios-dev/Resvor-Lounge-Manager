@@ -1,208 +1,111 @@
 "use client";
 import React from "react";
 import CustomPagination from "@/components/common/CustomPagination";
-import utils from "@/lib/utils";
+import utils, { getBookingStatusStyles } from "@/lib/utils";
 import { IoIosArrowForward } from "react-icons/io";
 import { useRouter } from "next/navigation";
 
-const Table = ({ filters = {} }) => {
+const Table = ({
+  filters = {},
+  bookings = [],
+  isLoading = false,
+  currentPage = 1,
+  totalPages = 1,
+  onPageChange = () => {},
+}) => {
+  console.log("🚀 ~ Table ~ bookings:", bookings);
   const router = useRouter();
-  const [filteredEvents, setFilteredEvents] = React.useState([]);
+  const [filteredBookings, setFilteredBookings] = React.useState([]);
   const [sortConfig, setSortConfig] = React.useState({
     key: "loungeName",
     direction: "asc",
   });
 
-  const events = [
-    {
-      bookingId: "AD111515",
-      user: {
-        name: "Christine Easom",
-        profileImage: "/images/profile.png",
-      },
-      loungeName: "First Lounge",
-      guestLimit: 20,
-      eventType: "Birthday Party",
-      eventDate: "Jan 02, 2025",
-      eventTime: "08:00 - 09:00",
-      ticketDoor: 20,
-    },
-    {
-      bookingId: "AD111516",
-      user: {
-        name: "John Smith",
-        profileImage: "/images/profile.png",
-      },
-      loungeName: "First Lounge",
-      guestLimit: 15,
-      eventType: "Wedding Reception",
-      eventDate: "Jan 03, 2025",
-      eventTime: "02:00 PM - 04:00 PM",
-      ticketDoor: 15,
-    },
-    {
-      bookingId: "AD111517",
-      user: {
-        name: "Sarah Johnson",
-        profileImage: "/images/profile.png",
-      },
-      loungeName: "First Lounge",
-      guestLimit: 30,
-      eventType: "Corporate Event",
-      eventDate: "Jan 05, 2025",
-      eventTime: "06:00 PM - 09:00 PM",
-      ticketDoor: 28,
-    },
-    {
-      bookingId: "AD111518",
-      user: {
-        name: "Mike Wilson",
-        profileImage: "/images/profile.png",
-      },
-      loungeName: "First Lounge",
-      guestLimit: 10,
-      eventType: "Anniversary",
-      eventDate: "Jan 07, 2025",
-      eventTime: "07:00 PM - 10:00 PM",
-      ticketDoor: 10,
-    },
-    {
-      bookingId: "AD111519",
-      user: {
-        name: "Emily Davis",
-        profileImage: "/images/profile.png",
-      },
-      loungeName: "First Lounge",
-      guestLimit: 25,
-      eventType: "Baby Shower",
-      eventDate: "Jan 08, 2025",
-      eventTime: "11:00 AM - 02:00 PM",
-      ticketDoor: 22,
-    },
-    {
-      bookingId: "AD111520",
-      user: {
-        name: "Robert Brown",
-        profileImage: "/images/profile.png",
-      },
-      loungeName: "First Lounge",
-      guestLimit: 50,
-      eventType: "Conference",
-      eventDate: "Jan 10, 2025",
-      eventTime: "09:00 AM - 05:00 PM",
-      ticketDoor: 45,
-    },
-    {
-      bookingId: "AD111521",
-      user: {
-        name: "Lisa Anderson",
-        profileImage: "/images/profile.png",
-      },
-      loungeName: "Second Lounge",
-      guestLimit: 12,
-      eventType: "Dinner Party",
-      eventDate: "Jan 12, 2025",
-      eventTime: "07:30 PM - 11:00 PM",
-      ticketDoor: 12,
-    },
-    {
-      bookingId: "AD111522",
-      user: {
-        name: "David Miller",
-        profileImage: "/images/profile.png",
-      },
-      loungeName: "First Lounge",
-      guestLimit: 40,
-      eventType: "Product Launch",
-      eventDate: "Jan 15, 2025",
-      eventTime: "03:00 PM - 06:00 PM",
-      ticketDoor: 38,
-    },
-    {
-      bookingId: "AD111523",
-      user: {
-        name: "Jennifer Taylor",
-        profileImage: "/images/profile.png",
-      },
-      loungeName: "Second Lounge",
-      guestLimit: 18,
-      eventType: "Graduation Party",
-      eventDate: "Jan 18, 2025",
-      eventTime: "01:00 PM - 04:00 PM",
-      ticketDoor: 16,
-    },
-    {
-      bookingId: "AD111524",
-      user: {
-        name: "Kevin Martin",
-        profileImage: "/images/profile.png",
-      },
-      loungeName: "Second Lounge",
-      guestLimit: 35,
-      eventType: "Networking Event",
-      eventDate: "Jan 20, 2025",
-      eventTime: "05:00 PM - 08:00 PM",
-      ticketDoor: 32,
-    },
-  ];
+  // Transform API data to match table structure
+  const transformBookingData = (apiBookings) => {
+    return apiBookings.map((booking) => {
+      const startTime = new Date(booking.startTime);
+      const endTime = new Date(booking.endTime);
+
+      const bookingEventTime = `${utils.formatTime(startTime)} - ${utils.formatTime(endTime)}`;
+      const userName =
+        `${booking.userId?.firstName || ""} ${booking.userId?.lastName || ""}`.trim();
+
+      return {
+        _id: booking._id,
+        bookingId: booking._id,
+        user: {
+          name: userName,
+          profileImage: "/images/profile.png",
+        },
+        loungeName: booking.loungeId?.name || "Unknown Lounge",
+        guestLimit: booking.guestCount,
+        eventType: booking.status || "Booking",
+        eventDate: utils.formatDateWithName(booking.bookingDate),
+        eventTime: bookingEventTime,
+        ticketDoor: booking.guestCount,
+        ...booking, // Include original data for reference
+      };
+    });
+  };
+
+  const transformedBookings = React.useMemo(() => {
+    return transformBookingData(bookings);
+  }, [bookings]);
 
   React.useEffect(() => {
-    let filtered = [...events];
+    let filtered = [...transformedBookings];
 
     if (filters.startDate) {
       const startDate = new Date(filters.startDate);
-      filtered = filtered.filter((event) => {
-        const eventDate = new Date(event.eventDate);
-        return eventDate >= startDate;
+      filtered = filtered.filter((booking) => {
+        const bookingDate = new Date(booking.bookingDate);
+        return bookingDate >= startDate;
       });
     }
 
     if (filters.endDate) {
       const endDate = new Date(filters.endDate);
       endDate.setHours(23, 59, 59, 999);
-      filtered = filtered.filter((event) => {
-        const eventDate = new Date(event.eventDate);
-        return eventDate <= endDate;
+      filtered = filtered.filter((booking) => {
+        const bookingDate = new Date(booking.bookingDate);
+        return bookingDate <= endDate;
       });
     }
 
     if (filters.selectedMonth) {
       const monthIndex = new Date(`${filters.selectedMonth} 1`).getMonth();
-      filtered = filtered.filter((event) => {
-        const eventDate = new Date(event.eventDate);
-        return eventDate.getMonth() === monthIndex;
+      filtered = filtered.filter((booking) => {
+        const bookingDate = new Date(booking.bookingDate);
+        return bookingDate.getMonth() === monthIndex;
       });
     }
 
     if (filters.selectedLounge) {
-      filtered = filtered.filter((event) => {
-        return event.loungeName === filters.selectedLounge;
+      filtered = filtered.filter((booking) => {
+        return booking.loungeName === filters.selectedLounge;
       });
     }
 
-    setFilteredEvents(filtered);
-  }, [filters]);
+    setFilteredBookings(filtered);
+  }, [filters, transformedBookings]);
 
-  const displayedEvents = Object.keys(filters).some((key) => filters[key])
-    ? filteredEvents
-    : events;
+  const displayedBookings = Object.keys(filters).some((key) => filters[key])
+    ? filteredBookings
+    : transformedBookings;
 
-  const onPageChange = (page) => {
-    // getAllEvents(page);
+  const handleRowClick = (bookingId) => {
+    router.push(`/dashboard/bookings/${bookingId}`);
   };
 
-  const handleRowClick = (index) => {
-    router.push(`/dashboard/bookings/${index}`);
-  };
-
-  const sortedServices = [...displayedEvents].sort((a, b) => {
+  const sortedBookings = [...displayedBookings].sort((a, b) => {
     if (!sortConfig.key) return 0;
 
     let valA = a[sortConfig.key];
     let valB = b[sortConfig.key];
 
     // Convert guestLimit to number for numeric sorting
-    if (sortConfig.key === "qty") {
+    if (sortConfig.key === "guestLimit") {
       valA = parseInt(valA, 10);
       valB = parseInt(valB, 10);
     }
@@ -222,15 +125,16 @@ const Table = ({ filters = {} }) => {
 
   return (
     <CustomPagination
-      loading={false}
+      loading={isLoading}
       onPageChange={onPageChange}
-      totalPages={10}
+      totalPages={totalPages}
+      currentPage={currentPage}
     >
       <div className="bg-white rounded-xl overflow-y-auto">
         <table className="w-full">
           <thead className="sticky top-0 z-10">
             <tr className="bg-[#E8E8FF]">
-              <th className="px-4 py-5 text-left text-nowrap">Booking ID</th>
+              {/* <th className="px-4 py-5 text-left text-nowrap">Booking ID</th> */}
               <th className="px-4 py-5 text-left text-nowrap">Users</th>
               <th
                 onClick={() => requestSort("loungeName")}
@@ -248,43 +152,49 @@ const Table = ({ filters = {} }) => {
                 )}
               </th>
               <th className="px-4 py-5 text-left text-nowrap">Guest Limit</th>
-              <th className="px-4 py-5 text-left text-nowrap">Event Type</th>
-              <th className="px-4 py-5 text-left text-nowrap">Event Date</th>
-              <th className="px-4 py-5 text-left text-nowrap">Event Time</th>
+              <th className="px-4 py-5 text-left text-nowrap">Date</th>
+              <th className="px-4 py-5 text-left text-nowrap">Time</th>
+              <th className="px-4 py-5 text-left text-nowrap">Status</th>
               <th className="px-4 py-5 text-left text-nowrap">Ticket Door</th>
               <th className="px-4 py-5 text-center text-nowrap">Action</th>
             </tr>
           </thead>
           <tbody className="mt-10">
-            {sortedServices?.map((event, index) => (
+            {sortedBookings?.map((booking) => (
               <tr
-                key={index}
-                onClick={() => handleRowClick(index)}
+                key={booking._id}
+                onClick={() => handleRowClick(booking._id)}
                 className="border-b border-[#D4D4D4] cursor-pointer hover:bg-gray-50 transition-all"
               >
-                <td className="px-4 py-6">{event?.bookingId}</td>
+                {/* <td className="px-4 py-6">{event?.bookingId}</td> */}
                 <td className="px-4 py-6">
                   <div className="flex items-center gap-3">
                     <div
                       className="h-[43px] w-[43px] rounded-full bg-cover bg-center bg-primary"
                       style={{
-                        backgroundImage: `url(${event?.user?.profileImage})`,
+                        backgroundImage: `url(${booking?.user?.profileImage})`,
                       }}
                     />
-                    {event?.user?.name}
+                    {booking?.user?.name}
                   </div>
                 </td>
-                <td className="px-4 py-6">{event?.loungeName}</td>
+                <td className="px-4 py-6">{booking?.loungeName}</td>
                 <td className="px-4 py-6">
-                  {utils.formatNumber(event?.guestLimit)}
+                  {utils.formatNumber(booking?.guestLimit)}
+                </td>
+                <td className="px-4 py-6">{booking?.eventDate}</td>
+                <td className="px-4 py-6">{booking?.eventTime}</td>
+                <td className="px-4 py-6">
+                  <span
+                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getBookingStatusStyles(
+                      booking?.status,
+                    )}`}
+                  >
+                    {utils.capitalize(booking?.status?.replaceAll("_", " "))}
+                  </span>
                 </td>
                 <td className="px-4 py-6">
-                  {utils.capitalize(event?.eventType)}
-                </td>
-                <td className="px-4 py-6">{event?.eventDate}</td>
-                <td className="px-4 py-6">{event?.eventTime}</td>
-                <td className="px-4 py-6">
-                  {utils.formatNumber(event?.ticketDoor)}
+                  {utils.formatNumber(booking?.ticketDoor)}
                 </td>
                 <td className="px-4 py-6 text-nowrap">
                   <div className="flex justify-center items-center cursor-pointer">

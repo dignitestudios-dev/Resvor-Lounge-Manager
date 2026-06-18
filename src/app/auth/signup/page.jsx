@@ -104,28 +104,30 @@ export default function SignUp() {
 
   const renderedScreen = useMemo(() => {
     switch (onboardingStep) {
-      case "create_account":
-        return <CreateAccount setEmail={setEmail} />;
-      case "verify_email":
-        return (
-          <VerifyEmail
-            email={email || contextValue?.authData?.data?.user?.email}
-            handlePrevious={handleLogout}
-          />
-        );
-      case "verify_mobile":
-        return (
-          <VerifyPhone
-            email={email || contextValue?.authData?.data?.user?.email}
-            handlePrevious={handleLogout}
-          />
-        );
-      case "create_lounge":
-        return <PersonalDetails handlePrevious={handleLogout} />;
-      case "completed":
-        return <Subscription handlePrevious={handleLogout} />;
+      // case "create_account":
+      //   return <CreateAccount setEmail={setEmail} />;
+      // case "verify_email":
+      //   return (
+      //     <VerifyEmail
+      //       email={email || contextValue?.authData?.data?.user?.email}
+      //       handlePrevious={handleLogout}
+      //     />
+      //   );
+      // case "verify_mobile":
+      //   return (
+      //     <VerifyPhone
+      //       email={email || contextValue?.authData?.data?.user?.email}
+      //       handlePrevious={handleLogout}
+      //     />
+      //   );
+      // case "create_lounge":
+      //   return <PersonalDetails handlePrevious={handleLogout} />;
+      // case "completed":
+      //   return <Subscription handlePrevious={handleLogout} />;
+
       default:
-        return <CreateAccount setEmail={setEmail} />;
+        return <Subscription handlePrevious={handleLogout} />;
+      // return <CreateAccount setEmail={setEmail} />;
     }
   }, [onboardingStep, contextValue?.authData, email]);
 

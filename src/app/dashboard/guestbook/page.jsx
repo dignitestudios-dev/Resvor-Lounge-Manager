@@ -4,9 +4,14 @@ import Table from "@/components/guestbook/Table";
 import DateAndMonthFilter from "@/components/common/DateAndMonthFilter";
 import { Button } from "@/components/ui/button";
 import AddGuestForm from "@/components/guestbook/AddGuestForm";
+import { useGetGuestbook } from "@/lib/hooks/queries/useGuestbook";
 
 const Guest = () => {
   const [openForm, setOpenForm] = useState(false);
+  const { data: guestbookData, isLoading } = useGetGuestbook();
+  
+  // Extract guests array from the response
+  const guests = guestbookData?.data || [];
   return (
     <div>
       <div className="flex justify-between items-center gap-10 mt-2">
@@ -33,7 +38,7 @@ const Guest = () => {
         </div>
       </div>
       <div className="mt-4">
-        <Table />
+        <Table guests={guests} isLoading={isLoading} />
       </div>
     </div>
   );

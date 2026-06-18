@@ -139,3 +139,15 @@ export const locations = [
     hours: "9 AM - 6 PM, Monday To Saturday",
   },
 ];
+
+export const eventTypeOptions = [
+  "Birthday Party",
+  "Wedding",
+  "Engagement",
+  "Ceremony",
+  "Meeting",
+  "Private Party",
+  "Maintenance",
+  "Closed",
+  "Other",
+];

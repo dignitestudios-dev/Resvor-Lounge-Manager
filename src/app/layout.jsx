@@ -22,12 +22,12 @@ export default function RootLayout({ children }) {
       <body
         className={`${inter.className} antialiased bg-[#F4F4FF] overflow-x-hidden`}
       >
-         <Toaster
-                  position="bottom-right"
-                  toastOptions={{
-                    duration: 3000,
-                  }}
-                />
+        <Toaster
+          position="bottom-right"
+          toastOptions={{
+            duration: 3000,
+          }}
+        />
         <ReactQueryProvider>{children}</ReactQueryProvider>
       </body>
     </html>

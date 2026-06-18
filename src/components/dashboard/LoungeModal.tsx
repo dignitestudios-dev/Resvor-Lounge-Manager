@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useGetLounges } from "@/lib/hooks/queries/useLounges";
+import { useSwitchLounge } from "./../../lib/hooks/mutations/LoungeMutations";
+import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
 
 interface Lounge {
   _id: string;
@@ -18,11 +20,17 @@ interface Lounge {
 interface LoungeModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onAddLounge?: () => void;
 }
 
-export default function LoungeModal({ isOpen, onClose }: LoungeModalProps) {
+export default function LoungeModal({
+  isOpen,
+  onClose,
+  onAddLounge,
+}: LoungeModalProps) {
   const { data: lounges = [], isLoading } = useGetLounges();
   const [selectedLoungeId, setSelectedLoungeId] = useState<string>("");
+  const switchLoungeMutation = useSwitchLounge();
 
   // Set default selected lounge when data loads
   useEffect(() => {
@@ -30,6 +38,29 @@ export default function LoungeModal({ isOpen, onClose }: LoungeModalProps) {
       setSelectedLoungeId(lounges[0]._id);
     }
   }, [lounges, selectedLoungeId]);
+
+  const handleSubmit = async () => {
+    try {
+      if (!selectedLoungeId) {
+        ErrorToast("Please select a lounge first");
+        return;
+      }
+
+      await switchLoungeMutation.mutateAsync({
+        loungeId: selectedLoungeId,
+      });
+
+      SuccessToast("Lounge switched successfully");
+      onClose();
+    } catch (error: any) {
+      ErrorToast(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Failed to switch lounge. Please try again.",
+      );
+      console.log("Switch lounge error:", error);
+    }
+  };
 
   // Prevent background scrolling when modal is open
   useEffect(() => {
@@ -147,7 +178,10 @@ export default function LoungeModal({ isOpen, onClose }: LoungeModalProps) {
           )}
 
           {/* Dotted Placeholder Card: "+ Add a New Lounge Profile" */}
-          <button className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 hover:border-slate-400 bg-white p-6 transition-colors group h-full min-h-[178px]">
+          <button
+            onClick={onAddLounge}
+            className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 hover:border-slate-400 bg-white p-6 transition-colors group h-full min-h-[178px]"
+          >
             <span className="text-sm font-semibold text-slate-600 group-hover:text-slate-800 transition-colors underline decoration-1 underline-offset-2">
               + Add a New Lounge Profile
             </span>
@@ -157,13 +191,11 @@ export default function LoungeModal({ isOpen, onClose }: LoungeModalProps) {
         {/* Footer Actions (Centered Dark Blue Action Button) */}
         <div className="flex justify-center mt-2">
           <button
-            onClick={() => {
-              // Add actual login logic here if needed
-              onClose();
-            }}
-            className="w-full max-w-[400px] bg-[#000040] hover:bg-[#000060] text-white text-sm font-medium py-3 rounded-xl shadow-md transition-colors tracking-wide"
+            onClick={handleSubmit}
+            disabled={switchLoungeMutation.isPending}
+            className="w-full max-w-[400px] bg-[#000040] hover:bg-[#000060] disabled:bg-gray-400 disabled:cursor-not-allowed text-white text-sm font-medium py-3 rounded-xl shadow-md transition-colors tracking-wide"
           >
-            Submit
+            {switchLoungeMutation.isPending ? "Switching..." : "Submit"}
           </button>
         </div>
       </div>

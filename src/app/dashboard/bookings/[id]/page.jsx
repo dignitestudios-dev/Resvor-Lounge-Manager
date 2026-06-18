@@ -1,16 +1,57 @@
 "use client";
 import React from "react";
 import { useParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { useGetBookingDetail } from "@/lib/hooks/queries/useBookingDetail";
+import utils, { getBookingStatusStyles } from "@/lib/utils";
 
-const EventDetails = () => {
+const BookingDetails = () => {
   const params = useParams();
-  const eventId = params.id;
+  const bookingId = params.id;
+
+  const { data: bookingData, isLoading } = useGetBookingDetail(bookingId);
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex justify-center items-center">
+        <div className="text-lg font-semibold">Loading booking details...</div>
+      </div>
+    );
+  }
+
+  if (!bookingData) {
+    return (
+      <div className="flex-1 flex justify-center items-center">
+        <div className="text-lg font-semibold text-red-600">
+          Booking not found
+        </div>
+      </div>
+    );
+  }
+
+  // Parse dates and times
+  const startTime = new Date(bookingData.startTime);
+  const endTime = new Date(bookingData.endTime);
+  const bookingDate = utils.formatDateWithName(bookingData.bookingDate);
+  const startTimeFormatted = utils.formatTime(startTime);
+  const endTimeFormatted = utils.formatTime(endTime);
+  const tableInfo = bookingData.tableIds?.[0] || {};
+  const userName =
+    `${bookingData.userId?.firstName || ""} ${bookingData.userId?.lastName || ""}`.trim() ||
+    "Unknown";
 
   return (
     <div className="flex-1 flex flex-col overflow-y-auto">
-      <div className="flex justify-start items-center mb-5">
+      <div className="flex justify-between items-center mb-5">
         <h1 className="text-2xl font-bold">Booking Details</h1>
+        {bookingData?.status && (
+          <span
+            className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${getBookingStatusStyles(
+              bookingData.status,
+            )}`}
+          >
+            {utils.capitalize(bookingData.status.replaceAll("_", " "))}
+          </span>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto bg-white p-5 rounded-2xl">
@@ -27,21 +68,20 @@ const EventDetails = () => {
               />
 
               <div className="flex-1">
-                <h3 className="text-xl font-bold mb-2">Highbar Rooftop NYC</h3>
+                <h3 className="text-xl font-bold mb-2">
+                  {bookingData.loungeId?.name || "Unknown Lounge"}
+                </h3>
                 <div className="flex gap-2 mb-4">
                   <span className="bg-blue-800/20 text-blue-950 px-3 py-1 rounded-full text-sm font-medium">
-                    Rooftop
+                    Booking
                   </span>
                   <span className="bg-blue-800/20 text-blue-950 px-3 py-1 rounded-full text-sm font-medium">
-                    BAR
-                  </span>
-                  <span className="bg-blue-800/20 text-blue-950 px-3 py-1 rounded-full text-sm font-medium">
-                    Bottle Service
+                    Active
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-700">
                   <span className="text-lg">📍</span>
-                  <span>Times Square, New York, NY</span>
+                  <span>{bookingData.loungeId?.name || "Unknown Lounge"}</span>
                 </div>
               </div>
             </div>
@@ -51,31 +91,35 @@ const EventDetails = () => {
                 <p className="text-gray-600 text-sm font-semibold mb-2">
                   Check-in Date
                 </p>
-                <p className="text-black font-semibold">26 Dec, 2024</p>
+                <p className="text-black font-semibold">{bookingDate}</p>
               </div>
               <div>
                 <p className="text-gray-600 text-sm font-semibold mb-2">
                   Check-in Time
                 </p>
-                <p className="text-black font-semibold">06:00 PM</p>
+                <p className="text-black font-semibold">{startTimeFormatted}</p>
+              </div>
+              <div>
+                <p className="text-gray-600 text-sm font-semibold mb-2">
+                  Check-out Time
+                </p>
+                <p className="text-black font-semibold">{endTimeFormatted}</p>
               </div>
               <div>
                 <p className="text-gray-600 text-sm font-semibold mb-2">
                   Guest Count
                 </p>
-                <p className="text-black font-semibold">6 Guests</p>
-              </div>
-              <div>
-                <p className="text-gray-600 text-sm font-semibold mb-2">
-                  Children (If any)
+                <p className="text-black font-semibold">
+                  {bookingData.guestCount} Guests
                 </p>
-                <p className="text-black font-semibold">None</p>
               </div>
               <div>
                 <p className="text-gray-600 text-sm font-semibold mb-2">
                   Table
                 </p>
-                <p className="text-black font-semibold">Table no. 05</p>
+                <p className="text-black font-semibold">
+                  {tableInfo.code || "N/A"}
+                </p>
               </div>
             </div>
 
@@ -83,19 +127,24 @@ const EventDetails = () => {
               <div className="grid grid-cols-2 gap-12">
                 <div>
                   <p className="text-gray-600 text-sm font-semibold mb-2">
-                    Services and Packages
+                    Table Details
                   </p>
                   <p className="text-black font-semibold">
-                    Food and Drink Package
+                    Type: {tableInfo.type || "N/A"}
                   </p>
-                  <p className="text-black font-semibold">Bottle Package</p>
+                  <p className="text-black font-semibold">
+                    Capacity: {tableInfo.capacity || "N/A"}
+                  </p>
                 </div>
                 <div className="border-l pl-12">
                   <p className="text-gray-600 text-sm font-semibold mb-2">
-                    Preferred Seating Area
+                    Payment Status
                   </p>
                   <p className="text-black font-semibold">
-                    Outdoor Terrace/ Rooftop
+                    {utils.capitalize(bookingData.paymentStatus || "N/A")}
+                  </p>
+                  <p className="text-gray-600 text-sm font-semibold">
+                    Amount Paid: ${bookingData.amountPaid || 0}
                   </p>
                 </div>
               </div>
@@ -103,16 +152,11 @@ const EventDetails = () => {
 
             <div className="border-t pt-6">
               <p className="text-gray-600 text-sm font-semibold mb-3">
-                Any Instructions{" "}
+                Any Special Requests{" "}
                 <span className="text-gray-400 font-normal">(Optional)</span>
               </p>
               <p className="text-gray-700 leading-relaxed text-sm">
-                The standard Lorem Ipsum passage, m ipsum dolor sit amet,
-                cectetur adipiscing elit, sed do eiusm. The standard Lorem Ipsum
-                passage, m ipsum dolor sit amet, cectetur adipiscing elit, sed
-                do eiusm. The standard.The standard Lorem Ipsum passage, m ipsum
-                dolor sit amet, cectetur adipiscing elit, sed do eiusm. The
-                standard.
+                {bookingData.specialRequest || "No special requests provided"}
               </p>
             </div>
           </div>
@@ -123,19 +167,23 @@ const EventDetails = () => {
             <div className="grid grid-cols-3 gap-12">
               <div>
                 <p className="text-gray-600 text-sm font-semibold mb-2">Name</p>
-                <p className="text-black font-semibold">Mike Smith</p>
+                <p className="text-black font-semibold">{userName}</p>
               </div>
               <div>
                 <p className="text-gray-600 text-sm font-semibold mb-2">
                   Email Address
                 </p>
-                <p className="text-black font-semibold">designer@gmail.com</p>
+                <p className="text-black font-semibold">
+                  {bookingData.userId?.email || "N/A"}
+                </p>
               </div>
               <div>
                 <p className="text-gray-600 text-sm font-semibold mb-2">
                   Phone Number
                 </p>
-                <p className="text-black font-semibold">+1 462 849 558</p>
+                <p className="text-black font-semibold">
+                  {bookingData.userId?.phone || "N/A"}
+                </p>
               </div>
             </div>
           </div>
@@ -145,4 +193,4 @@ const EventDetails = () => {
   );
 };
 
-export default EventDetails;
+export default BookingDetails;

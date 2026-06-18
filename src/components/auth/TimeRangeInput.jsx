@@ -1,5 +1,3 @@
-// src/components/TimeRangeInput.jsx
-
 /* eslint-disable react/prop-types */
 
 export default function TimeRangeInput({
@@ -13,13 +11,40 @@ export default function TimeRangeInput({
   error,
   touched,
   disabled,
+  variant = "dark", // dark | light
 }) {
+  const isDark = variant === "dark";
+
+  const inputStyles = isDark
+    ? `
+      text-white
+      bg-white/10
+      backdrop-blur-[28px]
+      border border-white/20
+      focus:ring-2 focus:ring-white/20
+      [color-scheme:dark]
+    `
+    : `
+      text-gray-800
+      bg-white
+      border border-gray-300
+      focus:ring-2 focus:ring-blue-200
+      focus:border-blue-500
+      [color-scheme:light]
+    `;
+
   return (
     <div>
-      <label className="block text-[14px] font-[500] text-white mb-2">
+      {/* Label */}
+      <label
+        className={`block text-[14px] font-[500] mb-2 ${
+          isDark ? "text-white" : "text-gray-700"
+        }`}
+      >
         {label}
       </label>
 
+      {/* Time Inputs */}
       <div className="flex items-center gap-3">
         {/* Start Time */}
         <input
@@ -29,18 +54,14 @@ export default function TimeRangeInput({
           onChange={onChange}
           onBlur={onBlur}
           disabled={disabled}
-          className="
-            w-full px-4 py-2 text-white text-sm rounded-[15px]
-            bg-white/10 backdrop-blur-[28.9px]
-            ring-1 ring-[#CACACA]
-            focus:ring-2 focus:ring-gray-200
-            focus:outline-none
+          className={`
+            w-full px-4 py-3 text-sm rounded-[15px]
+            focus:outline-none transition-all duration-200
+            disabled:opacity-50 disabled:cursor-not-allowed
             appearance-none
-            [color-scheme:dark]
-          "
+            ${inputStyles}
+          `}
         />
-
-        {/* <span className="text-white text-sm shrink-0">to</span> */}
 
         {/* End Time */}
         <input
@@ -50,20 +71,19 @@ export default function TimeRangeInput({
           onChange={onChange}
           onBlur={onBlur}
           disabled={disabled}
-          className="
-            w-full px-4 py-2 text-white text-sm rounded-[15px]
-            bg-white/10 backdrop-blur-[28.9px]
-            ring-1 ring-[#CACACA]
-            focus:ring-2 focus:ring-gray-200
-            focus:outline-none
+          className={`
+            w-full px-4 py-3 text-sm rounded-[15px]
+            focus:outline-none transition-all duration-200
+            disabled:opacity-50 disabled:cursor-not-allowed
             appearance-none
-            [color-scheme:dark]
-          "
+            ${inputStyles}
+          `}
         />
       </div>
 
+      {/* Error */}
       {error && touched && (
-        <p className="text-red-600 text-[12px] mt-1">{error}</p>
+        <p className="text-red-500 text-[12px] mt-1">{error}</p>
       )}
     </div>
   );

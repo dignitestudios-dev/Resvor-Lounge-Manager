@@ -2,21 +2,43 @@
 import { useState } from "react";
 import BuySubscriptionModal from "./BuySubscriptionModal";
 import AuthButton from "../auth/AuthButton";
-import { FaArrowLeftLong } from "react-icons/fa6";
 import { useRouter } from "next/navigation";
+import { useGetSubscriptionPlans } from "@/lib/hooks/queries/useSubscriptionPlans";
+import { usePurchaseSubscription } from "@/lib/hooks/mutations/SubscriptionMutation";
+import { CloudCog } from "lucide-react";
 
 const Subscription = ({ handlePrevious }) => {
   const router = useRouter();
   const [subscriptionModal, setSubscriptionModal] = useState(false);
   const [completed, setCompleted] = useState(false);
-  const [isVip, setIsVip] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+
+  const { mutateAsync: purchasePlan, isLoading: isPurchasing } =
+    usePurchaseSubscription();
+
+  const { data: plansResponse, isLoading } = useGetSubscriptionPlans();
+  const plans = plansResponse?.data || [];
+
+  // const handleBuyNow = (plan) => {
+  //   setSelectedPlan(plan);
+  //   setSubscriptionModal(true);
+  // };
+
+  const handleBuyNow = async (plan) => {
+    try {
+      const purchaseRes = await purchasePlan(plan._id);
+      console.log("🚀 ~ handleBuyNow ~ purchaseRes:", purchaseRes);
+      if (purchaseRes?.data?.checkoutUrl) {
+        window.location.href = purchaseRes.data.checkoutUrl;
+      }
+    } catch (error) {
+      ErrorToast("Failed to initiate purchase. Please try again.");
+      console.log("🚀 ~ handleBuyNow ~ error:", error);
+    }
+  };
+
   return (
     <div className="flex flex-col justify-center items-center h-auto ">
-      {/* <div className="flex justify-start items-center absolute top-12 left-0">
-        <button type="button" onClick={() => handlePrevious()}>
-          <FaArrowLeftLong color="white" size={24} />
-        </button>
-      </div> */}
       {completed ? (
         <div className="mt-4 xxl:w-[400px] xxl:ml-12 text-center space-y-3.5 max-w-[440px] px-4">
           <div className="flex justify-center pb-4">
@@ -57,100 +79,57 @@ const Subscription = ({ handlePrevious }) => {
 
           {/* Plans Grid */}
           <div className="mt-10 w-full max-w-[1100px] px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Plan 1 - Platinum */}
-              {/* <div className="bg-white/5 border border-white/20 rounded-[20px] p-6 flex flex-col min-h-[400px] hover:border-white/40 transition">
-                <div className="text-sm text-[#BEC2C9] mb-4">Plan 1</div>
-                <h2 className="text-3xl font-bold text-white mb-2">Platinum</h2>
-                <div className="text-4xl font-bold text-white mb-6">
-                  $199.95
-                </div>
-                <ul className="space-y-3 mb-8 flex-1">
-                  <li className="text-[#E6E6E6] flex items-start">
-                    <span className="mr-3 mt-0.5">•</span>
-                    <span>Unlimited Guests</span>
-                  </li>
-                  <li className="text-[#E6E6E6] flex items-start">
-                    <span className="mr-3 mt-0.5">•</span>
-                    <span>Unlimited Events</span>
-                  </li>
-                  <li className="text-[#E6E6E6] flex items-start">
-                    <span className="mr-3 mt-0.5">•</span>
-                    <span>Delivery by Text or Email</span>
-                  </li>
-                </ul>
-                <button
-                  onClick={() => setSubscriptionModal(true)}
-                  className="w-full bg-white text-[#181818] font-semibold py-3 rounded-[12px] hover:bg-gray-100 transition text-sm"
-                >
-                  Buy Now
-                </button>
-              </div> */}
-
-              {/* Plan 3 - Plus */}
-              <div className="bg-white/5 border border-white/20 rounded-[20px] p-6 flex flex-col min-h-[400px] hover:border-white/40 transition">
-                <div className="text-sm text-[#BEC2C9] mb-4">Plan 1</div>
-                <h2 className="text-3xl font-bold text-white mb-2">Plus</h2>
-                <div className="text-4xl font-bold text-[#FFA500] mb-6">
-                  $29.99
-                </div>
-                <ul className="space-y-3 mb-8 flex-1">
-                  <li className="text-[#E6E6E6] flex items-start">
-                    <span className="mr-3 mt-0.5">•</span>
-                    <span>Includes a 5-day free trial</span>
-                  </li>
-                  <li className="text-[#E6E6E6] flex items-start">
-                    <span className="mr-3 mt-0.5">•</span>
-                    <span>Provides access to the application</span>
-                  </li>
-                  <li className="text-[#E6E6E6] flex items-start">
-                    <span className="mr-3 mt-0.5">•</span>
-                    <span>
-                      Includes the ability to send up to 10 flyers/campaigns per
-                      month
-                    </span>
-                  </li>
-                </ul>
-                <button
-                  onClick={() => setSubscriptionModal(true)}
-                  className="w-full bg-white text-[#181818] font-semibold py-3 rounded-[12px] hover:bg-gray-100 transition text-sm"
-                >
-                  Buy Now
-                </button>
+            {isLoading ? (
+              <div className="text-center text-[#E6E6E6] py-10">
+                Loading plans...
               </div>
-
-              {/* Plan 2 - Premium */}
-              <div className="bg-white/5 border border-white/20 rounded-[20px] p-6 flex flex-col min-h-[400px] hover:border-white/40 transition">
-                <div className="text-sm text-[#BEC2C9] mb-4">Plan 2</div>
-                <h2 className="text-3xl font-bold text-white mb-2">Premium</h2>
-                <div className="text-4xl font-bold text-[#FFA500] mb-6">
-                  $250.99
-                </div>
-                <ul className="space-y-3 mb-8 flex-1">
-                  <li className="text-[#E6E6E6] flex items-start">
-                    <span className="mr-3 mt-0.5">•</span>
-                    <span>Includes a 5-day free trial</span>
-                  </li>
-                  <li className="text-[#E6E6E6] flex items-start">
-                    <span className="mr-3 mt-0.5">•</span>
-                    <span>Provides full access to the entire application</span>
-                  </li>
-                  <li className="text-[#E6E6E6] flex items-start">
-                    <span className="mr-3 mt-0.5">•</span>
-                    <span>
-                      Includes unlimited flyers/campaigns with no additional
-                      charges
-                    </span>
-                  </li>
-                </ul>
-                <button
-                  onClick={() => setSubscriptionModal(true)}
-                  className="w-full bg-white text-[#181818] font-semibold py-3 rounded-[12px] hover:bg-gray-100 transition text-sm"
-                >
-                  Buy Now
-                </button>
+            ) : plans.length === 0 ? (
+              <div className="text-center text-[#E6E6E6] py-10">
+                No plans available right now.
               </div>
-            </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {plans.map((plan, index) => (
+                  <div
+                    key={plan._id}
+                    className="bg-white/5 border border-white/20 rounded-[20px] p-6 flex flex-col min-h-[400px] hover:border-white/40 transition"
+                  >
+                    <div className="text-sm text-[#BEC2C9] mb-4">
+                      Plan {index + 1}
+                    </div>
+                    <h2 className="text-3xl font-bold text-white mb-2">
+                      {plan.label}
+                    </h2>
+                    <div className="text-4xl font-bold text-[#FFA500] mb-6">
+                      ${plan.displayPrice}
+                    </div>
+                    <ul className="space-y-3 mb-8 flex-1">
+                      {/* {plan.trialDays > 0 && (
+                        <li className="text-[#E6E6E6] flex items-start">
+                          <span className="mr-3 mt-0.5">•</span>
+                          <span>
+                            Includes a {plan.trialDays}-day free trial
+                          </span>
+                        </li>
+                      )} */}
+                      {plan.features?.map((feature, i) => (
+                        <li key={i} className="text-[#E6E6E6] flex items-start">
+                          <span className="mr-3 mt-0.5">•</span>
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <button
+                      disabled={isPurchasing}
+                      onClick={() => handleBuyNow(plan)}
+                      className="w-full bg-white text-[#181818] font-semibold py-3 rounded-[12px] hover:bg-gray-100 transition text-sm"
+                    >
+                      {isPurchasing ? "Processing..." : "Buy Now"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </>
       )}
@@ -159,7 +138,7 @@ const Subscription = ({ handlePrevious }) => {
         <BuySubscriptionModal
           onClick={() => setSubscriptionModal(false)}
           setCompleted={setCompleted}
-          isVip={isVip}
+          plan={selectedPlan}
         />
       )}
     </div>

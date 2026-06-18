@@ -1,40 +1,149 @@
 "use client";
 import React, { useState } from "react";
 import { useParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import EventAcceptedModal from "@/components/event-management/EventAcceptedModal";
+import EventAcceptConfirmModal from "@/components/event-management/EventAcceptConfirmModal";
+import EventRejectModal from "@/components/event-management/EventRejectModal";
+import { useGetEventDetail } from "@/lib/hooks/queries/useEventDetail";
+import { useRejectEvent, useAcceptEvent } from "@/lib/hooks/mutations/EventMutations";
+import utils from "@/lib/utils";
+import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
 
 const EventDetails = () => {
   const params = useParams();
   const eventId = params.id;
+  const queryClient = useQueryClient();
+
   const [isAccepted, setIsAccepted] = useState(false);
+  const [isAcceptConfirmModalOpen, setIsAcceptConfirmModalOpen] = useState(false);
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+
+  const { data: eventData, isLoading } = useGetEventDetail(eventId);
+  const rejectEventMutation = useRejectEvent();
+  const acceptEventMutation = useAcceptEvent();
 
   const handleReject = () => {
-    console.log("Event ID:", eventId, "Action: Rejected");
+    setIsRejectModalOpen(true);
+  };
+
+  const handleRejectSubmit = async (rejectionReason) => {
+    try {
+      await rejectEventMutation.mutateAsync({
+        eventId,
+        rejectionReason,
+      });
+
+      SuccessToast("Event rejected successfully");
+      setIsRejectModalOpen(false);
+
+      // Invalidate the event detail query to fetch updated status
+      await queryClient.invalidateQueries({
+        queryKey: ["event-detail", eventId],
+      });
+    } catch (error) {
+      ErrorToast(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Failed to reject event. Please try again.",
+      );
+      console.log("Reject event error:", error);
+    }
   };
 
   const handleAccept = () => {
-    console.log("Event ID:", eventId, "Action: Accepted");
-    setIsAccepted(true);
+    setIsAcceptConfirmModalOpen(true);
   };
+
+  const handleAcceptSubmit = async () => {
+    try {
+      await acceptEventMutation.mutateAsync(eventId);
+
+      SuccessToast("Event accepted successfully");
+      setIsAcceptConfirmModalOpen(false);
+      setIsAccepted(true);
+
+      // Invalidate the event detail query to fetch updated status
+      await queryClient.invalidateQueries({
+        queryKey: ["event-detail", eventId],
+      });
+    } catch (error) {
+      ErrorToast(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Failed to accept event. Please try again.",
+      );
+      console.log("Accept event error:", error);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex justify-center items-center">
+        <div className="text-lg font-semibold">Loading event details...</div>
+      </div>
+    );
+  }
+
+  if (!eventData) {
+    return (
+      <div className="flex-1 flex justify-center items-center">
+        <div className="text-lg font-semibold text-red-600">
+          Event not found
+        </div>
+      </div>
+    );
+  }
+
+  // Parse dates
+  const startDateTime = new Date(eventData.startDateTime);
+  const endDateTime = new Date(eventData.endDateTime);
+  const checkInTime = utils.formatTime(startDateTime);
+  const checkOutTime = utils.formatTime(endDateTime);
+  const checkInDate = utils.formatDateWithName(eventData.startDateTime);
+
+  const loungeName = eventData.loungeId?.name || "Unknown Lounge";
 
   return (
     <div className="flex-1 flex flex-col overflow-y-auto">
       <div className="flex justify-between items-center mb-5">
-        <h1 className="text-2xl font-bold">Event Details</h1>
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-bold">Event Details</h1>
+          {eventData?.status && (
+            <span
+              className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                eventData.status === "pending"
+                  ? "bg-yellow-100 text-yellow-800"
+                  : eventData.status === "accepted"
+                    ? "bg-green-100 text-green-800"
+                    : eventData.status === "rejected"
+                      ? "bg-red-100 text-red-800"
+                      : "bg-gray-100 text-gray-800"
+              }`}
+            >
+              {eventData.status.charAt(0).toUpperCase() +
+                eventData.status.slice(1)}
+            </span>
+          )}
+        </div>
         <div className="flex gap-3">
-          <Button
-            onClick={handleReject}
-            className="bg-red-600 hover:bg-red-700 w-36 font-medium text-lg"
-          >
-            Reject
-          </Button>
-          <Button
-            onClick={handleAccept}
-            className="bg-green-500 hover:bg-green-600 w-36 font-medium text-lg"
-          >
-            Accept
-          </Button>
+          {eventData?.status === "pending" && (
+            <>
+              <Button
+                onClick={handleReject}
+                className="bg-red-600 hover:bg-red-700 w-36 font-medium text-lg"
+              >
+                Reject
+              </Button>
+              <Button
+                onClick={handleAccept}
+                className="bg-green-500 hover:bg-green-600 w-36 font-medium text-lg"
+              >
+                Accept
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
@@ -52,21 +161,18 @@ const EventDetails = () => {
               />
 
               <div className="flex-1">
-                <h3 className="text-xl font-bold mb-2">Highbar Rooftop NYC</h3>
+                <h3 className="text-xl font-bold mb-2">{loungeName}</h3>
                 <div className="flex gap-2 mb-4">
                   <span className="bg-blue-800/20 text-blue-950 px-3 py-1 rounded-full text-sm font-medium">
-                    Rooftop
+                    {eventData.eventType || "Event"}
                   </span>
                   <span className="bg-blue-800/20 text-blue-950 px-3 py-1 rounded-full text-sm font-medium">
-                    BAR
-                  </span>
-                  <span className="bg-blue-800/20 text-blue-950 px-3 py-1 rounded-full text-sm font-medium">
-                    Bottle Service
+                    Active
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-700">
                   <span className="text-lg">📍</span>
-                  <span>Times Square, New York, NY</span>
+                  <span>{loungeName}</span>
                 </div>
               </div>
             </div>
@@ -75,44 +181,52 @@ const EventDetails = () => {
               <div>
                 <p className="text-black font-semibold mb-2">Event Type</p>
                 <p className="text-gray-600 text-sm font-semibold">
-                  Birthday Party
+                  {eventData.eventType || "N/A"}
                 </p>
               </div>
               <div>
                 <p className="text-black font-semibold mb-2">Check-in Date</p>
                 <p className="text-gray-600 text-sm font-semibold">
-                  26 Dec, 2024
+                  {checkInDate}
                 </p>
               </div>
               <div>
                 <p className="text-black font-semibold mb-2">Check-in Time</p>
-                <p className="text-gray-600 text-sm font-semibold">06:00 PM</p>
+                <p className="text-gray-600 text-sm font-semibold">
+                  {checkInTime}
+                </p>
               </div>
               <div>
                 <p className="text-black font-semibold mb-2">Check-out Time</p>
-                <p className="text-gray-600 text-sm font-semibold">10:00 PM</p>
+                <p className="text-gray-600 text-sm font-semibold">
+                  {checkOutTime}
+                </p>
               </div>
               <div>
                 <p className="text-black font-semibold mb-2">Guest Count</p>
-                <p className="text-gray-600 text-sm font-semibold">30 Guests</p>
+                <p className="text-gray-600 text-sm font-semibold">
+                  {eventData.guestCount || 0} Guests
+                </p>
               </div>
 
               {/* Second row - 4 columns */}
               <div>
                 <p className="text-black font-semibold mb-2">Preferred Music</p>
                 <p className="text-gray-600 text-sm font-semibold">
-                  Hip Hop, REB, Rock
+                  {eventData.preferredMusic || "N/A"}
                 </p>
               </div>
               <div>
                 <p className="text-black font-semibold mb-2">Special Request</p>
                 <p className="text-gray-600 text-sm font-semibold">
-                  Birthday Signage
+                  {eventData.specialRequest || "None"}
                 </p>
               </div>
               <div>
                 <p className="text-black font-semibold mb-2">Budget</p>
-                <p className="text-gray-600 text-sm font-semibold">$1000</p>
+                <p className="text-gray-600 text-sm font-semibold">
+                  ${eventData.budget || 0}
+                </p>
               </div>
               <div>
                 <p className="text-black font-semibold mb-2">
@@ -153,12 +267,7 @@ const EventDetails = () => {
                 <span className="text-gray-400 font-normal">(Optional)</span>
               </p>
               <p className="text-gray-700 leading-relaxed text-sm">
-                The standard Lorem Ipsum passage, m ipsum dolor sit amet,
-                cectetur adipiscing elit, sed do eiusm. The standard Lorem Ipsum
-                passage, m ipsum dolor sit amet, cectetur adipiscing elit, sed
-                do eiusm. The standard.The standard Lorem Ipsum passage, m ipsum
-                dolor sit amet, cectetur adipiscing elit, sed do eiusm. The
-                standard.
+                {eventData.description || "No instructions provided"}
               </p>
             </div>
           </div>
@@ -170,19 +279,19 @@ const EventDetails = () => {
               <div>
                 <p className="text-black font-semibold mb-2">Name</p>
                 <p className="text-gray-600 text-sm font-semibold">
-                  Mike Smith
+                  {eventData.userId?.firstName || "N/A"}
                 </p>
               </div>
               <div>
                 <p className="text-black font-semibold mb-2">Email Address</p>
                 <p className="text-gray-600 text-sm font-semibold">
-                  designer@gmail.com
+                  {eventData.userId?.email || "N/A"}
                 </p>
               </div>
               <div>
                 <p className="text-black font-semibold mb-2">Phone Number</p>
                 <p className="text-gray-600 text-sm font-semibold">
-                  +1 462 849 558
+                  {eventData.userId?.phone || "N/A"}
                 </p>
               </div>
             </div>
@@ -195,6 +304,18 @@ const EventDetails = () => {
           onOpenChange={() => setIsAccepted(false)}
         />
       )}
+      <EventAcceptConfirmModal
+        isOpen={isAcceptConfirmModalOpen}
+        onOpenChange={setIsAcceptConfirmModalOpen}
+        onSubmit={handleAcceptSubmit}
+        isLoading={acceptEventMutation.isPending}
+      />
+      <EventRejectModal
+        isOpen={isRejectModalOpen}
+        onOpenChange={setIsRejectModalOpen}
+        onSubmit={handleRejectSubmit}
+        isLoading={rejectEventMutation.isPending}
+      />
     </div>
   );
 };

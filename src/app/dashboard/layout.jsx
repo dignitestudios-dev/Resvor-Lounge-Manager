@@ -6,15 +6,8 @@ import { Suspense } from "react";
 export default function DashboardLayout({ children }) {
   return (
     <div className="w-full flex gap-4 h-screen">
-      <Suspense
-        fallback={
-          <div>
-            <p>loading...</p>
-          </div>
-        }
-      >
-        <LoungeModalWrapper />
-      </Suspense>
+      <LoungeModalWrapper />
+
       <div className="py-6 pl-6">
         <Sidebar />
       </div>

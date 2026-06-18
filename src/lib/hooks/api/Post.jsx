@@ -165,3 +165,9 @@ export const submitCreateLounge = async (payload) => {
   });
   return data;
 };
+
+export const switchLounge = async (payload) => {
+  const { data } = await axios.put("/lounges/switch", payload);
+
+  return data;
+};

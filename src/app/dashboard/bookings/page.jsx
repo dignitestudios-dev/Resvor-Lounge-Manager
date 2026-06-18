@@ -2,8 +2,10 @@
 import Table from "@/components/bookings/Table";
 import DateAndMonthFilter from "@/components/common/DateAndMonthFilter";
 import React, { useState } from "react";
+import { useGetBookings } from "@/lib/hooks/queries/useBookings";
 
 const Bookings = () => {
+  const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState({
     startDate: "",
     endDate: "",
@@ -11,9 +13,21 @@ const Bookings = () => {
     selectedLounge: "",
   });
 
+  const { data: bookingsResponse, isLoading } = useGetBookings(
+    currentPage,
+    10,
+    "pending",
+  );
+
   const handleFilterChange = (filterData) => {
     setFilters(filterData);
+    setCurrentPage(1); // Reset to first page on filter change
   };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center gap-10 mt-2">
@@ -28,7 +42,14 @@ const Bookings = () => {
       </div>
 
       <div className="mt-6">
-        <Table filters={filters} />
+        <Table
+          filters={filters}
+          bookings={bookingsResponse?.data || []}
+          isLoading={isLoading}
+          currentPage={currentPage}
+          totalPages={bookingsResponse?.pagination?.totalPages || 1}
+          onPageChange={handlePageChange}
+        />
       </div>
     </div>
   );
