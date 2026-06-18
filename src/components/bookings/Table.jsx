@@ -159,50 +159,59 @@ const Table = ({
               <th className="px-4 py-5 text-center text-nowrap">Action</th>
             </tr>
           </thead>
+
           <tbody className="mt-10">
-            {sortedBookings?.map((booking) => (
-              <tr
-                key={booking._id}
-                onClick={() => handleRowClick(booking._id)}
-                className="border-b border-[#D4D4D4] cursor-pointer hover:bg-gray-50 transition-all"
-              >
-                {/* <td className="px-4 py-6">{event?.bookingId}</td> */}
-                <td className="px-4 py-6">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="h-[43px] w-[43px] rounded-full bg-cover bg-center bg-primary"
-                      style={{
-                        backgroundImage: `url(${booking?.user?.profileImage})`,
-                      }}
-                    />
-                    {booking?.user?.name}
-                  </div>
-                </td>
-                <td className="px-4 py-6">{booking?.loungeName}</td>
-                <td className="px-4 py-6">
-                  {utils.formatNumber(booking?.guestLimit)}
-                </td>
-                <td className="px-4 py-6">{booking?.eventDate}</td>
-                <td className="px-4 py-6">{booking?.eventTime}</td>
-                <td className="px-4 py-6">
-                  <span
-                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getBookingStatusStyles(
-                      booking?.status,
-                    )}`}
-                  >
-                    {utils.capitalize(booking?.status?.replaceAll("_", " "))}
-                  </span>
-                </td>
-                <td className="px-4 py-6">
-                  {utils.formatNumber(booking?.ticketDoor)}
-                </td>
-                <td className="px-4 py-6 text-nowrap">
-                  <div className="flex justify-center items-center cursor-pointer">
-                    <IoIosArrowForward size={24} />
-                  </div>
+            {sortedBookings?.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="text-center py-10 text-gray-500">
+                  No bookings found.
                 </td>
               </tr>
-            ))}
+            ) : (
+              sortedBookings?.map((booking) => (
+                <tr
+                  key={booking._id}
+                  onClick={() => handleRowClick(booking._id)}
+                  className="border-b border-[#D4D4D4] cursor-pointer hover:bg-gray-50 transition-all"
+                >
+                  {/* <td className="px-4 py-6">{booking?.bookingId}</td> */}
+                  <td className="px-4 py-6">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="h-[43px] w-[43px] rounded-full bg-cover bg-center bg-primary"
+                        style={{
+                          backgroundImage: `url(${booking?.user?.profileImage})`,
+                        }}
+                      />
+                      {booking?.user?.name}
+                    </div>
+                  </td>
+                  <td className="px-4 py-6">{booking?.loungeName}</td>
+                  <td className="px-4 py-6">
+                    {utils.formatNumber(booking?.guestLimit)}
+                  </td>
+                  <td className="px-4 py-6">{booking?.eventDate}</td>
+                  <td className="px-4 py-6">{booking?.eventTime}</td>
+                  <td className="px-4 py-6">
+                    <span
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getBookingStatusStyles(
+                        booking?.status,
+                      )}`}
+                    >
+                      {utils.capitalize(booking?.status?.replaceAll("_", " "))}
+                    </span>
+                  </td>
+                  <td className="px-4 py-6">
+                    {utils.formatNumber(booking?.ticketDoor)}
+                  </td>
+                  <td className="px-4 py-6 text-nowrap">
+                    <div className="flex justify-center items-center cursor-pointer">
+                      <IoIosArrowForward size={24} />
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

@@ -12,7 +12,7 @@ const AuthLayout = ({ children }) => {
 
   if (isLoading || isFetching) {
     return (
-      <div className="flex justify-center items-center h-screen w-screen">
+      <div className="flex justify-center items-center h-screen w-screen text-white backgroundImage">
         Loading...
       </div>
     );

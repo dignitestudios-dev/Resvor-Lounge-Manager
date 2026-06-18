@@ -167,7 +167,7 @@ export const submitCreateLounge = async (payload) => {
 };
 
 export const switchLounge = async (payload) => {
-  const { data } = await axios.put("/lounges/switch", payload);
+  const { data } = await axios.patch("/lounges/switch", payload);
 
   return data;
 };
