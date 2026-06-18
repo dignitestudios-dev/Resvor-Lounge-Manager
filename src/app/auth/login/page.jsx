@@ -50,7 +50,8 @@ const Login = () => {
             console.log("🚀 ~ ELSE RUN LINE 50");
 
             localStorage.setItem("fromLogin", "true");
-            router.push("/dashboard");
+            window.location.href = "/dashboard";
+            // router.push("/dashboard");
             // router.replace("/dashboard");
           }
         } catch (error) {
