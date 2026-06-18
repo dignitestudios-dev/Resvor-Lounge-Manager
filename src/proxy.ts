@@ -80,7 +80,7 @@ export function proxy(request: NextRequest) {
   |--------------------------------------------------------------------------
   */
   if (isProtectedRoute) {
-    return NextResponse.redirect(new URL(DEFAULT_REDIRECT, request.url));
+    return NextResponse.redirect(new URL(AUTH_REDIRECT, request.url));
   }
 
   // if (token && tokenType === "access_token") {
