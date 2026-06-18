@@ -7,6 +7,8 @@ import { ErrorToast } from "../ui/toaster";
 import DatePickerField from "./../common/DatePickerField";
 import SelectField from "../common/SelectField";
 import { eventTypeOptions } from "@/lib/constants";
+import moment from "moment";
+import { phoneFormatter } from "@/lib/utils";
 
 const AddEventForm = ({ onClose, onNext }) => {
   const [startDate, setStartDate] = useState(null);
@@ -28,7 +30,7 @@ const AddEventForm = ({ onClose, onNext }) => {
     description: "",
   });
 
-  const [endDate, setEndDate] = useState("");
+  const [endTime, setEndTime] = useState("");
   const [formErrors, setFormErrors] = useState({});
 
   // const handleSelect = (option) => {
@@ -47,10 +49,19 @@ const AddEventForm = ({ onClose, onNext }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
+    let updatedValue = value;
+
+    // For phone number field
+    if (name === "number") {
+      updatedValue = value.replace(/\D/g, ""); // keep only digits
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: updatedValue,
     }));
+
     if (formErrors[name]) {
       setFormErrors((prev) => ({
         ...prev,
@@ -119,8 +130,22 @@ const AddEventForm = ({ onClose, onNext }) => {
     }
     if (!formData.eventName) errors.eventName = "Event name is required";
     if (!startDate) errors.startDate = "Date is required";
-    if (!startTime) errors.startTime = "Start time is required";
-    if (!endDate) errors.endTime = "End time is required";
+    if (!startTime) {
+      errors.startTime = "Start time is required";
+    }
+
+    if (!endTime) {
+      errors.endTime = "End time is required";
+    }
+
+    if (startTime && endTime) {
+      const start = new Date(`2000-01-01T${startTime}`);
+      const end = new Date(`2000-01-01T${endTime}`);
+
+      if (end <= start) {
+        errors.endTime = "End time must be after start time";
+      }
+    }
     if (!formData.name) errors.name = "Full name is required";
     if (!formData.email) {
       errors.email = "Email is required";
@@ -155,7 +180,7 @@ const AddEventForm = ({ onClose, onNext }) => {
     startDateTime.setHours(parseInt(startH), parseInt(startM));
 
     const endDateTime = new Date(startDate);
-    const [endH, endM] = endDate.split(":");
+    const [endH, endM] = endTime.split(":");
     endDateTime.setHours(parseInt(endH), parseInt(endM));
 
     const eventData = {
@@ -169,7 +194,7 @@ const AddEventForm = ({ onClose, onNext }) => {
         day: "2-digit",
       }),
       startTime: startTime,
-      endTime: endDate,
+      endTime: endTime,
       startDateTime: startDateTime.toISOString(),
       endDateTime: endDateTime.toISOString(),
       name: formData.name,
@@ -247,6 +272,7 @@ const AddEventForm = ({ onClose, onNext }) => {
           <div className="my-2 mx-1">
             <DatePickerField
               label="Select Date"
+              minDate={moment().add(1, "day").startOf("day").toDate()}
               value={startDate}
               onChange={(date) => {
                 setStartDate(date);
@@ -302,12 +328,13 @@ const AddEventForm = ({ onClose, onNext }) => {
               <input
                 type="time"
                 data-slot="input"
-                className={`text-black w-full px-4 py-2 text-sm rounded-[15px] bg-white/10 backdrop-blur-[28.9px] ring-1 ${formErrors.endTime ? "ring-red-500" : "ring-[#CACACA]"}
-  focus:ring-2 focus:ring-gray-200 focus:outline-none  placeholder:font-light placeholder:text-[12px] placeholder:text-[#E6E6F0]
-  }`}
-                value={endDate}
+                min={startTime || undefined}
+                className={`text-black w-full px-4 py-2 text-sm rounded-[15px] bg-white/10 backdrop-blur-[28.9px] ring-1 ${
+                  formErrors.endTime ? "ring-red-500" : "ring-[#CACACA]"
+                } focus:ring-2 focus:ring-gray-200 focus:outline-none`}
+                value={endTime}
                 onChange={(e) => {
-                  setEndDate(e.target.value);
+                  setEndTime(e.target.value);
                   setFormErrors((prev) => ({ ...prev, endTime: "" }));
                 }}
               />
@@ -357,7 +384,7 @@ const AddEventForm = ({ onClose, onNext }) => {
             />
           </div>
           <div className="w-full flex items-center gap-2 my-2 px-1">
-            <InputField
+            {/* <InputField
               label="Phone number"
               text="phone"
               placeholder="Phone number"
@@ -369,7 +396,19 @@ const AddEventForm = ({ onClose, onNext }) => {
               onChange={handleInputChange}
               error={formErrors.phone}
               touched={!!formErrors.phone}
+            /> */}
+
+            <PhoneInput
+              label={"Phone Number"}
+              value={phoneFormatter(formData.phone)}
+              id={"number"}
+              name={"number"}
+              onChange={handleInputChange}
+              error={formErrors.phone}
+              touched={!!formErrors.phone}
+              autoComplete="off"
             />
+
             <InputField
               label="Guest Count"
               text="guest"
