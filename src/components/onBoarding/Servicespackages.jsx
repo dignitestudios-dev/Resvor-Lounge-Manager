@@ -446,7 +446,7 @@ export default function AddServicesAndPackages({
       <div className="w-full max-w-[440px]">
         {/* Title */}
         <h2
-          className={`text-[16px] font-semibold mb-3 ${
+          className={`text-[14px] font-medium mb-1.5 ${
             isDark ? "text-white" : "text-gray-800"
           }`}
         >
@@ -463,10 +463,10 @@ export default function AddServicesAndPackages({
         >
           <div
             className={`flex-1 px-3 py-1.5 text-[12px] font-[300] ${
-              isDark ? "text-[#E6E6F0]" : "text-gray-500"
+              isDark ? "text-[#E6E6F0]" : "text-gray-400"
             }`}
           >
-            add services & packages
+            Add services & packages
           </div>
 
           <button

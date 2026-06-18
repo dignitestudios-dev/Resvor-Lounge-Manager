@@ -158,7 +158,7 @@ const PersonalDetailsRemaining = ({
                 />
                 <div className="text-center text-white/70 flex flex-col items-center gap-2">
                   <Upload />
-                  <p>choose file to upload</p>
+                  <p>Choose file to upload</p>
                 </div>
               </div>
               {values.images && values.images.length > 0 && (
@@ -203,7 +203,7 @@ const PersonalDetailsRemaining = ({
                 value={values.description}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                placeholder="Describe your business"
+                placeholder="Describe Your Business"
                 className="w-full h-20 rounded-[12px] border-2 border-white bg-white/10 placeholder:text-gray-400 text-[#E6E6F0] p-3"
               />
               {touched.description && errors.description && (
