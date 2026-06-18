@@ -51,9 +51,9 @@ const Login = () => {
 
             localStorage.setItem("fromLogin", "true");
             router.refresh();
-            // window.location.href = "/dashboard";
+            window.location.href = "/dashboard";
             // router.push("/dashboard");
-            router.replace("/dashboard");
+            // router.replace("/dashboard");
           }
         } catch (error) {
           ErrorToast(
