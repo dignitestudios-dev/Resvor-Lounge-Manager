@@ -40,12 +40,12 @@ export function proxy(request: NextRequest) {
   | STATE 1 — FULLY AUTHENTICATED USER (access_token)
   |--------------------------------------------------------------------------
   */
-  if (token && tokenType === "access_token") {
-    if (isAuthRoute) {
-      return NextResponse.redirect(new URL(DEFAULT_REDIRECT, request.url));
-    }
-    return NextResponse.next();
-  }
+  // if (token && tokenType === "access_token") {
+  //   if (isAuthRoute) {
+  //     return NextResponse.redirect(new URL(DEFAULT_REDIRECT, request.url));
+  //   }
+  //   return NextResponse.next();
+  // }
 
   // if (token && tokenType === "access_token") {
   //   // Allow authenticated users to access signup temporarily
@@ -65,12 +65,12 @@ export function proxy(request: NextRequest) {
   | STATE 2 — ONBOARDING USER (registration_token)
   |--------------------------------------------------------------------------
   */
-  if (token && tokenType === "registration_token") {
-    if (isOnboardingRoute) {
-      return NextResponse.next();
-    }
-    return NextResponse.redirect(new URL("/auth/signup", request.url));
-  }
+  // if (token && tokenType === "registration_token") {
+  //   if (isOnboardingRoute) {
+  //     return NextResponse.next();
+  //   }
+  //   return NextResponse.redirect(new URL("/auth/signup", request.url));
+  // }
 
   /*
   |--------------------------------------------------------------------------
@@ -79,9 +79,9 @@ export function proxy(request: NextRequest) {
   | Only block access to protected app routes.
   |--------------------------------------------------------------------------
   */
-  if (isProtectedRoute) {
-    return NextResponse.redirect(new URL(AUTH_REDIRECT, request.url));
-  }
+  // if (isProtectedRoute) {
+  //   return NextResponse.redirect(new URL(AUTH_REDIRECT, request.url));
+  // }
 
   // if (token && tokenType === "access_token") {
   //     return NextResponse.redirect(new URL(DEFAULT_REDIRECT, request.url));
