@@ -54,16 +54,48 @@ export const AuthProvider = ({ children }) => {
   console.log("🚀 ~ AuthProvider ~ isLoading:", isLoading);
   console.log("🚀 ~ AuthProvider ~ authData:", authData);
 
-  // Resolved once the FIRST load settles (success or 401).
-  // We deliberately ignore isFetching so background refetches
-  // (window focus, interval, etc.) never re-trigger the full-screen loader.
-  const isResolved = !isLoading;
-
-  const sessionType = authData?.sessionType ?? authData?.tokenType?? null;
+  const sessionType = authData?.sessionType ?? authData?.tokenType ?? null;
   const onboardingStep = authData?.onboardingStep ?? "create_account";
   const user = authData?.user ?? null;
   const isAuthenticated = sessionType === "access_token";
   const isOnboarding = sessionType === "registration_token";
+
+  useEffect(() => {
+    if (authData) {
+      if (authData.sessionType) {
+        Cookies.set("sessionType", authData.sessionType, { expires: 7, path: "/" });
+      } else if (authData.tokenType) {
+        Cookies.set("sessionType", authData.tokenType, { expires: 7, path: "/" });
+      }
+      if (authData.onboardingStep) {
+        Cookies.set("onboardingStep", authData.onboardingStep, { expires: 7, path: "/" });
+      }
+      if (authData.user) {
+        Cookies.set("user", JSON.stringify(authData.user), { expires: 7, path: "/" });
+      }
+    } else if (authData === null || isError) {
+      Cookies.remove("token", { path: "/" });
+      Cookies.remove("authorization", { path: "/" });
+      Cookies.remove("sessionType", { path: "/" });
+      Cookies.remove("onboardingStep", { path: "/" });
+      Cookies.remove("user", { path: "/" });
+    }
+  }, [authData, isError]);
+
+  useEffect(() => {
+    if (
+      pathname.startsWith("/dashboard") &&
+      (sessionType === "registration_token" || user?.isSubscribed === false)
+    ) {
+      refetch();
+    }
+  }, [pathname, sessionType, user?.isSubscribed, refetch]);
+
+  // Resolved once the FIRST load settles (success or 401).
+  // We deliberately ignore isFetching so background refetches
+  // (window focus, interval, etc.) never re-trigger the full-screen loader,
+  // EXCEPT when the user's cached state is incomplete (e.g., they just returned from Stripe).
+  const isResolved = !isLoading && !(isFetching && (sessionType === "registration_token" || user?.isSubscribed === false));
 
   const isProtectedRoute = PROTECTED_ROUTES.some((route) =>
     pathname.startsWith(route),

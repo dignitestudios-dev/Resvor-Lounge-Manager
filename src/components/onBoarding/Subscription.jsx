@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useGetSubscriptionPlans } from "@/lib/hooks/queries/useSubscriptionPlans";
 import { usePurchaseSubscription } from "@/lib/hooks/mutations/SubscriptionMutation";
 import { CloudCog, LogOutIcon } from "lucide-react";
+import { ErrorToast } from "@/components/ui/toaster";
 
 const Subscription = ({ handlePrevious }) => {
   const router = useRouter();
@@ -36,8 +37,10 @@ const Subscription = ({ handlePrevious }) => {
         window.location.href = purchaseRes.data.checkoutUrl;
       }
     } catch (error) {
-      ErrorToast("Failed to initiate purchase. Please try again.");
       console.log("🚀 ~ handleBuyNow ~ error:", error);
+      const msg = error?.response?.data?.message || "Failed to initiate purchase. Please try again.";
+      ErrorToast(msg);
+      setActivePlanId(null);
     }
   };
 
