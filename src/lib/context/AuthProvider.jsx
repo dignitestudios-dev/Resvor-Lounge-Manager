@@ -71,6 +71,10 @@ export const AuthProvider = ({ children }) => {
   const isAuthRoute = pathname.startsWith("/auth");
   const isOnboardingRoute = pathname === ONBOARDING_ROUTE;
 
+  console.log("auth provider --- 82 ",isAuthenticated);
+      console.log("auth provider --- 83 ",onboardingStep);
+      console.log("auth provider --- 84 ",user?.isSubscribed);
+
   const redirectTarget = useMemo(() => {
     if (!isResolved) return null;
 
