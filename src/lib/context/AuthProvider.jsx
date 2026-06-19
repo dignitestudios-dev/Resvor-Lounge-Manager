@@ -79,10 +79,15 @@ export const AuthProvider = ({ children }) => {
       onboardingStep === "completed" &&
       user?.isSubscribed === true
     ) {
+      console.log("auth provider --- 82 ",isAuthenticated);
+      console.log("auth provider --- 83 ",onboardingStep);
+      console.log("auth provider --- 84 ",user?.isSubscribed);
+
       return pathname.startsWith("/dashboard") ? null : DEFAULT_REDIRECT;
     }
 
     if (isAuthenticated && onboardingStep === "create_lounge") {
+      console.log("auth provider --- 85 ");
       return isOnboardingRoute ? null : ONBOARDING_ROUTE;
     }
 
