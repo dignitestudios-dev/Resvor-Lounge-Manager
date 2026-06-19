@@ -10,6 +10,7 @@ import {
   PROTECTED_ROUTES,
 } from "@/config/routes";
 import Cookies from "js-cookie";
+import { useQueryClient } from "@tanstack/react-query";
 
 const ONBOARDING_ROUTE = "/auth/signup";
 
@@ -19,11 +20,12 @@ export const useAuthContext = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const router = useRouter();
   const pathname = usePathname();
+  const queryClient = useQueryClient();
+
+  const hasToken = typeof window !== "undefined" && !!(Cookies.get("token") || Cookies.get("authorization"));
 
   const cachedAuth = useMemo(() => {
-    if (typeof window === "undefined") return null;
-    const token = Cookies.get("token") || Cookies.get("authorization");
-    if (!token) return null;
+    if (!hasToken) return null;
 
     try {
       const sessionType = Cookies.get("sessionType");
@@ -37,9 +39,13 @@ export const AuthProvider = ({ children }) => {
       console.error("Failed to parse cached auth cookies:", e);
     }
     return null;
-  }, []);
+  }, [hasToken]);
 
-  const hasToken = typeof window !== "undefined" && !!(Cookies.get("token") || Cookies.get("authorization"));
+  useEffect(() => {
+    if (!hasToken) {
+      queryClient.setQueryData(["auth-me"], null);
+    }
+  }, [hasToken, queryClient]);
 
   const {
     data: authData,
