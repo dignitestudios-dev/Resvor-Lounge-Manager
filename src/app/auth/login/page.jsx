@@ -45,15 +45,10 @@ const Login = () => {
           if (tokenType === "registration_token") {
             console.log("🚀 ~ IF RUN LINE 46");
             // Middleware will guard the route; onboardingStep is already in cache
-            router.push("/auth/signup");
+            router.replace("/auth/signup");
           } else {
-            console.log("🚀 ~ ELSE RUN LINE 50");
-
             localStorage.setItem("fromLogin", "true");
-            // router.refresh();
-            // window.location.href = "/dashboard";
-            router.push("/dashboard");
-            // router.replace("/dashboard");
+            router.replace("/dashboard");
           }
         } catch (error) {
           ErrorToast(

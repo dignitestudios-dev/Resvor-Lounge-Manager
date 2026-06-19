@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import ReactQueryProvider from "@/lib/hooks/query/ReactQueryProvider";
 import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "@/lib/context/AuthProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -28,7 +29,9 @@ export default function RootLayout({ children }) {
             duration: 3000,
           }}
         />
-        <ReactQueryProvider>{children}</ReactQueryProvider>
+        <ReactQueryProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </ReactQueryProvider>
       </body>
     </html>
   );

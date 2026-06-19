@@ -6,8 +6,7 @@ import { ErrorToast } from "./components/ui/toaster";
 export const baseUrl =
   process.env.NODE_ENV === "development"
     ? "/api" // Use Next.js rewrites proxy in development
-    : "https://api-dev.resvor.com"; // Use direct URL in production
-
+    : "/https://api-dev.resvor.com"; // Use direct URL in production
 
 async function getDeviceFingerprint() {
   const fp = await FingerprintJS.load();
@@ -81,13 +80,16 @@ instance.interceptors.response.use(
       status: error.response?.status,
       message: error.message,
     });
+    const isAuthRoute = window.location.pathname.startsWith("/auth/login");
 
     if (error.code === "ECONNABORTED") {
       ErrorToast("Your internet connection is slow. Please try again.");
     }
 
-    if (error.response && error.response.status === 401) {
-      ErrorToast("Session expired. Please relogin");
+    if (error?.response?.status === 401 && !isAuthRoute) {
+      // localStorage.removeItem("authToken");
+      // localStorage.removeItem("authUser");
+      window.location.href = "/auth/login";
     }
 
     return Promise.reject(error);

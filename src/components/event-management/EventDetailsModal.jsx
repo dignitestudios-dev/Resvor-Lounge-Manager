@@ -196,8 +196,8 @@ const EventDetailsModal = ({
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>Lounge</SelectLabel>
-                  {lounges.length > 0 ? (
-                    lounges.map((lounge) => (
+                  {lounges?.length > 0 ? (
+                    lounges?.map((lounge) => (
                       <SelectItem
                         className="text-black"
                         value={lounge._id}

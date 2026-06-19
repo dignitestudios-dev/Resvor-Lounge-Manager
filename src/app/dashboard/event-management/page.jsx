@@ -35,7 +35,7 @@ const EventManagement = () => {
   const { data: lounges = [] } = useGetLounges();
   const { data: eventsResponse, isLoading: isEventsLoading } = useGetEvents(
     currentPage,
-    10
+    10,
   );
 
   // Transform API data to match table structure
@@ -49,13 +49,16 @@ const EventManagement = () => {
       const loungeName = lounge?.loungeName || "Unknown Lounge";
 
       // Get user info from userId or bookedByManagerId
-      const userData =
-        event.userId || { firstName: "Unknown", lastName: "", _id: "" };
+      const userData = event.userId || {
+        firstName: "Unknown",
+        lastName: "",
+        _id: "",
+      };
       const userName = `${userData.firstName} ${userData.lastName}`.trim();
 
       // Format event time
       const eventTime = `${utils.formatTime(
-        startDateTime
+        startDateTime,
       )} - ${utils.formatTime(endDateTime)}`;
 
       return {

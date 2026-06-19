@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 // ── Edit Service Modal ────────────────────────────────────────────────────────
 const EditServiceModal = ({
@@ -9,52 +9,54 @@ const EditServiceModal = ({
   initial = null,
   variant = "dark",
 }) => {
-  const [serviceName, setServiceName] = useState(initial?.serviceName || "");
-  const [price, setPrice] = useState(initial?.price || "");
-  const [description, setDescription] = useState(initial?.description || "");
-  const [images, setImages] = useState(initial?.images || []);
+  const [serviceName, setServiceName] = useState("");
+  const [price, setPrice] = useState("");
+  const [description, setDescription] = useState("");
+  const [images, setImages] = useState([]);
   const fileRef = useRef();
+  useEffect(() => {
+    setServiceName(initial?.serviceName || "");
+    setPrice(initial?.price || "");
+    setDescription(initial?.description || "");
+    setImages(initial?.images || []);
+  }, [initial, isOpen]);
 
   const isDark = variant === "dark";
 
   if (!isOpen) return null;
 
-  const handleFiles = (e) => {
-    const files = Array.from(e.target.files);
+  const handleFiles = async (e) => {
+    const selectedFiles = Array.from(e.target.files || []);
 
-    setImages((prev) => {
-      let newImages = [...prev];
+    if (!selectedFiles.length) return;
 
-      files.forEach((file) => {
-        if (newImages.length >= 5) return;
+    const remainingSlots = 5 - images.length;
 
+    if (remainingSlots <= 0) {
+      e.target.value = "";
+      return;
+    }
+
+    const filesToAdd = selectedFiles.slice(0, remainingSlots);
+
+    const readFile = (file) =>
+      new Promise((resolve) => {
         const reader = new FileReader();
 
-        reader.onload = (ev) => {
-          setImages((current) => {
-            if (current.length < 5) {
-              return [
-                ...current,
-                {
-                  url: ev.target.result,
-                  name: file.name,
-                },
-              ];
-            }
-            return current;
+        reader.onload = (event) => {
+          resolve({
+            id: `${Date.now()}-${Math.random()}`,
+            url: event.target.result,
+            name: file.name,
           });
         };
 
         reader.readAsDataURL(file);
-
-        newImages.push({
-          url: "",
-          name: file.name,
-        });
       });
 
-      return newImages;
-    });
+    const newImages = await Promise.all(filesToAdd.map(readFile));
+
+    setImages((prev) => [...prev, ...newImages]);
 
     e.target.value = "";
   };
@@ -66,22 +68,25 @@ const EditServiceModal = ({
   const replaceImage = (index, e) => {
     const file = e.target.files?.[0];
 
-    if (file) {
-      const reader = new FileReader();
+    if (!file) return;
 
-      reader.onload = (ev) => {
-        setImages((prev) => {
-          const updated = [...prev];
-          updated[index] = {
-            url: ev.target.result,
-            name: file.name,
-          };
-          return updated;
-        });
-      };
+    const reader = new FileReader();
 
-      reader.readAsDataURL(file);
-    }
+    reader.onload = (event) => {
+      setImages((prev) => {
+        const updated = [...prev];
+
+        updated[index] = {
+          ...updated[index],
+          url: event.target.result,
+          name: file.name,
+        };
+
+        return updated;
+      });
+    };
+
+    reader.readAsDataURL(file);
 
     e.target.value = "";
   };
@@ -230,14 +235,14 @@ const EditServiceModal = ({
                 isDark ? "text-gray-400" : "text-gray-500"
               }`}
             >
-              (Optional - Max 5)
+              (Optional - {images.length}/5)
             </span>
           </label>
 
           {images.length > 0 && (
             <div className="mb-3 flex flex-wrap gap-3">
               {images.map((img, i) => (
-                <div key={i} className="relative">
+                <div key={img.id || `${img.name}-${i}`} className="relative">
                   <img
                     src={img.url}
                     alt={img.name}
@@ -269,7 +274,7 @@ const EditServiceModal = ({
             </div>
           )}
 
-          {images.length < 5 && (
+          {images.length < 5 ? (
             <div
               onClick={() => fileRef.current.click()}
               className={`rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all ${
@@ -293,6 +298,10 @@ const EditServiceModal = ({
                 to upload
               </p>
             </div>
+          ):(
+             <div className="text-center text-[12px] text-red-500">
+    Maximum 5 images allowed
+  </div>
           )}
 
           <input

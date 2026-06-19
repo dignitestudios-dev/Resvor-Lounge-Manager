@@ -8,7 +8,8 @@ import DatePickerField from "./../common/DatePickerField";
 import SelectField from "../common/SelectField";
 import { eventTypeOptions } from "@/lib/constants";
 import moment from "moment";
-import { phoneFormatter } from "@/lib/utils";
+import { phoneFormatter, phoneToE164 } from "@/lib/utils";
+import PhoneInput from "../auth/PhoneInput";
 
 const AddEventForm = ({ onClose, onNext }) => {
   const [startDate, setStartDate] = useState(null);
@@ -199,7 +200,7 @@ const AddEventForm = ({ onClose, onNext }) => {
       endDateTime: endDateTime.toISOString(),
       name: formData.name,
       email: formData.email,
-      phone: formData.phone,
+      phone: phoneToE164(formData.phone),
       guestCount: Number(formData.guestCount),
       preferredMusic: formData.preferredMusic || "None",
       specialRequest: formData.specialRequest || "None",
@@ -399,10 +400,11 @@ const AddEventForm = ({ onClose, onNext }) => {
             /> */}
 
             <PhoneInput
-              label={"Phone Number"}
-              value={phoneFormatter(formData.phone)}
-              id={"number"}
-              name={"number"}
+              variant="light"
+              label="Phone Number"
+              value={phoneFormatter(formData.phone || "")}
+              id="phone"
+              name="phone"
               onChange={handleInputChange}
               error={formErrors.phone}
               touched={!!formErrors.phone}

@@ -21,16 +21,15 @@ import Subscription from "../../../components/onBoarding/Subscription";
 import { useLogout } from "@/lib/hooks/mutations/AuthMutations";
 
 import { ErrorToast } from "@/components/ui/toaster";
-
-import { useAuthContext } from "../layout";
+import { useAuthContext } from "@/lib/context/AuthProvider";
 
 export default function SignUp() {
   const router = useRouter();
 
   const queryClient = useQueryClient();
 
-  const { contextValue } = useAuthContext();
-  console.log("🚀 ~ SignUp ~ contextValue:", contextValue);
+  const { onboardingStep: sessionOnboardingStep, user } = useAuthContext();
+  console.log("sessionOnboardingStep----->33---", sessionOnboardingStep);
 
   const logoutMutation = useLogout();
 
@@ -38,8 +37,7 @@ export default function SignUp() {
 
   const [email, setEmail] = useState("");
 
-  const onboardingStep =
-    contextValue?.authData?.data?.onboardingStep || "create_account";
+  const onboardingStep = sessionOnboardingStep || "create_account";
 
   const stepMap = {
     create_account: 0,
@@ -104,33 +102,31 @@ export default function SignUp() {
 
   const renderedScreen = useMemo(() => {
     switch (onboardingStep) {
-      // case "create_account":
-      //   return <CreateAccount setEmail={setEmail} />;
-      // case "verify_email":
-      //   return (
-      //     <VerifyEmail
-      //       email={email || contextValue?.authData?.data?.user?.email}
-      //       handlePrevious={handleLogout}
-      //     />
-      //   );
-      // case "verify_mobile":
-      //   return (
-      //     <VerifyPhone
-      //       email={email || contextValue?.authData?.data?.user?.email}
-      //       handlePrevious={handleLogout}
-      //     />
-      //   );
-      // case "create_lounge":
-      //   return <PersonalDetails handlePrevious={handleLogout} />;
-      // case "completed":
-      //   return <Subscription handlePrevious={handleLogout} />;
-
-      default:
+      case "create_account":
+        return <CreateAccount setEmail={setEmail} />;
+      case "verify_email":
+        return (
+          <VerifyEmail
+            email={email || user?.email}
+            handlePrevious={handleLogout}
+          />
+        );
+      case "verify_mobile":
+        return (
+          <VerifyPhone
+            email={email || user?.email}
+            handlePrevious={handleLogout}
+          />
+        );
+      case "create_lounge":
+        return <PersonalDetails handlePrevious={handleLogout} />;
+      case "completed":
         return <Subscription handlePrevious={handleLogout} />;
 
-      // return <CreateAccount setEmail={setEmail} />;
+      default:
+        return <CreateAccount setEmail={setEmail} />;
     }
-  }, [onboardingStep, contextValue?.authData, email]);
+  }, [onboardingStep, user?.email, email]);
 
   if (isLoggingOut) {
     return (

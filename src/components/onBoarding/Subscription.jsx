@@ -5,18 +5,21 @@ import AuthButton from "../auth/AuthButton";
 import { useRouter } from "next/navigation";
 import { useGetSubscriptionPlans } from "@/lib/hooks/queries/useSubscriptionPlans";
 import { usePurchaseSubscription } from "@/lib/hooks/mutations/SubscriptionMutation";
-import { CloudCog } from "lucide-react";
+import { CloudCog, LogOutIcon } from "lucide-react";
 
 const Subscription = ({ handlePrevious }) => {
   const router = useRouter();
   const [subscriptionModal, setSubscriptionModal] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
+  const [activePlanId, setActivePlanId] = useState(null);
 
-  const { mutateAsync: purchasePlan, isLoading: isPurchasing } =
+  const { mutateAsync: purchasePlan, isPending: isPurchasing } =
     usePurchaseSubscription();
+  console.log("🚀 ~ Subscription ~ isPurchasing:", isPurchasing);
 
   const { data: plansResponse, isLoading } = useGetSubscriptionPlans();
+  console.log("🚀 ~ Subscription ~ isLoading:", isLoading);
   const plans = plansResponse?.data || [];
 
   // const handleBuyNow = (plan) => {
@@ -26,6 +29,7 @@ const Subscription = ({ handlePrevious }) => {
 
   const handleBuyNow = async (plan) => {
     try {
+      setActivePlanId(plan._id);
       const purchaseRes = await purchasePlan(plan._id);
       console.log("🚀 ~ handleBuyNow ~ purchaseRes:", purchaseRes);
       if (purchaseRes?.data?.checkoutUrl) {
@@ -120,16 +124,24 @@ const Subscription = ({ handlePrevious }) => {
                       ))}
                     </ul>
                     <button
-                      disabled={isPurchasing}
+                      disabled={activePlanId === plan._id}
                       onClick={() => handleBuyNow(plan)}
                       className="w-full bg-white text-[#181818] font-semibold py-3 rounded-[12px] hover:bg-gray-100 transition text-sm"
                     >
-                      {isPurchasing ? "Processing..." : "Buy Now"}
+                      {activePlanId === plan._id ? "Processing..." : "Buy Now"}
                     </button>
                   </div>
                 ))}
               </div>
             )}
+            <div className="w-full mt-6">
+              <button
+                onClick={() => handlePrevious()}
+                className="w-full bg-[#EFEFEF1A] border border-[#CACACA] text-white py-2.5 rounded-xl text-[13px] font-semibold mt-auto"
+              >
+                Logout
+              </button>
+            </div>
           </div>
         </>
       )}
