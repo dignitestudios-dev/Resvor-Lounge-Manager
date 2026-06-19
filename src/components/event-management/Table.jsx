@@ -14,52 +14,54 @@ const Table = ({
   onPageChange = () => {},
 }) => {
   const router = useRouter();
-  // const [filteredEvents, setFilteredEvents] = React.useState([]);
-  // const [sortConfig, setSortConfig] = React.useState({
-  //   key: "loungeName",
-  //   direction: "asc",
-  // });
+  const [filteredEvents, setFilteredEvents] = React.useState([]);
 
-  // React.useEffect(() => {
-  //   let filtered = [...events];
+  React.useEffect(() => {
+    let filtered = [...events];
 
-  //   if (filters.startDate) {
-  //     const startDate = new Date(filters.startDate);
-  //     filtered = filtered.filter((event) => {
-  //       const eventDate = new Date(event.eventDate);
-  //       return eventDate >= startDate;
-  //     });
-  //   }
+    if (filters.startDate) {
+      const startDate = new Date(filters.startDate);
+      filtered = filtered.filter((event) => {
+        const eventDate = new Date(event.eventDate);
+        return eventDate >= startDate;
+      });
+    }
 
-  //   if (filters.endDate) {
-  //     const endDate = new Date(filters.endDate);
-  //     endDate.setHours(23, 59, 59, 999);
-  //     filtered = filtered.filter((event) => {
-  //       const eventDate = new Date(event.eventDate);
-  //       return eventDate <= endDate;
-  //     });
-  //   }
+    if (filters.endDate) {
+      const endDate = new Date(filters.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      filtered = filtered.filter((event) => {
+        const eventDate = new Date(event.eventDate);
+        return eventDate <= endDate;
+      });
+    }
 
-  //   if (filters.selectedMonth) {
-  //     const monthIndex = new Date(`${filters.selectedMonth} 1`).getMonth();
-  //     filtered = filtered.filter((event) => {
-  //       const eventDate = new Date(event.eventDate);
-  //       return eventDate.getMonth() === monthIndex;
-  //     });
-  //   }
+    if (filters.selectedMonth) {
+      const monthIndex = new Date(`${filters.selectedMonth} 1`).getMonth();
+      filtered = filtered.filter((event) => {
+        const eventDate = new Date(event.eventDate);
+        return eventDate.getMonth() === monthIndex;
+      });
+    }
 
-  //   if (filters.selectedLounge) {
-  //     filtered = filtered.filter((event) => {
-  //       return event.loungeName === filters.selectedLounge;
-  //     });
-  //   }
+    if (filters.selectedLounge) {
+      filtered = filtered.filter((event) => {
+        return event.loungeName === filters.selectedLounge;
+      });
+    }
 
-  //   setFilteredEvents(filtered);
-  // }, [filters, events]);
+    if (filters.selectedStatus) {
+      filtered = filtered.filter((event) => {
+        return event.status === filters.selectedStatus;
+      });
+    }
 
-  // const displayedEvents = Object.keys(filters).some((key) => filters[key])
-  //   ? filteredEvents
-  //   : events;
+    setFilteredEvents(filtered);
+  }, [filters, events]);
+
+  const displayedEvents = Object.keys(filters).some((key) => filters[key])
+    ? filteredEvents
+    : events;
 
   const handleRowClick = (eventId) => {
     router.push(`/dashboard/event-management/${eventId}`);
@@ -113,14 +115,14 @@ const Table = ({
           </thead>
 
           <tbody className="mt-10">
-            {events?.length === 0 ? (
+            {displayedEvents?.length === 0 ? (
               <tr>
                 <td colSpan={10} className="text-center py-10 text-gray-500">
                   No events found.
                 </td>
               </tr>
             ) : (
-              events?.map((event, index) => (
+              displayedEvents?.map((event, index) => (
                 <tr
                   key={event._id || index}
                   className="border-b border-[#D4D4D4] cursor-pointer hover:bg-gray-50"

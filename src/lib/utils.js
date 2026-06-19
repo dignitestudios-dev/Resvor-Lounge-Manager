@@ -1,5 +1,6 @@
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import Cookies from "js-cookie";
 
 export function cn(...inputs) {
   return twMerge(clsx(inputs));
@@ -309,19 +310,35 @@ export const validateImageResolution = (file) => {
 };
 
 export function updateAuthCache(queryClient, patch) {
-  queryClient.setQueryData(["auth-me"], (old) => ({
-    ...(old ?? {}),
-    ...patch,
+  queryClient.setQueryData(["auth-me"], (old) => {
+    const updated = {
+      ...(old ?? {}),
+      ...patch,
 
-    // Deep merge user
-    user:
-      patch.user !== undefined
-        ? {
-            ...(old?.user ?? {}),
-            ...(patch.user ?? {}),
-          }
-        : old?.user,
-  }));
+      // Deep merge user
+      user:
+        patch.user !== undefined
+          ? {
+              ...(old?.user ?? {}),
+              ...(patch.user ?? {}),
+            }
+          : old?.user,
+    };
+
+    if (typeof window !== "undefined") {
+      if (updated.sessionType !== undefined) {
+        Cookies.set("sessionType", updated.sessionType, { expires: 7, path: "/" });
+      }
+      if (updated.onboardingStep !== undefined) {
+        Cookies.set("onboardingStep", updated.onboardingStep, { expires: 7, path: "/" });
+      }
+      if (updated.user !== undefined) {
+        Cookies.set("user", JSON.stringify(updated.user), { expires: 7, path: "/" });
+      }
+    }
+
+    return updated;
+  });
 }
 
 export const getBookingStatusStyles = (status) => {

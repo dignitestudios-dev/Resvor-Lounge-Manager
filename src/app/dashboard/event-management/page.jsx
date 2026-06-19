@@ -28,6 +28,7 @@ const EventManagement = () => {
     endDate: "",
     selectedMonth: "",
     selectedLounge: "",
+    selectedStatus: "",
   });
 
   // Mutations and Queries
@@ -203,6 +204,7 @@ const EventManagement = () => {
             <DateAndMonthFilter
               isLounge={true}
               onFilterChange={handleFilterChange}
+              statusOptions={["pending", "accepted", "rejected"]}
             />
           )}
           {isEventDetails && (

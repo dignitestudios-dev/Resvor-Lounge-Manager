@@ -33,7 +33,14 @@ const Login = () => {
             role: "lounge_manager",
           });
 
-          const { tokenType, onboardingStep, user } = response?.data ?? {};
+          const { tokenType, onboardingStep, user, token, accessToken } = response?.data ?? {};
+          console.log(response?.data, "--response?.data--- 37---"); 
+          const activeToken = token || accessToken || response?.token || response?.accessToken;
+
+          if (activeToken) {
+            Cookies.set("token", activeToken, { expires: 7, path: "/" });
+            Cookies.set("authorization", activeToken, { expires: 7, path: "/" });
+          }
 
           // Seed the cache so AuthLayout / signup page never needs to refetch
           updateAuthCache(queryClient, {

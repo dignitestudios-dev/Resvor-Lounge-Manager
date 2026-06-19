@@ -11,6 +11,7 @@ const Bookings = () => {
     endDate: "",
     selectedMonth: "",
     selectedLounge: "",
+    selectedStatus: "",
   });
 
   const { data: bookingsResponse, isLoading } = useGetBookings(
@@ -37,6 +38,15 @@ const Bookings = () => {
           <DateAndMonthFilter
             isLounge={true}
             onFilterChange={handleFilterChange}
+            statusOptions={[
+              "pending",
+              "awaiting_payment",
+              "confirmed",
+              "failed",
+              "cancelled",
+              "rejected",
+              "completed",
+            ]}
           />
         </div>
       </div>

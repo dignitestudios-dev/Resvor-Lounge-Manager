@@ -87,6 +87,12 @@ const Table = ({
       });
     }
 
+    if (filters.selectedStatus) {
+      filtered = filtered.filter((booking) => {
+        return booking.status === filters.selectedStatus;
+      });
+    }
+
     setFilteredBookings(filtered);
   }, [filters, transformedBookings]);
 

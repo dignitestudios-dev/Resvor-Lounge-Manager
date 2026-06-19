@@ -1,7 +1,6 @@
 import Sidebar from "@/components/global/Sidebar";
 import Topbar from "@/components/global/Topbar";
 import LoungeModalWrapper from "@/components/dashboard/LoungeModalWrapper";
-import { Suspense } from "react";
 
 export default function DashboardLayout({ children }) {
   return (

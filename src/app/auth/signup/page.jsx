@@ -83,7 +83,9 @@ export default function SignUp() {
       setIsLoggingOut(true);
 
       await logoutMutation.mutateAsync();
+      queryClient.setQueryData(["auth-me"], null);
       queryClient.invalidateQueries({ queryKey: ["auth-me"] });
+      queryClient.clear();
 
       router.replace("/auth/login");
     } catch (error) {

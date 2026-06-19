@@ -9,6 +9,7 @@ import {
   DEFAULT_REDIRECT,
   PROTECTED_ROUTES,
 } from "@/config/routes";
+import Cookies from "js-cookie";
 
 const ONBOARDING_ROUTE = "/auth/signup";
 
@@ -19,13 +20,37 @@ export const AuthProvider = ({ children }) => {
   const router = useRouter();
   const pathname = usePathname();
 
+  const cachedAuth = useMemo(() => {
+    if (typeof window === "undefined") return null;
+    const token = Cookies.get("token") || Cookies.get("authorization");
+    if (!token) return null;
+
+    try {
+      const sessionType = Cookies.get("sessionType");
+      const onboardingStep = Cookies.get("onboardingStep");
+      const userVal = Cookies.get("user");
+      const user = userVal ? JSON.parse(userVal) : null;
+      if (sessionType) {
+        return { sessionType, onboardingStep, user };
+      }
+    } catch (e) {
+      console.error("Failed to parse cached auth cookies:", e);
+    }
+    return null;
+  }, []);
+
+  const hasToken = typeof window !== "undefined" && !!(Cookies.get("token") || Cookies.get("authorization"));
+
   const {
     data: authData,
     isLoading,
     isFetching,
     isError,
     refetch,
-  } = useAuthMe();
+  } = useAuthMe({
+    initialData: cachedAuth || undefined,
+    enabled: hasToken,
+  });
   console.log("🚀 ~ AuthProvider ~ isLoading:", isLoading);
   console.log("🚀 ~ AuthProvider ~ authData:", authData);
 
@@ -52,7 +77,7 @@ export const AuthProvider = ({ children }) => {
     if (
       isAuthenticated &&
       onboardingStep === "completed" &&
-      user.isSubscribed === true
+      user?.isSubscribed === true
     ) {
       return pathname.startsWith("/dashboard") ? null : DEFAULT_REDIRECT;
     }
@@ -64,7 +89,7 @@ export const AuthProvider = ({ children }) => {
     if (
       isAuthenticated &&
       onboardingStep === "completed" &&
-      user.isSubscribed === false
+      user?.isSubscribed === false
     ) {
       return isOnboardingRoute ? null : ONBOARDING_ROUTE;
     }

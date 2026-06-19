@@ -6,7 +6,7 @@ const fetchAuthMe = async () => {
   return data?.data || null;
 };
 
-export const useAuthMe = () => {
+export const useAuthMe = (options = {}) => {
   return useQuery({
     queryKey: ["auth-me"],
     queryFn: fetchAuthMe,
@@ -16,5 +16,6 @@ export const useAuthMe = () => {
     refetchOnReconnect: false,
     staleTime: Infinity,
     gcTime: Infinity,
+    ...options,
   });
 };

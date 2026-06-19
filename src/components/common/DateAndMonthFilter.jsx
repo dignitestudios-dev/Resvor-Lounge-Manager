@@ -23,11 +23,12 @@ import { Input } from "../ui/input";
 import { locations, months } from "@/lib/constants";
 import utils from "@/lib/utils";
 
-const DateAndMonthFilter = ({ isLounge, onFilterChange }) => {
+const DateAndMonthFilter = ({ isLounge, onFilterChange, statusOptions }) => {
   const [startDate, setStartDate] = React.useState("");
   const [endDate, setEndDate] = React.useState("");
   const [selectedMonth, setSelectedMonth] = React.useState("");
   const [selectedLounge, setSelectedLounge] = React.useState("");
+  const [selectedStatus, setSelectedStatus] = React.useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -37,6 +38,7 @@ const DateAndMonthFilter = ({ isLounge, onFilterChange }) => {
         endDate,
         selectedMonth,
         selectedLounge,
+        selectedStatus,
       });
     }
   };
@@ -46,12 +48,14 @@ const DateAndMonthFilter = ({ isLounge, onFilterChange }) => {
     setEndDate("");
     setSelectedMonth("");
     setSelectedLounge("");
+    setSelectedStatus("");
     if (onFilterChange) {
       onFilterChange({
         startDate: "",
         endDate: "",
         selectedMonth: "",
         selectedLounge: "",
+        selectedStatus: "",
       });
     }
   };
@@ -130,6 +134,28 @@ const DateAndMonthFilter = ({ isLounge, onFilterChange }) => {
                     {locations.map((month) => (
                       <SelectItem value={month.name} key={month._id}>
                         {utils.capitalize(month.name)}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {statusOptions && statusOptions.length > 0 && (
+            <div className="col-span-2 flex flex-col gap-1">
+              <Label className={"text-base"}>Select Status</Label>
+
+              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                <SelectTrigger className={"w-full h-14!"}>
+                  <SelectValue placeholder="Select a Status" />
+                </SelectTrigger>
+                <SelectContent className={"h-[200px]"}>
+                  <SelectGroup>
+                    <SelectLabel>Status</SelectLabel>
+                    {statusOptions.map((status, index) => (
+                      <SelectItem value={status} key={index}>
+                        {utils.capitalize(status.replaceAll("_", " "))}
                       </SelectItem>
                     ))}
                   </SelectGroup>

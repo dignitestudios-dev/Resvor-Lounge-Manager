@@ -1,6 +1,7 @@
 import axios from "axios";
 import FingerprintJS from "@fingerprintjs/fingerprintjs";
 import { ErrorToast } from "./components/ui/toaster";
+import Cookies from "js-cookie";
 
 // Proxy configuration - similar to Vite setup
 export const baseUrl =
@@ -21,7 +22,7 @@ const instance = axios.create({
   headers: {
     Accept: "application/json",
   },
-  timeout: 30000, // 30 seconds timeout
+  timeout: 200000, 
 });
 
 instance.interceptors.request.use(async (request) => {
@@ -34,6 +35,11 @@ instance.interceptors.request.use(async (request) => {
   }
 
   request.withCredentials = true;
+
+  const token = Cookies.get("token") || Cookies.get("authorization");
+  if (token) {
+    request.headers.Authorization = `Bearer ${token}`;
+  }
 
   let fingerprint = "unknown-device";
 
@@ -73,6 +79,23 @@ instance.interceptors.response.use(
       headers: response.headers,
       data: response.data,
     });
+
+    const token = response.data?.token || response.data?.data?.token ||
+                  response.data?.accessToken || response.data?.data?.accessToken ||
+                  response.data?.authorization || response.data?.data?.authorization;
+    if (token) {
+      Cookies.set("token", token, { expires: 7, path: "/" });
+      Cookies.set("authorization", token, { expires: 7, path: "/" });
+    }
+
+    if (response.config.url?.endsWith("/auth/logout")) {
+      Cookies.remove("token", { path: "/" });
+      Cookies.remove("authorization", { path: "/" });
+      Cookies.remove("sessionType", { path: "/" });
+      Cookies.remove("onboardingStep", { path: "/" });
+      Cookies.remove("user", { path: "/" });
+    }
+
     return response;
   },
   (error) => {
@@ -87,10 +110,16 @@ instance.interceptors.response.use(
     }
 
     if (error?.response?.status === 401 && !isAuthRoute) {
-      // localStorage.removeItem("authToken");
-      // localStorage.removeItem("authUser");
-      // window.location.href = "/auth/login";
-      ErrorToast("Session expired. Please log in again.");
+      const hasCookie = Cookies.get("token") || Cookies.get("authorization");
+      Cookies.remove("token", { path: "/" });
+      Cookies.remove("authorization", { path: "/" });
+      Cookies.remove("sessionType", { path: "/" });
+      Cookies.remove("onboardingStep", { path: "/" });
+      Cookies.remove("user", { path: "/" });
+
+      if (hasCookie) {
+        ErrorToast("Session expired. Please log in again.");
+      }
     }
 
     return Promise.reject(error);

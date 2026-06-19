@@ -32,7 +32,6 @@ const ProfileMenu = () => {
   const handleConfirmLogout = async () => {
     try {
       await logoutMutation.mutateAsync();
-      queryClient.setQueryData(["auth-me"], null);
       queryClient.invalidateQueries({ queryKey: ["auth-me"] });
       queryClient.clear();
 
