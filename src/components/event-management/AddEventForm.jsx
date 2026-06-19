@@ -477,8 +477,8 @@ const AddEventForm = ({ onClose, onNext }) => {
           </div>
 
           <div>
-            <div className="mt-4 px-1">
-              <Button type="button" onClick={handleNext}>
+            <div className="mt-4 px-1 w-full">
+              <Button className={"w-full"} type="button" onClick={handleNext}>
                 {" "}
                 Submit{" "}
               </Button>

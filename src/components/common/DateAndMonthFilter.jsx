@@ -100,7 +100,7 @@ const DateAndMonthFilter = ({ isLounge, onFilterChange, statusOptions }) => {
             />
           </div>
 
-          <div className="col-span-2 flex flex-col gap-1">
+          {/* <div className="col-span-2 flex flex-col gap-1">
             <Label className={"text-base"}>Select Month</Label>
 
             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
@@ -118,9 +118,9 @@ const DateAndMonthFilter = ({ isLounge, onFilterChange, statusOptions }) => {
                 </SelectGroup>
               </SelectContent>
             </Select>
-          </div>
+          </div> */}
 
-          {isLounge && (
+          {/* {isLounge && (
             <div className="col-span-2 flex flex-col gap-1">
               <Label className={"text-base"}>Select Lounge</Label>
 
@@ -140,7 +140,7 @@ const DateAndMonthFilter = ({ isLounge, onFilterChange, statusOptions }) => {
                 </SelectContent>
               </Select>
             </div>
-          )}
+          )} */}
 
           {statusOptions && statusOptions.length > 0 && (
             <div className="col-span-2 flex flex-col gap-1">

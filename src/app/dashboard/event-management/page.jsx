@@ -13,8 +13,10 @@ import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
 import { useGetLounges } from "@/lib/hooks/queries/useLounges";
 import { useGetEvents } from "@/lib/hooks/queries/useEvents";
 import utils from "@/lib/utils";
+import { useQueryClient } from "@tanstack/react-query";
 
 const EventManagement = () => {
+  const queryClient = useQueryClient();
   const [isEventRequest, setIsEventRequest] = useState(false);
   const [isEventDetails, setIsEventDetails] = useState(false);
   const [eventData, setEventData] = useState(null);
@@ -114,10 +116,10 @@ const EventManagement = () => {
 
   const handleEventDetailsClose = async () => {
     try {
-      if (!selectedLoungeId) {
-        ErrorToast("Please select a lounge first");
-        return;
-      }
+      // if (!selectedLoungeId) {
+      //   ErrorToast("Please select a lounge first");
+      //   return;
+      // }
 
       if (!eventData) {
         ErrorToast("Event data is missing");
@@ -125,7 +127,7 @@ const EventManagement = () => {
       }
 
       const payload = {
-        loungeId: selectedLoungeId,
+        // loungeId: selectedLoungeId,
         title: eventData.title || eventData.eventName,
         eventType: eventData.eventType,
         description: eventData.description,
@@ -138,6 +140,7 @@ const EventManagement = () => {
       };
 
       await createEventMutation.mutateAsync(payload);
+      queryClient.invalidateQueries({ queryKey: ["events-list"] });
 
       SuccessToast("Event created successfully");
 

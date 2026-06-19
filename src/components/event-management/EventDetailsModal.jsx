@@ -185,7 +185,7 @@ const EventDetailsModal = ({
           )}
 
           {/* Lounge Selector */}
-          <div className="mb-6">
+          {/* <div className="mb-6">
             <label className="block text-[14px] font-semibold text-[#000000] mb-2">
               Select Lounge <span className="text-red-500">*</span>
             </label>
@@ -214,12 +214,13 @@ const EventDetailsModal = ({
                 </SelectGroup>
               </SelectContent>
             </Select>
-          </div>
-          <div className="space-y-2 mt-8">
+          </div> */}
+          <div className="space-y-2 mt-8 w-full">
             <Button
+            className={"w-full"}
               type="button"
               onClick={onClick}
-              disabled={!selectedLoungeId || isLoading}
+              disabled={ isLoading}
             >
               {isLoading ? "Submitting..." : "Submit"}
             </Button>
