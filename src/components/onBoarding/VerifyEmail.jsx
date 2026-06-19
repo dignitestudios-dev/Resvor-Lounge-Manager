@@ -7,7 +7,7 @@ import AuthSuccessModal from "../auth/AuthSuccessModal";
 import { verifyEmailValues } from "@/lib/init/verifyEmailValues";
 import { verifyEmailSchema } from "@/lib/schema/authentication/verifyEmailSchema";
 import { useVerifyEmail } from "@/lib/hooks/mutations/OnBoardingMutations";
-import { ErrorToast } from "../ui/toaster";
+import { ErrorToast, SuccessToast } from "../ui/toaster";
 import { useResendForgotOtp } from "@/lib/hooks/mutations/AuthMutations";
 import { LogOutIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -145,6 +145,7 @@ const VerifyEmail = ({ email, handlePrevious }) => {
   const handleResendOtp = async () => {
     try {
       await resendOtpMutation.mutateAsync({ email, role: "lounge_manager" });
+      SuccessToast("OTP resent successfully");
       setOtpDisplay(Array(5).fill("")); // Reset OTP display
       handleChange({
         target: { name: "otp", value: "" },
