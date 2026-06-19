@@ -6,7 +6,7 @@ import { ErrorToast } from "./components/ui/toaster";
 export const baseUrl =
   process.env.NODE_ENV === "development"
     ? "/api" // Use Next.js rewrites proxy in development
-    : "/https://api-dev.resvor.com"; // Use direct URL in production
+    : "https://api-dev.resvor.com"; // Use direct URL in production
 
 async function getDeviceFingerprint() {
   const fp = await FingerprintJS.load();
