@@ -32,10 +32,9 @@ const ProfileMenu = () => {
   const handleConfirmLogout = async () => {
     try {
       await logoutMutation.mutateAsync();
-      // queryClient.removeQueries({
-      //   queryKey: ["auth-me"],
-      // });
+      queryClient.setQueryData(["auth-me"], null);
       queryClient.invalidateQueries({ queryKey: ["auth-me"] });
+      queryClient.clear();
 
       setIsLogoutModalOpen(false);
       router.push("/auth/login");
