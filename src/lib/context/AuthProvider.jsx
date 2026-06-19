@@ -46,7 +46,6 @@ export const AuthProvider = ({ children }) => {
   const isAuthRoute = pathname.startsWith("/auth");
   const isOnboardingRoute = pathname === ONBOARDING_ROUTE;
 
-  // Same branching proxy.ts used to do, just evaluated client-side.
   const redirectTarget = useMemo(() => {
     if (!isResolved) return null;
 
@@ -55,7 +54,7 @@ export const AuthProvider = ({ children }) => {
       onboardingStep === "completed" &&
       user.isSubscribed === true
     ) {
-      return "/dashboard" ? null : DEFAULT_REDIRECT;
+      return pathname.startsWith("/dashboard") ? null : DEFAULT_REDIRECT;
     }
 
     if (isAuthenticated && onboardingStep === "create_lounge") {
