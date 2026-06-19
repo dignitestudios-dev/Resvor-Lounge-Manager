@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }) => {
   // (window focus, interval, etc.) never re-trigger the full-screen loader.
   const isResolved = !isLoading;
 
-  const sessionType = authData?.sessionType ?? null;
+  const sessionType = authData?.sessionType ?? authData?.tokenType?? null;
   const onboardingStep = authData?.onboardingStep ?? "create_account";
   const user = authData?.user ?? null;
   const isAuthenticated = sessionType === "access_token";
@@ -71,9 +71,6 @@ export const AuthProvider = ({ children }) => {
   const isAuthRoute = pathname.startsWith("/auth");
   const isOnboardingRoute = pathname === ONBOARDING_ROUTE;
 
-  console.log("auth provider --- 82 ",isAuthenticated);
-      console.log("auth provider --- 83 ",onboardingStep);
-      console.log("auth provider --- 84 ",user?.isSubscribed);
 
   const redirectTarget = useMemo(() => {
     if (!isResolved) return null;
