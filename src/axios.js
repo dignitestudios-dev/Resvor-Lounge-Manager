@@ -89,7 +89,8 @@ instance.interceptors.response.use(
     if (error?.response?.status === 401 && !isAuthRoute) {
       // localStorage.removeItem("authToken");
       // localStorage.removeItem("authUser");
-      window.location.href = "/auth/login";
+      // window.location.href = "/auth/login";
+      ErrorToast("Session expired. Please log in again.");
     }
 
     return Promise.reject(error);
