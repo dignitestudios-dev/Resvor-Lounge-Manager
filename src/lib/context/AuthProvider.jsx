@@ -26,6 +26,7 @@ export const AuthProvider = ({ children }) => {
     isError,
     refetch,
   } = useAuthMe();
+  console.log("🚀 ~ AuthProvider ~ isLoading:", isLoading);
   console.log("🚀 ~ AuthProvider ~ authData:", authData);
 
   // Resolved once the FIRST load settles (success or 401).
@@ -54,7 +55,7 @@ export const AuthProvider = ({ children }) => {
       onboardingStep === "completed" &&
       user.isSubscribed === true
     ) {
-      return DEFAULT_REDIRECT;
+      return "/dashboard" ? null : DEFAULT_REDIRECT;
     }
 
     if (isAuthenticated && onboardingStep === "create_lounge") {
