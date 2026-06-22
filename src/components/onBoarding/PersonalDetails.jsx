@@ -50,7 +50,7 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
         } else {
           ErrorToast(
             error.response?.data?.message ||
-              "An error occurred during logout. Please try again.",
+            "An error occurred during logout. Please try again.",
           );
         }
       }

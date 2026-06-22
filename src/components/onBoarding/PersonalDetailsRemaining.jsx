@@ -37,12 +37,13 @@ const PersonalDetailsRemaining = ({
         } else {
           ErrorToast(
             error.response?.data?.message ||
-              "An error occurred during logout. Please try again.",
+            "An error occurred during logout. Please try again.",
           );
         }
       }
     },
   });
+  console.log("🚀 ~ PersonalDetailsRemaining ~ errors:", errors)
 
   const handleMultipleImagesChange = async (e) => {
     const selectedFiles = Array.from(e.target.files || []);
@@ -218,7 +219,7 @@ const PersonalDetailsRemaining = ({
           <div className="xxl:w-[650px] w-[450px] mt-1 mb-4">
             <AuthButton
               text={"Next"}
-              // disabled={Object.keys(errors).length > 0}
+            // disabled={Object.keys(errors).length > 0}
             />
           </div>
         </div>

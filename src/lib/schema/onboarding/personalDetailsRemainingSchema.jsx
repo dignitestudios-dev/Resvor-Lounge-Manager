@@ -63,7 +63,7 @@ export const personalDetailsRemainingSchema = Yup.object({
     )
     .max(100, "Location must not exceed 100 characters"),
 
-  offers: Yup.string().max(60, "Offers must not exceed 60 characters"),
+  // offers: Yup.string().max(60, "Offers must not exceed 60 characters"),
 
   role: Yup.string()
     .required("Role is required")

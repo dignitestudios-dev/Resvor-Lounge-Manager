@@ -4,10 +4,12 @@ import { ErrorToast } from "./components/ui/toaster";
 import Cookies from "js-cookie";
 
 // Proxy configuration - similar to Vite setup
-export const baseUrl =
-  process.env.NODE_ENV === "development"
-    ? "/api" // Use Next.js rewrites proxy in development
-    : "https://api-dev.resvor.com"; // Use direct URL in production
+// export const baseUrl =
+//   process.env.NODE_ENV === "development"
+//     ? "/api" // Use Next.js rewrites proxy in development
+//     : "https://api-dev.resvor.com"; // Use direct URL in production
+
+export const baseUrl = "https://api-dev.resvor.com";
 
 async function getDeviceFingerprint() {
   const fp = await FingerprintJS.load();
@@ -22,7 +24,7 @@ const instance = axios.create({
   headers: {
     Accept: "application/json",
   },
-  timeout: 200000, 
+  timeout: 200000,
 });
 
 instance.interceptors.request.use(async (request) => {
@@ -63,8 +65,8 @@ instance.interceptors.request.use(async (request) => {
     ...(isFormData
       ? {}
       : {
-          "Content-Type": "application/json",
-        }),
+        "Content-Type": "application/json",
+      }),
     devicemodel: fingerprint,
     deviceuniqueid: fingerprint,
   };
@@ -80,9 +82,13 @@ instance.interceptors.response.use(
       data: response.data,
     });
 
-    const token = response.data?.token || response.data?.data?.token ||
-                  response.data?.accessToken || response.data?.data?.accessToken ||
-                  response.data?.authorization || response.data?.data?.authorization;
+    const token =
+      response.data?.token ||
+      response.data?.data?.token ||
+      response.data?.accessToken ||
+      response.data?.data?.accessToken ||
+      response.data?.authorization ||
+      response.data?.data?.authorization;
     if (token) {
       Cookies.set("token", token, { expires: 7, path: "/" });
       Cookies.set("authorization", token, { expires: 7, path: "/" });
