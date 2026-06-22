@@ -39,8 +39,7 @@ const AddGuestForm = ({
   isEdit = false,
   showTrigger = true,
 }) => {
-  console.log("🚀 ~ AddGuestForm ~ isEdit:", isEdit);
-  console.log("🚀 ~ AddGuestForm ~ data:", data);
+
   // State for form fields
   const [fullName, setFullName] = useState(data?.fullName || "");
   const [email, setEmail] = useState(data?.email || "");
@@ -113,8 +112,8 @@ const AddGuestForm = ({
     } catch (error) {
       ErrorToast(
         error?.response?.data?.message ||
-          error?.message ||
-          `Failed to ${isEdit ? "update" : "add"} guest. Please try again.`,
+        error?.message ||
+        `Failed to ${isEdit ? "update" : "add"} guest. Please try again.`,
       );
       console.log(`${isEdit ? "Update" : "Add"} guest error:`, error);
     }

@@ -1,6 +1,5 @@
 "use client";
 import React, { useState } from "react";
-import { IoIosArrowForward } from "react-icons/io";
 import utils from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import Delete from "../icons/Delete";
@@ -11,12 +10,18 @@ import AddGuestForm from "./AddGuestForm";
 import { useDeleteGuest } from "@/lib/hooks/mutations/GuestbookMutations";
 import { useQueryClient } from "@tanstack/react-query";
 import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
+import CustomPagination from "@/components/common/CustomPagination";
 
-const Table = ({ guests = [], isLoading = false }) => {
+const Table = ({
+  guests = [],
+  isLoading = false,
+  pagination = null,
+  currentPage = 1,
+  onPageChange = () => { },
+}) => {
   const router = useRouter();
   const [openEditForm, setOpenEditForm] = useState(false);
   const [selectedGuestForEdit, setSelectedGuestForEdit] = useState(null);
-  console.log("🚀 ~ Table ~ selectedGuestForEdit:", selectedGuestForEdit);
   const [openDeletePopup, setOpenDeletePopup] = useState(false);
   const [selectedGuestIdForDelete, setSelectedGuestIdForDelete] =
     useState(null);
@@ -30,17 +35,12 @@ const Table = ({ guests = [], isLoading = false }) => {
     direction: "asc",
   });
 
-  const handleGoToGuestDetailsPage = (guestId) => {
-    router.push(`/dashboard/guestbook/${guestId}`);
-  };
-
   const sortedGuests = [...guests].sort((a, b) => {
     if (!sortConfig.key) return 0;
 
     let valA = a[sortConfig.key];
     let valB = b[sortConfig.key];
 
-    // Convert qty to number for numeric sorting
     if (sortConfig.key === "qty") {
       valA = parseInt(valA, 10);
       valB = parseInt(valB, 10);
@@ -69,7 +69,7 @@ const Table = ({ guests = [], isLoading = false }) => {
       await deleteGuestMutation.mutateAsync(selectedGuestIdForDelete);
 
       // Invalidate the guestbook list query to refresh data
-      queryClient.invalidateQueries(["guestbook-list"]);
+      queryClient.invalidateQueries({ queryKey: ["guestbook-list"] });
 
       SuccessToast("Guest deleted successfully");
 
@@ -79,8 +79,8 @@ const Table = ({ guests = [], isLoading = false }) => {
     } catch (error) {
       ErrorToast(
         error?.response?.data?.message ||
-          error?.message ||
-          "Failed to delete guest. Please try again.",
+        error?.message ||
+        "Failed to delete guest. Please try again.",
       );
       console.log("Delete guest error:", error);
     }
@@ -96,84 +96,92 @@ const Table = ({ guests = [], isLoading = false }) => {
     setOpenEditForm(true);
   };
 
-  return (
-    <div className="bg-white rounded-xl overflow-y-auto">
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <p className="text-gray-500 text-lg">Loading guests...</p>
-        </div>
-      ) : guests && guests.length > 0 ? (
-        <table className="w-full">
-          <thead className="sticky top-0 z-10">
-            <tr className="bg-[#E8E8FF]">
-              <th
-                onClick={() => requestSort("fullName")}
-                className="px-4 py-5 text-left text-nowrap cursor-pointer"
-              >
-                Guest Name
-                {sortConfig.key === "fullName" ? (
-                  sortConfig.direction === "asc" ? (
-                    <span className="cursor-pointer">↑</span>
-                  ) : (
-                    <span className="cursor-pointer">↓</span>
-                  )
-                ) : (
-                  ""
-                )}
-              </th>
-              <th className="px-4 py-5 text-left text-nowrap">Email</th>
-              <th className="px-4 py-5 text-left text-nowrap">Created Date</th>
-              <th className="px-4 py-5 text-center text-nowrap">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedGuests.map((guest) => (
-              <tr
-                key={guest._id}
-                className="border-b border-[#D4D4D4] cursor-pointer"
-              >
-                <td className="px-4 py-6">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="h-[43px] w-[43px] rounded-full bg-cover bg-center bg-primary"
-                      style={{
-                        backgroundImage: `url(${"/images/profile.png"})`,
-                      }}
-                    />
-                    {guest.fullName}{" "}
-                  </div>
-                </td>
-                <td className="px-4 py-6">{guest.email}</td>
-                <td className="px-4 py-6">
-                  {utils.formatDateWithName(guest.createdAt)}
-                </td>
-                <td className="px-4 py-6 text-nowrap">
-                  <div className="flex justify-center items-center cursor-pointer gap-1">
-                    {/* <IoIosArrowForward size={24} /> */}
+  const totalPages = pagination?.totalPages || 1;
 
-                    <Button
-                      onClick={() => handleDeleteGuest(guest._id)}
-                      className="bg-red-400 hover:bg-red-500"
-                    >
-                      <Delete className="scale-150 text-red-400" />
-                    </Button>
-                    <Button
-                      className="bg-blue-100 hover:bg-blue-50"
-                      onClick={() => handleEditGuest(guest)}
-                    >
-                      <Edit className="scale-150 " />
-                    </Button>
-                  </div>
-                </td>
+  return (
+    <>
+      <CustomPagination
+        loading={isLoading}
+        onPageChange={onPageChange}
+        totalPages={totalPages}
+        currentPage={currentPage}
+      >
+        <div className="bg-white rounded-xl overflow-y-auto">
+          <table className="w-full">
+            <thead className="sticky top-0 z-10">
+              <tr className="bg-[#E8E8FF]">
+                <th
+                  onClick={() => requestSort("fullName")}
+                  className="px-4 py-5 text-left text-nowrap cursor-pointer"
+                >
+                  Guest Name
+                  {sortConfig.key === "fullName" ? (
+                    sortConfig.direction === "asc" ? (
+                      <span className="cursor-pointer">↑</span>
+                    ) : (
+                      <span className="cursor-pointer">↓</span>
+                    )
+                  ) : (
+                    ""
+                  )}
+                </th>
+                <th className="px-4 py-5 text-left text-nowrap">Email</th>
+                <th className="px-4 py-5 text-left text-nowrap">Created Date</th>
+                <th className="px-4 py-5 text-center text-nowrap">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <div className="flex items-center justify-center py-12">
-          <p className="text-gray-500 text-lg">No guests found</p>
+            </thead>
+            <tbody>
+              {guests && guests.length > 0 ? (
+                sortedGuests.map((guest) => (
+                  <tr
+                    key={guest._id}
+                    className="border-b border-[#D4D4D4] cursor-pointer"
+                  >
+                    <td className="px-4 py-6">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="h-[43px] w-[43px] rounded-full bg-cover bg-center bg-primary"
+                          style={{
+                            backgroundImage: `url(${"/images/profile.png"})`,
+                          }}
+                        />
+                        {guest.fullName}{" "}
+                      </div>
+                    </td>
+                    <td className="px-4 py-6">{guest.email}</td>
+                    <td className="px-4 py-6">
+                      {utils.formatDateWithName(guest.createdAt)}
+                    </td>
+                    <td className="px-4 py-6 text-nowrap">
+                      <div className="flex justify-center items-center cursor-pointer gap-1">
+                        <Button
+                          onClick={() => handleDeleteGuest(guest._id)}
+                          className="bg-red-400 hover:bg-red-500"
+                        >
+                          <Delete className="scale-150 text-red-400" />
+                        </Button>
+                        <Button
+                          className="bg-blue-100 hover:bg-blue-50"
+                          onClick={() => handleEditGuest(guest)}
+                        >
+                          <Edit className="scale-150 " />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={4} className="text-center py-12 text-gray-500">
+                    No guests found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
+      </CustomPagination>
+
       {/* Delete Popup */}
       <DeleteGuestPopup
         isOpen={openDeletePopup}
@@ -193,7 +201,7 @@ const Table = ({ guests = [], isLoading = false }) => {
         isEdit={true}
         showTrigger={false}
       />
-    </div>
+    </>
   );
 };
 

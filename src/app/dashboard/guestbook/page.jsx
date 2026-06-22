@@ -8,10 +8,29 @@ import { useGetGuestbook } from "@/lib/hooks/queries/useGuestbook";
 
 const Guest = () => {
   const [openForm, setOpenForm] = useState(false);
-  const { data: guestbookData, isLoading } = useGetGuestbook();
-  
-  // Extract guests array from the response
+
+  // Pagination state
+  const [page, setPage] = useState(1);
+
+  // Date filter state — empty string means "no filter" (not sent to API)
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  const { data: guestbookData, isLoading } = useGetGuestbook({
+    page,
+    startDate,
+    endDate,
+  });
+
   const guests = guestbookData?.data || [];
+  const pagination = guestbookData?.pagination || null;
+
+  const handleFilterChange = ({ startDate: sd, endDate: ed }) => {
+    setStartDate(sd || "");
+    setEndDate(ed || "");
+    setPage(1); // reset to first page on every filter change
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center gap-10 mt-2">
@@ -34,11 +53,17 @@ const Guest = () => {
 
           <AddGuestForm isOpen={openForm} onOpenChange={setOpenForm} />
 
-          <DateAndMonthFilter />
+          <DateAndMonthFilter onFilterChange={handleFilterChange} />
         </div>
       </div>
       <div className="mt-4">
-        <Table guests={guests} isLoading={isLoading} />
+        <Table
+          guests={guests}
+          isLoading={isLoading}
+          pagination={pagination}
+          onPageChange={setPage}
+          currentPage={page}
+        />
       </div>
     </div>
   );

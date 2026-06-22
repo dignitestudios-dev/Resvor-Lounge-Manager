@@ -46,20 +46,19 @@ const StepIndicator = ({ currentStep }) => (
       return (
         <div
           key={step}
-          className={`h-2 rounded-full transition-all ${
-            active
+          className={`h-2 rounded-full transition-all ${active
               ? "w-8 bg-black"
               : done
                 ? "w-8 bg-black/50"
                 : "w-8 bg-gray-200"
-          }`}
+            }`}
         />
       );
     })}
   </div>
 );
 
-const AddLocationModal = ({ open, setOpen, handleNext = () => {} }) => {
+const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
   const [step, setStep] = useState(1);
   const [combinedData, setCombinedData] = useState({});
   const [imageError, setImageError] = useState("");
@@ -83,7 +82,7 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => {} }) => {
         } else {
           ErrorToast(
             error.response?.data?.message ||
-              "An error occurred. Please try again.",
+            "An error occurred. Please try again.",
           );
         }
       }
@@ -165,7 +164,7 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => {} }) => {
         } else {
           ErrorToast(
             error.response?.data?.message ||
-              "An error occurred. Please try again.",
+            "An error occurred. Please try again.",
           );
         }
       }
@@ -253,7 +252,7 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => {} }) => {
         } else {
           ErrorToast(
             error.response?.data?.message ||
-              "An error occurred. Please try again.",
+            "An error occurred. Please try again.",
           );
         }
       }
@@ -330,7 +329,7 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => {} }) => {
                 <ArrowLeft size={20} />
               </button>
             )}
-            <DialogTitle className="text-3xl">Add New Location</DialogTitle>
+            <DialogTitle className="text-3xl">Add New Lounge</DialogTitle>
           </div>
           <p className="text-sm text-gray-500 mt-1">
             Step {step} of {TOTAL_STEPS}

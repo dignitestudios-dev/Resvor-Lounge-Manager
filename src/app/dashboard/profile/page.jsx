@@ -7,10 +7,12 @@ import SuccessModal from "@/components/settings/modals/SuccessModal";
 import Edit from "@/components/icons/Edit";
 import Delete from "@/components/icons/sidebar/Delete";
 import EditFloorPlanModal from "@/components/profile/EditFloorPlanModal";
-import AddLocationModal from "@/components/profile/AddLocationModal";
+import CreateLoungeModal from "@/components/lounge-components/CreateLoungeModal";
 import AddGalleryImagesModal from "@/components/profile/AddGalleryImagesModal";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Profile = () => {
+  const queryClient = useQueryClient();
   const [openEditProfile, setOpenEditProfile] = useState(false);
   const [openEditFloorPlan, setOpenEditFloorPlan] = useState(false);
   const [addLocation, setAddLocation] = useState(false);
@@ -82,7 +84,7 @@ const Profile = () => {
               onClick={() => setAddLocation(true)}
               className="text-black underline cursor-pointer font-medium hover:underline"
             >
-              Add New Location
+              Add New Lounge
             </button>
           </div>
 
@@ -240,13 +242,14 @@ const Profile = () => {
         </>
       )}
 
-      {addLocation && (
-        <AddLocationModal
-          open={addLocation}
-          setOpen={setAddLocation}
-          handleNext={() => setOpenEditFloorPlan(true)}
-        />
-      )}
+      <CreateLoungeModal
+        open={addLocation}
+        setOpen={setAddLocation}
+        handleNext={() => {
+          setAddLocation(false);
+          queryClient.invalidateQueries({ queryKey: ["lounges-list"] });
+        }}
+      />
 
       <AddGalleryImagesModal
         open={openAddGalleryImages}
