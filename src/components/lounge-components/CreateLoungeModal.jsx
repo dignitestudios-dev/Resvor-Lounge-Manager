@@ -47,10 +47,10 @@ const StepIndicator = ({ currentStep }) => (
         <div
           key={step}
           className={`h-2 rounded-full transition-all ${active
-              ? "w-8 bg-black"
-              : done
-                ? "w-8 bg-black/50"
-                : "w-8 bg-gray-200"
+            ? "w-8 bg-black"
+            : done
+              ? "w-8 bg-black/50"
+              : "w-8 bg-gray-200"
             }`}
         />
       );
@@ -344,42 +344,64 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
             <form onSubmit={handleSubmit1}>
               <div className="space-y-6">
                 {/* Business Logo */}
-                <div className="flex items-center w-full">
-                  <div className="md:w-[80px] w-[60px] md:h-[80px] h-[60px] rounded-full overflow-hidden">
-                    <img
-                      className="object-cover md:w-[80px] w-[60px] md:h-[80px] h-[60px]"
-                      src={
-                        v1.userImage
-                          ? typeof v1.userImage === "string"
-                            ? v1.userImage
-                            : URL.createObjectURL(v1.userImage)
-                          : "/images/uploadIcon.png"
-                      }
-                      alt="business logo"
-                    />
+
+                <div>
+                  <div className="flex  items-center gap-2">
+
+
+                    {/* Circular upload area */}
+                    <label className="relative md:w-[100px] md:h-[100px] w-[80px] h-[80px] rounded-full cursor-pointer group">
+                      {/* Hidden file input */}
+                      <input
+                        type="file"
+                        accept=".jpg,.jpeg,.png"
+                        onChange={handleFileChange}
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full rounded-full"
+                      />
+
+                      {v1.userImage ? (
+                        /* Show uploaded image */
+                        <>
+                          <img
+                            src={
+                              typeof v1.userImage === "string"
+                                ? v1.userImage
+                                : URL.createObjectURL(v1.userImage)
+                            }
+                            alt="business logo"
+                            className="w-full h-full rounded-full object-cover border-2 border-gray-200"
+                          />
+                          {/* Hover overlay */}
+                          <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                            </svg>
+                          </div>
+                        </>
+                      ) : (
+                        /* Empty state — dashed circle with + */
+                        <div className="w-full h-full rounded-full border-2 border-dashed border-gray-300 bg-gray-50 group-hover:border-gray-400 group-hover:bg-gray-100 transition-colors flex flex-col items-center justify-center gap-1">
+                          <svg className="w-7 h-7 text-gray-400 group-hover:text-gray-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                          </svg>
+                        </div>
+                      )}
+                    </label>
+                    <label className="text-[14px] font-[500] text-black">
+                      Business Logo
+                    </label>
+
+
                   </div>
-                  <div className="pl-2">
-                    <p className="text-[#BEC2C9]">
-                      <span className="relative text-black capitalize underline pl-4">
-                        Business Logo
-                        <input
-                          type="file"
-                          accept=".jpg,.jpeg,.png"
-                          onChange={handleFileChange}
-                          className="absolute inset-0 opacity-0 cursor-pointer -left-24"
-                        />
-                      </span>
-                    </p>
-                    {imageError && (
-                      <p className="text-red-600 text-xs mt-1">{imageError}</p>
-                    )}
-                    {touched1.userImage && errors1.userImage && (
-                      <p className="text-red-600 text-xs mt-1">
-                        {errors1.userImage}
-                      </p>
-                    )}
-                  </div>
+                  {/* Errors */}
+                  {imageError && (
+                    <p className="text-red-600 text-xs">{imageError}</p>
+                  )}
+                  {touched1.userImage && errors1.userImage && (
+                    <p className="text-red-600 text-xs">{errors1.userImage}</p>
+                  )}
                 </div>
+
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="w-full">
