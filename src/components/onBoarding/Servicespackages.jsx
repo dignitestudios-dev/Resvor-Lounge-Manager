@@ -123,27 +123,25 @@ const EditServiceModal = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm px-4">
       <div
-        className={`rounded-[20px] w-full max-w-[400px] p-6 shadow-2xl ${
-          isDark ? "bg-[#0F172A]" : "bg-white"
-        }`}
+        className={`rounded-[20px] w-full max-w-[400px] p-6 shadow-2xl ${isDark ? "bg-[#0F172A]" : "bg-white"
+          }`}
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <h2
-            className={`text-[22px] font-bold ${
-              isDark ? "text-white" : "text-gray-900"
-            }`}
+            className={`text-[22px] font-bold ${isDark ? "text-white" : "text-gray-900"
+              }`}
           >
             Edit Service
           </h2>
 
           <button
+            type="button"
             onClick={onClose}
-            className={`text-2xl leading-none ${
-              isDark
-                ? "text-gray-400 hover:text-white"
-                : "text-gray-400 hover:text-gray-700"
-            }`}
+            className={`text-2xl leading-none ${isDark
+              ? "text-gray-400 hover:text-white"
+              : "text-gray-400 hover:text-gray-700"
+              }`}
           >
             ×
           </button>
@@ -152,9 +150,8 @@ const EditServiceModal = ({
         {/* Service Name */}
         <div className="mb-4">
           <label
-            className={`block text-[13px] font-semibold mb-1.5 ${
-              isDark ? "text-white" : "text-gray-800"
-            }`}
+            className={`block text-[13px] font-semibold mb-1.5 ${isDark ? "text-white" : "text-gray-800"
+              }`}
           >
             Service Name
           </label>
@@ -171,9 +168,8 @@ const EditServiceModal = ({
         {/* Price */}
         <div className="mb-4">
           <label
-            className={`block text-[13px] font-semibold mb-1.5 ${
-              isDark ? "text-white" : "text-gray-800"
-            }`}
+            className={`block text-[13px] font-semibold mb-1.5 ${isDark ? "text-white" : "text-gray-800"
+              }`}
           >
             Price
           </label>
@@ -182,9 +178,8 @@ const EditServiceModal = ({
             className={`flex items-center rounded-xl px-4 py-2.5 transition-all ${inputStyles}`}
           >
             <span
-              className={`text-[13px] mr-1 ${
-                isDark ? "text-gray-300" : "text-gray-500"
-              }`}
+              className={`text-[13px] mr-1 ${isDark ? "text-gray-300" : "text-gray-500"
+                }`}
             >
               $
             </span>
@@ -194,11 +189,10 @@ const EditServiceModal = ({
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               placeholder="0"
-              className={`flex-1 text-[13px] outline-none bg-transparent ${
-                isDark
-                  ? "text-white placeholder:text-gray-300"
-                  : "text-gray-800 placeholder:text-gray-400"
-              }`}
+              className={`flex-1 text-[13px] outline-none bg-transparent ${isDark
+                ? "text-white placeholder:text-gray-300"
+                : "text-gray-800 placeholder:text-gray-400"
+                }`}
             />
           </div>
         </div>
@@ -206,9 +200,8 @@ const EditServiceModal = ({
         {/* Description */}
         <div className="mb-4">
           <label
-            className={`block text-[13px] font-semibold mb-1.5 ${
-              isDark ? "text-white" : "text-gray-800"
-            }`}
+            className={`block text-[13px] font-semibold mb-1.5 ${isDark ? "text-white" : "text-gray-800"
+              }`}
           >
             Description
           </label>
@@ -225,15 +218,13 @@ const EditServiceModal = ({
         {/* Images */}
         <div className="mb-6">
           <label
-            className={`block text-[13px] font-semibold mb-1.5 ${
-              isDark ? "text-white" : "text-gray-800"
-            }`}
+            className={`block text-[13px] font-semibold mb-1.5 ${isDark ? "text-white" : "text-gray-800"
+              }`}
           >
             Service Images{" "}
             <span
-              className={`font-normal ${
-                isDark ? "text-gray-400" : "text-gray-500"
-              }`}
+              className={`font-normal ${isDark ? "text-gray-400" : "text-gray-500"
+                }`}
             >
               (Optional - {images.length}/5)
             </span>
@@ -277,31 +268,28 @@ const EditServiceModal = ({
           {images.length < 5 ? (
             <div
               onClick={() => fileRef.current.click()}
-              className={`rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all ${
-                isDark
-                  ? "border border-white/20 hover:bg-white/5"
-                  : "border border-gray-300 hover:bg-gray-50"
-              }`}
+              className={`rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all ${isDark
+                ? "border border-white/20 hover:bg-white/5"
+                : "border border-gray-300 hover:bg-gray-50"
+                }`}
             >
               <p
-                className={`text-[12px] ${
-                  isDark ? "text-gray-300" : "text-gray-600"
-                }`}
+                className={`text-[12px] ${isDark ? "text-gray-300" : "text-gray-600"
+                  }`}
               >
                 <span
-                  className={`font-semibold ${
-                    isDark ? "text-white" : "text-gray-800"
-                  }`}
+                  className={`font-semibold ${isDark ? "text-white" : "text-gray-800"
+                    }`}
                 >
                   choose file
                 </span>{" "}
                 to upload
               </p>
             </div>
-          ):(
-             <div className="text-center text-[12px] text-red-500">
-    Maximum 5 images allowed
-  </div>
+          ) : (
+            <div className="text-center text-[12px] text-red-500">
+              Maximum 5 images allowed
+            </div>
           )}
 
           <input
@@ -316,6 +304,7 @@ const EditServiceModal = ({
 
         {/* Save */}
         <button
+          type="button"
           onClick={handleSave}
           className="w-full bg-[#012C57] text-white font-semibold text-[15px] py-3.5 rounded-2xl hover:bg-[#01243f] transition-colors"
         >
@@ -332,22 +321,19 @@ const ServiceCard = ({ service, onEdit, onDelete, variant = "dark" }) => {
 
   return (
     <div
-      className={`rounded-2xl p-4 mb-3 ${
-        isDark
-          ? "bg-white/10 backdrop-blur-[28px] border border-white/10"
-          : "bg-white border border-gray-200 shadow-sm"
-      }`}
+      className={`rounded-2xl p-4 mb-3 ${isDark
+        ? "bg-white/10 backdrop-blur-[28px] border border-white/10"
+        : "bg-white border border-gray-200 shadow-sm"
+        }`}
     >
       {/* Top Row */}
       <div
-        className={`flex items-center justify-between mb-2 pb-2 ${
-          isDark ? "border-b border-white/10" : "border-b border-gray-200"
-        }`}
+        className={`flex items-center justify-between mb-2 pb-2 ${isDark ? "border-b border-white/10" : "border-b border-gray-200"
+          }`}
       >
         <div
-          className={`flex items-center gap-3 text-[13px] font-medium ${
-            isDark ? "text-white" : "text-gray-800"
-          }`}
+          className={`flex items-center gap-3 text-[13px] font-medium ${isDark ? "text-white" : "text-gray-800"
+            }`}
         >
           <span>{service.serviceName}</span>
 
@@ -358,12 +344,12 @@ const ServiceCard = ({ service, onEdit, onDelete, variant = "dark" }) => {
 
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={onEdit}
-            className={`transition-colors ${
-              isDark
-                ? "text-white/60 hover:text-white"
-                : "text-gray-500 hover:text-gray-800"
-            }`}
+            className={`transition-colors ${isDark
+              ? "text-white/60 hover:text-white"
+              : "text-gray-500 hover:text-gray-800"
+              }`}
           >
             <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
               <path d="M13.586 3.586a2 2 0 112.828 2.828l-1.06 1.06-2.829-2.828 1.061-1.06zm-2.475 2.475L3 14.172V17h2.828l8.111-8.111-2.828-2.828z" />
@@ -371,6 +357,7 @@ const ServiceCard = ({ service, onEdit, onDelete, variant = "dark" }) => {
           </button>
 
           <button
+            type="button"
             onClick={onDelete}
             className="text-red-400 hover:text-red-500 transition-colors"
           >
@@ -388,9 +375,8 @@ const ServiceCard = ({ service, onEdit, onDelete, variant = "dark" }) => {
       {/* Description */}
       {service.description && (
         <p
-          className={`text-[12px] leading-relaxed mb-3 ${
-            isDark ? "text-white/70" : "text-gray-600"
-          }`}
+          className={`text-[12px] leading-relaxed mb-3 ${isDark ? "text-white/70" : "text-gray-600"
+            }`}
         >
           {service.description}
         </p>
@@ -455,34 +441,31 @@ export default function AddServicesAndPackages({
       <div className="w-full max-w-[440px]">
         {/* Title */}
         <h2
-          className={`text-[14px] font-medium mb-1.5 ${
-            isDark ? "text-white" : "text-gray-800"
-          }`}
+          className={`text-[14px] font-medium mb-1.5 ${isDark ? "text-white" : "text-gray-800"
+            }`}
         >
           Add Services And Packages
         </h2>
 
         {/* Input Trigger */}
         <div
-          className={`flex items-center text-sm rounded-[14px] overflow-hidden p-[3px] mb-4 ${
-            isDark
-              ? "border border-gray-600 bg-white/10 backdrop-blur-[28px]"
-              : "border border-gray-300 bg-white"
-          }`}
+          className={`flex items-center text-sm rounded-[14px] overflow-hidden p-[3px] mb-4 ${isDark
+            ? "border border-gray-600 bg-white/10 backdrop-blur-[28px]"
+            : "border border-gray-300 bg-white"
+            }`}
         >
           <div
-            className={`flex-1 px-3 py-1.5 text-[12px] font-[300] ${
-              isDark ? "text-[#E6E6F0]" : "text-gray-400"
-            }`}
+            className={`flex-1 px-3 py-1.5 text-[12px] font-[300] ${isDark ? "text-[#E6E6F0]" : "text-gray-400"
+              }`}
           >
             Add services & packages
           </div>
 
           <button
+            type="button"
             onClick={openAdd}
-            className={`p-1 rounded-md transition-colors ${
-              isDark ? "bg-white text-[#012C57]" : "bg-[#012C57] text-white"
-            }`}
+            className={`p-1 rounded-md transition-colors ${isDark ? "bg-white text-[#012C57]" : "bg-[#012C57] text-white"
+              }`}
           >
             <svg
               className="h-6 w-6 p-[2px]"
@@ -520,5 +503,5 @@ export default function AddServicesAndPackages({
 
 AddServicesAndPackages.defaultProps = {
   services: [],
-  onChange: () => {},
+  onChange: () => { },
 };
