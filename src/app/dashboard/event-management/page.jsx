@@ -39,6 +39,9 @@ const EventManagement = () => {
   const { data: eventsResponse, isLoading: isEventsLoading } = useGetEvents(
     currentPage,
     10,
+    filters.startDate || undefined,
+    filters.endDate || undefined,
+    filters.selectedStatus || undefined,
   );
 
   // Transform API data to match table structure
@@ -60,9 +63,9 @@ const EventManagement = () => {
       const userName = `${userData.firstName} ${userData.lastName}`.trim();
 
       // Format event time
-      const eventTime = `${utils.formatTime(
+      const eventTime = `${utils.formatTime12(
         startDateTime,
-      )} - ${utils.formatTime(endDateTime)}`;
+      )} - ${utils.formatTime12(endDateTime)}`;
 
       return {
         _id: event._id,
@@ -97,15 +100,17 @@ const EventManagement = () => {
   // Filter events for the selected date
   const filteredEventsForCalendar = selectedDate
     ? transformedEvents.filter((event) => {
-        try {
-          const eventDateISO = new Date(event.eventDate)
-            .toISOString()
-            .slice(0, 10);
-          return eventDateISO === selectedDate;
-        } catch (e) {
-          return false;
-        }
-      })
+      try {
+        const dateObj = new Date(event.eventDate);
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+        const day = String(dateObj.getDate()).padStart(2, "0");
+        const eventDateLocal = `${year}-${month}-${day}`;
+        return eventDateLocal === selectedDate;
+      } catch (e) {
+        return false;
+      }
+    })
     : transformedEvents;
 
   const handleEventRequestNext = (data) => {
@@ -137,6 +142,13 @@ const EventManagement = () => {
         specialRequest: eventData.specialRequest,
         startDateTime: eventData.startDateTime,
         endDateTime: eventData.endDateTime,
+        guestName: eventData.guestName,
+        guestPhone: eventData.guestPhone,
+        guestEmail: eventData.guestEmail,
+        ticketAtDoor: eventData.ticketAtDoor,
+        preferredSeatingArea: eventData.preferredSeatingArea,
+        servicePackageIds: eventData.servicePackageIds || [],
+        instructions: eventData.instructions,
       };
 
       await createEventMutation.mutateAsync(payload);
@@ -152,8 +164,8 @@ const EventManagement = () => {
     } catch (error) {
       ErrorToast(
         error?.response?.data?.message ||
-          error?.message ||
-          "Failed to create event. Please try again.",
+        error?.message ||
+        "Failed to create event. Please try again.",
       );
       console.log("Create event error:", error);
     }
@@ -169,28 +181,29 @@ const EventManagement = () => {
         <h1 className="section-heading">Event Management</h1>
         <div className="flex items-center gap-3">
           <Button
-            onClick={() => setIsEventRequest(true)}
+            onClick={() => {
+              setEventData(null);
+              setIsEventRequest(true);
+            }}
             className={"border-2 h-12 text-[14px] px-6"}
           >
             Add New Event
           </Button>
           <div className="w-[260px] flex ">
             <button
-              className={`text-[12px] py-3.5 px-2 rounded-l-lg w-full ${
-                view === "list"
-                  ? "bg-gradient text-white"
-                  : "bg-[#FFFFFF] text-[#222246]"
-              }`}
+              className={`text-[12px] py-3.5 px-2 rounded-l-lg w-full ${view === "list"
+                ? "bg-gradient text-white"
+                : "bg-[#FFFFFF] text-[#222246]"
+                }`}
               onClick={() => setView("list")}
             >
               List View
             </button>
             <button
-              className={`text-[12px] py-3.5 px-2 rounded-r-lg w-full ${
-                view === "calendar"
-                  ? "bg-gradient text-white"
-                  : "bg-[#FFFFFF] text-[#222246]"
-              }`}
+              className={`text-[12px] py-3.5 px-2 rounded-r-lg w-full ${view === "calendar"
+                ? "bg-gradient text-white"
+                : "bg-[#FFFFFF] text-[#222246]"
+                }`}
               onClick={() => setView("calendar")}
             >
               Calendar View
@@ -199,15 +212,28 @@ const EventManagement = () => {
 
           {isEventRequest && (
             <AddEventForm
-              onClose={() => setIsEventRequest(false)}
+              onClose={() => {
+                setIsEventRequest(false);
+                setEventData(null);
+              }}
               onNext={handleEventRequestNext}
+              initialData={eventData}
             />
           )}
           {view === "list" && (
             <DateAndMonthFilter
               isLounge={true}
               onFilterChange={handleFilterChange}
-              statusOptions={["pending", "accepted", "rejected"]}
+              statusOptions={[
+                "pending",
+                "awaiting_payment",
+                "confirmed",
+                "rejected",
+                "completed",
+                "cancelled",
+                "expired",
+                "refunded"
+              ]}
             />
           )}
           {isEventDetails && (
@@ -217,13 +243,16 @@ const EventManagement = () => {
                 setIsEventRequest(true);
               }}
               onClick={handleEventDetailsClose}
-              onClose={() => setIsEventDetails(false)}
+              onClose={() => {
+                setIsEventDetails(false);
+                setEventData(null);
+              }}
               eventData={eventData}
               lounges={lounges}
               selectedLoungeId={selectedLoungeId}
               onLoungeSelect={setSelectedLoungeId}
               isLoading={createEventMutation.isPending}
-              // serviceData={eventServices}
+            // serviceData={eventServices}
             />
           )}
         </div>
@@ -236,12 +265,12 @@ const EventManagement = () => {
             <h2 className="text-lg font-semibold mb-4">
               {selectedDate
                 ? `Events on ${new Date(
-                    selectedDate + "T00:00:00",
-                  ).toLocaleDateString("en-GB", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}`
+                  selectedDate + "T00:00:00",
+                ).toLocaleDateString("en-GB", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}`
                 : "All Events"}
             </h2>
             <div className="h-full overflow-y-auto">

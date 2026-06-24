@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import LoungeModal from "./LoungeModal";
 import CreateLoungeModal from "../lounge-components/CreateLoungeModal";
+import { useAuthContext } from "@/lib/context/AuthProvider";
 
 export default function LoungeModalWrapper() {
+
   const [isOpen, setIsOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);

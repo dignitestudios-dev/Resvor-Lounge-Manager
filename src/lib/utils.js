@@ -90,6 +90,19 @@ export const formatTime = (isoString, format) => {
   return format === "12" ? time12 : time24;
 };
 
+export const formatTime12 = (isoString) => {
+  const date = new Date(isoString);
+  if (isNaN(date.getTime())) return "";
+
+  const pad = (num) => String(num).padStart(2, "0");
+  const hours = date.getHours();
+  const minutes = pad(date.getMinutes());
+  const hours12 = pad(hours % 12 || 12);
+  const ampm = hours >= 12 ? "PM" : "AM";
+
+  return `${hours12}:${minutes} ${ampm}`;
+};
+
 // String utilities
 export const capitalize = (str) => {
   if (!str) return "";
@@ -216,6 +229,7 @@ const utils = {
   formatDateWithName,
   formatDateTime,
   formatTime,
+  formatTime12,
   capitalize,
   truncate,
   formatCurrency,

@@ -9,7 +9,12 @@ const toDate = (isoOrStr) => {
   return d;
 };
 
-const formatISO = (d) => d.toISOString().slice(0, 10);
+const formatISO = (d) => {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
 
 const addDays = (d, n) => {
   const x = new Date(d);

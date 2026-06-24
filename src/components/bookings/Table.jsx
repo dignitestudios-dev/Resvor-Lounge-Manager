@@ -11,7 +11,7 @@ const Table = ({
   isLoading = false,
   currentPage = 1,
   totalPages = 1,
-  onPageChange = () => {},
+  onPageChange = () => { },
 }) => {
   console.log("🚀 ~ Table ~ bookings:", bookings);
   const router = useRouter();
@@ -27,7 +27,7 @@ const Table = ({
       const startTime = new Date(booking.startTime);
       const endTime = new Date(booking.endTime);
 
-      const bookingEventTime = `${utils.formatTime(startTime)} - ${utils.formatTime(endTime)}`;
+      const bookingEventTime = `${utils.formatTime12(startTime)} - ${utils.formatTime12(endTime)}`;
       const userName =
         `${booking.userId?.firstName || ""} ${booking.userId?.lastName || ""}`.trim();
 
@@ -56,23 +56,6 @@ const Table = ({
   React.useEffect(() => {
     let filtered = [...transformedBookings];
 
-    if (filters.startDate) {
-      const startDate = new Date(filters.startDate);
-      filtered = filtered.filter((booking) => {
-        const bookingDate = new Date(booking.bookingDate);
-        return bookingDate >= startDate;
-      });
-    }
-
-    if (filters.endDate) {
-      const endDate = new Date(filters.endDate);
-      endDate.setHours(23, 59, 59, 999);
-      filtered = filtered.filter((booking) => {
-        const bookingDate = new Date(booking.bookingDate);
-        return bookingDate <= endDate;
-      });
-    }
-
     if (filters.selectedMonth) {
       const monthIndex = new Date(`${filters.selectedMonth} 1`).getMonth();
       filtered = filtered.filter((booking) => {
@@ -84,12 +67,6 @@ const Table = ({
     if (filters.selectedLounge) {
       filtered = filtered.filter((booking) => {
         return booking.loungeName === filters.selectedLounge;
-      });
-    }
-
-    if (filters.selectedStatus) {
-      filtered = filtered.filter((booking) => {
-        return booking.status === filters.selectedStatus;
       });
     }
 
@@ -147,7 +124,7 @@ const Table = ({
                 className="px-4 py-5 text-left text-nowrap"
               >
                 Lounge Name
-                {sortConfig.key === "loungeName" ? (
+                {/* {sortConfig.key === "loungeName" ? (
                   sortConfig.direction === "asc" ? (
                     <span className="cursor-pointer">↑</span>
                   ) : (
@@ -155,7 +132,7 @@ const Table = ({
                   )
                 ) : (
                   ""
-                )}
+                )} */}
               </th>
               <th className="px-4 py-5 text-left text-nowrap">Guest Limit</th>
               <th className="px-4 py-5 text-left text-nowrap">Date</th>
@@ -183,12 +160,12 @@ const Table = ({
                   {/* <td className="px-4 py-6">{booking?.bookingId}</td> */}
                   <td className="px-4 py-6">
                     <div className="flex items-center gap-3">
-                      <div
+                      {/* <div
                         className="h-[43px] w-[43px] rounded-full bg-cover bg-center bg-primary"
                         style={{
                           backgroundImage: `url(${booking?.user?.profileImage})`,
                         }}
-                      />
+                      /> */}
                       {booking?.user?.name}
                     </div>
                   </td>

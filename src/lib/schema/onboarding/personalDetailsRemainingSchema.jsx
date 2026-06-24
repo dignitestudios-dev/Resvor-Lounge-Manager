@@ -103,4 +103,9 @@ export const personalDetailsRemainingSchema = Yup.object({
     )
     .min(20, "Description must be at least 20 characters long")
     .max(500, "Description must not exceed 500 characters"),
+
+  services: Yup.array()
+    .min(1, "At least one service or package is required")
+    .required("At least one service or package is required"),
 });
+

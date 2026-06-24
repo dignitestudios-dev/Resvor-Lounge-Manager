@@ -22,7 +22,7 @@ const EventAcceptedModal = ({ isOpen, onOpenChange }) => {
                 Event Accepted!{" "}
               </h3>
               <p className="text-[#565656] text-center">
-                The event has been added to list.
+                Event successfully accepted.
               </p>
             </div>
           </DialogDescription>

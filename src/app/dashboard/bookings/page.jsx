@@ -17,7 +17,9 @@ const Bookings = () => {
   const { data: bookingsResponse, isLoading } = useGetBookings(
     currentPage,
     10,
-    "pending",
+    filters.startDate || undefined,
+    filters.endDate || undefined,
+    filters.selectedStatus || undefined,
   );
 
   const handleFilterChange = (filterData) => {

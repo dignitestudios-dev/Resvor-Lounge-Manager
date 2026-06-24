@@ -20,7 +20,7 @@ const EventAcceptConfirmModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>Accept Event</DialogTitle>
           <DialogDescription>

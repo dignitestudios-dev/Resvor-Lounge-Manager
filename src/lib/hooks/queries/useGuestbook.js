@@ -8,7 +8,7 @@ const fetchGuestbook = async ({ page = 1, startDate = "", endDate = "" }) => {
   if (startDate) params.startDate = startDate;
   if (endDate) params.endDate = endDate;
 
-  const { data } = await axios.get("/guestbook", { params });
+  const { data } = await axios.get("/guestbook?limit=10", { params });
   // Return both the array and pagination meta
   return {
     data: data?.data || [],

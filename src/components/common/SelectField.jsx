@@ -47,22 +47,27 @@ export default function SelectField({
   useEffect(() => {
     const handler = (e) => {
       if (ref.current && !ref.current.contains(e.target)) {
+        if (isOpen) {
+          onBlur?.({ target: { name } });
+        }
         setIsOpen(false);
         setSearch("");
       }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, []);
+  }, [isOpen, onBlur, name]);
 
   const selectedLabel =
     normalised.find((opt) => opt.value === value)?.label ?? "";
 
   const handleSelect = (opt) => {
     onChange?.(opt.value);
-    onBlur?.({ target: { name } });
     setIsOpen(false);
     setSearch("");
+    setTimeout(() => {
+      onBlur?.({ target: { name } });
+    }, 0);
   };
 
   const toggle = () => {

@@ -22,6 +22,7 @@ import { useLogout } from "@/lib/hooks/mutations/AuthMutations";
 
 import { ErrorToast } from "@/components/ui/toaster";
 import { useAuthContext } from "@/lib/context/AuthProvider";
+import Completed from "@/components/onBoarding/Completed";
 
 export default function SignUp() {
   const router = useRouter();
@@ -29,7 +30,6 @@ export default function SignUp() {
   const queryClient = useQueryClient();
 
   const { onboardingStep: sessionOnboardingStep, user } = useAuthContext();
-  console.log("sessionOnboardingStep----->33---", sessionOnboardingStep);
 
   const logoutMutation = useLogout();
 
@@ -43,8 +43,9 @@ export default function SignUp() {
     create_account: 0,
     verify_email: 1,
     verify_mobile: 2,
-    create_lounge: 3,
-    completed: 4,
+    buy_subscription: 3,
+    create_lounge: 4,
+    completed: 5,
   };
 
   const currentStep = stepMap[onboardingStep] ?? 0;
@@ -64,11 +65,11 @@ export default function SignUp() {
     },
     {
       icon: LiaIdCard,
-      title: "Create Lounge",
+      title: "Subscription",
     },
     {
       icon: FaClipboardList,
-      title: "Subscription",
+      title: "Create Lounge",
     },
   ];
 
@@ -94,7 +95,7 @@ export default function SignUp() {
       } else {
         ErrorToast(
           error?.response?.data?.message ||
-            "An error occurred during logout. Please try again.",
+          "An error occurred during logout. Please try again.",
         );
       }
     } finally {
@@ -120,10 +121,12 @@ export default function SignUp() {
             handlePrevious={handleLogout}
           />
         );
+      case "buy_subscription":
+        return <Subscription handlePrevious={handleLogout} />;
       case "create_lounge":
         return <PersonalDetails handlePrevious={handleLogout} />;
       case "completed":
-        return <Subscription handlePrevious={handleLogout} />;
+        return <Completed />;
 
       default:
         return <CreateAccount setEmail={setEmail} />;

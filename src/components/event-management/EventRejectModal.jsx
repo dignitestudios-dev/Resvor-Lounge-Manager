@@ -22,7 +22,7 @@ const EventRejectModal = ({ isOpen, onOpenChange, onSubmit, isLoading }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>Reject Event</DialogTitle>
           <DialogDescription>
@@ -35,7 +35,7 @@ const EventRejectModal = ({ isOpen, onOpenChange, onSubmit, isLoading }) => {
             placeholder="Enter rejection reason..."
             value={rejectionReason}
             onChange={(e) => setRejectionReason(e.target.value)}
-            className="min-h-32 resize-none"
+            className="min-h-32 resize-none break-all"
           />
 
           <div className="flex gap-3 justify-end">

@@ -57,8 +57,6 @@ export const AuthProvider = ({ children }) => {
     initialData: cachedAuth || undefined,
     enabled: hasToken,
   });
-  console.log("🚀 ~ AuthProvider ~ isLoading:", isLoading);
-  console.log("🚀 ~ AuthProvider ~ authData:", authData);
 
   const sessionType = authData?.sessionType ?? authData?.tokenType ?? null;
   const onboardingStep = authData?.onboardingStep ?? "create_account";
@@ -118,15 +116,10 @@ export const AuthProvider = ({ children }) => {
       onboardingStep === "completed" &&
       user?.isSubscribed === true
     ) {
-      console.log("auth provider --- 82 ",isAuthenticated);
-      console.log("auth provider --- 83 ",onboardingStep);
-      console.log("auth provider --- 84 ",user?.isSubscribed);
-
       return pathname.startsWith("/dashboard") ? null : DEFAULT_REDIRECT;
     }
 
     if (isAuthenticated && onboardingStep === "create_lounge") {
-      console.log("auth provider --- 85 ");
       return isOnboardingRoute ? null : ONBOARDING_ROUTE;
     }
 
@@ -153,7 +146,7 @@ export const AuthProvider = ({ children }) => {
     isOnboardingRoute,
     isProtectedRoute,
   ]);
-  console.log("🚀 ~ AuthProvider ~ redirectTarget:", redirectTarget);
+
 
   useEffect(() => {
     if (redirectTarget && redirectTarget !== pathname) {

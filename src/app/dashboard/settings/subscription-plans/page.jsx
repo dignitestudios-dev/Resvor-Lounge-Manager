@@ -1,8 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
-import PlanCard from "@/components/subscription/PlanCard";
 import CancelSubscriptionModal from "@/components/subscription/CancelSubscriptionModal";
+import {
+  useGetSubscriptionPlans,
+  useGetMySubscription,
+} from "@/lib/hooks/queries/useSubscriptionPlans";
+import {
+  usePurchaseSubscription,
+  useCancelSubscription,
+} from "@/lib/hooks/mutations/SubscriptionMutation";
+import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
+import { useQueryClient } from "@tanstack/react-query";
 
 const invoices = [
   {
@@ -56,13 +65,84 @@ const invoices = [
   },
 ];
 
+const statusBadge = (status) => {
+  const map = {
+    active: { label: "Active", cls: "bg-green-100 text-green-700" },
+    trialing: { label: "Trialing", cls: "bg-blue-100 text-blue-700" },
+    canceled: { label: "Canceled", cls: "bg-red-100 text-red-600" },
+    past_due: { label: "Past Due", cls: "bg-yellow-100 text-yellow-700" },
+  };
+  const s = map[status] || { label: status, cls: "bg-gray-100 text-gray-600" };
+  return (
+    <span
+      className={`inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full ${s.cls}`}
+    >
+      {s.label}
+    </span>
+  );
+};
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return "—";
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
 const SubscriptionPlans = () => {
   const [tab, setTab] = useState("billing");
   const [cancelOpen, setCancelOpen] = useState(false);
+  const [purchasingPlanId, setPurchasingPlanId] = useState(null);
+  const queryClient = useQueryClient();
 
-  const handleProceedCancel = () => {
-    // Called when user confirms cancellation. Replace with API call as needed.
-    console.log("User proceeded to cancel subscription");
+  // Queries
+  const { data: plansResponse, isLoading: isPlansLoading } =
+    useGetSubscriptionPlans();
+  const plans = plansResponse?.data || [];
+
+  const {
+    data: mySubData,
+    isLoading: isMySubLoading,
+  } = useGetMySubscription();
+  const subscription = mySubData?.subscription || null;
+  const isActive = mySubData?.isActive || false;
+  const subscribedPlanId = subscription?.planId?._id || null;
+
+  // Mutations
+  const { mutateAsync: purchasePlan } = usePurchaseSubscription();
+  const { mutateAsync: cancelSub, isPending: isCancelling } =
+    useCancelSubscription();
+
+  // const handleBuyNow = async (plan) => {
+  //   try {
+  //     setPurchasingPlanId(plan._id);
+  //     const purchaseRes = await purchasePlan(plan._id);
+  //     if (purchaseRes?.data?.checkoutUrl) {
+  //       window.location.href = purchaseRes.data.checkoutUrl;
+  //     }
+  //   } catch (error) {
+  //     const msg =
+  //       error?.response?.data?.message ||
+  //       "Failed to initiate purchase. Please try again.";
+  //     ErrorToast(msg);
+  //     setPurchasingPlanId(null);
+  //   }
+  // };
+
+  const handleProceedCancel = async () => {
+    try {
+      await cancelSub();
+      SuccessToast("Subscription cancelled successfully");
+      queryClient.invalidateQueries({ queryKey: ["my-subscription"] });
+    } catch (error) {
+      ErrorToast(
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to cancel subscription. Please try again."
+      );
+    }
   };
 
   return (
@@ -74,21 +154,19 @@ const SubscriptionPlans = () => {
           <nav className="flex gap-6">
             <button
               onClick={() => setTab("billing")}
-              className={`py-4 cursor-pointer ${
-                tab === "billing"
-                  ? "border-b-2 border-gray-800 font-semibold"
-                  : "text-gray-500"
-              }`}
+              className={`py-4 cursor-pointer ${tab === "billing"
+                ? "border-b-2 border-gray-800 font-semibold"
+                : "text-gray-500"
+                }`}
             >
               Billing
             </button>
             <button
               onClick={() => setTab("plan")}
-              className={`py-4 cursor-pointer ${
-                tab === "plan"
-                  ? "border-b-2 border-gray-800 font-semibold"
-                  : "text-gray-500"
-              }`}
+              className={`py-4 cursor-pointer ${tab === "plan"
+                ? "border-b-2 border-gray-800 font-semibold"
+                : "text-gray-500"
+                }`}
             >
               Plan
             </button>
@@ -100,12 +178,18 @@ const SubscriptionPlans = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div className="bg-white rounded-lg border p-6">
                 <p className="text-sm text-gray-500">Next Invoice Issue Date</p>
-                <div className="text-xl font-semibold mt-3">Dec 29, 2024</div>
+                <div className="text-xl font-semibold mt-3">
+                  {subscription ? formatDate(subscription.periodEnd) : "—"}
+                </div>
               </div>
 
               <div className="bg-white rounded-lg border p-6">
                 <p className="text-sm text-gray-500">Invoice Total</p>
-                <div className="text-xl font-semibold mt-3">$150.00</div>
+                <div className="text-xl font-semibold mt-3">
+                  {subscription?.planId
+                    ? `$${subscription.planId.displayPrice}`
+                    : "—"}
+                </div>
               </div>
             </div>
 
@@ -134,55 +218,126 @@ const SubscriptionPlans = () => {
           </div>
         ) : (
           <div className="mt-6">
-            <div className="flex items-center justify-center gap-x-8 gap-y-8">
-              <PlanCard
-                title="Plan 1"
-                price="$199.95"
-                features={[
-                  "Unlimited Guests",
-                  "Unlimited Event",
-                  "Delivery by Text or Email",
-                ]}
-                highlight={true}
-                onPrimary={() => setCancelOpen(true)}
-                priceColor="metallic-text"
-                primaryClass={"bg-gray-100 text-red-500 hover:bg-gray-200"}
-                primaryLabel={"Cancel Subscription"}
-                buttonVariant={"ghost"}
-              />
+            {isPlansLoading || isMySubLoading ? (
+              <div className="text-center text-gray-400 py-10">
+                Loading plans...
+              </div>
+            ) : plans.length === 0 ? (
+              <div className="text-center text-gray-400 py-10">
+                No plans available right now.
+              </div>
+            ) : (
+              <div className="flex items-start justify-center gap-x-8 gap-y-8 flex-wrap">
+                {plans.map((plan, index) => {
+                  const isSubscribed =
+                    isActive && subscribedPlanId === plan._id;
+                  const isCancelPending =
+                    isSubscribed && subscription?.cancelAtPeriodEnd;
 
-              <PlanCard
-                title="Plan 2"
-                price="$99.95"
-                features={[
-                  "1000 guests per event",
-                  "Unlimited Event",
-                  "Delivery by Text or Email",
-                ]}
-                onPrimary={() => console.log("Update plan 2")}
-                priceColor="gold-text"
-                primaryClass={
-                  "bg-linear-to-r from-[#0b1738] to-[#0b2b8d] text-white"
-                }
-                buttonVariant={"default"}
-              />
+                  return (
+                    <div
+                      key={plan._id}
+                      className={`max-w-[320px] w-full bg-white rounded-2xl border p-6 shadow-sm flex flex-col min-h-[420px] relative ${isSubscribed
+                        ? "border-[#010067] ring-1 ring-[#010067]"
+                        : "border-gray-200"
+                        }`}
+                    >
+                      {/* Current plan badge */}
+                      {isSubscribed && (
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                          <span className="bg-[#010067] text-white text-[11px] font-semibold px-3 py-1 rounded-full whitespace-nowrap">
+                            Current Plan
+                          </span>
+                        </div>
+                      )}
 
-              <PlanCard
-                title="Plan 3"
-                price="$59.95"
-                features={[
-                  "500 guests per event",
-                  "Unlimited Event",
-                  "Delivery by Text or Email",
-                ]}
-                onPrimary={() => console.log("Update plan 3")}
-                priceColor="orange-metallic"
-                primaryClass={
-                  "bg-linear-to-r from-[#0b1738] to-[#0b2b8d] text-white"
-                }
-                buttonVariant={"default"}
-              />
-            </div>
+                      <div className="mb-4 text-sm text-gray-500 flex items-center justify-between">
+                        <span>Plan {index + 1}</span>
+                        {isSubscribed &&
+                          statusBadge(subscription.status)}
+                      </div>
+
+                      <div className="flex-1">
+                        <div className="flex justify-between">
+                          <div>
+                            <h3 className="text-2xl font-extrabold mb-2">
+                              {plan.label}
+                            </h3>
+                            <div
+                              className={`text-3xl font-bold mb-1 ${isSubscribed
+                                ? "text-[#010067]"
+                                : "text-[#FFA500]"
+                                }`}
+                            >
+                              ${plan.displayPrice}
+                            </div>
+                            <p className="text-xs text-gray-400 mb-5">
+                              per {plan.durationDays} days
+                            </p>
+                          </div>
+                          <div>
+                            {isSubscribed && subscription && (
+                              <div className="mb-4 bg-gray-50 rounded-lg p-3 text-xs text-gray-500 space-y-1">
+                                <div className="flex justify-between">
+                                  <span>Start: </span>
+                                  <span className="font-medium text-gray-700">
+                                    {formatDate(subscription.periodStart)}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span> End: </span>
+                                  <span className="font-medium text-gray-700">
+                                    {formatDate(subscription.periodEnd)}
+                                  </span>
+                                </div>
+                                {isCancelPending && (
+                                  <div className="text-red-500 font-medium mt-1 text-center">
+                                    Cancels at period end
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <ul className="text-sm text-gray-700 mb-6 list-disc pl-5 space-y-3">
+                          {plan.features?.map((feature, i) => (
+                            <li key={i}>{feature}</li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="mt-4">
+                        {isSubscribed ? (
+                          <button
+                            onClick={() => setCancelOpen(true)}
+                            disabled={isCancelPending}
+                            className={`w-full py-3 rounded-xl text-sm font-semibold transition ${isCancelPending
+                              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                              : "bg-gray-100 text-red-500 hover:bg-gray-200"
+                              }`}
+                          >
+                            {isCancelPending
+                              ? "Cancellation Pending"
+                              : "Cancel Subscription"}
+                          </button>
+                        ) : (
+                          <></>
+                          // <button
+                          //   // onClick={() => handleBuyNow(plan)}
+                          //   disabled={purchasingPlanId === plan._id}
+                          //   className="w-full bg-gradient-to-r from-[#0b1738] to-[#0b2b8d] text-white py-3 rounded-xl text-sm font-semibold hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed"
+                          // >
+                          //   {purchasingPlanId === plan._id
+                          //     ? "Processing..."
+                          //     : "Buy Now"}
+                          // </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -35,21 +35,21 @@ const Table = ({
     direction: "asc",
   });
 
-  const sortedGuests = [...guests].sort((a, b) => {
-    if (!sortConfig.key) return 0;
+  // const sortedGuests = [...guests].sort((a, b) => {
+  //   if (!sortConfig.key) return 0;
 
-    let valA = a[sortConfig.key];
-    let valB = b[sortConfig.key];
+  //   let valA = a[sortConfig.key];
+  //   let valB = b[sortConfig.key];
 
-    if (sortConfig.key === "qty") {
-      valA = parseInt(valA, 10);
-      valB = parseInt(valB, 10);
-    }
+  //   if (sortConfig.key === "qty") {
+  //     valA = parseInt(valA, 10);
+  //     valB = parseInt(valB, 10);
+  //   }
 
-    if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
-    if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
-    return 0;
-  });
+  //   if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
+  //   if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
+  //   return 0;
+  // });
 
   const requestSort = (key) => {
     let direction = "asc";
@@ -115,7 +115,7 @@ const Table = ({
                   className="px-4 py-5 text-left text-nowrap cursor-pointer"
                 >
                   Guest Name
-                  {sortConfig.key === "fullName" ? (
+                  {/* {sortConfig.key === "fullName" ? (
                     sortConfig.direction === "asc" ? (
                       <span className="cursor-pointer">↑</span>
                     ) : (
@@ -123,7 +123,7 @@ const Table = ({
                     )
                   ) : (
                     ""
-                  )}
+                  )} */}
                 </th>
                 <th className="px-4 py-5 text-left text-nowrap">Email</th>
                 <th className="px-4 py-5 text-left text-nowrap">Created Date</th>
@@ -131,20 +131,20 @@ const Table = ({
               </tr>
             </thead>
             <tbody>
-              {guests && guests.length > 0 ? (
-                sortedGuests.map((guest) => (
+              {guests && guests?.length > 0 ? (
+                guests?.map((guest) => (
                   <tr
                     key={guest._id}
                     className="border-b border-[#D4D4D4] cursor-pointer"
                   >
                     <td className="px-4 py-6">
                       <div className="flex items-center gap-3">
-                        <div
+                        {/* <div
                           className="h-[43px] w-[43px] rounded-full bg-cover bg-center bg-primary"
                           style={{
                             backgroundImage: `url(${"/images/profile.png"})`,
                           }}
-                        />
+                        /> */}
                         {guest.fullName}{" "}
                       </div>
                     </td>
@@ -173,7 +173,7 @@ const Table = ({
               ) : (
                 <tr>
                   <td colSpan={4} className="text-center py-12 text-gray-500">
-                    No guests found
+                    Nothing here yet. Add a new guest to get started
                   </td>
                 </tr>
               )}

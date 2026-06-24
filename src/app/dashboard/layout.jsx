@@ -3,6 +3,7 @@ import Topbar from "@/components/global/Topbar";
 import LoungeModalWrapper from "@/components/dashboard/LoungeModalWrapper";
 
 export default function DashboardLayout({ children }) {
+
   return (
     <div className="w-full flex gap-4 h-screen">
       <LoungeModalWrapper />

@@ -31,6 +31,8 @@ import {
 import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
 import utils from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
+import { useFormik } from "formik";
+import { addGuestSchema } from "@/lib/schema/guestbook/addGuestSchema";
 
 const AddGuestForm = ({
   isOpen,
@@ -39,13 +41,13 @@ const AddGuestForm = ({
   isEdit = false,
   showTrigger = true,
 }) => {
-
-  // State for form fields
-  const [fullName, setFullName] = useState(data?.fullName || "");
-  const [email, setEmail] = useState(data?.email || "");
-  const [selectedLoungeId, setSelectedLoungeId] = useState(
-    data?.loungeId || "",
-  );
+  const [selectedLoungeId, setSelectedLoungeId] = useState(() => {
+    if (data?.loungeId) return data.loungeId;
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("activeLoungeId") || "";
+    }
+    return "";
+  });
   const [profileImage, setProfileImage] = useState(null);
   const queryClient = useQueryClient();
 
@@ -54,78 +56,103 @@ const AddGuestForm = ({
   const createGuestMutation = useCreateGuest();
   const updateGuestMutation = useUpdateGuest();
 
+  // Formik setup with Yup validation (same rules as userDetailsSchema)
+  const formik = useFormik({
+    initialValues: {
+      fullName: data?.fullName || "",
+      email: data?.email || "",
+    },
+    validationSchema: addGuestSchema,
+    validateOnChange: true,
+    validateOnBlur: true,
+    enableReinitialize: true,
+    onSubmit: async (values) => {
+      try {
+        if (!isEdit && !selectedLoungeId) {
+          ErrorToast("Please select a lounge");
+          return;
+        }
+
+        if (isEdit && data?._id) {
+          // Edit mode - call update mutation
+          await updateGuestMutation.mutateAsync({
+            entryId: data._id,
+            fullName: values.fullName,
+            email: values.email,
+          });
+        } else {
+          // Create mode - call create mutation
+          await createGuestMutation.mutateAsync({
+            loungeId: selectedLoungeId,
+            fullName: values.fullName,
+            email: values.email,
+          });
+        }
+
+        queryClient.invalidateQueries(["guestbook-list"]);
+
+        SuccessToast(
+          isEdit ? "Guest updated successfully" : "Guest added successfully",
+        );
+
+        // Reset form
+        formik.resetForm();
+        // setSelectedLoungeId("");
+        setProfileImage(null);
+
+        onOpenChange(false);
+      } catch (error) {
+        ErrorToast(
+          error?.response?.data?.message ||
+          error?.message ||
+          `Failed to ${isEdit ? "update" : "add"} guest. Please try again.`,
+        );
+        console.log(`${isEdit ? "Update" : "Add"} guest error:`, error);
+      }
+    },
+  });
+
+  // Sync selectedLoungeId with activeLoungeId from localStorage/LoungeSelector
+  useEffect(() => {
+    if (isEdit && data) {
+      setSelectedLoungeId(data.loungeId || "");
+      return;
+    }
+
+    const syncLounge = () => {
+      const storedId = localStorage.getItem("activeLoungeId");
+      if (storedId) {
+        setSelectedLoungeId(storedId);
+      } else if (lounges.length > 0) {
+        setSelectedLoungeId(lounges[0]._id);
+      }
+    };
+
+    syncLounge();
+
+    window.addEventListener("activeLoungeChanged", syncLounge);
+    return () => {
+      window.removeEventListener("activeLoungeChanged", syncLounge);
+    };
+  }, [lounges, isEdit, data]);
+
+  // Sync formik values when editing
+  useEffect(() => {
+    if (isEdit && data) {
+      formik.setValues({
+        fullName: data.fullName || "",
+        email: data.email || "",
+      });
+      setSelectedLoungeId(data.loungeId || "");
+    }
+  }, [isEdit, data]);
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setProfileImage(URL.createObjectURL(file));
     }
   };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      if (!fullName.trim()) {
-        ErrorToast("Please enter full name");
-        return;
-      }
-
-      if (!email.trim()) {
-        ErrorToast("Please enter email address");
-        return;
-      }
-
-      if (!isEdit && !selectedLoungeId) {
-        ErrorToast("Please select a lounge");
-        return;
-      }
-
-      if (isEdit && data?._id) {
-        // Edit mode - call update mutation
-        await updateGuestMutation.mutateAsync({
-          entryId: data._id,
-          fullName: fullName,
-          email: email,
-        });
-      } else {
-        // Create mode - call create mutation
-        await createGuestMutation.mutateAsync({
-          loungeId: selectedLoungeId,
-          fullName: fullName,
-          email: email,
-        });
-      }
-
-      queryClient.invalidateQueries(["guestbook-list"]);
-
-      SuccessToast(
-        isEdit ? "Guest updated successfully" : "Guest added successfully",
-      );
-
-      // Reset form
-      setFullName("");
-      setEmail("");
-      setSelectedLoungeId("");
-      setProfileImage(null);
-
-      onOpenChange(false);
-    } catch (error) {
-      ErrorToast(
-        error?.response?.data?.message ||
-        error?.message ||
-        `Failed to ${isEdit ? "update" : "add"} guest. Please try again.`,
-      );
-      console.log(`${isEdit ? "Update" : "Add"} guest error:`, error);
-    }
-  };
-
-  useEffect(() => {
-    if (isEdit && data) {
-      setFullName(data.fullName || "");
-      setEmail(data.email || "");
-      setSelectedLoungeId(data.loungeId || "");
-    }
-  }, [isEdit, data]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -148,7 +175,7 @@ const AddGuestForm = ({
             {isEdit ? "Edit Guest" : "Add New Guest"}
           </DialogTitle>
           <DialogDescription>
-            <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+            <form onSubmit={formik.handleSubmit} className="mt-4 space-y-4">
               {/* <div className="flex gap-6 items-center">
                 <Label
                   htmlFor="profile"
@@ -185,9 +212,18 @@ const AddGuestForm = ({
                 <Input
                   placeholder="Full Name"
                   className={"h-14"}
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
+                  id="fullName"
+                  name="fullName"
+                  maxLength={64}
+                  value={formik.values.fullName}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                 />
+                {formik.errors.fullName && formik.touched.fullName && (
+                  <p className="text-red-500 text-[11px] font-medium mt-1">
+                    {formik.errors.fullName}
+                  </p>
+                )}
               </div>
 
               <div className="w-full flex flex-col gap-1">
@@ -196,9 +232,18 @@ const AddGuestForm = ({
                   placeholder="email@example.com"
                   type={"email"}
                   className={"h-14"}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="email"
+                  name="email"
+                  maxLength={50}
+                  value={formik.values.email}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                 />
+                {formik.errors.email && formik.touched.email && (
+                  <p className="text-red-500 text-[11px] font-medium mt-1">
+                    {formik.errors.email}
+                  </p>
+                )}
               </div>
 
               {/* <div className="w-full flex flex-col gap-1">
@@ -211,43 +256,6 @@ const AddGuestForm = ({
                 <Input type={"date"} className={"h-14"} />
               </div> */}
 
-              <div className="col-span-2 flex flex-col gap-1">
-                <Label className={"text-black"}>Select Lounge</Label>
-
-                <Select
-                  value={selectedLoungeId}
-                  onValueChange={setSelectedLoungeId}
-                  disabled={isEdit}
-                >
-                  <SelectTrigger className={"w-full h-14!"}>
-                    <SelectValue placeholder="Select a Lounge" />
-                  </SelectTrigger>
-                  <SelectContent className={"h-[200px]"}>
-                    <SelectGroup>
-                      <SelectLabel>Lounge</SelectLabel>
-                      {isLoadingLounges ? (
-                        <SelectItem disabled value="">
-                          Loading lounges...
-                        </SelectItem>
-                      ) : lounges.length > 0 ? (
-                        lounges.map((lounge) => (
-                          <SelectItem
-                            className={"text-black"}
-                            value={lounge._id}
-                            key={lounge._id}
-                          >
-                            {lounge.name}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <SelectItem disabled value="">
-                          No lounges available
-                        </SelectItem>
-                      )}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
 
               {/* <div className="w-full flex flex-col gap-1">
                 <Label className={"text-base text-black"}>Add Details</Label>

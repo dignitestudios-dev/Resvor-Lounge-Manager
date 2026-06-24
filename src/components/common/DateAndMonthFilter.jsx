@@ -24,6 +24,7 @@ import { locations, months } from "@/lib/constants";
 import utils from "@/lib/utils";
 
 const DateAndMonthFilter = ({ isLounge, onFilterChange, statusOptions }) => {
+  const [open, setOpen] = React.useState(false);
   const [startDate, setStartDate] = React.useState("");
   const [endDate, setEndDate] = React.useState("");
   const [selectedMonth, setSelectedMonth] = React.useState("");
@@ -41,6 +42,7 @@ const DateAndMonthFilter = ({ isLounge, onFilterChange, statusOptions }) => {
         selectedStatus,
       });
     }
+    setOpen(false);
   };
 
   const handleClear = () => {
@@ -58,10 +60,11 @@ const DateAndMonthFilter = ({ isLounge, onFilterChange, statusOptions }) => {
         selectedStatus: "",
       });
     }
+    setOpen(false);
   };
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button className={"h-12 w-12 bg-gradient"}>
           <FaFilter className="h-6 w-6 min-h-6 min-w-6" />
@@ -85,7 +88,13 @@ const DateAndMonthFilter = ({ isLounge, onFilterChange, statusOptions }) => {
               type={"date"}
               className={"w-40 h-14"}
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={(e) => {
+                const newStart = e.target.value;
+                setStartDate(newStart);
+                if (endDate && endDate < newStart) {
+                  setEndDate("");
+                }
+              }}
             />
           </div>
 
@@ -96,6 +105,7 @@ const DateAndMonthFilter = ({ isLounge, onFilterChange, statusOptions }) => {
               type={"date"}
               className={"w-40 h-14"}
               value={endDate}
+              min={startDate}
               onChange={(e) => setEndDate(e.target.value)}
             />
           </div>

@@ -12,3 +12,14 @@ export const usePurchaseSubscription = () => {
     mutationFn: (planId) => purchaseSubscription(planId),
   });
 };
+
+const cancelSubscription = async () => {
+  const { data } = await axios.delete(`/subscriptions/cancel`);
+  return data;
+};
+
+export const useCancelSubscription = () => {
+  return useMutation({
+    mutationFn: cancelSubscription,
+  });
+};

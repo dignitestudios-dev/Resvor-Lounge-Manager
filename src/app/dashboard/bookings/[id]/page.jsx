@@ -3,19 +3,17 @@ import React from "react";
 import { useParams } from "next/navigation";
 import { useGetBookingDetail } from "@/lib/hooks/queries/useBookingDetail";
 import utils, { getBookingStatusStyles } from "@/lib/utils";
+import PageLoader from "@/components/common/PageLoader";
 
 const BookingDetails = () => {
   const params = useParams();
   const bookingId = params.id;
 
   const { data: bookingData, isLoading } = useGetBookingDetail(bookingId);
+  console.log("🚀 ~ BookingDetails ~ bookingData:", bookingData)
 
   if (isLoading) {
-    return (
-      <div className="flex-1 flex justify-center items-center">
-        <div className="text-lg font-semibold">Loading booking details...</div>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (!bookingData) {
@@ -32,8 +30,8 @@ const BookingDetails = () => {
   const startTime = new Date(bookingData.startTime);
   const endTime = new Date(bookingData.endTime);
   const bookingDate = utils.formatDateWithName(bookingData.bookingDate);
-  const startTimeFormatted = utils.formatTime(startTime);
-  const endTimeFormatted = utils.formatTime(endTime);
+  const startTimeFormatted = utils.formatTime12(startTime);
+  const endTimeFormatted = utils.formatTime12(endTime);
   const tableInfo = bookingData.tableIds?.[0] || {};
   const userName =
     `${bookingData.userId?.firstName || ""} ${bookingData.userId?.lastName || ""}`.trim() ||
@@ -63,7 +61,7 @@ const BookingDetails = () => {
               <div
                 className="w-56 h-40 rounded-2xl bg-cover bg-center shrink-0"
                 style={{
-                  backgroundImage: "url(/images/lounge.jfif)",
+                  backgroundImage: `url(${bookingData.loungeId?.logo?.location || "/images/lounge.jfif"})`,
                 }}
               />
 
@@ -71,17 +69,24 @@ const BookingDetails = () => {
                 <h3 className="text-xl font-bold mb-2">
                   {bookingData.loungeId?.name || "Unknown Lounge"}
                 </h3>
-                <div className="flex gap-2 mb-4">
-                  <span className="bg-blue-800/20 text-blue-950 px-3 py-1 rounded-full text-sm font-medium">
+                {bookingData?.loungeId?.tags.length > 0 &&
+                  <div className="flex gap-2 mb-4">
+                    {bookingData?.loungeId?.tags?.map((tag, index) => (
+                      <span key={index} className="bg-blue-800/20 text-blue-950 px-3 py-1 rounded-full text-sm font-medium">
+                        {tag}
+                      </span>
+                    ))}
+                    {/* <span className="bg-blue-800/20 text-blue-950 px-3 py-1 rounded-full text-sm font-medium">
                     Booking
                   </span>
                   <span className="bg-blue-800/20 text-blue-950 px-3 py-1 rounded-full text-sm font-medium">
                     Active
-                  </span>
-                </div>
+                  </span> */}
+                  </div>}
                 <div className="flex items-center gap-2 text-gray-700">
                   <span className="text-lg">📍</span>
-                  <span>{bookingData.loungeId?.name || "Unknown Lounge"}</span>
+                  <span>{bookingData.loungeId?.location?.address
+                    || "Unknown Lounge"}</span>
                 </div>
               </div>
             </div>
@@ -89,19 +94,19 @@ const BookingDetails = () => {
             <div className="grid grid-cols-5 gap-6 py-5">
               <div>
                 <p className="text-gray-600 text-sm font-semibold mb-2">
-                  Check-in Date
+                  Booking Date
                 </p>
                 <p className="text-black font-semibold">{bookingDate}</p>
               </div>
               <div>
                 <p className="text-gray-600 text-sm font-semibold mb-2">
-                  Check-in Time
+                  Start Time
                 </p>
                 <p className="text-black font-semibold">{startTimeFormatted}</p>
               </div>
               <div>
                 <p className="text-gray-600 text-sm font-semibold mb-2">
-                  Check-out Time
+                  End Time
                 </p>
                 <p className="text-black font-semibold">{endTimeFormatted}</p>
               </div>

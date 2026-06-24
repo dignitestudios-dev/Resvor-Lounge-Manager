@@ -50,13 +50,18 @@ export default function LoungeModal({
         loungeId: selectedLoungeId,
       });
 
+      if (typeof window !== "undefined") {
+        localStorage.setItem("activeLoungeId", selectedLoungeId);
+        window.dispatchEvent(new Event("activeLoungeChanged"));
+      }
+
       SuccessToast("Lounge switched successfully");
       onClose();
     } catch (error: any) {
       ErrorToast(
         error?.response?.data?.message ||
-          error?.message ||
-          "Failed to switch lounge. Please try again.",
+        error?.message ||
+        "Failed to switch lounge. Please try again.",
       );
       console.log("Switch lounge error:", error);
     }
@@ -120,11 +125,10 @@ export default function LoungeModal({
                   <div
                     key={lounge._id}
                     onClick={() => setSelectedLoungeId(lounge._id)}
-                    className={`cursor-pointer rounded-2xl bg-[#FDFDFF] p-4 flex flex-col items-center text-center transition-all border-2 ${
-                      isSelected
+                    className={`cursor-pointer rounded-2xl bg-[#FDFDFF] p-4 flex flex-col items-center text-center transition-all border-2 ${isSelected
                         ? "border-[#010067] ring-1 ring-[#010067]"
                         : "border-[#CACACA] hover:border-slate-200"
-                    }`}
+                      }`}
                   >
                     {/* Lounge Logo (Circular Image Frame) */}
                     <div className="w-20 h-20 rounded-full bg-slate-200 border-4 border-white shadow-sm overflow-hidden flex items-center justify-center relative mb-4">

@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
+import { useState, useMemo } from "react";
 import { RxCross2 } from "react-icons/rx";
-import { useState } from "react";
 import InputField from "../auth/InputField";
 import { Button } from "../ui/button";
 import { ErrorToast } from "../ui/toaster";
@@ -10,205 +10,123 @@ import { eventTypeOptions } from "@/lib/constants";
 import moment from "moment";
 import { phoneFormatter, phoneToE164 } from "@/lib/utils";
 import PhoneInput from "../auth/PhoneInput";
+import { useFormik } from "formik";
+import { addEventSchema } from "@/lib/schema/event/addEventSchema";
+import ServicesModal from "./ServicesModal";
+import { useGetLounges } from "@/lib/hooks/queries/useLounges";
 
-const AddEventForm = ({ onClose, onNext }) => {
-  const [startDate, setStartDate] = useState(null);
-  const [startTime, setStartTime] = useState(null);
+const normalizeEventType = (value) => {
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_");
 
-  // const [selectedType, setSelectedType] = useState([]);
+  const aliasMap = {
+    birthday_party: "birthday",
+    birthday: "birthday",
+    wedding: "wedding",
+    engagement: "engagement",
+    ceremony: "ceremony",
+    meeting: "meeting",
+    private_party: "private_party",
+    "private party": "private_party",
+    maintenance: "maintenance",
+    closed: "closed",
+    other: "other",
+  };
 
-  const [formData, setFormData] = useState({
-    eventType: "",
-    eventName: "",
-    name: "",
-    email: "",
-    phone: "",
-    guestCount: "",
-    preferredMusic: "",
-    specialRequest: "",
-    budget: "",
-    ticketAtDoor: "",
-    description: "",
+  return aliasMap[normalized] || normalized;
+};
+
+const AddEventForm = ({ onClose, onNext, initialData }) => {
+  const [servicesModalOpen, setServicesModalOpen] = useState(false);
+
+  const { data: lounges = [] } = useGetLounges();
+  const activeLoungeId = typeof window !== "undefined" ? localStorage.getItem("activeLoungeId") : null;
+  const activeLounge = useMemo(() => {
+    if (activeLoungeId) return lounges.find((l) => l._id === activeLoungeId) ?? lounges[0];
+    return lounges[0] ?? null;
+  }, [activeLoungeId, lounges]);
+
+  const loungeServices = useMemo(() => {
+    return (activeLounge?.services || []).map((s) => ({
+      id: s._id || s.id,
+      name: s.name,
+      price: s.price,
+      description: s.description || "",
+      images: s.images || [],
+    }));
+  }, [activeLounge]);
+
+  const formik = useFormik({
+    initialValues: {
+      eventType: initialData?.eventType || "",
+      eventName: initialData?.eventName || "",
+      description: initialData?.description || "",
+      startDate: initialData?.startDateTime ? new Date(initialData.startDateTime) : null,
+      startTime: initialData?.startTime || "",
+      endTime: initialData?.endTime || "",
+      guestName: initialData?.guestName || "",
+      guestEmail: initialData?.guestEmail || "",
+      guestPhone: initialData?.guestPhone || "",
+      guestCount: initialData?.guestCount !== undefined ? String(initialData.guestCount) : "",
+      preferredMusic: initialData?.preferredMusic === "None" ? "" : (initialData?.preferredMusic || ""),
+      specialRequest: initialData?.specialRequest === "None" ? "" : (initialData?.specialRequest || ""),
+      budget: initialData?.budget !== undefined ? String(initialData.budget) : "",
+      preferredSeatingArea: initialData?.preferredSeatingArea || "",
+      instructions: initialData?.instructions === "None" ? "" : (initialData?.instructions || ""),
+      ticketAtDoor: initialData?.ticketAtDoor !== undefined ? (initialData.ticketAtDoor === true || initialData.ticketAtDoor === "true") : false,
+      services: initialData?.services || [],
+    },
+    validationSchema: addEventSchema,
+    validateOnChange: true,
+    validateOnBlur: true,
+    onSubmit: (values) => {
+      // Prepare startDateTime and endDateTime
+      const startDateTime = new Date(values.startDate);
+      const [startH, startM] = values.startTime.split(":");
+      startDateTime.setHours(parseInt(startH), parseInt(startM));
+
+      const endDateTime = new Date(values.startDate);
+      const [endH, endM] = values.endTime.split(":");
+      endDateTime.setHours(parseInt(endH), parseInt(endM));
+
+      const eventData = {
+        title: values.eventName,
+        eventName: values.eventName,
+        eventType: normalizeEventType(values.eventType),
+        description: values.description || values.eventName,
+        date: values.startDate.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "2-digit",
+        }),
+        startTime: values.startTime,
+        endTime: values.endTime,
+        startDateTime: startDateTime.toISOString(),
+        endDateTime: endDateTime.toISOString(),
+        guestName: values.guestName,
+        guestEmail: values.guestEmail,
+        guestPhone: phoneToE164(values.guestPhone),
+        guestCount: Number(values.guestCount),
+        preferredMusic: values.preferredMusic || "None",
+        specialRequest: values.specialRequest || "None",
+        budget: Number(values.budget),
+        ticketAtDoor: values.ticketAtDoor === true || values.ticketAtDoor === "true",
+        preferredSeatingArea: values.preferredSeatingArea,
+        servicePackageIds: values.services ? values.services.map((s) => s.id) : [],
+        services: values.services || [],
+        instructions: values.instructions || "",
+      };
+      onNext(eventData);
+    },
   });
 
-  const [endTime, setEndTime] = useState("");
-  const [formErrors, setFormErrors] = useState({});
-
-  // const handleSelect = (option) => {
-  //   const name = option?.name || option;
-  //   setSelectedType([name]);
-  //   // setSelectedType((prev) => {
-  //   //   const exists = prev.some((item) => item.name === name);
-
-  //   //   if (exists) {
-  //   //     return prev.filter((item) => item.name !== name);
-  //   //   } else {
-  //   //     return [...prev, { name }];
-  //   //   }
-  //   // });
-  // };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-
-    let updatedValue = value;
-
-    // For phone number field
-    if (name === "number") {
-      updatedValue = value.replace(/\D/g, ""); // keep only digits
-    }
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: updatedValue,
-    }));
-
-    if (formErrors[name]) {
-      setFormErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
-    }
-  };
-
-  const normalizeEventType = (value) => {
-    const normalized = String(value || "")
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, "_");
-
-    const aliasMap = {
-      birthday_party: "birthday",
-      birthday: "birthday",
-      wedding: "wedding",
-      engagement: "engagement",
-      ceremony: "ceremony",
-      meeting: "meeting",
-      private_party: "private_party",
-      "private party": "private_party",
-      maintenance: "maintenance",
-      closed: "closed",
-      other: "other",
-    };
-
-    return aliasMap[normalized] || normalized;
-  };
-
-  const handleEventTypeChange = (value) => {
-    setFormData((prev) => ({
-      ...prev,
-      eventType: value,
-    }));
-
-    if (formErrors.eventType) {
-      setFormErrors((prev) => ({
-        ...prev,
-        eventType: "",
-      }));
-    }
-  };
-
-  const validate = () => {
-    const errors = {};
-    const normalizedEventType = normalizeEventType(formData.eventType);
-
-    if (!formData.eventType) {
-      errors.eventType = "Event type is required";
-    } else if (
-      ![
-        "birthday",
-        "wedding",
-        "engagement",
-        "ceremony",
-        "meeting",
-        "private_party",
-        "maintenance",
-        "closed",
-        "other",
-      ].includes(normalizedEventType)
-    ) {
-      errors.eventType = "Enter a valid event type";
-    }
-    if (!formData.eventName) errors.eventName = "Event name is required";
-    if (!startDate) errors.startDate = "Date is required";
-    if (!startTime) {
-      errors.startTime = "Start time is required";
-    }
-
-    if (!endTime) {
-      errors.endTime = "End time is required";
-    }
-
-    if (startTime && endTime) {
-      const start = new Date(`2000-01-01T${startTime}`);
-      const end = new Date(`2000-01-01T${endTime}`);
-
-      if (end <= start) {
-        errors.endTime = "End time must be after start time";
-      }
-    }
-    if (!formData.name) errors.name = "Full name is required";
-    if (!formData.email) {
-      errors.email = "Email is required";
-    } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.email)) {
-      errors.email = "Invalid email format";
-    }
-    if (!formData.phone) errors.phone = "Phone number is required";
-    if (!formData.guestCount) {
-      errors.guestCount = "Guest count is required";
-    } else if (isNaN(formData.guestCount) || Number(formData.guestCount) <= 0) {
-      errors.guestCount = "Enter a valid guest count";
-    }
-    if (!formData.budget) {
-      errors.budget = "Budget is required";
-    } else if (isNaN(formData.budget) || Number(formData.budget) <= 0) {
-      errors.budget = "Enter a valid budget";
-    }
-
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleNext = () => {
-    if (!validate()) {
+  const handleSubmitClick = () => {
+    formik.handleSubmit();
+    if (!formik.isValid) {
       ErrorToast("Please fill all the required fields.");
-      return;
     }
-
-    // Prepare startDateTime and endDateTime
-    const startDateTime = new Date(startDate);
-    const [startH, startM] = startTime.split(":");
-    startDateTime.setHours(parseInt(startH), parseInt(startM));
-
-    const endDateTime = new Date(startDate);
-    const [endH, endM] = endTime.split(":");
-    endDateTime.setHours(parseInt(endH), parseInt(endM));
-
-    const eventData = {
-      title: formData.eventName,
-      eventName: formData.eventName,
-      eventType: normalizeEventType(formData.eventType),
-      description: formData.description || formData.eventName,
-      date: startDate.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "2-digit",
-      }),
-      startTime: startTime,
-      endTime: endTime,
-      startDateTime: startDateTime.toISOString(),
-      endDateTime: endDateTime.toISOString(),
-      name: formData.name,
-      email: formData.email,
-      phone: phoneToE164(formData.phone),
-      guestCount: Number(formData.guestCount),
-      preferredMusic: formData.preferredMusic || "None",
-      specialRequest: formData.specialRequest || "None",
-      budget: Number(formData.budget),
-      ticketAtDoor: formData.ticketAtDoor || "None",
-      instructions: formData.instructions || "",
-    };
-    onNext(eventData);
   };
 
   return (
@@ -226,21 +144,15 @@ const AddEventForm = ({ onClose, onNext }) => {
           <div className=" mx-1">
             <SelectField
               label="Event Type"
-              name={`eventType`}
+              name="eventType"
               placeholder="Select Event Type"
-              value={formData.eventType}
-              onChange={handleEventTypeChange}
-              error={formErrors.eventType}
-              touched={!!formErrors.eventType}
+              value={formik.values.eventType}
+              onChange={(value) => formik.setFieldValue("eventType", value)}
+              onBlur={() => formik.setFieldTouched("eventType", true)}
+              error={formik.errors.eventType}
+              touched={formik.touched.eventType}
               options={eventTypeOptions}
             />
-            {/* <FilterSelectableField
-              label="Event Type"
-              placeholder={"Select Event Type"}
-              options={["Anniversary Party", "Birthday Party", "corporate"]}
-              value={selectedType}
-              onChange={handleSelect}
-            /> */}
           </div>
           <div className=" mx-1 pt-2">
             <InputField
@@ -248,13 +160,14 @@ const AddEventForm = ({ onClose, onNext }) => {
               text="eventName"
               placeholder="Event Name"
               type="text"
-              id={`eventName`}
-              name={`eventName`}
+              id="eventName"
+              name="eventName"
               maxLength={30}
-              value={formData.eventName}
-              onChange={handleInputChange}
-              error={formErrors.eventName}
-              touched={!!formErrors.eventName}
+              value={formik.values.eventName}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.errors.eventName}
+              touched={formik.touched.eventName}
             />
           </div>
           <div className=" mx-1 pt-2">
@@ -263,26 +176,29 @@ const AddEventForm = ({ onClose, onNext }) => {
               text="description"
               placeholder="Event description"
               type="text"
-              id={`description`}
-              name={`description`}
+              id="description"
+              name="description"
               maxLength={100}
-              value={formData.description}
-              onChange={handleInputChange}
+              value={formik.values.description}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.errors.description}
+              touched={formik.touched.description}
             />
           </div>
           <div className="my-2 mx-1">
             <DatePickerField
               label="Select Date"
               minDate={moment().add(1, "day").startOf("day").toDate()}
-              value={startDate}
+              value={formik.values.startDate}
               onChange={(date) => {
-                setStartDate(date);
-                setFormErrors((prev) => ({ ...prev, startDate: "" }));
+                formik.setFieldValue("startDate", date);
+                formik.setFieldTouched("startDate", true, false);
               }}
             />
-            {formErrors.startDate && (
+            {formik.errors.startDate && formik.touched.startDate && (
               <p className="text-red-600 text-[12px] mt-1">
-                {formErrors.startDate}
+                {formik.errors.startDate}
               </p>
             )}
           </div>
@@ -294,33 +210,20 @@ const AddEventForm = ({ onClose, onNext }) => {
               <input
                 type="time"
                 data-slot="input"
-                className={`text-black w-full px-4 py-2 text-sm rounded-[15px] bg-white/10 backdrop-blur-[28.9px] ring-1 ${formErrors.startTime ? "ring-red-500" : "ring-[#CACACA]"}
+                name="startTime"
+                className={`text-black w-full px-4 py-2 text-sm rounded-[15px] bg-white/10 backdrop-blur-[28.9px] ring-1 ${formik.errors.startTime && formik.touched.startTime ? "ring-red-500" : "ring-[#CACACA]"}
   focus:ring-2 focus:ring-gray-200 focus:outline-none  placeholder:font-light placeholder:text-[12px] placeholder:text-[#E6E6F0]
-  }`}
-                value={startTime}
-                onChange={(e) => {
-                  setStartTime(e.target.value);
-                  setFormErrors((prev) => ({ ...prev, startTime: "" }));
-                }}
+  `}
+                value={formik.values.startTime}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
               />
-              {formErrors.startTime && (
+              {formik.errors.startTime && formik.touched.startTime && (
                 <p className="text-red-600 text-[12px] mt-1">
-                  {formErrors.startTime}
+                  {formik.errors.startTime}
                 </p>
               )}
             </div>
-
-            {/* <TimePickerField
-              text="Start Time"
-              label="Select Time"
-              value={startTime}
-              onChange={setStartTime}
-              open={openField === "start"}
-              onOpen={() =>
-                setOpenField(openField === "start" ? null : "start")
-              }
-              position={"-left-4"}
-            />*/}
 
             <div className="w-full">
               <label className="block text-[14px] font-[500] text-[#181818] mb-2">
@@ -329,85 +232,62 @@ const AddEventForm = ({ onClose, onNext }) => {
               <input
                 type="time"
                 data-slot="input"
-                min={startTime || undefined}
-                className={`text-black w-full px-4 py-2 text-sm rounded-[15px] bg-white/10 backdrop-blur-[28.9px] ring-1 ${
-                  formErrors.endTime ? "ring-red-500" : "ring-[#CACACA]"
-                } focus:ring-2 focus:ring-gray-200 focus:outline-none`}
-                value={endTime}
-                onChange={(e) => {
-                  setEndTime(e.target.value);
-                  setFormErrors((prev) => ({ ...prev, endTime: "" }));
-                }}
+                name="endTime"
+                min={formik.values.startTime || undefined}
+                className={`text-black w-full px-4 py-2 text-sm rounded-[15px] bg-white/10 backdrop-blur-[28.9px] ring-1 ${formik.errors.endTime && formik.touched.endTime ? "ring-red-500" : "ring-[#CACACA]"
+                  } focus:ring-2 focus:ring-gray-200 focus:outline-none`}
+                value={formik.values.endTime}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
               />
-              {formErrors.endTime && (
+              {formik.errors.endTime && formik.touched.endTime && (
                 <p className="text-red-600 text-[12px] mt-1">
-                  {formErrors.endTime}
+                  {formik.errors.endTime}
                 </p>
               )}
             </div>
-            {/*
-            <TimePickerField
-              text="End Time"
-              label="Select Time"
-              value={endDate}
-              onChange={setEndDate}
-              open={openField === "end"}
-              onOpen={() => setOpenField(openField === "end" ? null : "end")}
-              position={"-right-6"}
-            /> */}
           </div>
           <div className="w-full flex items-center gap-2 my-2 px-1">
             <InputField
               label="Full Name"
-              text="name"
+              text="guestName"
               placeholder="Full Name"
               type="text"
-              id={`name`}
-              name={`name`}
-              maxLength={30}
-              value={formData.name}
-              onChange={handleInputChange}
-              error={formErrors.name}
-              touched={!!formErrors.name}
+              id="guestName"
+              name="guestName"
+              maxLength={64}
+              value={formik.values.guestName}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.errors.guestName}
+              touched={formik.touched.guestName}
             />
             <InputField
               label="Email address"
-              text="email"
-              placeholder="example@gamil.com"
+              text="guestEmail"
+              placeholder="example@gmail.com"
               type="email"
-              id={`email`}
-              name={`email`}
-              maxLength={30}
-              value={formData.email}
-              onChange={handleInputChange}
-              error={formErrors.email}
-              touched={!!formErrors.email}
+              id="guestEmail"
+              name="guestEmail"
+              maxLength={50}
+              value={formik.values.guestEmail}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.errors.guestEmail}
+              touched={formik.touched.guestEmail}
             />
           </div>
           <div className="w-full flex items-center gap-2 my-2 px-1">
-            {/* <InputField
-              label="Phone number"
-              text="phone"
-              placeholder="Phone number"
-              type="text"
-              id={`phone`}
-              name={`phone`}
-              maxLength={30}
-              value={formData.phone}
-              onChange={handleInputChange}
-              error={formErrors.phone}
-              touched={!!formErrors.phone}
-            /> */}
-
             <PhoneInput
               variant="light"
               label="Phone Number"
-              value={phoneFormatter(formData.phone || "")}
-              id="phone"
-              name="phone"
-              onChange={handleInputChange}
-              error={formErrors.phone}
-              touched={!!formErrors.phone}
+              value={phoneFormatter(formik.values.guestPhone || "")}
+              id="guestPhone"
+              name="guestPhone"
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.errors.guestPhone}
+              touched={formik.touched.guestPhone}
               autoComplete="off"
             />
 
@@ -416,13 +296,14 @@ const AddEventForm = ({ onClose, onNext }) => {
               text="guest"
               placeholder="Add here"
               type="text"
-              id={`guest`}
-              name={`guestCount`}
+              id="guest"
+              name="guestCount"
               maxLength={30}
-              value={formData.guestCount}
-              onChange={handleInputChange}
-              error={formErrors.guestCount}
-              touched={!!formErrors.guestCount}
+              value={formik.values.guestCount}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.errors.guestCount}
+              touched={formik.touched.guestCount}
             />
           </div>
           <div className="w-full flex items-center gap-2 my-2 px-1">
@@ -431,22 +312,24 @@ const AddEventForm = ({ onClose, onNext }) => {
               text="music"
               placeholder="Add here"
               type="text"
-              id={`music`}
-              name={`preferredMusic`}
+              id="music"
+              name="preferredMusic"
               maxLength={30}
-              value={formData.preferredMusic}
-              onChange={handleInputChange}
+              value={formik.values.preferredMusic}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
             />
             <InputField
               label="Special Requests"
               text="special"
               placeholder="Add here"
               type="text"
-              id={`special`}
-              name={`specialRequest`}
+              id="special"
+              name="specialRequest"
               maxLength={30}
-              value={formData.specialRequest}
-              onChange={handleInputChange}
+              value={formik.values.specialRequest}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
             />
           </div>
           <div className="w-full flex items-center gap-2 my-2 px-1">
@@ -455,32 +338,134 @@ const AddEventForm = ({ onClose, onNext }) => {
               text="budget"
               placeholder="Add here"
               type="text"
-              id={`budget`}
-              name={`budget`}
+              id="budget"
+              name="budget"
               maxLength={30}
-              value={formData.budget}
-              onChange={handleInputChange}
-              error={formErrors.budget}
-              touched={!!formErrors.budget}
+              value={formik.values.budget}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.errors.budget}
+              touched={formik.touched.budget}
+            />
+            <div className="w-[70%]">
+              <SelectField
+                label="Ticket at Door"
+                name="ticketAtDoor"
+                placeholder="Select Option"
+                value={formik.values.ticketAtDoor.toString()}
+                onChange={(value) => formik.setFieldValue("ticketAtDoor", value === "true")}
+                onBlur={() => formik.setFieldTouched("ticketAtDoor", true)}
+                error={formik.errors.ticketAtDoor}
+                touched={formik.touched.ticketAtDoor}
+                options={[
+                  { value: "true", label: "Yes" },
+                  { value: "false", label: "No" },
+                ]}
+              />
+            </div>
+          </div>
+          <div className="w-full flex items-center gap-2 my-2 px-1">
+            <InputField
+              label="Preferred Seating Area"
+              text="preferredSeatingArea"
+              placeholder="e.g. Rooftop terrace"
+              type="text"
+              id="preferredSeatingArea"
+              name="preferredSeatingArea"
+              maxLength={100}
+              value={formik.values.preferredSeatingArea}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.errors.preferredSeatingArea}
+              touched={formik.touched.preferredSeatingArea}
             />
             <InputField
-              label="Ticket at door (optional)"
-              text="ticket"
-              placeholder="Add here"
+              label="Instructions (optional)"
+              text="instructions"
+              placeholder="Special instructions"
               type="text"
-              id={`ticket`}
-              name={`ticketAtDoor`}
-              maxLength={30}
-              value={formData.ticketAtDoor}
-              onChange={handleInputChange}
+              id="instructions"
+              name="instructions"
+              maxLength={200}
+              value={formik.values.instructions}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.errors.instructions}
+              touched={formik.touched.instructions}
             />
           </div>
 
+          {/* Select Services & Packages TagsField */}
+          <div className="mx-1 pt-2 w-full">
+            <label className="block text-[14px] font-[500] text-[#181818] mb-2">
+              Select Services & Packages
+            </label>
+            <div
+              className="flex items-center justify-between border border-gray-400 bg-white/10 backdrop-blur-[28.9px] text-sm rounded-[15px] overflow-hidden p-2.5 h-11"
+            >
+              <div className="flex flex-wrap p-1 text-[#727272] font-light text-[12px] select-none">
+                Add Services and Packages
+              </div>
+              <button
+                type="button"
+                onClick={() => setServicesModalOpen(true)}
+                className="bg-[#012C57] hover:bg-opacity-90 text-white p-1 rounded-xl transition cursor-pointer flex items-center justify-center"
+              >
+                <svg
+                  className="h-5 w-5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M10 5a1 1 0 00-1 1v3H6a1 1 0 000 2h3v3a1 1 0 002 0V11h3a1 1 0 100-2h-3V6a1 1 0 00-1-1z" />
+                </svg>
+              </button>
+            </div>
+            {formik.errors.services && formik.touched.services && (
+              <p className="text-red-600 text-[12px] mt-1">
+                {formik.errors.services}
+              </p>
+            )}
+
+            {formik.values.services && formik.values.services.length > 0 && (
+              <div
+                className="flex items-center border border-[#CACACA] text-sm rounded-[15px] overflow-hidden p-3 mt-2 w-full bg-gray-50"
+              >
+                <div className="flex flex-wrap gap-2 w-full text-white">
+                  {formik.values.services.map((service) => (
+                    <span
+                      key={service.id}
+                      className="bg-[#012C57] text-[12px] rounded-full px-3 py-1.5 inline-flex items-center gap-2 shadow-sm font-medium"
+                    >
+                      {service.title} (${service.price})
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = formik.values.services.filter(s => s.id !== service.id);
+                          formik.setFieldValue("services", updated);
+                        }}
+                        className="text-white hover:text-red-400 focus:outline-none cursor-pointer flex items-center justify-center"
+                      >
+                        <RxCross2 className="w-3.5 h-3.5" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <ServicesModal
+            isOpen={servicesModalOpen}
+            onClose={() => setServicesModalOpen(false)}
+            setServiceModalData={(data) => formik.setFieldValue("services", data)}
+            loungeServices={loungeServices}
+            initialSelectedServices={formik.values.services}
+          />
+
           <div>
             <div className="mt-4 px-1 w-full">
-              <Button className={"w-full"} type="button" onClick={handleNext}>
-                {" "}
-                Submit{" "}
+              <Button className={"w-full"} type="button" onClick={handleSubmitClick}>
+                Submit
               </Button>
             </div>
           </div>

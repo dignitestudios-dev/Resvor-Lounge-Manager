@@ -14,6 +14,13 @@ const createEvent = async (data) => {
     specialRequest: data.specialRequest,
     startDateTime: data.startDateTime,
     endDateTime: data.endDateTime,
+    guestName: data.guestName,
+    guestPhone: data.guestPhone,
+    guestEmail: data.guestEmail,
+    ticketAtDoor: data.ticketAtDoor,
+    preferredSeatingArea: data.preferredSeatingArea,
+    servicePackageIds: data.servicePackageIds,
+    instructions: data.instructions,
   });
   return response.data;
 };

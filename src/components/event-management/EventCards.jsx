@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "../ui/button";
 import { IoIosArrowForward } from "react-icons/io";
+import { capitalize } from "@/lib/utils";
 
 export default function EventCards({ events }) {
   if (!events.length) {
@@ -25,7 +26,7 @@ export default function EventCards({ events }) {
           <div className="grid grid-cols-2 text-sm mb-2 py-2 border-b-[1px] border-b-[#01005924]">
             <div className="flex flex-col">
               <div className="text-[12px] text-[#656565]">Event Type</div>
-              <div>{event.eventType}</div>
+              <div>{capitalize(event.eventType)}</div>
             </div>
             <div className="flex flex-col border-l-2 border-gray-300 pl-4">
               <div className="text-[12px] text-[#656565]">Event Date</div>
@@ -46,11 +47,11 @@ export default function EventCards({ events }) {
           </div>
           <div className="flex items-center gap-5 justify-between">
             <div className="flex items-center mt-2">
-              <img
+              {/* <img
                 src={event.user.profile}
                 alt={event.user.name}
                 className="w-8 h-8 rounded-full mr-2 border-2 border-white"
-              />
+              /> */}
               <span className="font-medium">{event.user.name}</span>
             </div>
 
