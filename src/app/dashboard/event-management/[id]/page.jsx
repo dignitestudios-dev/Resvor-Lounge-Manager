@@ -108,21 +108,7 @@ const EventDetails = () => {
       <div className="flex justify-between items-center mb-5">
         <div className="flex items-center gap-4">
           <h1 className="text-2xl font-bold">Event Details</h1>
-          {eventData?.status && (
-            <span
-              className={`px-4 py-2 rounded-full text-sm font-semibold ${eventData.status === "pending"
-                ? "bg-yellow-100 text-yellow-800"
-                : eventData.status === "accepted"
-                  ? "bg-green-100 text-green-800"
-                  : eventData.status === "rejected"
-                    ? "bg-red-100 text-red-800"
-                    : "bg-gray-100 text-gray-800"
-                }`}
-            >
-              {eventData.status.charAt(0).toUpperCase() +
-                eventData.status.slice(1)}
-            </span>
-          )}
+
         </div>
         <div className="flex gap-3">
           {eventData?.status === "pending" && (
@@ -146,7 +132,10 @@ const EventDetails = () => {
 
       <div className="flex-1 overflow-y-auto bg-white p-5 rounded-2xl">
         <div className="bg-[#F5F5F5] rounded-2xl p-5">
-          <h2 className="text-lg font-bold mb-3">Reservation Details</h2>
+          <div>
+
+            <h2 className="text-lg font-bold mb-3">Reservation Details</h2>
+          </div>
 
           <div className="bg-white rounded-2xl p-6 mb-6">
             <div className="flex gap-6 mb-8">
@@ -158,22 +147,43 @@ const EventDetails = () => {
               />
 
               <div className="flex-1">
-                <h3 className="text-xl font-bold mb-2">{eventData?.title}</h3>
-                {eventData?.loungeId?.tags?.length > 0 && (
-                  <div className="flex gap-2 mb-4">
-                    {eventData?.loungeId?.tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="bg-blue-800/20 text-blue-950 px-3 py-1 rounded-full text-sm font-medium"
-                      >
-                        {tag?.name}
-                      </span>
-                    ))}
+                <div className="flex justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold mb-2">{eventData?.title}</h3>
+                    {eventData?.loungeId?.tags?.length > 0 && (
+                      <div className="flex gap-2 mb-4">
+                        {eventData?.loungeId?.tags.map((tag, index) => (
+                          <span
+                            key={index}
+                            className="bg-blue-800/20 text-blue-950 px-3 py-1 rounded-full text-sm font-medium"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 text-gray-700">
+                      <span className="text-lg">📍</span>
+                      <span>{eventData?.loungeId?.location?.address}</span>
+                    </div>
                   </div>
-                )}
-                <div className="flex items-center gap-2 text-gray-700">
-                  <span className="text-lg">📍</span>
-                  <span>{eventData?.loungeId?.location?.address}</span>
+                  <div>
+                    {eventData?.status && (
+                      <span
+                        className={`px-4 py-2 rounded-full text-sm font-semibold ${eventData.status === "pending"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : eventData.status === "accepted"
+                            ? "bg-green-100 text-green-800"
+                            : eventData.status === "rejected"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
+                      >
+                        {eventData.status.charAt(0).toUpperCase() +
+                          eventData.status.slice(1)}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -239,26 +249,36 @@ const EventDetails = () => {
             </div>
 
             <div className="border-t pt-6 mb-8">
+              <p className="text-black font-semibold mb-2">
+                Services and Packages
+              </p>
               <div className="flex gap-12">
-                <div>
-                  <p className="text-black font-semibold mb-2">
-                    Services and Packages
-                  </p>
+                {eventData?.servicePackageIds?.length > 0 ? (
+                  eventData?.servicePackageIds?.map((service, index) => (
+                    <div key={index}>
+                      <p className="text-gray-600 text-sm font-semibold">
+                        {service.name}
+                      </p>
+                      <p className="text-gray-600 text-sm font-semibold">
+                        {service.description}
+                      </p>
+                    </div>
+                  ))
+                ) : (
                   <p className="text-gray-600 text-sm font-semibold">
-                    Food and Drink Package
+                    No services selected
                   </p>
-                  <p className="text-gray-600 text-sm font-semibold">
-                    Bottle Package
-                  </p>
-                </div>
-                <div className="border-l pl-12">
+                )}
+
+
+                {/* <div className="border-l pl-12">
                   <p className="text-black font-semibold mb-2">
                     Preferred Seating Area
                   </p>
                   <p className="text-gray-600 text-sm font-semibold">
                     Outdoor Terrace/ Rooftop
                   </p>
-                </div>
+                </div> */}
               </div>
             </div>
 

@@ -143,14 +143,10 @@ const PersonalDetailsRemaining = ({
               onChange={(updatedServices) =>
                 setFieldValue("services", updatedServices)
               }
+              errors={errors}
+              touched={touched}
             />
-            {touched.services && errors.services && (
-              <p className="text-red-600 text-xs mt-0">
-                {typeof errors.services === "string"
-                  ? errors.services
-                  : "Please check your services entries"}
-              </p>
-            )}
+
 
             <div>
               <label className="text-[14px] font-medium text-white block mb-1">

@@ -404,6 +404,8 @@ export default function AddServicesAndPackages({
   services = [],
   onChange,
   variant = "dark",
+  errors,
+  touched,
 }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
@@ -497,6 +499,13 @@ export default function AddServicesAndPackages({
           variant={variant}
         />
       </div>
+      {touched.services && errors.services && (
+        <p className="text-red-600 text-xs mt-0">
+          {typeof errors.services === "string"
+            ? errors.services
+            : "Please check your services entries"}
+        </p>
+      )}
     </div>
   );
 }

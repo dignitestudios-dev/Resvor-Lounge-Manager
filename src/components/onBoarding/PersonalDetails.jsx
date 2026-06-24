@@ -79,13 +79,13 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
       }
 
       // Check image resolution (215x215)
-      const isValidResolution = await validateImageResolution(file);
-      if (!isValidResolution) {
-        const errorMsg = "Image resolution must be at least 215x215";
-        setImageError(errorMsg);
-        ErrorToast(errorMsg);
-        return;
-      }
+      // const isValidResolution = await validateImageResolution(file);
+      // if (!isValidResolution) {
+      //   const errorMsg = "Image resolution must be at least 215x215";
+      //   setImageError(errorMsg);
+      //   ErrorToast(errorMsg);
+      //   return;
+      // }
 
       setUserImage(file);
       setFieldValue("userImage", file);
