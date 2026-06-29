@@ -22,7 +22,9 @@ export const AuthProvider = ({ children }) => {
   const pathname = usePathname();
   const queryClient = useQueryClient();
 
-  const hasToken = typeof window !== "undefined" && !!(Cookies.get("token") || Cookies.get("authorization"));
+  const hasToken =
+    typeof window !== "undefined" &&
+    !!(Cookies.get("token") || Cookies.get("authorization"));
 
   const cachedAuth = useMemo(() => {
     if (!hasToken) return null;
@@ -67,15 +69,27 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (authData) {
       if (authData.sessionType) {
-        Cookies.set("sessionType", authData.sessionType, { expires: 7, path: "/" });
+        Cookies.set("sessionType", authData.sessionType, {
+          expires: 7,
+          path: "/",
+        });
       } else if (authData.tokenType) {
-        Cookies.set("sessionType", authData.tokenType, { expires: 7, path: "/" });
+        Cookies.set("sessionType", authData.tokenType, {
+          expires: 7,
+          path: "/",
+        });
       }
       if (authData.onboardingStep) {
-        Cookies.set("onboardingStep", authData.onboardingStep, { expires: 7, path: "/" });
+        Cookies.set("onboardingStep", authData.onboardingStep, {
+          expires: 7,
+          path: "/",
+        });
       }
       if (authData.user) {
-        Cookies.set("user", JSON.stringify(authData.user), { expires: 7, path: "/" });
+        Cookies.set("user", JSON.stringify(authData.user), {
+          expires: 7,
+          path: "/",
+        });
       }
     } else if (authData === null || isError) {
       Cookies.remove("token", { path: "/" });
@@ -99,14 +113,18 @@ export const AuthProvider = ({ children }) => {
   // We deliberately ignore isFetching so background refetches
   // (window focus, interval, etc.) never re-trigger the full-screen loader,
   // EXCEPT when the user's cached state is incomplete (e.g., they just returned from Stripe).
-  const isResolved = !isLoading && !(isFetching && (sessionType === "registration_token" || user?.isSubscribed === false));
+  const isResolved =
+    !isLoading &&
+    !(
+      isFetching &&
+      (sessionType === "registration_token" || user?.isSubscribed === false)
+    );
 
   const isProtectedRoute = PROTECTED_ROUTES.some((route) =>
     pathname.startsWith(route),
   );
   const isAuthRoute = pathname.startsWith("/auth");
   const isOnboardingRoute = pathname === ONBOARDING_ROUTE;
-
 
   const redirectTarget = useMemo(() => {
     if (!isResolved) return null;
@@ -131,6 +149,14 @@ export const AuthProvider = ({ children }) => {
       return isOnboardingRoute ? null : ONBOARDING_ROUTE;
     }
 
+    if (
+      isAuthenticated &&
+      onboardingStep === "buy_subscription" &&
+      user?.isSubscribed === false
+    ) {
+      return isOnboardingRoute ? null : ONBOARDING_ROUTE;
+    }
+
     if (isOnboarding) {
       return isOnboardingRoute ? null : ONBOARDING_ROUTE;
     }
@@ -146,7 +172,6 @@ export const AuthProvider = ({ children }) => {
     isOnboardingRoute,
     isProtectedRoute,
   ]);
-
 
   useEffect(() => {
     if (redirectTarget && redirectTarget !== pathname) {
