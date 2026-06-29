@@ -73,7 +73,7 @@ const AddEventForm = ({ onClose, onNext, initialData }) => {
       preferredMusic: initialData?.preferredMusic === "None" ? "" : (initialData?.preferredMusic || ""),
       specialRequest: initialData?.specialRequest === "None" ? "" : (initialData?.specialRequest || ""),
       budget: initialData?.budget !== undefined ? String(initialData.budget) : "",
-      preferredSeatingArea: initialData?.preferredSeatingArea || "",
+
       instructions: initialData?.instructions === "None" ? "" : (initialData?.instructions || ""),
       ticketAtDoor: initialData?.ticketAtDoor !== undefined ? (initialData.ticketAtDoor === true || initialData.ticketAtDoor === "true") : false,
       services: initialData?.services || [],
@@ -113,7 +113,7 @@ const AddEventForm = ({ onClose, onNext, initialData }) => {
         specialRequest: values.specialRequest || "None",
         budget: Number(values.budget),
         ticketAtDoor: values.ticketAtDoor === true || values.ticketAtDoor === "true",
-        preferredSeatingArea: values.preferredSeatingArea,
+
         servicePackageIds: values.services ? values.services.map((s) => s.id) : [],
         services: values.services || [],
         instructions: values.instructions || "",
@@ -365,20 +365,6 @@ const AddEventForm = ({ onClose, onNext, initialData }) => {
             </div>
           </div>
           <div className="w-full flex items-center gap-2 my-2 px-1">
-            <InputField
-              label="Preferred Seating Area"
-              text="preferredSeatingArea"
-              placeholder="e.g. Rooftop terrace"
-              type="text"
-              id="preferredSeatingArea"
-              name="preferredSeatingArea"
-              maxLength={100}
-              value={formik.values.preferredSeatingArea}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              error={formik.errors.preferredSeatingArea}
-              touched={formik.touched.preferredSeatingArea}
-            />
             <InputField
               label="Instructions (optional)"
               text="instructions"

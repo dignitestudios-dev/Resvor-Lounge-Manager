@@ -118,9 +118,9 @@ export const addEventSchema = Yup.object({
       (value) =>
         value
           ? value
-              .trim()
-              .split(" ")
-              .every((word) => /^[A-ZÀ-Ÿ][\p{L}'-]*$/u.test(word))
+            .trim()
+            .split(" ")
+            .every((word) => /^[A-ZÀ-Ÿ][\p{L}'-]*$/u.test(word))
           : true,
     ),
 
@@ -164,9 +164,6 @@ export const addEventSchema = Yup.object({
       (value) => value && !isNaN(value) && Number(value) > 0,
     ),
 
-  preferredSeatingArea: Yup.string()
-    .required("Preferred seating area is required.")
-    .max(100, "Preferred seating area cannot exceed 100 characters."),
 
   instructions: Yup.string()
     .max(200, "Instructions cannot exceed 200 characters."),

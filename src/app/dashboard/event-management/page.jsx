@@ -146,7 +146,6 @@ const EventManagement = () => {
         guestPhone: eventData.guestPhone,
         guestEmail: eventData.guestEmail,
         ticketAtDoor: eventData.ticketAtDoor,
-        preferredSeatingArea: eventData.preferredSeatingArea,
         servicePackageIds: eventData.servicePackageIds || [],
         instructions: eventData.instructions,
       };
