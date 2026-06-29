@@ -4,13 +4,13 @@ import React from "react";
 const PrivacyPolicy = () => {
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-8 md:py-12">
-      <div className="bg-black bg-opacity-60 rounded-lg p-6 md:p-12 backdrop-blur-sm">
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
+      <div className="bg-white rounded-lg p-6 md:p-12 backdrop-blur-sm">
+        <h1 className="text-3xl md:text-4xl font-bold  mb-4">
           Privacy Policy
         </h1>
 
-        <div className="text-gray-300 space-y-4 text-sm md:text-base leading-relaxed">
-          <p className="font-semibold text-white">
+        <div className="text-gray-700 space-y-4 text-sm md:text-base leading-relaxed">
+          <p className="font-semibold">
             Effective Date: October 1, 2025
           </p>
 
@@ -36,7 +36,7 @@ const PrivacyPolicy = () => {
             <span className="text-indigo-400">privacy@lladner.com</span>.
           </p>
 
-          <h2 className="text-xl md:text-2xl font-semibold text-white mt-8 mb-4">
+          <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mt-8 mb-4">
             Information We Collect
           </h2>
 

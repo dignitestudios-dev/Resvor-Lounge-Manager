@@ -22,7 +22,6 @@ const EventDetails = () => {
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
 
   const { data: eventData, isLoading } = useGetEventDetail(eventId);
-  console.log("🚀 ~ EventDetails ~ eventData:", eventData)
   const rejectEventMutation = useRejectEvent();
   const acceptEventMutation = useAcceptEvent();
 
