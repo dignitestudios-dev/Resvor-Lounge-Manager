@@ -97,8 +97,8 @@ const EventDetails = () => {
   // Parse dates
   const startDateTime = new Date(eventData.startDateTime);
   const endDateTime = new Date(eventData.endDateTime);
-  const checkInTime = utils.formatTime(startDateTime);
-  const checkOutTime = utils.formatTime(endDateTime);
+  const checkInTime = utils.formatTime12(startDateTime);
+  const checkOutTime = utils.formatTime12(endDateTime);
   const checkInDate = utils.formatDateWithName(eventData.startDateTime);
 
   const loungeName = eventData.loungeId?.name || "Unknown Lounge";
