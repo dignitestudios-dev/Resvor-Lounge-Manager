@@ -89,8 +89,19 @@ export const submitCreateLounge = async (payload) => {
   // formData.append("offers", payload.offers);
 
   // Operating Hours
-  formData.append("operatingHours[open]", payload.operatingHours);
-  formData.append("operatingHours[close]", payload.operatingHours); // Adjust if needed
+  if (payload.operatingHours && typeof payload.operatingHours === "string") {
+    const hours = payload.operatingHours.split(" - ");
+    if (hours.length === 2) {
+      formData.append("operatingHours[open]", hours[0].trim());
+      formData.append("operatingHours[close]", hours[1].trim());
+    } else {
+      formData.append("operatingHours[open]", payload.operatingHours);
+      formData.append("operatingHours[close]", payload.operatingHours);
+    }
+  } else {
+    formData.append("operatingHours[open]", "");
+    formData.append("operatingHours[close]", "");
+  }
 
   // Location
   formData.append("location[address]", payload.location);

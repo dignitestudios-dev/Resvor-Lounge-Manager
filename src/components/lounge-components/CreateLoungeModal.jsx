@@ -599,14 +599,9 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
                   onChange={(updatedServices) =>
                     setFieldValue2("services", updatedServices)
                   }
+                  errors={errors2}
+                  touched={touched2}
                 />
-                {touched2.services && errors2.services && (
-                  <p className="text-red-600 text-xs mt-1">
-                    {typeof errors2.services === "string"
-                      ? errors2.services
-                      : "Please check your services entries"}
-                  </p>
-                )}
 
                 <div>
                   <label className="text-[14px] font-medium text-black block mb-1">
