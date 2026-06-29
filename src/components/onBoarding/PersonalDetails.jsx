@@ -41,6 +41,7 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
     validateOnChange: true,
     validateOnBlur: true,
     onSubmit: async (values) => {
+      console.log("🚀 ~ PersonalDetails ~ values:", values);
       try {
         // Pass data to next step
         setRemainingDetails("remainingDetails");
@@ -50,7 +51,7 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
         } else {
           ErrorToast(
             error.response?.data?.message ||
-            "An error occurred during logout. Please try again.",
+              "An error occurred during logout. Please try again.",
           );
         }
       }

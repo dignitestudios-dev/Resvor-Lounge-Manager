@@ -137,6 +137,10 @@ export const AuthProvider = ({ children }) => {
       return pathname.startsWith("/dashboard") ? null : DEFAULT_REDIRECT;
     }
 
+    if (isAuthenticated && onboardingStep === "buy_subscription") {
+      return isOnboardingRoute ? null : ONBOARDING_ROUTE;
+    }
+
     if (isAuthenticated && onboardingStep === "create_lounge") {
       return isOnboardingRoute ? null : ONBOARDING_ROUTE;
     }
@@ -144,14 +148,6 @@ export const AuthProvider = ({ children }) => {
     if (
       isAuthenticated &&
       onboardingStep === "completed" &&
-      user?.isSubscribed === false
-    ) {
-      return isOnboardingRoute ? null : ONBOARDING_ROUTE;
-    }
-
-    if (
-      isAuthenticated &&
-      onboardingStep === "buy_subscription" &&
       user?.isSubscribed === false
     ) {
       return isOnboardingRoute ? null : ONBOARDING_ROUTE;
