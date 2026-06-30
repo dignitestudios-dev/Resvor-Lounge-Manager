@@ -182,3 +182,27 @@ export const switchLounge = async (payload) => {
 
   return data;
 };
+
+export const submitCreateCampaign = async (payload) => {
+  const formData = new FormData();
+  formData.append("channel", payload.channel || "email");
+  formData.append("additionalInfo", payload.additionalInfo || "");
+
+  if (payload.recipients && Array.isArray(payload.recipients)) {
+    payload.recipients.forEach((email, index) => {
+      formData.append(`recipients[${index}]`, email);
+    });
+  }
+
+  if (payload.image) {
+    formData.append("image", payload.image);
+  }
+
+  const { data } = await axios.post("/campaigns", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return data;
+};
+
