@@ -30,6 +30,7 @@ const instance = axios.create({
 instance.interceptors.request.use(async (request) => {
   // Internet check
   if (!navigator.onLine) {
+    console.log("Network Error")
     return Promise.reject({
       code: "NO_INTERNET",
       message: "No internet connection",
