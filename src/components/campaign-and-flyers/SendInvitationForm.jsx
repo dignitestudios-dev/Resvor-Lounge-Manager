@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { X, Plus, Loader2 } from "lucide-react";
+import { X, Plus, Loader2, Check } from "lucide-react";
 import { useGetGuestbook } from "@/lib/hooks/queries/useGuestbook";
 import { useCreateCampaign } from "@/lib/hooks/mutations/CampaignMutations";
 import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
@@ -19,9 +19,10 @@ const SendInvitationForm = ({ isOpen, onOpenChange, onSendInvitation, image, add
   const [selectedGuests, setSelectedGuests] = useState([]);
   const [customEmail, setCustomEmail] = useState("");
 
-  // Fetch guests from guestbook API
+  // Fetch all guests from guestbook API (high limit to load all)
   const { data: guestbookData, isLoading: isGuestsLoading } = useGetGuestbook({
     page: 1,
+    limit: 100,
   });
   const guests = guestbookData?.data || [];
 
@@ -47,14 +48,31 @@ const SendInvitationForm = ({ isOpen, onOpenChange, onSendInvitation, image, add
 
   const addEmail = () => {
     const email = customEmail.trim();
-    if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      if (!selectedGuests.includes(email)) {
-        setSelectedGuests([...selectedGuests, email]);
-      }
-      setCustomEmail("");
-    } else {
-      ErrorToast("Please enter a valid email address");
+
+    // Rule 1: no leading space (pre-trim we check original value)
+    if (customEmail && customEmail[0] === " ") {
+      ErrorToast("Email cannot start with a space.");
+      return;
     }
+
+    // Rule 2: no internal or trailing spaces
+    if (!email || /\s/.test(email)) {
+      ErrorToast("Email cannot contain spaces.");
+      return;
+    }
+
+    // Rule 3: strict email format (same regex as userDetailsSchema)
+    const emailRegex =
+      /^(?!.*\.\.)(?!.*\.$)[A-Za-z0-9][A-Za-z0-9._+-]*@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      ErrorToast("Invalid email format.");
+      return;
+    }
+
+    if (!selectedGuests.includes(email)) {
+      setSelectedGuests([...selectedGuests, email]);
+    }
+    setCustomEmail("");
   };
 
   const handleSend = async () => {
@@ -155,26 +173,43 @@ const SendInvitationForm = ({ isOpen, onOpenChange, onSendInvitation, image, add
                       <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
                     </div>
                   ) : guests && guests.length > 0 ? (
-                    <div className="space-y-3">
-                      {guests.map((guest) => (
-                        <div
-                          key={guest._id}
-                          onClick={() => handleGuestSelect(guest.email)}
-                          className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition"
-                        >
-                          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-lg flex-shrink-0">
-                            👤
+                    <div className="space-y-2">
+                      {guests.map((guest) => {
+                        const isSelected = selectedGuests.includes(guest.email);
+                        return (
+                          <div
+                            key={guest._id}
+                            onClick={() => handleGuestSelect(guest.email)}
+                            className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-all ${
+                              isSelected
+                                ? "bg-primary/8 border border-primary/20"
+                                : "hover:bg-gray-50 border border-transparent"
+                            }`}
+                          >
+                            {/* Avatar */}
+                            <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-base flex-shrink-0">
+                              👤
+                            </div>
+
+                            {/* Name + Email */}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900 truncate">
+                                {guest.fullName}
+                              </p>
+                              <p className="text-xs text-gray-500 truncate">
+                                {guest.email}
+                              </p>
+                            </div>
+
+                            {/* Checkmark when selected */}
+                            {isSelected && (
+                              <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                                <Check className="w-3 h-3 text-white" />
+                              </div>
+                            )}
                           </div>
-                          <div className="flex-1">
-                            <p className="text-sm font-medium text-gray-900">
-                              {guest.fullName}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {guest.email}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
                     <p className="text-sm text-gray-500 text-center py-8">

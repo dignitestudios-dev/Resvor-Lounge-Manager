@@ -35,6 +35,9 @@ const CampaignAndFlyersDetails = () => {
   const [city, setCity] = useState("");
 
   const [editorContent, setEditorContent] = useState("");
+
+  // Show glass overlay only when user has entered any data
+  const hasAnyData = !!(eventTitle || eventDate || eventStartTime || eventEndTime || address || city);
   const [selectedTemplate, setSelectedTemplate] = useState({
     id: 1,
     image: "/images/flyer.png",
@@ -361,60 +364,68 @@ const CampaignAndFlyersDetails = () => {
                     className="w-full h-full object-cover"
                   />
 
-                  {/* Full-coverage glass-black overlay — exactly like the reference image */}
-                  <div
-                    className="absolute inset-0 flex flex-col"
-                    style={{ background: "rgba(10, 8, 6, 0.82)" }}
-                  >
-                    {/* Large centered title — upper-center area */}
-                    <div className="flex-1 flex items-center justify-center px-6 pt-6 pb-2">
-                      <h2
-                        className="text-white text-center"
-                        style={{
-                          fontFamily: "Georgia, 'Times New Roman', serif",
-                          fontSize: "clamp(16px, 4vw, 26px)",
-                          fontWeight: "400",
-                          lineHeight: "1.5",
-                          textShadow: "0 1px 4px rgba(0,0,0,0.6)",
-                        }}
-                      >
-                        {eventTitle ||
-                          "Showcase weekly events including brunches, karaoke, DJs, ladies nights, etc."}
-                      </h2>
-                    </div>
+                  {hasAnyData && (
+                    <>
+                      {/* Darkening gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-black/0 to-black/75 pointer-events-none" />
 
-                    {/* Thin divider */}
-                    <div className="mx-6 h-px bg-white/10" />
+                      {/* Glass content panel — centered on image */}
+                      <div className="absolute left-4 right-4 top-1/2 -translate-y-1/2 bg-black/50 backdrop-blur-sm rounded-2xl border border-white/10 px-5 py-5 flex flex-col items-center shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
 
-                    {/* Date / Time / Location — left-aligned block, bottom area */}
-                    <div className="px-7 py-5 flex flex-col gap-2">
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-white/50 shrink-0 text-[11px] min-w-[64px]">Date:</span>
-                        <span className="text-white text-[11px]">
-                          {eventDate
-                            ? (() => {
-                                const d = new Date(eventDate);
-                                return `${String(d.getDate()).padStart(2,"0")}-${d.getMonth()+1}-${d.getFullYear()}`;
-                              })()
-                            : "00-2-2026"}
-                        </span>
+                        {/* Gold top accent bar */}
+                        <div className="w-10 h-[3px] rounded-full bg-gradient-to-r from-[#c9a84c] via-[#f0d080] to-[#c9a84c] mb-4" />
+
+                        {/* Event Title */}
+                        <h2
+                          className="text-white font-bold leading-snug text-center mb-4 tracking-wide break-words drop-shadow-lg w-full"
+                          style={{ fontSize: eventTitle && eventTitle.length > 40 ? "13px" : "15px" }}
+                        >
+                          {eventTitle ||
+                            "Event Title"}
+                        </h2>
+
+                        {/* Thin divider */}
+                        <div className="w-full h-px bg-white/20 mb-4" />
+
+                        {/* Details rows */}
+                        <div className="flex flex-col gap-2 w-full">
+                          {/* Date */}
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] text-white/60 font-semibold min-w-[56px]">Date:</span>
+                            <span className="text-[11px] text-white/90">
+                              {eventDate
+                                ? (() => {
+                                    const d = new Date(eventDate);
+                                    return `${String(d.getDate()).padStart(2, "0")}-${d.getMonth() + 1}-${d.getFullYear()}`;
+                                  })()
+                                : "—"}
+                            </span>
+                          </div>
+
+                          {/* Time */}
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] text-white/60 font-semibold min-w-[56px]">Time:</span>
+                            <span className="text-[11px] text-white/90">
+                              {eventStartTime
+                                ? `${eventStartTime}${eventEndTime ? ` - ${eventEndTime}` : ""}`
+                                : "—"}
+                            </span>
+                          </div>
+
+                          {/* Location */}
+                          <div className="flex items-start gap-2">
+                            <span className="text-[11px] text-white/60 font-semibold min-w-[56px] shrink-0">Location:</span>
+                            <span className="text-[11px] text-white/90 leading-snug break-words">
+                              {address ? `${address}${city ? `, ${city}` : ""}` : "—"}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Gold bottom accent bar */}
+                        <div className="w-10 h-[3px] rounded-full bg-gradient-to-r from-[#c9a84c] via-[#f0d080] to-[#c9a84c] mt-4" />
                       </div>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-white/50 shrink-0 text-[11px] min-w-[64px]">Time:</span>
-                        <span className="text-white text-[11px]">
-                          {eventStartTime
-                            ? `${eventStartTime}${eventEndTime ? ` - ${eventEndTime}` : ""}`
-                            : "00:00 am"}
-                        </span>
-                      </div>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-white/50 shrink-0 text-[11px] min-w-[64px]">Location:</span>
-                        <span className="text-white text-[11px] truncate max-w-[160px]">
-                          {address ? `${address}${city ? `, ${city}` : ""}` : "My house"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                    </>
+                  )}
                 </div>
               </div>
 
