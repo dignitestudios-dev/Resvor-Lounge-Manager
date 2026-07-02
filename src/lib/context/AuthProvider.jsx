@@ -107,6 +107,12 @@ export const AuthProvider = ({ children }) => {
     ) {
       refetch();
     }
+    if (
+      pathname.startsWith("/dashboard") &&
+      (sessionType === "access_token" || user?.isSubscribed === false)
+    ) {
+      refetch();
+    }
   }, [pathname, sessionType, user?.isSubscribed, refetch]);
 
   // Resolved once the FIRST load settles (success or 401).
