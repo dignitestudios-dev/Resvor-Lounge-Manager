@@ -9,8 +9,8 @@ import Cookies from "js-cookie";
 //     ? "/api" // Use Next.js rewrites proxy in development
 //     : "https://api-dev.resvor.com"; // Use direct URL in production
 
-// export const baseUrl = "https://api-staging.resvor.com";
-export const baseUrl = "https://api-dev.resvor.com";
+export const baseUrl = "https://api-staging.resvor.com";
+// export const baseUrl = "https://api-dev.resvor.com";
 
 async function getDeviceFingerprint() {
   const fp = await FingerprintJS.load();
@@ -67,8 +67,8 @@ instance.interceptors.request.use(async (request) => {
     ...(isFormData
       ? {}
       : {
-        "Content-Type": "application/json",
-      }),
+          "Content-Type": "application/json",
+        }),
     devicemodel: fingerprint,
     deviceuniqueid: fingerprint,
   };
