@@ -439,16 +439,6 @@ const CampaignAndFlyersDetails = () => {
             </div>
           </div>
         </div>
-        <div>
-          <h3 className="section-heading text-2xl font-bold">
-            Additional Information
-          </h3>
-
-          <p className="text-[#333333]">
-            Provide additional details about your event. The message will appear
-            next to your invitation.
-          </p>
-        </div>
         <RichTextEditor
           initialContent="<p>Start editing here...</p>"
           onChange={setEditorContent}

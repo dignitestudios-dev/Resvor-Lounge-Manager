@@ -183,6 +183,11 @@ export const switchLounge = async (payload) => {
   return data;
 };
 
+export const submitWalletTopup = async (payload) => {
+  const { data } = await axios.post("/wallet/topup/intent", payload);
+  return data;
+};
+
 export const submitCreateCampaign = async (payload) => {
   const formData = new FormData();
   formData.append("channel", payload.channel || "email");
@@ -206,3 +211,17 @@ export const submitCreateCampaign = async (payload) => {
   return data;
 };
 
+export const retryCampaign = async (campaignId) => {
+  const { data } = await axios.post(`/campaigns/${campaignId}/retry`);
+  return data;
+};
+
+export const getCampaigns = async () => {
+  const { data } = await axios.get("/campaigns");
+  return data;
+};
+
+export const getCampaignById = async (campaignId) => {
+  const { data } = await axios.get(`/campaigns/${campaignId}`);
+  return data;
+};

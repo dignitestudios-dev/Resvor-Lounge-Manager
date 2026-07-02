@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import CancelSubscriptionModal from "@/components/subscription/CancelSubscriptionModal";
+import Wallet from "@/components/settings/Wallet";
 import {
   useGetSubscriptionPlans,
   useGetMySubscription,
@@ -170,10 +171,21 @@ const SubscriptionPlans = () => {
             >
               Plan
             </button>
+            <button
+              onClick={() => setTab("wallet")}
+              className={`py-4 cursor-pointer ${tab === "wallet"
+                ? "border-b-2 border-gray-800 font-semibold"
+                : "text-gray-500"
+                }`}
+            >
+              Wallet
+            </button>
           </nav>
         </div>
 
-        {tab === "billing" ? (
+        {tab === "wallet" ? (
+          <Wallet />
+        ) : tab === "billing" ? (
           <div className="mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div className="bg-white rounded-lg border p-6">
