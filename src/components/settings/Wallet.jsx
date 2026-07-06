@@ -139,6 +139,7 @@ const StripeCardForm = ({ onSubmitCard, isValidatingCard }) => {
 /* ─── TopUp Modal ──────────────────────────────────── */
 const TopUpModalContent = ({ onClose }) => {
   const queryClient = useQueryClient();
+  const stripe = useStripe();
   const { mutate: topup, isPending } = useWalletTopup();
 
   // steps: "card" | "amount"
@@ -148,12 +149,15 @@ const TopUpModalContent = ({ onClose }) => {
   const [amountDollars, setAmountDollars] = useState("");
   const [paymentMethodId, setPaymentMethodId] = useState("");
   const [isValidatingCard, setIsValidatingCard] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
+  const isLoading = isPending || isProcessingPayment;
 
   // Step 1: Handle Stripe Payment Method Creation
-  const handleCardSubmit = async (stripe, cardElement, cardName) => {
+  const handleCardSubmit = async (stripeInstance, cardElement, cardName) => {
     setIsValidatingCard(true);
     try {
-      const { paymentMethod, error } = await stripe.createPaymentMethod({
+      const { paymentMethod, error } = await stripeInstance.createPaymentMethod({
         type: "card",
         card: cardElement,
         billing_details: {
@@ -189,14 +193,51 @@ const TopUpModalContent = ({ onClose }) => {
     // Convert dollars → cents for the API
     const amountInCents = Math.round(dollars * 100);
 
+    if (amountInCents < 500) {
+      ErrorToast("Minimum top-up is $5.00.");
+      return;
+    }
+
     topup(
       { amount: amountInCents, paymentMethodId },
       {
-        onSuccess: () => {
-          SuccessToast("Wallet topped up successfully!");
-          queryClient.invalidateQueries({ queryKey: ["wallet-me"] });
-          queryClient.invalidateQueries({ queryKey: ["wallet-transactions"] });
-          onClose();
+        onSuccess: async (response) => {
+          console.log("🚀 ~ handleAmountSubmit ~ response:", response);
+          const { clientSecret, status } = response?.data || {};
+
+          if (clientSecret && status !== "succeeded") {
+            setIsProcessingPayment(true);
+            try {
+              if (!stripe) {
+                ErrorToast("Stripe has not loaded yet. Please try again.");
+                setIsProcessingPayment(false);
+                return;
+              }
+
+              const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret);
+
+              if (error) {
+                ErrorToast(error.message || "Payment authentication failed.");
+              } else if (paymentIntent && paymentIntent.status === "succeeded") {
+                SuccessToast("Wallet topped up successfully!");
+                queryClient.invalidateQueries({ queryKey: ["wallet-me"] });
+                queryClient.invalidateQueries({ queryKey: ["wallet-transactions"] });
+                onClose();
+              } else {
+                ErrorToast(`Payment verification status: ${paymentIntent?.status}`);
+              }
+            } catch (err) {
+              console.error("3DS Confirmation Error:", err);
+              ErrorToast("An error occurred during payment confirmation.");
+            } finally {
+              setIsProcessingPayment(false);
+            }
+          } else {
+            SuccessToast("Wallet topped up successfully!");
+            queryClient.invalidateQueries({ queryKey: ["wallet-me"] });
+            queryClient.invalidateQueries({ queryKey: ["wallet-transactions"] });
+            onClose();
+          }
         },
         onError: (err) => {
           const msg =
@@ -246,17 +287,22 @@ const TopUpModalContent = ({ onClose }) => {
                   </span>
                   <input
                     type="number"
-                    min="1"
+                    min="5"
                     step="0.01"
-                    placeholder="0.00"
+                    placeholder="5.00"
                     value={amountDollars}
                     onChange={(e) => setAmountDollars(e.target.value)}
                     className="w-full pl-7 pr-4 py-2.5 text-sm rounded-[12px] bg-transparent ring-1 ring-[#BEBEBE] focus:ring-2 focus:ring-gray-200 focus:outline-none placeholder:text-[#737373] placeholder:font-light"
-                    disabled={isPending}
+                    disabled={isLoading}
                     required
                   />
                 </div>
-                {amountDollars && parseFloat(amountDollars) > 0 && (
+                {amountDollars && parseFloat(amountDollars) > 0 && parseFloat(amountDollars) < 5 && (
+                  <p className="text-xs text-red-500 mt-1">
+                    Minimum top-up is $5.00.
+                  </p>
+                )}
+                {amountDollars && parseFloat(amountDollars) >= 5 && (
                   <p className="text-xs text-gray-400 mt-1">
                     = {Math.round(parseFloat(amountDollars) * 100).toLocaleString()} cents sent to API
                   </p>
@@ -267,17 +313,17 @@ const TopUpModalContent = ({ onClose }) => {
                 <button
                   type="button"
                   onClick={() => setStep("card")}
-                  disabled={isPending}
+                  disabled={isLoading}
                   className="w-full py-2.5 bg-[#21293514] text-[13px] text-black rounded-[12px] font-bold"
                 >
                   Back
                 </button>
                 <button
                   type="submit"
-                  disabled={isPending || !amountDollars}
+                  disabled={isLoading || !amountDollars}
                   className="bg-gradient-to-l from-[#012C57] to-[#061523] text-white text-[13px] font-bold px-4 py-3 rounded-[12px] disabled:opacity-60 flex justify-center items-center gap-2"
                 >
-                  {isPending ? (
+                  {isLoading ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                       Processing...
