@@ -126,8 +126,8 @@ export default function LoungeModal({
                     key={lounge._id}
                     onClick={() => setSelectedLoungeId(lounge._id)}
                     className={`cursor-pointer rounded-2xl bg-[#FDFDFF] p-4 flex flex-col items-center text-center transition-all border-2 ${isSelected
-                        ? "border-[#010067] ring-1 ring-[#010067]"
-                        : "border-[#CACACA] hover:border-slate-200"
+                      ? "border-[#010067] ring-1 ring-[#010067]"
+                      : "border-[#CACACA] hover:border-slate-200"
                       }`}
                   >
                     {/* Lounge Logo (Circular Image Frame) */}
@@ -199,7 +199,7 @@ export default function LoungeModal({
             disabled={switchLoungeMutation.isPending}
             className="w-full max-w-[400px] bg-[#000040] hover:bg-[#000060] disabled:bg-gray-400 disabled:cursor-not-allowed text-white text-sm font-medium py-3 rounded-xl shadow-md transition-colors tracking-wide"
           >
-            {switchLoungeMutation.isPending ? "Switching..." : "Submit"}
+            {switchLoungeMutation.isPending ? "Switching..." : "Select"}
           </button>
         </div>
       </div>

@@ -18,6 +18,8 @@ import { Label } from "../ui/label";
 
 const AddFlyerForm = ({ isOpen, onOpenChange }) => {
   const [flyerImage, setFlyerImage] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+  const [description, setDescription] = useState("");
 
   // Modal triggers
   const [openInvForm, setOpenInvForm] = useState(false);
@@ -26,6 +28,7 @@ const AddFlyerForm = ({ isOpen, onOpenChange }) => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file && file.type.startsWith("image/")) {
+      setImageFile(file);
       setFlyerImage(URL.createObjectURL(file));
     } else {
       alert("Please upload a valid image file.");
@@ -34,6 +37,10 @@ const AddFlyerForm = ({ isOpen, onOpenChange }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!imageFile) {
+      alert("Please upload a flyer image.");
+      return;
+    }
     console.log("Flyer Added");
     onOpenChange(false);
     setOpenInvForm(true);
@@ -96,6 +103,8 @@ const AddFlyerForm = ({ isOpen, onOpenChange }) => {
                   </Label>
                   <Textarea
                     name="description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
                     placeholder="Describe your event"
                     className="min-h-[100px]"
                   />
@@ -113,6 +122,8 @@ const AddFlyerForm = ({ isOpen, onOpenChange }) => {
         isOpen={openInvForm}
         onOpenChange={setOpenInvForm}
         onSendInvitation={handleSendInvitation}
+        image={imageFile}
+        additionalInfo={description}
       />
 
       {/* Cofirm Popup */}

@@ -46,7 +46,7 @@ const NotificationPopup = () => {
 
   return (
     <Popover>
-      <PopoverTrigger>
+      <PopoverTrigger asChild>
         <Button className="h-12! w-12! bg-[#d9d9e0] hover:bg-[#ababb1] rounded-lg p-2 relative">
           <div className="w-5 h-5 rounded-full bg-gradient text-white absolute -top-2 -right-2 flex justify-center items-center text-xs font-semibold">
             {notifications.filter((n) => n.unread).length}

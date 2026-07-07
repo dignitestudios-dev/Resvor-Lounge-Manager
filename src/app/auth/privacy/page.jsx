@@ -1,10 +1,23 @@
 "use client";
 import React from "react";
+import { useRouter } from "next/navigation";
+import { BsFillArrowLeftCircleFill } from "react-icons/bs";
 
 const PrivacyPolicy = () => {
+  const router = useRouter();
+
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 py-8 md:py-12">
-      <div className="bg-white rounded-lg p-6 md:p-12 backdrop-blur-sm">
+    <div className="py-8 px-16">
+      {/* Back Button */}
+      <button
+        onClick={() => router.back()}
+        className="mb-4 flex items-center gap-2 text-white font-medium hover:text-gray-300 transition"
+      >
+        <BsFillArrowLeftCircleFill size={18} />
+        Back
+      </button>
+
+      <div className="bg-white p-6 rounded-2xl mb-4">
         <h1 className="text-3xl md:text-4xl font-bold  mb-4">
           Privacy Policy
         </h1>

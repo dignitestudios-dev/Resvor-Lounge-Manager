@@ -183,6 +183,48 @@ export const switchLounge = async (payload) => {
   return data;
 };
 
+export const submitWalletTopup = async (payload) => {
+  const { data } = await axios.post("/wallet/topup/intent", payload);
+  return data;
+};
+
+export const submitCreateCampaign = async (payload) => {
+  const formData = new FormData();
+  formData.append("channel", payload.channel || "email");
+  formData.append("additionalInfo", payload.additionalInfo || "");
+
+  if (payload.recipients && Array.isArray(payload.recipients)) {
+    payload.recipients.forEach((email, index) => {
+      formData.append(`recipients[${index}]`, email);
+    });
+  }
+
+  if (payload.image) {
+    formData.append("image", payload.image);
+  }
+
+  const { data } = await axios.post("/campaigns", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return data;
+};
+
+export const retryCampaign = async (campaignId) => {
+  const { data } = await axios.post(`/campaigns/${campaignId}/retry`);
+  return data;
+};
+
+export const getCampaigns = async () => {
+  const { data } = await axios.get("/campaigns");
+  return data;
+};
+
+export const getCampaignById = async (campaignId) => {
+  const { data } = await axios.get(`/campaigns/${campaignId}`);
+  return data;
+};
 
 export const submitAddService = async (payload) => {
   const { data } = await axios.post("/lounges/services", payload, {
