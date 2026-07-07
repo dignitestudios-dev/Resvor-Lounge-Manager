@@ -1,5 +1,8 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import * as Yup from "yup";
+// Adjust this path to wherever your schema file actually lives
+import { serviceSchema } from "@/lib/schema/services/servicesSchema"; 
 import {
   Dialog,
   DialogContent,
@@ -15,6 +18,16 @@ import { Textarea } from "../ui/textarea";
 import { Upload } from "lucide-react";
 import ConfirmPopup from "./ConfirmPopup";
 import Edit2 from "../icons/Edit2";
+import {
+  useAddServiceMutation,
+  useUpdateServiceMutation,
+} from "@/lib/hooks/mutations/ServiceMutations";
+import { useQueryClient } from "@tanstack/react-query";
+
+const BASE_IMAGE_URL =
+  process.env.NEXT_PUBLIC_API_URL
+    ? `${process.env.NEXT_PUBLIC_API_URL}/uploads`
+    : "/uploads";
 
 const AddServiceForm = ({
   isOpen,
@@ -23,30 +36,66 @@ const AddServiceForm = ({
   isEdit = false,
   showTrigger = true,
 }) => {
-  const [serviceImage, setServiceImage] = useState(null);
+  const [serviceImages, setServiceImages] = useState([]);
+  const [deletedImageIds, setDeletedImageIds] = useState([]);
+  const fileRef = useRef(null);
   const [confirmPopup, setConfirmPopup] = useState(false);
   const [formData, setFormData] = useState({
     serviceName: "",
     price: "",
     description: "",
   });
+  
+  // Track frontend validation errors
+  const [errors, setErrors] = useState({});
 
-  // Pre-populate form data when editing
+  const { mutate: addService, isPending: adding } = useAddServiceMutation();
+  const { mutate: updateService, isPending: updating } = useUpdateServiceMutation();
+  const isPending = adding || updating;
+  const queryClient = useQueryClient();
+
+  const normalizeImages = (svc) => {
+    if (!svc || !Array.isArray(svc.images)) return [];
+
+    return svc.images.map((img, i) => {
+      const resolvedUrl =
+        img.url ||
+        img.imageUrl ||
+        img.secure_url ||
+        img.location ||
+        img.path ||
+        img.src ||
+        img.key ||
+        (img.filename ? `${BASE_IMAGE_URL}/${img.filename}` : "");
+
+      return {
+        id: img._id || img.id || `existing-${i}`,
+        url: resolvedUrl,
+        name: img.filename || img.name || `image-${i}`,
+        file: null,
+        isExisting: true,
+      };
+    });
+  };
+
   useEffect(() => {
+    setErrors({});
     if (isEdit && data) {
       setFormData({
-        serviceName: data.serviceName || "",
-        price: data.price || "",
+        serviceName: data.name || data.serviceName || "",
+        price: data.price ?? "",
         description: data.description || "",
       });
-      setServiceImage(data.serviceImage || null);
+      setServiceImages(normalizeImages(data));
+      setDeletedImageIds([]);
     } else {
       setFormData({
         serviceName: "",
         price: "",
         description: "",
       });
-      setServiceImage(null);
+      setServiceImages([]);
+      setDeletedImageIds([]);
     }
   }, [isEdit, data, isOpen]);
 
@@ -56,23 +105,163 @@ const AddServiceForm = ({
       ...prev,
       [name]: value,
     }));
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file && file.type.startsWith("image/")) {
-      setServiceImage(URL.createObjectURL(file));
-    } else {
-      alert("Please upload a valid image file.");
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleImageChange = async (e) => {
+    const selectedFiles = Array.from(e.target.files || []);
+    if (!selectedFiles.length) return;
+
+    const remainingSlots = 5 - serviceImages.length;
+    if (remainingSlots <= 0) {
+      e.target.value = "";
+      return;
+    }
+
+    const filesToAdd = selectedFiles.slice(0, remainingSlots);
+
+    const readFile = (file) =>
+      new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          resolve({
+            id: `${Date.now()}-${Math.random()}`,
+            file,
+            url: event.target.result,
+            name: file.name,
+            isExisting: false,
+          });
+        };
+        reader.readAsDataURL(file);
+      });
+
+    const newImages = await Promise.all(filesToAdd.map(readFile));
+    setServiceImages((prev) => [...prev, ...newImages]);
+    
+    if (errors.serviceImages) {
+      setErrors((prev) => ({ ...prev, serviceImages: "" }));
+    }
+
+    e.target.value = "";
+  };
+
+  const deleteImage = (index) => {
+    setServiceImages((prev) => {
+      const target = prev[index];
+      if (target?.isExisting && target.file === null) {
+        setDeletedImageIds((ids) =>
+          ids.includes(target.id) ? ids : [...ids, target.id]
+        );
+      }
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const replaceImage = (index, e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setServiceImages((prev) => {
+        const updated = [...prev];
+        const target = updated[index];
+
+        if (target?.isExisting) {
+          setDeletedImageIds((ids) =>
+            ids.includes(target.id) ? ids : [...ids, target.id]
+          );
+        }
+
+        updated[index] = {
+          ...target,
+          file,
+          url: event.target.result,
+          name: file.name,
+          isExisting: false,
+        };
+        return updated;
+      });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form Data: ", formData);
-    console.log("Is Edit: ", isEdit);
-    onOpenChange(false);
-    setConfirmPopup(true);
+
+    // Prepare data block matching the structure expected by your external schema
+    const validationData = {
+      serviceName: formData.serviceName,
+      price: formData.price === "" ? undefined : Number(formData.price),
+      description: formData.description,
+      // Pass only the raw File objects for validation
+      serviceImages: serviceImages.map((img) => img.file).filter(Boolean),
+    };
+
+    try {
+      // Execute the imported serviceSchema with your isEdit flag
+      await serviceSchema(isEdit).validate(validationData, { abortEarly: false });
+      setErrors({}); 
+    } catch (err) {
+      if (err instanceof Yup.ValidationError) {
+        const validationErrors = {};
+        err.inner.forEach((error) => {
+          if (error.path) {
+            validationErrors[error.path] = error.message;
+          }
+        });
+        setErrors(validationErrors);
+      }
+      return; // Stop execution if validation fails
+    }
+
+    const payload = new FormData();
+    payload.append("name", formData.serviceName);
+    payload.append("price", formData.price);
+    payload.append("description", formData.description);
+
+    serviceImages.forEach((img) => {
+      if (img.file) {
+        payload.append("serviceImages", img.file);
+      }
+    });
+
+    if (isEdit) {
+      deletedImageIds.forEach((id) => {
+        payload.append("deleteImages", id);
+      });
+    }
+
+    const resetForm = () => {
+      setFormData({
+        serviceName: "",
+        price: "",
+        description: "",
+      });
+      setServiceImages([]);
+      setDeletedImageIds([]);
+      setErrors({});
+    };
+
+    const onSuccess = (res) => {
+      queryClient.invalidateQueries(["services"]);
+      onOpenChange(false);
+      setConfirmPopup(true);
+      resetForm();
+    };
+
+    const onError = (err) => {
+      console.error(err);
+    };
+
+    if (isEdit && data?._id) {
+      updateService({ serviceId: data._id, payload }, { onSuccess, onError });
+    } else {
+      addService(payload, { onSuccess, onError });
+    }
   };
 
   return (
@@ -106,10 +295,13 @@ const AddServiceForm = ({
                   <Input
                     name="serviceName"
                     placeholder="Enter service name"
-                    className="h-12"
+                    className={`h-12 ${errors.serviceName ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                     value={formData.serviceName}
                     onChange={handleInputChange}
                   />
+                  {errors.serviceName && (
+                    <span className="text-xs text-red-500">{errors.serviceName}</span>
+                  )}
                 </div>
 
                 {/* Price */}
@@ -123,10 +315,13 @@ const AddServiceForm = ({
                     min="0"
                     step="0.01"
                     placeholder="$"
-                    className="h-12"
+                    className={`h-12 ${errors.price ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                     value={formData.price}
                     onChange={handleInputChange}
                   />
+                  {errors.price && (
+                    <span className="text-xs text-red-500">{errors.price}</span>
+                  )}
                 </div>
 
                 {/* Description */}
@@ -137,50 +332,99 @@ const AddServiceForm = ({
                   <Textarea
                     name="description"
                     placeholder="Describe your service"
-                    className="min-h-[100px]"
+                    className={`min-h-[100px] ${errors.description ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                     value={formData.description}
                     onChange={handleInputChange}
                   />
+                  {errors.description && (
+                    <span className="text-xs text-red-500">{errors.description}</span>
+                  )}
                 </div>
 
                 {/* Image Upload */}
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-2">
                   <Label className="text-sm font-medium text-black">
                     Service Images{" "}
-                    <span className="text-gray-400 text-xs">(Optional)</span>
+                    <span className="text-gray-400 text-xs">
+                      (Optional - {serviceImages.length}/5)
+                    </span>
                   </Label>
 
-                  <label
-                    htmlFor="serviceImage"
-                    className="border-2 border-dashed rounded-xl flex flex-col items-center justify-center py-6 cursor-pointer hover:bg-gray-50 transition"
-                  >
-                    {serviceImage ? (
-                      <img
-                        src={serviceImage}
-                        alt="Service Preview"
-                        className="w-40 h-40 object-cover rounded-lg"
-                      />
-                    ) : (
-                      <>
-                        <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                        <span className="text-sm text-gray-600">
-                          Choose file to upload
-                        </span>
-                      </>
-                    )}
-                    <Input
-                      id="serviceImage"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleImageChange}
-                    />
-                  </label>
+                  {serviceImages.length > 0 && (
+                    <div className="flex flex-wrap gap-3">
+                      {serviceImages.map((img, index) => (
+                        <div key={img.id} className="relative">
+                          <img
+                            src={img.url}
+                            alt={img.name}
+                            className="w-20 h-20 rounded-lg object-cover border bg-gray-100"
+                            onError={(e) => {
+                              console.warn("Failed to load image. Object was:", img);
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = "/images/service.jpg";
+                            }}
+                          />
+
+                          <button
+                            type="button"
+                            onClick={() => deleteImage(index)}
+                            className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white text-sm hover:bg-red-600"
+                          >
+                            ×
+                          </button>
+
+                          <label className="absolute inset-0 rounded-lg bg-black/0 hover:bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 cursor-pointer transition">
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => replaceImage(index, e)}
+                            />
+                            <span className="text-white text-xs font-medium">
+                              Replace
+                            </span>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {serviceImages.length < 5 ? (
+                    <div
+                      onClick={() => fileRef.current?.click()}
+                      className={`border-2 border-dashed rounded-xl flex flex-col items-center justify-center py-6 cursor-pointer hover:bg-gray-50 transition ${errors.serviceImages ? "border-red-500" : ""}`}
+                    >
+                      <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                      <span className="text-sm text-gray-600">
+                        Choose file to upload
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="text-center text-red-500 text-sm">
+                      Maximum 5 images allowed
+                    </div>
+                  )}
+
+                  <Input
+                    ref={fileRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={handleImageChange}
+                  />
+                  {errors.serviceImages && (
+                    <span className="text-xs text-red-500 mt-1">{errors.serviceImages}</span>
+                  )}
                 </div>
 
-                {/* Save Button */}
-                <Button type="submit" className="w-full h-12 text-lg">
-                  {isEdit ? "Update" : "Save"}
+                 {/* Save Button */}
+                <Button
+                  type="submit"
+                  disabled={isPending}
+                  className="w-full h-12 text-lg"
+                >
+                  {isPending ? "Saving..." : isEdit ? "Update" : "Save"}
                 </Button>
               </form>
             </DialogDescription>

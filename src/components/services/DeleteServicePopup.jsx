@@ -8,7 +8,7 @@ import {
 import Delete2 from "../icons/Delete2";
 import { Button } from "../ui/button";
 
-const DeleteServicePopup = ({ isOpen, onOpenChange, onDelete }) => {
+const DeleteServicePopup = ({ isOpen, onOpenChange, onDelete,deleting }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent showCloseButton={false}>
@@ -35,12 +35,13 @@ const DeleteServicePopup = ({ isOpen, onOpenChange, onDelete }) => {
                 >
                   No
                 </Button>
-                <Button
-                  className={"flex-1 bg-red-400 hover:bg-red-500"}
-                  onClick={onDelete}
-                >
-                  Yes
-                </Button>
+               <Button
+  className="flex-1 bg-red-400 hover:bg-red-500"
+  onClick={onDelete}
+  disabled={deleting}
+>
+  {deleting ? "Deleting..." : "Yes"}
+</Button>
               </div>
             </div>
           </DialogDescription>
