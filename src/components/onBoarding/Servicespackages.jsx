@@ -13,12 +13,14 @@ const EditServiceModal = ({
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [images, setImages] = useState([]);
+  const [errors, setErrors] = useState({});
   const fileRef = useRef();
   useEffect(() => {
     setServiceName(initial?.serviceName || "");
     setPrice(initial?.price || "");
     setDescription(initial?.description || "");
     setImages(initial?.images || []);
+    setErrors({});
   }, [initial, isOpen]);
 
   const isDark = variant === "dark";
@@ -92,11 +94,28 @@ const EditServiceModal = ({
   };
 
   const handleSave = () => {
-    if (!serviceName.trim()) return;
+    const tempErrors = {};
+    if (!serviceName.trim()) {
+      tempErrors.serviceName = "Service name is required";
+    }
+
+    const numericPrice = parseFloat(price);
+    if (price === "" || price === undefined || price === null) {
+      tempErrors.price = "Price is required";
+    } else if (isNaN(numericPrice)) {
+      tempErrors.price = "Price must be a valid number";
+    } else if (numericPrice <= 1) {
+      tempErrors.price = "Price must be more than $1";
+    }
+
+    if (Object.keys(tempErrors).length > 0) {
+      setErrors(tempErrors);
+      return;
+    }
 
     onSave({
-      serviceName,
-      price,
+      serviceName: serviceName.trim(),
+      price: price.toString(),
       description,
       images,
     });
@@ -104,21 +123,23 @@ const EditServiceModal = ({
     onClose();
   };
 
-  const inputStyles = isDark
-    ? `
-      bg-white/10
-      text-white
-      border border-white/20
-      placeholder:text-gray-300
-      focus:border-white/40
-    `
-    : `
-      bg-white
-      text-gray-800
-      border border-gray-300
-      placeholder:text-gray-400
-      focus:border-[#012C57]
-    `;
+  const getInputStyles = (hasError) => {
+    if (isDark) {
+      return `
+        bg-white/10
+        text-white
+        border ${hasError ? "border-red-500 focus:border-red-500 focus-within:border-red-500" : "border-white/20 focus:border-white/40 focus-within:border-white/40"}
+        placeholder:text-gray-300
+      `;
+    } else {
+      return `
+        bg-white
+        text-gray-800
+        border ${hasError ? "border-red-500 focus:border-red-500 focus-within:border-red-500" : "border-gray-300 focus:border-[#012C57] focus-within:border-[#012C57]"}
+        placeholder:text-gray-400
+      `;
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm px-4">
@@ -159,10 +180,21 @@ const EditServiceModal = ({
           <input
             type="text"
             value={serviceName}
-            onChange={(e) => setServiceName(e.target.value)}
+            maxLength={80}
+            onChange={(e) => {
+              setServiceName(e.target.value);
+              if (errors.serviceName) {
+                setErrors((prev) => ({ ...prev, serviceName: "" }));
+              }
+            }}
             placeholder="Food and Drink Package"
-            className={`w-full rounded-xl px-4 py-2.5 text-[13px] outline-none transition-all ${inputStyles}`}
+            className={`w-full rounded-xl px-4 py-2.5 text-[13px] outline-none transition-all ${getInputStyles(
+              errors.serviceName
+            )}`}
           />
+          {errors.serviceName && (
+            <p className="text-red-500 text-[11px] mt-1">{errors.serviceName}</p>
+          )}
         </div>
 
         {/* Price */}
@@ -175,7 +207,9 @@ const EditServiceModal = ({
           </label>
 
           <div
-            className={`flex items-center rounded-xl px-4 py-2.5 transition-all ${inputStyles}`}
+            className={`flex items-center rounded-xl px-4 py-2.5 transition-all ${getInputStyles(
+              errors.price
+            )}`}
           >
             <span
               className={`text-[13px] mr-1 ${isDark ? "text-gray-300" : "text-gray-500"
@@ -187,14 +221,23 @@ const EditServiceModal = ({
             <input
               type="number"
               value={price}
-              onChange={(e) => setPrice(e.target.value)}
+              onChange={(e) => {
+                setPrice(e.target.value);
+                if (errors.price) {
+                  setErrors((prev) => ({ ...prev, price: "" }));
+                }
+              }}
               placeholder="0"
+              maxLength={5}
               className={`flex-1 text-[13px] outline-none bg-transparent ${isDark
                 ? "text-white placeholder:text-gray-300"
                 : "text-gray-800 placeholder:text-gray-400"
                 }`}
             />
           </div>
+          {errors.price && (
+            <p className="text-red-500 text-[11px] mt-1">{errors.price}</p>
+          )}
         </div>
 
         {/* Description */}
@@ -210,8 +253,11 @@ const EditServiceModal = ({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Describe your service"
+            maxLength={300}
             rows={4}
-            className={`w-full rounded-xl px-4 py-2.5 text-[13px] outline-none resize-none transition-all ${inputStyles}`}
+            className={`w-full rounded-xl px-4 py-2.5 text-[13px] outline-none resize-none transition-all ${getInputStyles(
+              false
+            )}`}
           />
         </div>
 
