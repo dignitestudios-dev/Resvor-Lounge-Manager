@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as Yup from "yup";
 // Adjust this path to wherever your schema file actually lives
-import { serviceSchema } from "@/lib/schema/services/servicesSchema"; 
+import { serviceSchema } from "@/lib/schema/services/servicesSchema";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +23,7 @@ import {
   useUpdateServiceMutation,
 } from "@/lib/hooks/mutations/ServiceMutations";
 import { useQueryClient } from "@tanstack/react-query";
+import { ErrorToast } from "../ui/toaster";
 
 const BASE_IMAGE_URL =
   process.env.NEXT_PUBLIC_API_URL
@@ -45,7 +46,7 @@ const AddServiceForm = ({
     price: "",
     description: "",
   });
-  
+
   // Track frontend validation errors
   const [errors, setErrors] = useState({});
 
@@ -139,7 +140,7 @@ const AddServiceForm = ({
 
     const newImages = await Promise.all(filesToAdd.map(readFile));
     setServiceImages((prev) => [...prev, ...newImages]);
-    
+
     if (errors.serviceImages) {
       setErrors((prev) => ({ ...prev, serviceImages: "" }));
     }
@@ -204,7 +205,7 @@ const AddServiceForm = ({
     try {
       // Execute the imported serviceSchema with your isEdit flag
       await serviceSchema(isEdit).validate(validationData, { abortEarly: false });
-      setErrors({}); 
+      setErrors({});
     } catch (err) {
       if (err instanceof Yup.ValidationError) {
         const validationErrors = {};
@@ -254,7 +255,8 @@ const AddServiceForm = ({
     };
 
     const onError = (err) => {
-      console.error(err);
+      console.log("🚀 ~ onError ~ err:", err)
+      ErrorToast(err.response.data.message);
     };
 
     if (isEdit && data?._id) {
@@ -418,7 +420,7 @@ const AddServiceForm = ({
                   )}
                 </div>
 
-                 {/* Save Button */}
+                {/* Save Button */}
                 <Button
                   type="submit"
                   disabled={isPending}

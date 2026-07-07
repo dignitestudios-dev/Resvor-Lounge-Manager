@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useRef, useEffect } from "react";
+import { ErrorToast } from "../ui/toaster";
 
 // ── Edit Service Modal ────────────────────────────────────────────────────────
 const EditServiceModal = ({
@@ -39,7 +40,23 @@ const EditServiceModal = ({
       return;
     }
 
-    const filesToAdd = selectedFiles.slice(0, remainingSlots);
+    const filesToAdd = [];
+    for (const file of selectedFiles.slice(0, remainingSlots)) {
+      if (!["image/jpeg", "image/png"].includes(file.type)) {
+        ErrorToast(`${file.name}: Only JPEG and PNG formats are allowed`);
+        continue;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        ErrorToast(`${file.name}: File size must not exceed 10MB`);
+        continue;
+      }
+      filesToAdd.push(file);
+    }
+
+    if (filesToAdd.length === 0) {
+      e.target.value = "";
+      return;
+    }
 
     const readFile = (file) =>
       new Promise((resolve) => {
@@ -71,6 +88,17 @@ const EditServiceModal = ({
     const file = e.target.files?.[0];
 
     if (!file) return;
+
+    if (!["image/jpeg", "image/png"].includes(file.type)) {
+      ErrorToast(`${file.name}: Only JPEG and PNG formats are allowed`);
+      e.target.value = "";
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      ErrorToast(`${file.name}: File size must not exceed 10MB`);
+      e.target.value = "";
+      return;
+    }
 
     const reader = new FileReader();
 
@@ -297,7 +325,7 @@ const EditServiceModal = ({
                   <label className="absolute inset-0 rounded-lg bg-black/0 hover:bg-black/30 flex items-center justify-center cursor-pointer transition-colors opacity-0 hover:opacity-100">
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/jpeg,image/png"
                       className="hidden"
                       onChange={(e) => replaceImage(i, e)}
                     />
@@ -341,7 +369,7 @@ const EditServiceModal = ({
           <input
             ref={fileRef}
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png"
             multiple
             className="hidden"
             onChange={handleFiles}

@@ -29,7 +29,7 @@ const nameValidation = Yup.string()
     (value) => !value || value.length > 0
   )
   .min(3, "Service name must be at least 3 characters")
-  .max(50, "Service name must not exceed 50 characters");
+  .max(100, "Service name must not exceed 100 characters");
 
 const descriptionValidation = Yup.string()
   .transform((value) => value?.trim())
