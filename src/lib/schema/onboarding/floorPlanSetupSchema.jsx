@@ -38,7 +38,10 @@ export const floorPlanSetupSchema = Yup.object({
       "Email cannot contain spaces.",
       (value) => (value ? value.trim() === value && !/\s/.test(value) : false),
     )
-    .matches(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/, "Invalid email format."),
+    .matches(
+      /^[A-Za-z0-9_+-]+(?:\.[A-Za-z0-9_+-]+)*@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/,
+      "Invalid email format.",
+    ),
 
   phone: Yup.string()
     .transform((value) => value.replace(/\D/g, ""))

@@ -1,6 +1,7 @@
 "use client";
 import { useParams } from "next/navigation";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { campaignAndFlyers } from "@/lib/constants";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -42,6 +43,20 @@ const CampaignAndFlyersDetails = () => {
     id: 1,
     image: "/images/flyer.png",
   });
+
+  useEffect(() => {
+    if (flyerId) {
+      const currentCampaign = campaignAndFlyers.find(
+        (c) => String(c.id) === String(flyerId)
+      );
+      if (currentCampaign) {
+        setSelectedTemplate({
+          id: currentCampaign.id,
+          image: currentCampaign.image,
+        });
+      }
+    }
+  }, [flyerId]);
 
   // Modal and generation states
   const [isGenerating, setIsGenerating] = useState(false);
@@ -119,13 +134,13 @@ const CampaignAndFlyersDetails = () => {
           // Centered vertically within the upper part of the card
           const titleText = eventTitle || "Showcase weekly events including brunches, karaoke, DJs, ladies nights, etc.";
           ctx.font = "italic 36px Georgia, serif"; // Serif-style font matching the user's picture
-          
+
           // Wrapping words helper
           const words = titleText.split(" ");
           let lines = [];
           let currentLine = "";
           const maxWidth = boxW - 80;
-          
+
           for (let i = 0; i < words.length; i++) {
             let testLine = currentLine + words[i] + " ";
             let metrics = ctx.measureText(testLine);
@@ -140,7 +155,7 @@ const CampaignAndFlyersDetails = () => {
 
           const lineHeight = 50;
           let yStart = boxY + (boxH * 0.35) - ((lines.length - 1) * lineHeight) / 2;
-          
+
           lines.forEach((line, index) => {
             ctx.fillText(line, canvas.width / 2, yStart + index * lineHeight);
           });
@@ -149,7 +164,7 @@ const CampaignAndFlyersDetails = () => {
           // Positioned at the bottom of the card
           ctx.textAlign = "left";
           ctx.font = "24px system-ui, -apple-system, sans-serif";
-          
+
           // Format date like '30-6-2026'
           let dateStr = "00-2-2026";
           if (eventDate) {
@@ -175,7 +190,7 @@ const CampaignAndFlyersDetails = () => {
           // Calculate details alignment starting X (centered block)
           // We find a reasonable offset from the center
           const detailsX = canvas.width / 2 - 130;
-          
+
           const yDate = boxY + boxH - 120;
           const yTime = boxY + boxH - 85;
           const yLoc = boxY + boxH - 50;
@@ -237,7 +252,7 @@ const CampaignAndFlyersDetails = () => {
 
   return (
     <div className="flex-1 flex flex-col">
-      <h1 className="section-heading">Campaign and Flyers</h1>
+      <h1 className="section-heading mt-4">Campaign and Flyers</h1>
       <div className="mt-10 flex-1 bg-white border rounded-2xl p-5 space-y-5">
         <div className="grid grid-cols-2 gap-10">
           <div className="space-y-5">
@@ -395,9 +410,9 @@ const CampaignAndFlyersDetails = () => {
                             <span className="text-[11px] text-white/90">
                               {eventDate
                                 ? (() => {
-                                    const d = new Date(eventDate);
-                                    return `${String(d.getDate()).padStart(2, "0")}-${d.getMonth() + 1}-${d.getFullYear()}`;
-                                  })()
+                                  const d = new Date(eventDate);
+                                  return `${String(d.getDate()).padStart(2, "0")}-${d.getMonth() + 1}-${d.getFullYear()}`;
+                                })()
                                 : "—"}
                             </span>
                           </div>
@@ -429,13 +444,13 @@ const CampaignAndFlyersDetails = () => {
                 </div>
               </div>
 
-              <div>
+              {/* <div>
                 <p className="my-3 font-semibold text-lg">
                   Select Card Template
                 </p>
 
-                <TemplateCarousel onSelectTemplate={setSelectedTemplate} />
-              </div>
+                <TemplateCarousel selectedId={selectedTemplate.id} onSelectTemplate={setSelectedTemplate} />
+              </div> */}
             </div>
           </div>
         </div>

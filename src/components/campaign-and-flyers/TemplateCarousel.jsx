@@ -7,9 +7,10 @@ import "swiper/css";
 import "swiper/css/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const TemplateCarousel = ({ onSelectTemplate }) => {
+const TemplateCarousel = ({ onSelectTemplate, selectedId: propSelectedId }) => {
   const swiperRef = useRef(null);
-  const [selectedId, setSelectedId] = useState(1);
+  const [localSelectedId, setLocalSelectedId] = useState(1);
+  const selectedId = propSelectedId !== undefined ? propSelectedId : localSelectedId;
 
   // Create 10 template items with alternating images
   const templates = Array.from({ length: 10 }, (_, index) => ({
@@ -30,7 +31,9 @@ const TemplateCarousel = ({ onSelectTemplate }) => {
   };
 
   const handleSelectTemplate = (template) => {
-    setSelectedId(template.id);
+    if (propSelectedId === undefined) {
+      setLocalSelectedId(template.id);
+    }
     onSelectTemplate(template);
   };
 

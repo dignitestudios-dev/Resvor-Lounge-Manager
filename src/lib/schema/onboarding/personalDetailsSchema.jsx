@@ -64,7 +64,7 @@ export const personalDetailsSchema = Yup.object({
       (value) => (value ? value.trim() === value && !/\s/.test(value) : false),
     )
     .matches(
-      /^(?!.*\.\.)(?!.*\.$)[A-Za-z0-9][A-Za-z0-9._+-]*@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/,
+      /^[A-Za-z0-9_+-]+(?:\.[A-Za-z0-9_+-]+)*@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/,
       "Invalid email format.",
     ),
 
@@ -127,4 +127,8 @@ export const personalDetailsSchema = Yup.object({
   role: Yup.string()
     .required("Role is required")
     .oneOf(["lounge_manager", "promoter"], "Invalid role selection"),
+
+  loungeTags: Yup.array()
+    .min(1, "At least one tag is required")
+    .required("Lounge tags are required"),
 });

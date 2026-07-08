@@ -493,7 +493,10 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
                     variant="light"
                     label="Lounge Tags"
                     value={v1.loungeTags}
-                    onChange={(tags) => setFieldValue1("loungeTags", tags)}
+                    onChange={(tags) => {
+                      setFieldValue1("loungeTags", tags);
+                      step1Formik.setFieldTouched("loungeTags", true, true);
+                    }}
                     placeholder="Type tag and press Enter..."
                     error={errors1?.loungeTags}
                     touched={touched1?.loungeTags}

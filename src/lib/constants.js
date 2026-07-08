@@ -151,3 +151,56 @@ export const eventTypeOptions = [
   "Closed",
   "Other",
 ];
+
+export const campaignAndFlyers = [
+  {
+    id: 1,
+    title: "Spring Sale",
+    image: "/images/flyerImage.jpg",
+  },
+  {
+    id: 2,
+    title: "Winter Clearance",
+    image: "/images/flyerImage.jpg",
+  },
+  {
+    id: 3,
+    title: "Summer Festival",
+    image: "/images/flyerImage.jpg",
+  },
+  {
+    id: 4,
+    title: "Fall Harvest",
+    image: "/images/flyerImage.jpg",
+  },
+  {
+    id: 5,
+    title: "Spring Sale",
+    image: "/images/flyerImage.jpg",
+  },
+  {
+    id: 6,
+    title: "Winter Clearance",
+    image: "/images/flyerImage.jpg",
+  },
+  {
+    id: 7,
+    title: "Summer Festival",
+    image: "/images/flyerImage.jpg",
+  },
+  {
+    id: 8,
+    title: "Fall Harvest",
+    image: "/images/flyerImage.jpg",
+  },
+  {
+    id: 9,
+    title: "Spring Sale",
+    image: "/images/flyerImage.jpg",
+  },
+  {
+    id: 10,
+    title: "Winter Clearance",
+    image: "/images/flyerImage.jpg",
+  },
+];
