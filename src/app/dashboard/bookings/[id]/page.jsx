@@ -166,17 +166,18 @@ const BookingDetails = () => {
                 Services & Packages
               </p>
               {bookingData.servicePackageIds && bookingData.servicePackageIds.length > 0 ? (
-                <div className="flex flex-wrap gap-3">
-                  {bookingData.servicePackageIds.map((item) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+                  {bookingData.servicePackageIds.map((item, index) => (
                     <div
                       key={item._id}
-                      className=" p-4 flex flex-col min-w-[240px] flex-1 max-w-sm"
+                      className={`flex flex-col ${index % 2 !== 0 ? "md:border-l md:pl-12" : ""
+                        }`}
                     >
                       <div className="flex items-start gap-4 mb-2">
                         <span className="font-semibold text-gray-800 text-sm">
                           {item.name}
                         </span>
-                        <span className="text-gray-700 ">
+                        <span className="text-gray-700">
                           (${item.price})
                         </span>
                       </div>
@@ -212,14 +213,14 @@ const BookingDetails = () => {
             <div className="grid grid-cols-3 gap-12">
               <div>
                 <p className="text-gray-600 text-sm font-semibold mb-2">Name</p>
-                <p className="text-black font-semibold">{userName}</p>
+                <p className="text-black font-semibold">{bookingData?.guestName || userName}</p>
               </div>
               <div>
                 <p className="text-gray-600 text-sm font-semibold mb-2">
                   Email Address
                 </p>
                 <p className="text-black font-semibold">
-                  {bookingData.userId?.email || "N/A"}
+                  {bookingData?.guestEmail || bookingData?.userId?.email || "N/A"}
                 </p>
               </div>
               <div>
@@ -227,7 +228,7 @@ const BookingDetails = () => {
                   Phone Number
                 </p>
                 <p className="text-black font-semibold">
-                  {bookingData.userId?.phone || "N/A"}
+                  {bookingData?.guestPhone || bookingData?.userId?.phone || "N/A"}
                 </p>
               </div>
             </div>
