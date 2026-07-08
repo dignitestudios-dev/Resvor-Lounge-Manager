@@ -170,14 +170,14 @@ const BookingDetails = () => {
                   {bookingData.servicePackageIds.map((item) => (
                     <div
                       key={item._id}
-                      className="border border-gray-100 bg-gray-50/50 rounded-xl p-4 flex flex-col min-w-[240px] flex-1 max-w-sm"
+                      className=" p-4 flex flex-col min-w-[240px] flex-1 max-w-sm"
                     >
-                      <div className="flex justify-between items-start gap-4 mb-2">
+                      <div className="flex items-start gap-4 mb-2">
                         <span className="font-semibold text-gray-800 text-sm">
                           {item.name}
                         </span>
-                        <span className="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg text-xs font-bold border border-blue-100/50">
-                          ${item.price}
+                        <span className="text-gray-700 ">
+                          (${item.price})
                         </span>
                       </div>
                       {item.description && (
