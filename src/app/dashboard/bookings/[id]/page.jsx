@@ -10,7 +10,7 @@ const BookingDetails = () => {
   const bookingId = params.id;
 
   const { data: bookingData, isLoading } = useGetBookingDetail(bookingId);
-  console.log("🚀 ~ BookingDetails ~ bookingData:", bookingData)
+  console.log("🚀 ~ BookingDetails ~ bookingData:", bookingData);
 
   if (isLoading) {
     return <PageLoader />;
@@ -69,10 +69,13 @@ const BookingDetails = () => {
                 <h3 className="text-xl font-bold mb-2">
                   {bookingData.loungeId?.name || "Unknown Lounge"}
                 </h3>
-                {bookingData?.loungeId?.tags.length > 0 &&
+                {bookingData?.loungeId?.tags.length > 0 && (
                   <div className="flex gap-2 mb-4">
                     {bookingData?.loungeId?.tags?.map((tag, index) => (
-                      <span key={index} className="bg-blue-800/20 text-blue-950 px-3 py-1 rounded-full text-sm font-medium">
+                      <span
+                        key={index}
+                        className="bg-blue-800/20 text-blue-950 px-3 py-1 rounded-full text-sm font-medium"
+                      >
                         {tag}
                       </span>
                     ))}
@@ -82,11 +85,14 @@ const BookingDetails = () => {
                   <span className="bg-blue-800/20 text-blue-950 px-3 py-1 rounded-full text-sm font-medium">
                     Active
                   </span> */}
-                  </div>}
+                  </div>
+                )}
                 <div className="flex items-center gap-2 text-gray-700">
                   <span className="text-lg">📍</span>
-                  <span>{bookingData.loungeId?.location?.address
-                    || "Unknown Lounge"}</span>
+                  <span>
+                    {bookingData.loungeId?.location?.address ||
+                      "Unknown Lounge"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -153,6 +159,40 @@ const BookingDetails = () => {
                   </p>
                 </div>
               </div>
+            </div>
+
+            <div className="border-t pt-6 mb-6">
+              <p className="text-gray-600 text-sm font-semibold mb-3">
+                Services & Packages
+              </p>
+              {bookingData.servicePackageIds && bookingData.servicePackageIds.length > 0 ? (
+                <div className="flex flex-wrap gap-3">
+                  {bookingData.servicePackageIds.map((item) => (
+                    <div
+                      key={item._id}
+                      className="border border-gray-100 bg-gray-50/50 rounded-xl p-4 flex flex-col min-w-[240px] flex-1 max-w-sm"
+                    >
+                      <div className="flex justify-between items-start gap-4 mb-2">
+                        <span className="font-semibold text-gray-800 text-sm">
+                          {item.name}
+                        </span>
+                        <span className="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg text-xs font-bold border border-blue-100/50">
+                          ${item.price}
+                        </span>
+                      </div>
+                      {item.description && (
+                        <p className="text-gray-500 text-xs leading-relaxed">
+                          {item.description}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-700 leading-relaxed text-sm">
+                  No services or packages selected
+                </p>
+              )}
             </div>
 
             <div className="border-t pt-6">
