@@ -317,7 +317,7 @@ const EditServiceModal = ({
                   <button
                     type="button"
                     onClick={() => deleteImage(i)}
-                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-sm font-bold transition-colors"
+                    className="absolute -top-3 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-sm font-bold transition-colors"
                   >
                     ×
                   </button>
