@@ -26,7 +26,7 @@ export const personalDetailsRemainingSchema = Yup.object({
       (value) => (value ? !value.startsWith(" ") : true),
     )
     .min(3, "Lounge name must be at least 3 characters long")
-    .max(50, "Lounge name must not exceed 50 characters"),
+    .max(100, "Lounge name must not exceed 50 characters"),
 
   email: Yup.string()
     .required("Business email is required")
@@ -105,7 +105,7 @@ export const personalDetailsRemainingSchema = Yup.object({
       (value) => value?.trim().length > 0,
     )
     .min(20, "Description must be at least 20 characters long")
-    .max(500, "Description must not exceed 500 characters"),
+    .max(250, "Description must not exceed 500 characters"),
 
   services: Yup.array()
     .min(1, "At least one service or package is required")

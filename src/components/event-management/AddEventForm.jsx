@@ -162,7 +162,7 @@ const AddEventForm = ({ onClose, onNext, initialData }) => {
               type="text"
               id="eventName"
               name="eventName"
-              maxLength={30}
+              maxLength={100}
               value={formik.values.eventName}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
@@ -255,7 +255,7 @@ const AddEventForm = ({ onClose, onNext, initialData }) => {
               type="text"
               id="guestName"
               name="guestName"
-              maxLength={64}
+              maxLength={100}
               value={formik.values.guestName}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
@@ -269,7 +269,7 @@ const AddEventForm = ({ onClose, onNext, initialData }) => {
               type="email"
               id="guestEmail"
               name="guestEmail"
-              maxLength={50}
+              maxLength={60}
               value={formik.values.guestEmail}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
@@ -298,7 +298,7 @@ const AddEventForm = ({ onClose, onNext, initialData }) => {
               type="text"
               id="guest"
               name="guestCount"
-              maxLength={30}
+              maxLength={3}
               value={formik.values.guestCount}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
@@ -314,7 +314,7 @@ const AddEventForm = ({ onClose, onNext, initialData }) => {
               type="text"
               id="music"
               name="preferredMusic"
-              maxLength={30}
+              maxLength={100}
               value={formik.values.preferredMusic}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
@@ -326,7 +326,7 @@ const AddEventForm = ({ onClose, onNext, initialData }) => {
               type="text"
               id="special"
               name="specialRequest"
-              maxLength={30}
+              maxLength={100}
               value={formik.values.specialRequest}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
@@ -340,7 +340,7 @@ const AddEventForm = ({ onClose, onNext, initialData }) => {
               type="text"
               id="budget"
               name="budget"
-              maxLength={30}
+              maxLength={5}
               value={formik.values.budget}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
@@ -372,7 +372,7 @@ const AddEventForm = ({ onClose, onNext, initialData }) => {
               type="text"
               id="instructions"
               name="instructions"
-              maxLength={200}
+              maxLength={250}
               value={formik.values.instructions}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}

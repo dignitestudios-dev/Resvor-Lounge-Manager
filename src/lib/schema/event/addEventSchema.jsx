@@ -41,7 +41,7 @@ export const addEventSchema = Yup.object({
   eventName: Yup.string()
     .required("Event name is required.")
     .min(2, "Event name must be at least 2 characters.")
-    .max(30, "Event name cannot exceed 30 characters.")
+    .max(100, "Event name cannot exceed 100 characters.")
     .test(
       "not-empty-after-trim",
       "Event name cannot be empty or only spaces.",
@@ -86,7 +86,7 @@ export const addEventSchema = Yup.object({
   guestName: Yup.string()
     .required("Full name is required.")
     .min(1, "Full name must be at least 1 character.")
-    .max(64, "Full name cannot exceed 64 characters.")
+    .max(100, "Full name cannot exceed 100 characters.")
     .test(
       "not-empty-after-trim",
       "Full name cannot be empty or only spaces.",
@@ -152,9 +152,9 @@ export const addEventSchema = Yup.object({
       (value) => value && !isNaN(value) && Number(value) > 0,
     ),
 
-  preferredMusic: Yup.string().max(30, "Cannot exceed 30 characters."),
+  preferredMusic: Yup.string().max(100, "Cannot exceed 100 characters."),
 
-  specialRequest: Yup.string().max(30, "Cannot exceed 30 characters."),
+  specialRequest: Yup.string().max(100, "Cannot exceed 100 characters."),
 
   budget: Yup.string()
     .required("Budget is required.")
@@ -166,7 +166,7 @@ export const addEventSchema = Yup.object({
 
 
   instructions: Yup.string()
-    .max(200, "Instructions cannot exceed 200 characters."),
+    .max(250, "Instructions cannot exceed 250 characters."),
 
   ticketAtDoor: Yup.boolean()
     .required("Ticket at door selection is required."),

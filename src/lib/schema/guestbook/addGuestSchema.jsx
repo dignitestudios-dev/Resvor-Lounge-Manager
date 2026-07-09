@@ -4,7 +4,7 @@ export const addGuestSchema = Yup.object({
   fullName: Yup.string()
     .required("Full name is required.")
     .min(1, "Full name must be at least 1 character.")
-    .max(64, "Full name cannot exceed 64 characters.")
+    .max(100, "Full name cannot exceed 100 characters.")
 
     // Not empty after trim
     .test(
@@ -51,9 +51,9 @@ export const addGuestSchema = Yup.object({
       (value) =>
         value
           ? value
-              .trim()
-              .split(" ")
-              .every((word) => /^[A-ZÀ-Ÿ][\p{L}'-]*$/u.test(word))
+            .trim()
+            .split(" ")
+            .every((word) => /^[A-ZÀ-Ÿ][\p{L}'-]*$/u.test(word))
           : true,
     ),
   email: Yup.string()

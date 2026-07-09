@@ -208,7 +208,7 @@ const EditServiceModal = ({
           <input
             type="text"
             value={serviceName}
-            maxLength={80}
+            maxLength={100}
             onChange={(e) => {
               setServiceName(e.target.value);
               if (errors.serviceName) {
@@ -281,7 +281,7 @@ const EditServiceModal = ({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Describe your service"
-            maxLength={300}
+            maxLength={250}
             rows={4}
             className={`w-full rounded-xl px-4 py-2.5 text-[13px] outline-none resize-none transition-all ${getInputStyles(
               false
