@@ -1,26 +1,65 @@
 "use client";
 import AddBartenderForm from "@/components/bartender/AddBartenderForm";
 import DeleteBartenderPopup from "@/components/bartender/DeleteBartenderPopup";
-import AddGuestForm from "@/components/guestbook/AddGuestForm";
+import UpdatePasswordModal from "@/components/bartender/UpdatePasswordModal";
 import Delete from "@/components/icons/Delete";
 import { Button } from "@/components/ui/button";
+import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
+import { useDeleteBartender } from "@/lib/hooks/mutations/BartenderMutations";
+import { useGetBartenderById } from "@/lib/hooks/queries/useBartenders";
+import { KeyRound, Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import React, { useMemo, useState } from "react";
 
 const BartenderDetails = () => {
   const router = useRouter();
   const params = useParams();
-  const guestId = useMemo(() => params.id, [params]);
-  console.log("guestId: ", guestId);
+  const bartenderId = useMemo(() => params.id, [params]);
 
-  // Modal triggers
   const [openEditForm, setOpenEditForm] = useState(false);
   const [openDeletePopup, setOpenDeletePopup] = useState(false);
+  const [openPasswordModal, setOpenPasswordModal] = useState(false);
+
+  const { data: bartender, isLoading, isError } = useGetBartenderById(bartenderId);
+  const { mutate: deleteBartender, isPending: isDeleting } = useDeleteBartender();
+
+  // profileImage is an object { location: "url", ... } – normalise to a URL string
+  const profileImageUrl =
+    typeof bartender?.profileImage === "string"
+      ? bartender.profileImage
+      : bartender?.profileImage?.location || "/images/profile.png";
 
   const handleDelete = () => {
-    console.log("ID to delete: ", guestId);
-    router.push("/dashboard/bartenders");
+    deleteBartender(bartenderId, {
+      onSuccess: () => {
+        SuccessToast("Bartender deleted successfully.");
+        router.push("/dashboard/bartenders");
+      },
+      onError: (error) => {
+        ErrorToast(
+          error?.response?.data?.message || "Failed to delete bartender."
+        );
+        setOpenDeletePopup(false);
+      },
+    });
   };
+
+  // ── Loading / Error states ──────────────────────────────────────────────────
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-full py-20">
+        <Loader2 className="animate-spin w-8 h-8 text-primary" />
+      </div>
+    );
+  }
+
+  if (isError || !bartender) {
+    return (
+      <div className="flex justify-center items-center py-20 text-red-500">
+        Failed to load bartender details.
+      </div>
+    );
+  }
 
   return (
     <>
@@ -29,76 +68,106 @@ const BartenderDetails = () => {
 
         <div className="mt-10 flex-1 bg-white rounded-2xl p-5 overflow-y-auto">
           <div className="flex flex-col bg-[#F5F5F5] rounded-2xl h-full p-5 space-y-5 overflow-y-auto">
+
+            {/* ── Header card ── */}
             <div className="w-full bg-white rounded-2xl p-5">
-              <div className="flex items-center justify-between gap-5">
+              <div className="flex items-center justify-between gap-5 flex-wrap">
+                {/* Avatar + name */}
                 <div className="flex items-center gap-5">
                   <div
-                    className="w-28 h-28 rounded-full bg-center bg-cover"
-                    style={{
-                      backgroundImage: `url(/images/profile.png)`,
-                    }}
+                    className="w-28 h-28 rounded-full bg-center bg-cover bg-primary flex-shrink-0"
+                    style={{ backgroundImage: `url(${profileImageUrl})` }}
                   />
-
                   <div>
-                    <p className="text-black text-3xl! font-bold">John Alex</p>
-                    <p className="text-gray-500">john.alex@gmail.com</p>
+                    <p className="text-black text-3xl! font-bold">
+                      {bartender.fullName}
+                    </p>
+                    <p className="text-gray-500">{bartender.email}</p>
                   </div>
                 </div>
-                <div className="space-x-5">
+
+                {/* Action buttons */}
+                <div className="flex items-center gap-3">
+                  {/* Update Password button */}
                   <Button
-                    className={"bg-red-400 hover:bg-red-500 w-14! h-14!"}
+                    className="h-14 px-5 gap-2 bg-blue-900 hover:bg-blue-800"
+                    onClick={() => setOpenPasswordModal(true)}
+                  >
+                    <KeyRound className="w-5 h-5" />
+                    Update Password
+                  </Button>
+
+                  {/* Delete button */}
+                  <Button
+                    className="bg-red-400 hover:bg-red-500 w-14! h-14!"
                     onClick={() => setOpenDeletePopup(true)}
                   >
                     <Delete className="scale-150" />
                   </Button>
 
-                  {/* Add Bartender form to Edit,  */}
+                  {/* Edit form */}
                   <AddBartenderForm
                     isOpen={openEditForm}
                     onOpenChange={setOpenEditForm}
                     isEdit={true}
-                    data={{}}
+                    data={bartender}
                   />
                 </div>
               </div>
             </div>
 
-            <div className="w-full bg-white rounded-2xl p-5 overflow-y-auto">
+            {/* ── Basic Details ── */}
+            <div className="w-full bg-white rounded-2xl p-5">
               <h1 className="section-heading border-b pb-5">Basic Details</h1>
 
               <div className="py-4 border-b">
                 <p className="text-gray-500">Full Name</p>
-                <p className="text-black font-medium text-lg">John Alex</p>
+                <p className="text-black font-medium text-lg">
+                  {bartender.fullName || "—"}
+                </p>
               </div>
 
               <div className="py-4 border-b">
                 <p className="text-gray-500">Email Address</p>
                 <p className="text-black font-medium text-lg">
-                  johndoe@gmail.com
+                  {bartender.email || "—"}
                 </p>
               </div>
 
               <div className="py-4 border-b">
                 <p className="text-gray-500">Phone Number</p>
-                <p className="text-black font-medium text-lg">+000 0000 000</p>
+                <p className="text-black font-medium text-lg">
+                  {bartender.phoneNumber || "—"}
+                </p>
               </div>
 
               <div className="py-4 border-b">
                 <p className="text-gray-500">Address</p>
                 <p className="text-black font-medium text-lg">
-                  lorem ipsum dolor sit
+                  {bartender.address || "—"}
                 </p>
               </div>
+
+         
             </div>
+
           </div>
         </div>
       </div>
+
+      {/* Update Password Modal */}
+      <UpdatePasswordModal
+        isOpen={openPasswordModal}
+        onOpenChange={setOpenPasswordModal}
+        bartenderId={bartenderId}
+      />
 
       {/* Delete Popup */}
       <DeleteBartenderPopup
         isOpen={openDeletePopup}
         onOpenChange={setOpenDeletePopup}
         onDelete={handleDelete}
+        isDeleting={isDeleting}
       />
     </>
   );

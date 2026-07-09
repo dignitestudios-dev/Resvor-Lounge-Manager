@@ -2,96 +2,32 @@
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
+import { useGetBartenders } from "@/lib/hooks/queries/useBartenders";
+import { useDeleteBartender } from "@/lib/hooks/mutations/BartenderMutations";
+import DeleteBartenderPopup from "./DeleteBartenderPopup";
+import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
+import CustomPagination from "@/components/common/CustomPagination";
+
+const LIMIT = 10;
 
 const Table = () => {
   const router = useRouter();
-  const bartenders = [
-    {
-      bartenderName: "John Doe",
-      emailAddress: "johndoe@gmail.com",
-      number: "+1 202-555-0123",
-      address: "Dallas, TX – 802 PainEase Plaza",
-      loungeName: "First Lounge",
-      date: "25-10-2025",
-    },
-    {
-      bartenderName: "Jane Smith",
-      emailAddress: "janesmith@example.com",
-      number: "+1 312-555-0456",
-      address: "Chicago, IL – 1204 Windy Lane",
-      loungeName: "First Lounge",
-      date: "25-10-2025",
-    },
-    {
-      bartenderName: "Michael Johnson",
-      emailAddress: "michael.johnson@email.com",
-      number: "+1 415-555-0789",
-      address: "San Francisco, CA – 55 Market Street",
-      loungeName: "Second Lounge",
-      date: "25-10-2025",
-    },
-    {
-      bartenderName: "Emily Davis",
-      emailAddress: "emily.davis@outlook.com",
-      number: "+1 646-555-0145",
-      address: "New York, NY – 9 Empire Blvd",
-      loungeName: "Second Lounge",
-      date: "25-10-2025",
-    },
-    {
-      bartenderName: "Robert Wilson",
-      emailAddress: "robertwilson@gmail.com",
-      number: "+1 702-555-0933",
-      address: "Las Vegas, NV – 450 Sunset Avenue",
-      loungeName: "First Lounge",
-      date: "25-10-2025",
-    },
-    {
-      bartenderName: "Olivia Martinez",
-      emailAddress: "olivia.martinez@domain.com",
-      number: "+1 617-555-0234",
-      address: "Boston, MA – 132 Beacon Street",
-      loungeName: "First Lounge",
-      date: "25-10-2025",
-    },
-    {
-      bartenderName: "James Brown",
-      emailAddress: "james.brown@samplemail.com",
-      number: "+1 303-555-0678",
-      address: "Denver, CO – 78 Rocky Road",
-      loungeName: "First Lounge",
-      date: "25-10-2025",
-    },
-    {
-      bartenderName: "Sophia Turner",
-      emailAddress: "sophia.turner@mail.com",
-      number: "+1 213-555-0199",
-      address: "Los Angeles, CA – 901 Hollywood Blvd",
-      loungeName: "First Lounge",
-      date: "25-10-2025",
-    },
-    {
-      bartenderName: "William Anderson",
-      emailAddress: "will.anderson@gmail.com",
-      number: "+1 512-555-0345",
-      address: "Austin, TX – 300 Tech Park Drive",
-      loungeName: "second Lounge",
-      date: "25-10-2025",
-    },
-    {
-      bartenderName: "Ava Clark",
-      emailAddress: "ava.clark@demo.com",
-      number: "+1 480-555-0721",
-      address: "Phoenix, AZ – 18 Desert View Lane",
-      loungeName: "second Lounge",
-      date: "25-10-2025",
-    },
-  ];
 
+  const [page, setPage] = useState(1);
   const [sortConfig, setSortConfig] = useState({
-    key: "bartenderName",
+    key: "fullName",
     direction: "asc",
   });
+  const [deleteTarget, setDeleteTarget] = useState(null);
+
+  const { data: response, isLoading, isError } = useGetBartenders({
+    page,
+    limit: LIMIT,
+  });
+  const { mutate: deleteBartender, isPending: isDeleting } = useDeleteBartender();
+
+  const bartenders = response?.data || [];
+  const totalPages = response?.pagination?.totalPages || 1;
 
   const handleGoToDetailsPage = (id) => {
     router.push(`/dashboard/bartenders/${id}`);
@@ -99,16 +35,8 @@ const Table = () => {
 
   const sortedBartenders = [...bartenders].sort((a, b) => {
     if (!sortConfig.key) return 0;
-
-    let valA = a[sortConfig.key];
-    let valB = b[sortConfig.key];
-
-    // Convert guestLimit to number for numeric sorting
-    if (sortConfig.key === "qty") {
-      valA = parseInt(valA, 10);
-      valB = parseInt(valB, 10);
-    }
-
+    let valA = a[sortConfig.key] || "";
+    let valB = b[sortConfig.key] || "";
     if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
     if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
     return 0;
@@ -122,77 +50,141 @@ const Table = () => {
     setSortConfig({ key, direction });
   };
 
+  const handleDeleteConfirm = () => {
+    if (!deleteTarget) return;
+    deleteBartender(deleteTarget._id, {
+      onSuccess: () => {
+        SuccessToast("Bartender deleted successfully.");
+        setDeleteTarget(null);
+      },
+      onError: (error) => {
+        ErrorToast(
+          error?.response?.data?.message || "Failed to delete bartender."
+        );
+        setDeleteTarget(null);
+      },
+    });
+  };
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+  };
+
   return (
-    <div className="bg-white rounded-xl overflow-y-auto">
-      <table className="w-full">
-        <thead className="sticky top-0 z-10">
-          <tr className="bg-[#E8E8FF]">
-            <th
-              onClick={() => requestSort("bartenderName")}
-              className="px-4 py-5 text-left text-nowrap"
-            >
-              Name
-              {sortConfig.key === "bartenderName" ? (
-                sortConfig.direction === "asc" ? (
-                  <span className="cursor-pointer">↑</span>
-                ) : (
-                  <span className="cursor-pointer">↓</span>
-                )
-              ) : (
-                ""
-              )}
-            </th>
-            <th className="px-4 py-5 text-left text-nowrap">Email Address</th>
-            <th className="px-4 py-5 text-left text-nowrap">Number</th>
-            <th className="px-4 py-5 text-left text-nowrap">Lounge Name</th>
-            <th className="px-4 py-5 text-left text-nowrap">Address</th>
-            <th className="px-4 py-5 text-left text-nowrap">Date of Joining</th>
-            <th className="px-4 py-5 text-left text-nowrap">Status</th>
+    <>
+      <CustomPagination
+        loading={isLoading}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      >
+        {isError ? (
+          <div className="flex justify-center items-center py-20 text-red-500">
+            Failed to load bartenders. Please try again.
+          </div>
+        ) : !isLoading && bartenders.length === 0 ? (
+          <div className="flex justify-center items-center py-20 text-gray-500">
+            No bartenders found.
+          </div>
+        ) : (
+          <table className="w-full">
+            <thead className="sticky top-0 z-10">
+              <tr className="bg-[#E8E8FF]">
+                <th
+                  onClick={() => requestSort("fullName")}
+                  className="px-4 py-5 text-left text-nowrap cursor-pointer select-none"
+                >
+                  Name
+                  {sortConfig.key === "fullName" ? (
+                    sortConfig.direction === "asc" ? (
+                      <span> ↑</span>
+                    ) : (
+                      <span> ↓</span>
+                    )
+                  ) : null}
+                </th>
+                <th className="px-4 py-5 text-left text-nowrap">
+                  Email Address
+                </th>
+                <th className="px-4 py-5 text-left text-nowrap">Number</th>
+                <th className="px-4 py-5 text-left text-nowrap">Address</th>
+                <th className="px-4 py-5 text-center text-nowrap">Action</th>
+              </tr>
+            </thead>
 
-            <th className="px-4 py-5 text-center text-nowrap">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sortedBartenders?.map((bartender, index) => (
-            <tr
-              onClick={() => handleGoToDetailsPage(index)}
-              key={index}
-              className="border-b border-[#D4D4D4] cursor-pointer"
-            >
-              <td className="px-4 py-6">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="h-[43px] w-[43px] rounded-full bg-cover bg-center bg-primary"
-                    style={{
-                      backgroundImage: `url(${"/images/profile.png"})`,
-                    }}
-                  />
-                  {bartender?.bartenderName}
-                </div>
-              </td>
-              <td className="px-4 py-6">{bartender?.emailAddress}</td>
-              <td className="px-4 py-6">{bartender?.number}</td>
-              <td className="px-4 py-6">{bartender?.loungeName}</td>
+            <tbody>
+              {sortedBartenders.map((bartender, index) => (
+                <tr
+                  key={bartender._id || index}
+                  className="border-b border-[#D4D4D4] hover:bg-gray-50 transition-colors"
+                >
+                  {/* Name */}
+                  <td
+                    className="px-4 py-6 cursor-pointer"
+                    onClick={() => handleGoToDetailsPage(bartender._id)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="h-[43px] w-[43px] rounded-full bg-cover bg-center bg-primary flex-shrink-0"
+                        style={{
+                          backgroundImage: bartender.profileImage?.location
+                            ? `url(${bartender.profileImage.location})`
+                            : `url(/images/profile.png)`,
+                        }}
+                      />
+                      {bartender.fullName}
+                    </div>
+                  </td>
 
-              <td className="px-4 py-6">{bartender?.address}</td>
-              <td className="px-4 py-6">{bartender?.date}</td>
-              <td
-                className={`px-4 py-6 ${
-                  index % 2 === 0 ? "text-green-700" : "text-red-600"
-                }`}
-              >
-                {index % 2 === 0 ? "Active" : "Inactive"}
-              </td>
-              <td className="px-4 py-6 text-nowrap">
-                <div className="flex justify-center items-center cursor-pointer">
-                  <IoIosArrowForward size={24} />
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+                  {/* Email */}
+                  <td
+                    className="px-4 py-6 cursor-pointer"
+                    onClick={() => handleGoToDetailsPage(bartender._id)}
+                  >
+                    {bartender.email}
+                  </td>
+
+                  {/* Phone */}
+                  <td
+                    className="px-4 py-6 cursor-pointer"
+                    onClick={() => handleGoToDetailsPage(bartender._id)}
+                  >
+                    {bartender.phoneNumber}
+                  </td>
+
+                  {/* Address */}
+                  <td
+                    className="px-4 py-6 cursor-pointer"
+                    onClick={() => handleGoToDetailsPage(bartender._id)}
+                  >
+                    {bartender.address}
+                  </td>
+
+                  {/* Action */}
+                  <td className="px-4 py-6 text-nowrap">
+                    <div
+                      className="flex justify-center items-center cursor-pointer"
+                      onClick={() => handleGoToDetailsPage(bartender._id)}
+                    >
+                      <IoIosArrowForward size={24} />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </CustomPagination>
+
+      {/* Delete Confirmation Popup */}
+      <DeleteBartenderPopup
+        isOpen={!!deleteTarget}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+        onDelete={handleDeleteConfirm}
+        isDeleting={isDeleting}
+      />
+    </>
   );
 };
 

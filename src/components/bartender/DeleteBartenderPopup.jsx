@@ -1,5 +1,4 @@
 import React from "react";
-import { IoCheckmark } from "react-icons/io5";
 import {
   Dialog,
   DialogContent,
@@ -8,8 +7,9 @@ import {
 } from "@/components/ui/dialog";
 import Delete2 from "../icons/Delete2";
 import { Button } from "../ui/button";
+import { Loader2 } from "lucide-react";
 
-const DeleteBartenderPopup = ({ isOpen, onOpenChange, onDelete }) => {
+const DeleteBartenderPopup = ({ isOpen, onOpenChange, onDelete, isDeleting }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent showCloseButton={false}>
@@ -21,11 +21,11 @@ const DeleteBartenderPopup = ({ isOpen, onOpenChange, onDelete }) => {
               </div>
 
               <h3 className="text-[#181818] text-2xl font-bold text-center">
-                Delete This Bartender{" "}
+                Delete This Bartender
               </h3>
               <p className="text-[#565656] text-center">
-                Are you sure you want delete this Bartender. Please confirm to
-                proceed.{" "}
+                Are you sure you want to delete this Bartender? This action
+                cannot be undone.
               </p>
 
               <div className="w-full flex gap-5">
@@ -33,14 +33,20 @@ const DeleteBartenderPopup = ({ isOpen, onOpenChange, onDelete }) => {
                   variant={"secondary"}
                   className={"flex-1"}
                   onClick={() => onOpenChange(false)}
+                  disabled={isDeleting}
                 >
                   No
                 </Button>
                 <Button
                   className={"flex-1 bg-red-400 hover:bg-red-500"}
                   onClick={onDelete}
+                  disabled={isDeleting}
                 >
-                  Yes
+                  {isDeleting ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    "Yes, Delete"
+                  )}
                 </Button>
               </div>
             </div>
