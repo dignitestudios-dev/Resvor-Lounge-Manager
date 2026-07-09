@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
-import axios from "../../axios";
-import { ErrorToast } from "../../components/global/Toaster";
-import { processError } from "../../lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { processError } from "@/lib/utils";
+import axios from "../../../axios";
 
 const useUsers = (url, currentPage = 1) => {
   const [loading, setLoading] = useState(false);
@@ -29,3 +28,37 @@ const useUsers = (url, currentPage = 1) => {
 };
 
 export { useUsers };
+
+
+
+
+
+
+
+// services/api.js
+
+
+// export const getServices = async (page = 1) => {
+//   const { data } = await axios.get(`/services?page=${page}`);
+//   return data;
+// };
+
+export const getServices = async () => {
+  const { data } = await axios.get(`/lounges/services`);
+  return data;
+};
+
+export const createService = async (payload) => {
+  const { data } = await axios.post("/services", payload);
+  return data;
+};
+
+export const updateService = async ({ id, payload }) => {
+  const { data } = await axios.put(`/services/${id}`, payload);
+  return data;
+};
+
+export const deleteService = async (id) => {
+  const { data } = await axios.delete(`/services/${id}`);
+  return data;
+};

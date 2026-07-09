@@ -1,9 +1,27 @@
-"use client"
+"use client";
 import AuthButton from "../auth/AuthButton";
 import { useRouter } from "next/navigation";
+import { useAuthContext } from "@/lib/context/AuthProvider";
+import { useState } from "react";
 
 const Completed = () => {
     const router = useRouter()
+    const { refetchAuth } = useAuthContext()
+    const [loading, setLoading] = useState(false)
+
+    const handleExplore = async () => {
+        try {
+            setLoading(true);
+            await refetchAuth();
+            router.push("/dashboard");
+        } catch (error) {
+            console.error("Failed to refetch auth status:", error);
+            router.push("/dashboard");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="flex flex-col justify-center items-center h-auto ">
             <div className="mt-4 xxl:w-[400px] xxl:ml-12 text-center space-y-3.5 max-w-[440px] px-4">
@@ -25,7 +43,9 @@ const Completed = () => {
                         <AuthButton
                             type="button"
                             text={"Explore Dashboard"}
-                            onClick={() => router.push("/dashboard")}
+                            loading={loading}
+                            disabled={loading}
+                            onClick={handleExplore}
                         />
                     </div>
                 </div>

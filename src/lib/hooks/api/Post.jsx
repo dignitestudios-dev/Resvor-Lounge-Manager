@@ -225,3 +225,27 @@ export const getCampaignById = async (campaignId) => {
   const { data } = await axios.get(`/campaigns/${campaignId}`);
   return data;
 };
+
+export const submitAddService = async (payload) => {
+  const { data } = await axios.post("/lounges/services", payload, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return data;
+};
+
+export const submitUpdateService = async ({ serviceId, payload }) => {
+  const { data } = await axios.patch(
+    `/lounges/services/${serviceId}`,
+    payload,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return data;
+};

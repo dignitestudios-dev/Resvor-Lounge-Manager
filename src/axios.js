@@ -111,6 +111,24 @@ instance.interceptors.response.use(
       status: error.response?.status,
       message: error.message,
     });
+
+    if (error.response?.data) {
+      const data = error.response.data;
+      if (Array.isArray(data.error)) {
+        const messages = data.error.map((err) => err.message).filter(Boolean);
+        if (messages.length > 0) {
+          data.message = messages.join(", ");
+        }
+      } else if (
+        data.error &&
+        typeof data.error === "object" &&
+        data.error.message
+      ) {
+        data.message = data.error.message;
+      } else if (data.error && typeof data.error === "string") {
+        data.message = data.error;
+      }
+    }
     const isAuthRoute = window.location.pathname.startsWith("/auth/login");
 
     if (error.code === "ECONNABORTED") {

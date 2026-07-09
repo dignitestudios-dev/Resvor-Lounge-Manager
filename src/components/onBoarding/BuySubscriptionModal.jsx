@@ -82,20 +82,20 @@ const BuySubscriptionModalContent = ({ onClick, setCompleted, plan }) => {
       const paymentMethodPayload = paymentMethodId
         ? paymentMethodId
         : {
-            card: elements.getElement(CardNumberElement),
-            billing_details: { name: cardholderName },
-          };
+          card: elements.getElement(CardNumberElement),
+          billing_details: { name: cardholderName },
+        };
 
       // 2. Confirm with Stripe. A SetupIntent secret ("seti_...") is what
       // Stripe uses to save a card for trial plans with no upfront charge;
       // a PaymentIntent secret ("pi_...") is used to charge immediately.
       const confirm = clientSecret.startsWith("seti_")
         ? await stripe.confirmCardSetup(clientSecret, {
-            payment_method: paymentMethodPayload,
-          })
+          payment_method: paymentMethodPayload,
+        })
         : await stripe.confirmCardPayment(clientSecret, {
-            payment_method: paymentMethodPayload,
-          });
+          payment_method: paymentMethodPayload,
+        });
 
       if (confirm.error) {
         throw new Error(confirm.error.message);
@@ -107,8 +107,8 @@ const BuySubscriptionModalContent = ({ onClick, setCompleted, plan }) => {
     } catch (err) {
       setErrorMessage(
         err?.response?.data?.message ||
-          err?.message ||
-          "Payment failed. Please try again.",
+        err?.message ||
+        "Payment failed. Please try again.",
       );
     } finally {
       setProcessing(false);
@@ -121,9 +121,8 @@ const BuySubscriptionModalContent = ({ onClick, setCompleted, plan }) => {
     <div className="fixed inset-0 bg-[#0A150F80] bg-opacity-0 z-50 flex items-center justify-center">
       <div className="bg-white rounded-[12px] w-[440px]">
         <div
-          className={`flex justify-between items-center  px-8 pt-4 ${
-            !success ? "border-b-2 border-b-gray-300" : ""
-          }`}
+          className={`flex justify-between items-center  px-8 pt-4 ${!success ? "border-b-2 border-b-gray-300" : ""
+            }`}
         >
           {!success ? (
             <p className=" xxl:text-[48px] text-[28px] text-[#181818] font-[600] capitalize">

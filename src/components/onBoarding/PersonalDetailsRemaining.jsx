@@ -73,12 +73,12 @@ const PersonalDetailsRemaining = ({
       }
 
       // Resolution validation
-      const isValidResolution = await validateImageResolution(file);
+      // const isValidResolution = await validateImageResolution(file);
 
-      if (!isValidResolution) {
-        ErrorToast(`${file.name}: Image resolution must be at least 215x215`);
-        continue;
-      }
+      // if (!isValidResolution) {
+      //   ErrorToast(`${file.name}: Image resolution must be at least 215x215`);
+      //   continue;
+      // }
 
       validFiles.push(file);
     }
@@ -125,6 +125,7 @@ const PersonalDetailsRemaining = ({
               <textarea
                 name="specialization"
                 id="specialization"
+                maxLength={200}
                 value={values.specialization}
                 onChange={handleChange}
                 onBlur={handleBlur}

@@ -121,13 +121,13 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
       }
 
       // Check image resolution (215x215)
-      const isValidResolution = await validateImageResolution(file);
-      if (!isValidResolution) {
-        const errorMsg = "Image resolution must be at least 215x215";
-        setImageError(errorMsg);
-        ErrorToast(errorMsg);
-        return;
-      }
+      // const isValidResolution = await validateImageResolution(file);
+      // if (!isValidResolution) {
+      //   const errorMsg = "Image resolution must be at least 215x215";
+      //   setImageError(errorMsg);
+      //   ErrorToast(errorMsg);
+      //   return;
+      // }
 
       setFieldValue1("userImage", file);
     }
@@ -411,6 +411,7 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
                       placeholder="Enter your lounge name"
                       type="text"
                       name="name"
+                      maxLength={100}
                       value={v1.name}
                       onChange={handleChange1}
                       onBlur={handleBlur1}
@@ -492,7 +493,10 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
                     variant="light"
                     label="Lounge Tags"
                     value={v1.loungeTags}
-                    onChange={(tags) => setFieldValue1("loungeTags", tags)}
+                    onChange={(tags) => {
+                      setFieldValue1("loungeTags", tags);
+                      step1Formik.setFieldTouched("loungeTags", true, true);
+                    }}
                     placeholder="Type tag and press Enter..."
                     error={errors1?.loungeTags}
                     touched={touched1?.loungeTags}
@@ -580,6 +584,7 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
                   <textarea
                     name="specialization"
                     id="specialization"
+                    maxLength={200}
                     value={v2.specialization}
                     onChange={handleChange2}
                     onBlur={handleBlur2}
