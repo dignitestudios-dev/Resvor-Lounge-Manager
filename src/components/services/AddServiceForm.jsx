@@ -100,16 +100,24 @@ const AddServiceForm = ({
     }
   }, [isEdit, data, isOpen]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
+const handleInputChange = (e) => {
+  const { name, value } = e.target;
+
+  if (name === "price") {
+    if (value === "" || Number(value) <= 1000) {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
     }
-  };
+    return;
+  }
+
+  setFormData((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
 
   const handleImageChange = async (e) => {
     const selectedFiles = Array.from(e.target.files || []);
@@ -194,14 +202,12 @@ const AddServiceForm = ({
     e.preventDefault();
 
     // Prepare data block matching the structure expected by your external schema
-    const validationData = {
-      serviceName: formData.serviceName,
-      price: formData.price === "" ? undefined : Number(formData.price),
-      description: formData.description,
-      // Pass only the raw File objects for validation
-      serviceImages: serviceImages.map((img) => img.file).filter(Boolean),
-    };
-
+   const validationData = {
+  serviceName: formData.serviceName,
+  price: formData.price === "" ? undefined : Number(formData.price),
+  description: formData.description,
+  serviceImages,
+};
     try {
       // Execute the imported serviceSchema with your isEdit flag
       await serviceSchema(isEdit).validate(validationData, { abortEarly: false });
@@ -266,6 +272,8 @@ const AddServiceForm = ({
     }
   };
 
+  
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -300,6 +308,7 @@ const AddServiceForm = ({
                     className={`h-12 ${errors.serviceName ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                     value={formData.serviceName}
                     onChange={handleInputChange}
+                    maxlength={100}
                   />
                   {errors.serviceName && (
                     <span className="text-xs text-red-500">{errors.serviceName}</span>
@@ -311,19 +320,19 @@ const AddServiceForm = ({
                   <Label className="text-sm font-medium text-black">
                     Price
                   </Label>
-                  <Input
-                    name="price"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder="$"
-                    className={`h-12 ${errors.price ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-                    value={formData.price}
-                    onChange={handleInputChange}
-                  />
-                  {errors.price && (
-                    <span className="text-xs text-red-500">{errors.price}</span>
-                  )}
+                 <Input
+  name="price"
+  type="number"
+  min="0"
+  max="1000"
+  step="0.01"
+  placeholder="$"
+  className={`h-12 ${
+    errors.price ? "border-red-500 focus-visible:ring-red-500" : ""
+  }`}
+  value={formData.price}
+  onChange={handleInputChange}
+/>
                 </div>
 
                 {/* Description */}
@@ -331,15 +340,20 @@ const AddServiceForm = ({
                   <Label className="text-sm font-medium text-black">
                     Description
                   </Label>
-                  <Textarea
-                    name="description"
-                    placeholder="Describe your service"
-                    className={`min-h-[100px] ${errors.description ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-                    value={formData.description}
-                    onChange={handleInputChange}
-                  />
+                 <Textarea
+  name="description"
+  placeholder="Describe your service"
+  className={`min-h-[100px] w-full resize-none break-all whitespace-pre-wrap overflow-x-hidden ${
+    errors.description
+      ? "border-red-500 focus-visible:ring-red-500"
+      : ""
+  }`}
+  value={formData.description}
+  onChange={handleInputChange}
+  maxLength={250}
+/>
                   {errors.description && (
-                    <span className="text-xs text-red-500">{errors.description}</span>
+                    <span className="text-xs text-red-500 ">{errors.description}</span>
                   )}
                 </div>
 
@@ -348,7 +362,7 @@ const AddServiceForm = ({
                   <Label className="text-sm font-medium text-black">
                     Service Images{" "}
                     <span className="text-gray-400 text-xs">
-                      (Optional - {serviceImages.length}/5)
+                      ({serviceImages.length}/5)
                     </span>
                   </Label>
 

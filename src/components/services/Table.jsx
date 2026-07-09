@@ -156,8 +156,8 @@ const Table = () => {
                     {service.description}
                   </td>
 
-                  <td className="px-4 py-5 font-semibold">
-  ${service.price}
+                 <td className="px-4 py-5 font-semibold">
+  ${Number(service.price)}
 </td>
 
                   <td>
