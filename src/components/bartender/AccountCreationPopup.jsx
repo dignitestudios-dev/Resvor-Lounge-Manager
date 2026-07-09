@@ -7,10 +7,11 @@ import {
   DialogHeader,
 } from "@/components/ui/dialog";
 import { Button } from "../ui/button";
+import { Loader2 } from "lucide-react";
 
-const AccountCreationPopup = ({ isOpen, onOpenChange, onSendMail }) => {
+const AccountCreationPopup = ({ isOpen, onOpenChange, onSendMail, isLoading }) => {
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={isLoading ? undefined : onOpenChange}>
       <DialogContent showCloseButton={false}>
         <DialogHeader>
           <DialogDescription>
@@ -23,12 +24,21 @@ const AccountCreationPopup = ({ isOpen, onOpenChange, onSendMail }) => {
                 Bartender Account Created
               </h3>
               <p className="text-[#565656] text-center">
-                Login credentials have been successfully generated. The
-                bartenders can now access their account and manage their
-                profile.
+                Login credentials have been successfully generated. Click the
+                button below to send the credentials to the bartender via email.
               </p>
 
-              <Button onClick={onSendMail}>Send Mail to Bartender</Button>
+              <Button
+                onClick={onSendMail}
+                disabled={isLoading}
+                className="min-w-[180px]"
+              >
+                {isLoading ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  "Send Mail to Bartender"
+                )}
+              </Button>
             </div>
           </DialogDescription>
         </DialogHeader>
