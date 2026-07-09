@@ -88,7 +88,7 @@ const LoungeSelector = () => {
     try {
       setSwitchingId(lounge._id);
       await switchLoungeMutation.mutateAsync({ loungeId: lounge._id });
-      
+
       if (typeof window !== "undefined") {
         localStorage.setItem("activeLoungeId", lounge._id);
         setActiveLoungeId(lounge._id);

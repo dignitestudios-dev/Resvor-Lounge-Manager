@@ -1,5 +1,5 @@
 "use client";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
 import { useFormik } from "formik";
 import { campaignAndFlyers } from "@/lib/constants";
@@ -26,6 +26,7 @@ import { campaignFlyerSchema } from "@/lib/schema/campaign/campaignFlyerSchema";
 
 const CampaignAndFlyersDetails = () => {
   const params = useParams();
+  const router = useRouter();
   const flyerId = useMemo(() => params.id, [params]);
 
   // Formik form state
@@ -556,7 +557,15 @@ const CampaignAndFlyersDetails = () => {
       />
 
       {/* Confirmation Modal */}
-      <ConfirmPopup isOpen={confirmPopup} onOpenChange={setConfirmPopup} />
+      <ConfirmPopup
+        isOpen={confirmPopup}
+        onOpenChange={(open) => {
+          setConfirmPopup(open);
+          if (!open) {
+            router.push("/dashboard/campaign-and-flyers/history");
+          }
+        }}
+      />
     </div>
   );
 };
