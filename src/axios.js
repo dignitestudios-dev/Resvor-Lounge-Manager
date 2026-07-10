@@ -67,8 +67,8 @@ instance.interceptors.request.use(async (request) => {
     ...(isFormData
       ? {}
       : {
-          "Content-Type": "application/json",
-        }),
+        "Content-Type": "application/json",
+      }),
     devicemodel: fingerprint,
     deviceuniqueid: fingerprint,
   };

@@ -21,6 +21,32 @@ const imageValidation = Yup.mixed()
     return value.size <= 5 * 1024 * 1024;
   });
 
+
+
+
+  // const imageValidation = Yup.mixed()
+  //   .test(
+  //     "valid-image",
+  //     "Only JPG, JPEG, PNG and WEBP files are allowed",
+  //     (value) => {
+  //       if (!value) return true;
+  
+  //       // Existing uploaded image
+  //       if (value.isExisting || value.url) return true;
+  
+  //       // Newly uploaded file
+  //       if (value.file) {
+  //         return SUPPORTED_FORMATS.includes(value.file.type);
+  //       }
+  
+  //       return false;
+  //     }
+  //   )
+  //   .test("fileSize", "Image size must be less than 5MB", (value) => {
+  //     if (!value || value.isExisting || !value.file) return true;
+  //     return value.file.size <= 5 * 1024 * 1024;
+  //   });
+
 const nameValidation = Yup.string()
   .transform((value) => value?.trim())
   .test(
@@ -39,11 +65,12 @@ const descriptionValidation = Yup.string()
     (value) => !value || value.length > 0
   )
   .min(10, "Description must be at least 10 characters")
-  .max(300, "Description must not exceed 300 characters");
+  .max(250, "Description must not exceed 250 characters");
 
 const priceValidation = Yup.number()
   .typeError("Price must be a valid number")
-  .positive("Price must be greater than 0");
+  .positive("Price must be greater than 0")
+  .max(1000, "Price cannot exceed 1000");
 
 export const serviceSchema = (isEdit = false) =>
   Yup.object({
@@ -59,7 +86,9 @@ export const serviceSchema = (isEdit = false) =>
       ? priceValidation
       : priceValidation.required("Price is required"),
 
-    serviceImages: Yup.array()
-      .of(imageValidation)
-      .max(5, "Maximum 5 images are allowed"),
+ serviceImages: Yup.array()
+  .of(imageValidation)
+  .min(1, "At least one image is required")
+  .required("Service image is required")
+  .max(5, "Maximum 5 images are allowed"),
   });

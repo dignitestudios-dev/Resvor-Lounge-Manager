@@ -1,6 +1,7 @@
 "use client";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
+import { useFormik } from "formik";
 import { campaignAndFlyers } from "@/lib/constants";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,24 +22,38 @@ import SendInvitationForm from "@/components/campaign-and-flyers/SendInvitationF
 import ConfirmPopup from "@/components/campaign-and-flyers/ConfirmPopup";
 import { Loader2 } from "lucide-react";
 import { ErrorToast } from "@/components/ui/toaster";
+import { campaignFlyerSchema } from "@/lib/schema/campaign/campaignFlyerSchema";
 
 const CampaignAndFlyersDetails = () => {
   const params = useParams();
+  const router = useRouter();
   const flyerId = useMemo(() => params.id, [params]);
 
-  // Form states
-  const [eventType, setEventType] = useState("");
-  const [eventTitle, setEventTitle] = useState("");
-  const [eventDate, setEventDate] = useState("");
-  const [eventStartTime, setEventStartTime] = useState("");
-  const [eventEndTime, setEventEndTime] = useState("");
-  const [address, setAddress] = useState("");
-  const [city, setCity] = useState("");
+  // Formik form state
+  const formik = useFormik({
+    initialValues: {
+      eventType: "",
+      eventTitle: "",
+      eventDate: "",
+      eventStartTime: "",
+      eventEndTime: "",
+      address: "",
+      city: "",
+    },
+    validationSchema: campaignFlyerSchema,
+    validateOnChange: true,
+    validateOnBlur: true,
+    onSubmit: async () => {
+      await handleSaveAndSendAction();
+    },
+  });
+
+  const { values, handleBlur, handleChange, handleSubmit, errors, touched, setFieldValue, setFieldTouched } = formik;
 
   const [editorContent, setEditorContent] = useState("");
 
   // Show glass overlay only when user has entered any data
-  const hasAnyData = !!(eventTitle || eventDate || eventStartTime || eventEndTime || address || city);
+  const hasAnyData = !!(values.eventTitle || values.eventDate || values.eventStartTime || values.eventEndTime || values.address || values.city);
   const [selectedTemplate, setSelectedTemplate] = useState({
     id: 1,
     image: "/images/flyer.png",
@@ -132,7 +147,7 @@ const CampaignAndFlyersDetails = () => {
 
           // 3. Draw Event Title / Main Description text
           // Centered vertically within the upper part of the card
-          const titleText = eventTitle || "Showcase weekly events including brunches, karaoke, DJs, ladies nights, etc.";
+          const titleText = values.eventTitle || "Showcase weekly events including brunches, karaoke, DJs, ladies nights, etc.";
           ctx.font = "italic 36px Georgia, serif"; // Serif-style font matching the user's picture
 
           // Wrapping words helper
@@ -167,8 +182,8 @@ const CampaignAndFlyersDetails = () => {
 
           // Format date like '30-6-2026'
           let dateStr = "00-2-2026";
-          if (eventDate) {
-            const dateObj = new Date(eventDate);
+          if (values.eventDate) {
+            const dateObj = new Date(values.eventDate);
             const day = String(dateObj.getDate()).padStart(2, "0");
             const month = dateObj.getMonth() + 1;
             const year = dateObj.getFullYear();
@@ -176,15 +191,15 @@ const CampaignAndFlyersDetails = () => {
           }
 
           let timeStr = "00:00 am";
-          if (eventStartTime) {
-            timeStr = eventStartTime;
-            if (eventEndTime) {
-              timeStr += ` - ${eventEndTime}`;
+          if (values.eventStartTime) {
+            timeStr = values.eventStartTime;
+            if (values.eventEndTime) {
+              timeStr += ` - ${values.eventEndTime}`;
             }
           }
 
-          const locationStr = address
-            ? `${address}${city ? `, ${city}` : ""}`
+          const locationStr = values.address
+            ? `${values.address}${values.city ? `, ${values.city}` : ""}`
             : "My house";
 
           // Calculate details alignment starting X (centered block)
@@ -229,12 +244,7 @@ const CampaignAndFlyersDetails = () => {
     });
   };
 
-  const handleSaveAndSend = async () => {
-    if (!eventTitle) {
-      ErrorToast("Please enter an event title.");
-      return;
-    }
-
+  const handleSaveAndSendAction = async () => {
     try {
       const file = await generateFlyerFile();
       setDesignedFile(file);
@@ -245,9 +255,25 @@ const CampaignAndFlyersDetails = () => {
     }
   };
 
+  const handleSaveAndSend = () => {
+    handleSubmit();
+    if (!formik.isValid) {
+      ErrorToast("Please fill all the required fields.");
+    }
+  };
+
   const handleSendSuccess = () => {
     setOpenInvForm(false);
     setConfirmPopup(true);
+  };
+
+  const getTomorrowDateString = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const year = tomorrow.getFullYear();
+    const month = String(tomorrow.getMonth() + 1).padStart(2, "0");
+    const day = String(tomorrow.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   };
 
   return (
@@ -268,8 +294,14 @@ const CampaignAndFlyersDetails = () => {
               <Label className="text-sm font-medium text-black">
                 Event Type
               </Label>
-              <Select value={eventType} onValueChange={setEventType}>
-                <SelectTrigger className={"w-full h-14!"}>
+              <Select
+                value={values.eventType}
+                onValueChange={(value) => {
+                  setFieldValue("eventType", value);
+                  setFieldTouched("eventType", true, false);
+                }}
+              >
+                <SelectTrigger className={`w-full h-14! ${errors.eventType && touched.eventType ? "border-red-500 ring-red-500" : ""}`}>
                   <SelectValue placeholder="Select event type" />
                 </SelectTrigger>
                 <SelectContent className={"h-[200px]"}>
@@ -282,7 +314,12 @@ const CampaignAndFlyersDetails = () => {
                     ))}
                   </SelectGroup>
                 </SelectContent>
-              </Select>{" "}
+              </Select>
+              {errors.eventType && touched.eventType && (
+                <p className="text-red-600 text-[12px] mt-1">
+                  {errors.eventType}
+                </p>
+              )}
             </div>
             <div className="flex flex-col gap-1">
               <Label className="text-sm font-medium text-black">
@@ -290,11 +327,18 @@ const CampaignAndFlyersDetails = () => {
               </Label>
               <Input
                 name="eventTitle"
-                value={eventTitle}
-                onChange={(e) => setEventTitle(e.target.value)}
+                value={values.eventTitle}
+                onChange={handleChange}
+                onBlur={handleBlur}
                 placeholder="Enter event title"
-                className="h-12"
+                maxLength={100}
+                className={`h-12 ${errors.eventTitle && touched.eventTitle ? "border-red-500 ring-red-500" : ""}`}
               />
+              {errors.eventTitle && touched.eventTitle && (
+                <p className="text-red-600 text-[12px] mt-1">
+                  {errors.eventTitle}
+                </p>
+              )}
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div className="flex flex-col gap-1">
@@ -304,11 +348,18 @@ const CampaignAndFlyersDetails = () => {
                 <Input
                   name="eventDate"
                   type={"date"}
-                  value={eventDate}
-                  onChange={(e) => setEventDate(e.target.value)}
+                  value={values.eventDate}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  min={getTomorrowDateString()}
                   placeholder="Enter event date"
-                  className="h-12"
+                  className={`h-12 ${errors.eventDate && touched.eventDate ? "border-red-500 ring-red-500" : ""}`}
                 />
+                {errors.eventDate && touched.eventDate && (
+                  <p className="text-red-600 text-[12px] mt-1">
+                    {errors.eventDate}
+                  </p>
+                )}
               </div>
 
               <div className="flex flex-col gap-1">
@@ -318,11 +369,17 @@ const CampaignAndFlyersDetails = () => {
                 <Input
                   name="eventStartTime"
                   type={"time"}
-                  value={eventStartTime}
-                  onChange={(e) => setEventStartTime(e.target.value)}
+                  value={values.eventStartTime}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
                   placeholder="Enter start time"
-                  className="h-12"
+                  className={`h-12 ${errors.eventStartTime && touched.eventStartTime ? "border-red-500 ring-red-500" : ""}`}
                 />
+                {errors.eventStartTime && touched.eventStartTime && (
+                  <p className="text-red-600 text-[12px] mt-1">
+                    {errors.eventStartTime}
+                  </p>
+                )}
               </div>
 
               <div className="flex flex-col gap-1">
@@ -332,11 +389,18 @@ const CampaignAndFlyersDetails = () => {
                 <Input
                   name="eventEndTime"
                   type={"time"}
-                  value={eventEndTime}
-                  onChange={(e) => setEventEndTime(e.target.value)}
+                  value={values.eventEndTime}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  min={values.eventStartTime || undefined}
                   placeholder="Enter end time"
-                  className="h-12"
+                  className={`h-12 ${errors.eventEndTime && touched.eventEndTime ? "border-red-500 ring-red-500" : ""}`}
                 />
+                {errors.eventEndTime && touched.eventEndTime && (
+                  <p className="text-red-600 text-[12px] mt-1">
+                    {errors.eventEndTime}
+                  </p>
+                )}
               </div>
             </div>
             <h3 className="section-heading text-2xl font-bold">Location</h3>
@@ -344,21 +408,35 @@ const CampaignAndFlyersDetails = () => {
               <Label className="text-sm font-medium text-black">Address</Label>
               <Input
                 name="address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
+                value={values.address}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                maxLength={200}
                 placeholder="Enter event address"
-                className="h-12"
+                className={`h-12 ${errors.address && touched.address ? "border-red-500 ring-red-500" : ""}`}
               />
+              {errors.address && touched.address && (
+                <p className="text-red-600 text-[12px] mt-1">
+                  {errors.address}
+                </p>
+              )}
             </div>
             <div className="flex flex-col gap-1">
               <Label className="text-sm font-medium text-black">City</Label>
               <Input
                 name="city"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
+                value={values.city}
+                maxLength={60}
+                onChange={handleChange}
+                onBlur={handleBlur}
                 placeholder="Enter city"
-                className="h-12"
+                className={`h-12 ${errors.city && touched.city ? "border-red-500 ring-red-500" : ""}`}
               />
+              {errors.city && touched.city && (
+                <p className="text-red-600 text-[12px] mt-1">
+                  {errors.city}
+                </p>
+              )}
             </div>
           </div>
           <div className="flex justify-center">
@@ -393,9 +471,9 @@ const CampaignAndFlyersDetails = () => {
                         {/* Event Title */}
                         <h2
                           className="text-white font-bold leading-snug text-center mb-4 tracking-wide break-words drop-shadow-lg w-full"
-                          style={{ fontSize: eventTitle && eventTitle.length > 40 ? "13px" : "15px" }}
+                          style={{ fontSize: values.eventTitle && values.eventTitle.length > 40 ? "13px" : "15px" }}
                         >
-                          {eventTitle ||
+                          {values.eventTitle ||
                             "Event Title"}
                         </h2>
 
@@ -408,9 +486,9 @@ const CampaignAndFlyersDetails = () => {
                           <div className="flex items-center gap-2">
                             <span className="text-[11px] text-white/60 font-semibold min-w-[56px]">Date:</span>
                             <span className="text-[11px] text-white/90">
-                              {eventDate
+                              {values.eventDate
                                 ? (() => {
-                                  const d = new Date(eventDate);
+                                  const d = new Date(values.eventDate);
                                   return `${String(d.getDate()).padStart(2, "0")}-${d.getMonth() + 1}-${d.getFullYear()}`;
                                 })()
                                 : "—"}
@@ -421,8 +499,8 @@ const CampaignAndFlyersDetails = () => {
                           <div className="flex items-center gap-2">
                             <span className="text-[11px] text-white/60 font-semibold min-w-[56px]">Time:</span>
                             <span className="text-[11px] text-white/90">
-                              {eventStartTime
-                                ? `${eventStartTime}${eventEndTime ? ` - ${eventEndTime}` : ""}`
+                              {values.eventStartTime
+                                ? `${values.eventStartTime}${values.eventEndTime ? ` - ${values.eventEndTime}` : ""}`
                                 : "—"}
                             </span>
                           </div>
@@ -431,7 +509,7 @@ const CampaignAndFlyersDetails = () => {
                           <div className="flex items-start gap-2">
                             <span className="text-[11px] text-white/60 font-semibold min-w-[56px] shrink-0">Location:</span>
                             <span className="text-[11px] text-white/90 leading-snug break-words">
-                              {address ? `${address}${city ? `, ${city}` : ""}` : "—"}
+                              {values.address ? `${values.address}${values.city ? `, ${values.city}` : ""}` : "—"}
                             </span>
                           </div>
                         </div>
@@ -459,6 +537,7 @@ const CampaignAndFlyersDetails = () => {
           onChange={setEditorContent}
         />{" "}
         <Button
+          type="button"
           onClick={handleSaveAndSend}
           disabled={isGenerating}
           className={"h-14! w-xl flex items-center justify-center gap-2"}
@@ -478,7 +557,15 @@ const CampaignAndFlyersDetails = () => {
       />
 
       {/* Confirmation Modal */}
-      <ConfirmPopup isOpen={confirmPopup} onOpenChange={setConfirmPopup} />
+      <ConfirmPopup
+        isOpen={confirmPopup}
+        onOpenChange={(open) => {
+          setConfirmPopup(open);
+          if (!open) {
+            router.push("/dashboard/campaign-and-flyers/history");
+          }
+        }}
+      />
     </div>
   );
 };

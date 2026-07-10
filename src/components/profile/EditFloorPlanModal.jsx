@@ -2,6 +2,8 @@
 
 import React, { useRef, useState } from "react";
 import Image from "next/image";
+import { useFormik } from "formik";
+import { editFloorPlanSchema } from "@/lib/schema/profile/editFloorPlanSchema";
 import {
   Dialog,
   DialogContent,
@@ -10,22 +12,66 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 const EditFloorPlanModal = ({
   open,
   setOpen,
   onEditChange,
   isEdit,
+  lounge,
+  isLoading,
   onSave = () => console.log("save profile (parent)"),
 }) => {
   const [floorPlanImage, setFloorPlanImage] = useState(
-    "/images/floor-plan.jpg"
+    lounge?.floorPlan?.image?.location || "/images/floor-plan.jpg"
   );
   const fileInputRef = useRef(null);
+
+  const formik = useFormik({
+    initialValues: {
+      floorPlanFile: null,
+      regularTables: lounge?.floorPlan?.regularTables || "",
+      vipTables: lounge?.floorPlan?.vipTables || "",
+    },
+    validationSchema: editFloorPlanSchema,
+    validateOnChange: true,
+    validateOnBlur: true,
+    onSubmit: (values) => {
+      if (onSave) {
+        onSave({
+          floorPlanFile: values.floorPlanFile,
+          regularTables: values.regularTables,
+          vipTables: values.vipTables,
+        });
+      }
+      if (isEdit) {
+        onEditChange(false);
+      }
+      if (!isLoading) {
+        setOpen(false);
+      }
+    },
+  });
+
+  const { values, handleBlur, handleChange, handleSubmit, errors, touched, setFieldValue, setFieldTouched } = formik;
+
+  React.useEffect(() => {
+    if (lounge && open) {
+      formik.setValues({
+        floorPlanFile: null,
+        regularTables: lounge.floorPlan?.regularTables || "",
+        vipTables: lounge.floorPlan?.vipTables || "",
+      });
+      setFloorPlanImage(lounge.floorPlan?.image?.location || "/images/floor-plan.jpg");
+    }
+  }, [lounge, open]);
 
   function handleImageChange(e) {
     const file = e.target.files?.[0];
     if (file) {
+      setFieldValue("floorPlanFile", file);
+      setFieldTouched("floorPlanFile", true, false);
       const reader = new FileReader();
       reader.onload = (event) => {
         setFloorPlanImage(event.target?.result || "/images/floor-plan.jpg");
@@ -35,16 +81,7 @@ const EditFloorPlanModal = ({
   }
 
   function handleSave() {
-    if (isEdit) {
-      console.log("Editing floor plan...");
-      onEditChange(false);
-    } else {
-      if (onSave) {
-        // call on save and pass data
-      }
-    }
-
-    setOpen(false);
+    handleSubmit();
   }
 
   return (
@@ -82,6 +119,11 @@ const EditFloorPlanModal = ({
               className="hidden"
               onChange={handleImageChange}
             />
+            {touched.floorPlanFile && errors.floorPlanFile && (
+              <p className="text-red-600 text-xs mt-1">
+                {errors.floorPlanFile}
+              </p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -89,9 +131,18 @@ const EditFloorPlanModal = ({
             </label>
             <input
               type="number"
-              className="w-full px-3 py-2 rounded-md border border-gray-300"
+              name="regularTables"
+              value={values.regularTables}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className={`w-full px-3 py-2 rounded-md border ${errors.regularTables && touched.regularTables ? "border-red-500 ring-1 ring-red-500" : "border-gray-300"}`}
               placeholder="Total Number of Tables"
             />
+            {errors.regularTables && touched.regularTables && (
+              <p className="text-red-600 text-[12px] mt-1">
+                {errors.regularTables}
+              </p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -99,16 +150,26 @@ const EditFloorPlanModal = ({
             </label>
             <input
               type="number"
-              className="w-full px-3 py-2 rounded-md border border-gray-300"
+              name="vipTables"
+              value={values.vipTables}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className={`w-full px-3 py-2 rounded-md border ${errors.vipTables && touched.vipTables ? "border-red-500 ring-1 ring-red-500" : "border-gray-300"}`}
               placeholder="Total Number of VIP Tables"
             />
+            {errors.vipTables && touched.vipTables && (
+              <p className="text-red-600 text-[12px] mt-1">
+                {errors.vipTables}
+              </p>
+            )}
           </div>
         </div>
 
         <DialogFooter className="mt-8">
           <div className="w-full flex justify-center">
-            <Button onClick={handleSave} className="w-full max-w-xs">
-              Save
+            <Button onClick={handleSave} disabled={isLoading} className="w-full max-w-xs flex items-center justify-center gap-2">
+              {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
+              {isLoading ? "Saving..." : "Save"}
             </Button>
           </div>
         </DialogFooter>

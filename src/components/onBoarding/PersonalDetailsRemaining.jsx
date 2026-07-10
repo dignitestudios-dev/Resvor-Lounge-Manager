@@ -125,7 +125,7 @@ const PersonalDetailsRemaining = ({
               <textarea
                 name="specialization"
                 id="specialization"
-                maxLength={200}
+                maxLength={250}
                 value={values.specialization}
                 onChange={handleChange}
                 onBlur={handleBlur}

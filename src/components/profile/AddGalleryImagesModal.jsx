@@ -10,9 +10,9 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { Upload, X } from "lucide-react";
+import { Upload, X, Loader2 } from "lucide-react";
 
-const AddGalleryImagesModal = ({ open, setOpen, onAdd }) => {
+const AddGalleryImagesModal = ({ open, setOpen, isLoading, onAdd }) => {
   const [galleryImages, setGalleryImages] = useState([]);
   const [inputKey, setInputKey] = useState(0);
 
@@ -40,9 +40,10 @@ const AddGalleryImagesModal = ({ open, setOpen, onAdd }) => {
     if (onAdd) {
       onAdd(galleryImages);
     }
-    // Reset and close
-    setGalleryImages([]);
-    setOpen(false);
+    if (!isLoading) {
+      setGalleryImages([]);
+      setOpen(false);
+    }
   };
 
   const handleOpenChange = (newOpen) => {
@@ -114,10 +115,11 @@ const AddGalleryImagesModal = ({ open, setOpen, onAdd }) => {
               <Button
                 type="button"
                 onClick={handleAdd}
-                disabled={galleryImages.length === 0}
-                className="w-full h-14 text-lg"
+                disabled={galleryImages.length === 0 || isLoading}
+                className="w-full h-14 text-lg flex items-center justify-center gap-2"
               >
-                Add Images
+                {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
+                {isLoading ? "Adding Images..." : "Add Images"}
               </Button>
             </form>
           </DialogDescription>

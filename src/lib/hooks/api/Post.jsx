@@ -177,6 +177,82 @@ export const submitCreateLounge = async (payload) => {
   return data;
 };
 
+export const submitUpdateLounge = async (payload) => {
+  const formData = new FormData();
+
+  // Basic fields (only add if present in payload)
+  if (payload.name !== undefined) formData.append("name", payload.name);
+  if (payload.email !== undefined) formData.append("businessEmail", payload.email);
+  if (payload.phone !== undefined) formData.append("businessPhone", phoneToE164(payload.phone));
+  if (payload.specialization !== undefined) formData.append("specialization", payload.specialization);
+  if (payload.description !== undefined) formData.append("description", payload.description);
+
+  // Operating Hours
+  if (payload.operatingHours !== undefined) {
+    if (payload.operatingHours && typeof payload.operatingHours === "string") {
+      const hours = payload.operatingHours.split(" - ");
+      if (hours.length === 2) {
+        formData.append("operatingHours[open]", hours[0].trim());
+        formData.append("operatingHours[close]", hours[1].trim());
+      } else {
+        formData.append("operatingHours[open]", payload.operatingHours);
+        formData.append("operatingHours[close]", payload.operatingHours);
+      }
+    } else if (payload.operatingHours === null) {
+      formData.append("operatingHours[open]", "");
+      formData.append("operatingHours[close]", "");
+    }
+  }
+
+  // Location
+  if (payload.location !== undefined) {
+    formData.append("location[address]", payload.location);
+    formData.append("location[coordinates][lat]", 0);
+    formData.append("location[coordinates][lng]", 1);
+  }
+
+  // Tables
+  if (payload.regularTables !== undefined) formData.append("regularTables", payload.regularTables);
+  if (payload.vipTables !== undefined) formData.append("vipTables", payload.vipTables);
+
+  // Logo File
+  if (payload.userImage !== undefined && payload.userImage !== null) {
+    formData.append("logo", payload.userImage);
+  }
+
+  // Images Array (Gallery)
+  if (payload.images !== undefined && Array.isArray(payload.images)) {
+    payload.images.forEach((image, index) => {
+      let imageFile = image;
+      if (typeof image === "string" && image.startsWith("data:")) {
+        imageFile = dataURLtoFile(image, `gallery_image_${index}.png`);
+      }
+      if (imageFile) {
+        formData.append("images", imageFile);
+      }
+    });
+  }
+
+  // Floor Plan Image
+  if (payload.floorPlan !== undefined && payload.floorPlan !== null) {
+    formData.append("floorPlanImage", payload.floorPlan);
+  }
+
+  // Lounge Tags
+  if (payload.loungeTags !== undefined && Array.isArray(payload.loungeTags)) {
+    payload.loungeTags.forEach((tag) => {
+      formData.append("tags", tag);
+    });
+  }
+
+  const { data } = await axios.patch("/lounges", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return data;
+};
+
 export const switchLounge = async (payload) => {
   const { data } = await axios.patch("/lounges/switch", payload);
 
