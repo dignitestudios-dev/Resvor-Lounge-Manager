@@ -129,6 +129,12 @@ export const personalDetailsSchema = Yup.object({
     .oneOf(["lounge_manager", "promoter"], "Invalid role selection"),
 
   loungeTags: Yup.array()
+    .of(
+      Yup.string()
+        .min(2, "Each tag must be at least 2 characters")
+        .max(25, "Each tag must not exceed 25 characters")
+    )
     .min(1, "At least one tag is required")
+    .max(10, "Maximum of 10 tags allowed")
     .required("Lounge tags are required"),
 });

@@ -122,11 +122,12 @@ const RichTextEditor = ({ onChange, value = "", initialContent = "" }) => {
     <div className="space-y-4">
       <div>
         <h3 className="text-[16px] font-bold text-[#333333] mb-2">
-          Additional Information
+          Additional Information{" "}
+          <span className="text-[13px] font-normal text-[#999999]">(Optional)</span>
         </h3>
         <p className="text-[13px] text-[#666666] mb-4">
-          Provide additional details about your event. The message will appear
-          next to your invitation.
+          Optionally provide additional details about your event. The message
+          will appear next to your invitation.
         </p>
       </div>
 

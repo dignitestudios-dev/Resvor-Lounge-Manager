@@ -109,17 +109,11 @@ export default function SignUp() {
         return <CreateAccount setEmail={setEmail} />;
       case "verify_email":
         return (
-          <VerifyEmail
-            email={email || user?.email}
-            handlePrevious={handleLogout}
-          />
+          <VerifyEmail email={email || user?.email} handlePrevious={handleLogout} />
         );
       case "verify_mobile":
         return (
-          <VerifyPhone
-            email={email || user?.email}
-            handlePrevious={handleLogout}
-          />
+          <VerifyPhone email={email || user?.email} handlePrevious={handleLogout} />
         );
       case "buy_subscription":
         return <Subscription handlePrevious={handleLogout} />;
