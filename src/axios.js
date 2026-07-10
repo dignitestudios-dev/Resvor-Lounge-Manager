@@ -10,7 +10,7 @@ import Cookies from "js-cookie";
 //     : "https://api-dev.resvor.com"; // Use direct URL in production
 
 export const baseUrl = "https://api-staging.resvor.com";
-// export const baseUrl = "https://api-dev.resvor.com";
+// export const baseUrl = "https://api-dev.resvor.com";wq
 
 async function getDeviceFingerprint() {
   const fp = await FingerprintJS.load();
