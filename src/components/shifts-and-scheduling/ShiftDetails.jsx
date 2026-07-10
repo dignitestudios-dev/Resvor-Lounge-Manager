@@ -11,6 +11,7 @@ import Delete2 from "@/components/icons/Delete2";
 import utils from "@/lib/utils";
 import Edit from "../icons/Edit";
 import Delete from "../icons/Delete";
+import { useGetShiftById, useGetEligibleEvents } from "@/lib/hooks/queries/useShifts";
 
 const ShiftDetails = ({
   isOpen,
@@ -19,6 +20,21 @@ const ShiftDetails = ({
   onEditClick,
   onDeleteClick,
 }) => {
+  const { data: shiftDetail, isLoading } = useGetShiftById(data?._id);
+  const { data: eventsResponse } = useGetEligibleEvents({ page: 1, limit: 100 });
+  const eventsList = eventsResponse?.data || [];
+
+  const foundEvent = eventsList.find((e) => e._id === shiftDetail?.referenceId);
+  const eventName = foundEvent ? foundEvent.title : shiftDetail?.referenceId || "-";
+
+  const firstBartender = shiftDetail?.bartenderIds?.[0];
+  const bartenderName = firstBartender ? firstBartender.fullName : "-";
+
+  const startStr = shiftDetail ? utils.formatTime12(shiftDetail.startDateTime) : "";
+  const endStr = shiftDetail ? utils.formatTime12(shiftDetail.endDateTime) : "";
+  const timeStr = startStr && endStr ? `${startStr} - ${endStr}` : "-";
+  const dateStr = shiftDetail ? utils.formatDateWithName(shiftDetail.startDateTime) : "-";
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -47,23 +63,27 @@ const ShiftDetails = ({
 
           <hr className="my-4" />
 
-          <DialogDescription>
-            {data && (
+          <DialogDescription asChild>
+            {isLoading ? (
+              <div className="flex justify-center items-center py-10 text-gray-500">
+                Loading shift details...
+              </div>
+            ) : shiftDetail ? (
               <div className="space-y-4">
                 <div className="grid grid-cols-3 gap-4">
                   <div>
                     <div className=" text-gray-500">Date</div>
                     <div className="font-semibold text-black">
-                      {utils.formatDateWithName(data.date)}
+                      {dateStr}
                     </div>
                   </div>
                   <div>
                     <div className=" text-gray-500">Time</div>
-                    <div className="font-semibold text-black">{data.time}</div>
+                    <div className="font-semibold text-black">{timeStr}</div>
                   </div>
                   <div>
                     <div className=" text-gray-500">Role</div>
-                    <div className="font-semibold text-black">{data.role}</div>
+                    <div className="font-semibold text-black">{shiftDetail.role || "-"}</div>
                   </div>
                 </div>
 
@@ -72,12 +92,12 @@ const ShiftDetails = ({
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <div className=" text-gray-500">Event</div>
-                    <div className="font-semibold text-black">{data.event}</div>
+                    <div className="font-semibold text-black">{eventName}</div>
                   </div>
                   <div>
                     <div className=" text-gray-500">Bartender</div>
                     <div className="font-semibold text-black">
-                      {data.bartender ? data.bartender.name : "-"}
+                      {bartenderName}
                     </div>
                   </div>
                 </div>
@@ -90,11 +110,11 @@ const ShiftDetails = ({
                     <span className="text-gray-300">(optional)</span>
                   </div>
                   <p className="mt-2  text-gray-600">
-                    {data.instruction || "-"}
+                    {shiftDetail.instructions || "-"}
                   </p>
                 </div>
               </div>
-            )}
+            ) : null}
           </DialogDescription>
         </DialogHeader>
       </DialogContent>
