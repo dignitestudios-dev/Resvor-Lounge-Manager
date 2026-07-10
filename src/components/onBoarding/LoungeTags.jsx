@@ -1,6 +1,10 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { IoMdClose } from "react-icons/io";
+
+const MIN_TAG_LENGTH = 2;
+const MAX_TAG_LENGTH = 25;
+const DEFAULT_MAX_TAGS = 10;
 
 export default function LoungeTags({
   label,
@@ -10,12 +14,20 @@ export default function LoungeTags({
   className = "",
   error,
   touched,
-  maxTags,
+  maxTags = DEFAULT_MAX_TAGS,
   variant = "dark", // dark | light
 }) {
   const [inputValue, setInputValue] = useState("");
+  const [warning, setWarning] = useState("");
 
   const isDark = variant === "dark";
+
+  // Auto-clear warning after 2 seconds
+  useEffect(() => {
+    if (!warning) return;
+    const timer = setTimeout(() => setWarning(""), 2000);
+    return () => clearTimeout(timer);
+  }, [warning]);
 
   const handleAddTag = (e) => {
     if (e.key === "Enter") {
@@ -23,14 +35,35 @@ export default function LoungeTags({
 
       const trimmedValue = inputValue.trim();
 
-      if (trimmedValue && !value.includes(trimmedValue)) {
-        if (maxTags && value.length >= maxTags) {
-          return;
-        }
+      if (!trimmedValue) return;
 
-        onChange([...value, trimmedValue]);
-        setInputValue("");
+      // Check min length
+      if (trimmedValue.length < MIN_TAG_LENGTH) {
+        setWarning(`Tag must be at least ${MIN_TAG_LENGTH} characters`);
+        return;
       }
+
+      // Check max length (also enforced via maxLength on input, but just in case)
+      if (trimmedValue.length > MAX_TAG_LENGTH) {
+        setWarning(`Tag must not exceed ${MAX_TAG_LENGTH} characters`);
+        return;
+      }
+
+      // Check duplicate
+      if (value.includes(trimmedValue)) {
+        setWarning("This tag already exists");
+        return;
+      }
+
+      // Check max tags
+      if (value.length >= maxTags) {
+        setWarning(`Maximum of ${maxTags} tags allowed`);
+        return;
+      }
+
+      setWarning("");
+      onChange([...value, trimmedValue]);
+      setInputValue("");
     }
   };
 
@@ -41,6 +74,8 @@ export default function LoungeTags({
   const handleInputChange = (e) => {
     setInputValue(e.target.value);
   };
+
+  const isAtLimit = value.length >= maxTags;
 
   return (
     <div>
@@ -60,7 +95,9 @@ export default function LoungeTags({
           value={inputValue}
           onChange={handleInputChange}
           onKeyDown={handleAddTag}
-          placeholder={placeholder}
+          placeholder={isAtLimit ? `Maximum of ${maxTags} tags reached` : placeholder}
+          maxLength={MAX_TAG_LENGTH}
+          disabled={isAtLimit}
           className={`
             w-full px-4 py-3 text-sm rounded-[15px]
             focus:outline-none transition-all duration-200
@@ -91,6 +128,11 @@ export default function LoungeTags({
         />
       </div>
 
+      {/* Inline warning */}
+      {warning && (
+        <p className="text-amber-400 text-[12px] mb-2">{warning}</p>
+      )}
+
       {/* Tags */}
       {value.length > 0 && (
         <div className="flex flex-wrap gap-2">
@@ -99,7 +141,7 @@ export default function LoungeTags({
               key={index}
               className={`
                 flex items-center gap-2 px-3 py-1 rounded-full
-                transition-all duration-200
+                transition-all duration-200 max-w-[200px]
                 ${
                   isDark
                     ? `
@@ -115,9 +157,10 @@ export default function LoungeTags({
               `}
             >
               <span
-                className={`text-sm ${
+                className={`text-sm truncate ${
                   isDark ? "text-white" : "text-gray-800"
                 }`}
+                title={tag}
               >
                 {tag}
               </span>
@@ -126,7 +169,7 @@ export default function LoungeTags({
                 type="button"
                 onClick={() => handleRemoveTag(index)}
                 className={`
-                  transition-colors flex items-center justify-center
+                  transition-colors flex items-center justify-center flex-shrink-0
                   ${
                     isDark
                       ? "text-white hover:text-red-400"
@@ -146,16 +189,15 @@ export default function LoungeTags({
         <p className="text-red-500 text-[12px] mt-1">{error}</p>
       )}
 
-      {/* Max Tags Count */}
-      {maxTags && (
-        <p
-          className={`text-[12px] mt-1 ${
-            isDark ? "text-gray-400" : "text-gray-500"
-          }`}
-        >
-          {value.length}/{maxTags} tags
-        </p>
-      )}
+      {/* Tags Count */}
+      <p
+        className={`text-[12px] mt-1 ${
+          isDark ? "text-gray-400" : "text-gray-500"
+        }`}
+      >
+        {value.length}/{maxTags} tags
+        {` (${MIN_TAG_LENGTH}-${MAX_TAG_LENGTH} chars each)`}
+      </p>
     </div>
   );
 }

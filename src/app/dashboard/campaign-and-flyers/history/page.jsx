@@ -53,7 +53,7 @@ const CampaignHistoryPage = () => {
 
           <div>
             <h1 className="section-heading text-3xl font-bold">Campaign History</h1>
-          
+
           </div>
         </div>
       </div>

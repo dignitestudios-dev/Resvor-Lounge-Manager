@@ -533,7 +533,7 @@ const CampaignAndFlyersDetails = () => {
           </div>
         </div>
         <RichTextEditor
-          initialContent="<p>Start editing here...</p>"
+          // initialContent="<p>Start editing here...</p>"
           onChange={setEditorContent}
         />{" "}
         <Button

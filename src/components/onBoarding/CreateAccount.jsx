@@ -45,7 +45,7 @@ const CreateAccount = ({ setEmail }) => {
           } else {
             ErrorToast(
               error.response?.data?.message ||
-                "An error occurred. Please try again.",
+              "An error occurred. Please try again.",
             );
           }
         }
@@ -77,7 +77,7 @@ const CreateAccount = ({ setEmail }) => {
               type={"text"}
               id={"name"}
               name={"name"}
-              maxLength={50}
+              maxLength={100}
               value={values.name}
               onChange={handleChange}
               onBlur={handleBlur}
@@ -93,7 +93,7 @@ const CreateAccount = ({ setEmail }) => {
               type={"email"}
               id={"email"}
               name={"email"}
-              maxLength={30}
+              maxLength={60}
               value={values.email}
               onChange={handleChange}
               onBlur={handleBlur}

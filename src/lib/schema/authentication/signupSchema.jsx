@@ -4,7 +4,7 @@ export const userDetailsSchema = Yup.object({
   name: Yup.string()
     .required("Full name is required.")
     .min(1, "Full name must be at least 1 character.")
-    .max(64, "Full name cannot exceed 64 characters.")
+    .max(100, "Full name cannot exceed 100 characters.")
 
     // Not empty after trim
     .test(
@@ -51,9 +51,9 @@ export const userDetailsSchema = Yup.object({
       (value) =>
         value
           ? value
-              .trim()
-              .split(" ")
-              .every((word) => /^[A-ZÀ-Ÿ][\p{L}'-]*$/u.test(word))
+            .trim()
+            .split(" ")
+            .every((word) => /^[A-ZÀ-Ÿ][\p{L}'-]*$/u.test(word))
           : true,
     ),
   email: Yup.string()
@@ -77,7 +77,7 @@ export const userDetailsSchema = Yup.object({
 
   password: Yup.string()
     .min(8, "Password must be at least 8 characters long.")
-    .max(50, "Password must not exceed 50 characters.")
+    .max(60, "Password must not exceed 60 characters.")
     .matches(/[A-Z]/, "Password must contain at least one uppercase letter.")
     .matches(/\d/, "Password must contain at least one number.")
     .matches(
