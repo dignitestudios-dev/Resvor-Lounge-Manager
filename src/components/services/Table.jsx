@@ -10,6 +10,8 @@ import DeleteServicePopup from "./DeleteServicePopup";
 import { useDeleteService } from "@/lib/hooks/mutations/ServiceMutations";
 import { useServices } from "@/lib/hooks/queries/useService";
 import { useQueryClient } from "@tanstack/react-query";
+import { Eye } from "lucide-react";
+import ViewServiceModal from "./ViewServiceModal";
 
 
 const Table = () => {
@@ -25,6 +27,7 @@ const Table = () => {
   const [selectedService, setSelectedService] = useState(null);
   const [openEditForm, setOpenEditForm] = useState(false);
   const [openDeletePopup, setOpenDeletePopup] = useState(false);
+  const [openViewModal, setOpenViewModal] = useState(false);
 
   // API response
   const services = data?.data || [];
@@ -152,37 +155,50 @@ const Table = () => {
                     </div>
                   </td>
 
-                  <td className="px-4 py-5 text-gray-700">
-                    {service.description}
-                  </td>
+                 <td className="px-4 py-5 text-gray-700">
+  {service.description?.length > 15
+    ? service.description.substring(0, 15) + "..."
+    : service.description}
+</td>
 
-                 <td className="px-4 py-5 font-semibold">
-  ${Number(service.price)}
+              <td className="px-4 py-5 font-semibold">
+  ${(Number(service.price) / 100).toFixed(2)}
 </td>
 
                   <td>
-                    <div className="flex items-center justify-center">
-                      <Button
-                        variant="ghost"
-                        onClick={() => {
-                          setSelectedService(service);
-                          setOpenEditForm(true);
-                        }}
-                      >
-                        <Edit />
-                      </Button>
+                   <div className="flex items-c
+                   enter justify-center gap-2">
+  <Button
+    variant="ghost"
+    onClick={() => {
+      setSelectedService(service);
+      setOpenViewModal(true);
+    }}
+  >
+    <Eye className="h-5 w-5 text-blue-600" />
+  </Button>
 
-                      <Button
-  variant="ghost"
-  disabled={deleting}
-  onClick={() => {
-    setSelectedService(service);
-    setOpenDeletePopup(true);
-  }}
->
-  <Delete />
-</Button>
-                    </div>
+  <Button
+    variant="ghost"
+    onClick={() => {
+      setSelectedService(service);
+      setOpenEditForm(true);
+    }}
+  >
+    <Edit />
+  </Button>
+
+  <Button
+    variant="ghost"
+    disabled={deleting}
+    onClick={() => {
+      setSelectedService(service);
+      setOpenDeletePopup(true);
+    }}
+  >
+    <Delete />
+  </Button>
+</div>
                   </td>
                 </tr>
               ))
@@ -198,6 +214,12 @@ const Table = () => {
         isEdit
         showTrigger={false}
       />
+
+      <ViewServiceModal
+  isOpen={openViewModal}
+  onOpenChange={setOpenViewModal}
+  service={selectedService}
+/>
 
       <DeleteServicePopup
         isOpen={openDeletePopup}

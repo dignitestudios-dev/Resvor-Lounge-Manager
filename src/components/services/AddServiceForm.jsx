@@ -225,9 +225,12 @@ const handleInputChange = (e) => {
       return; // Stop execution if validation fails
     }
 
+    const priceInCents = Math.round(Number(formData.price) * 100);
+
+
     const payload = new FormData();
     payload.append("name", formData.serviceName);
-    payload.append("price", formData.price);
+payload.append("price", priceInCents);
     payload.append("description", formData.description);
 
     serviceImages.forEach((img) => {
