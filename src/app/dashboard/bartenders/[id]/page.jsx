@@ -8,6 +8,7 @@ import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
 import { useDeleteBartender } from "@/lib/hooks/mutations/BartenderMutations";
 import { useGetBartenderById } from "@/lib/hooks/queries/useBartenders";
 import { KeyRound, Loader2 } from "lucide-react";
+import { formatPhoneNumber } from "@/lib/utils";
 import { useParams, useRouter } from "next/navigation";
 import React, { useMemo, useState } from "react";
 
@@ -137,7 +138,7 @@ const BartenderDetails = () => {
               <div className="py-4 border-b">
                 <p className="text-gray-500">Phone Number</p>
                 <p className="text-black font-medium text-lg">
-                  {bartender.phoneNumber || "—"}
+                  {formatPhoneNumber(bartender.phoneNumber) || "—"}
                 </p>
               </div>
 

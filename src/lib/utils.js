@@ -138,9 +138,9 @@ export const handleError = (error, customMessage) => {
   console.log(error);
   toast.error(
     error?.message ||
-      error?.response?.data?.message ||
-      customMessage ||
-      "Something went wrong",
+    error?.response?.data?.message ||
+    customMessage ||
+    "Something went wrong",
   );
 };
 
@@ -221,30 +221,80 @@ export const processError = (error) => {
   }
 };
 
-const utils = {
-  validateEmail,
-  validatePhone,
-  storage,
-  formatDate,
-  formatDateWithName,
-  formatDateTime,
-  formatTime,
-  formatTime12,
-  capitalize,
-  truncate,
-  formatCurrency,
-  formatNumber,
-  formatPercentage,
-  handleError,
-  handleSuccess,
-  phoneFormatter,
-};
+
 
 export const phoneToE164 = (formattedPhone, countryCode = "+1") => {
   const digits = formattedPhone.replace(/\D/g, ""); // Strip all non-numeric chars
   // Remove leading 0 if present (e.g. 03001234567 → 3001234567)
   const normalized = digits.startsWith("0") ? digits.slice(1) : digits;
   return `${countryCode}${normalized}`;
+};
+
+export const cleanPhoneNumber = (phone) => {
+  if (!phone) return "";
+  return phone.replace(/[\s\-()]/g, "");
+};
+
+export const formatPhoneNumber = (input) => {
+  if (typeof input !== "string") return "";
+
+  // Clean all characters except digits and '+'
+  let cleaned = input.replace(/[^\d+]/g, "");
+
+  // Ensure we don't have multiple '+' signs, only a single one at the start
+  if (cleaned.includes("+")) {
+    cleaned = "+" + cleaned.replace(/\+/g, "");
+  }
+
+  const hasPlus = cleaned.startsWith("+");
+  const digitsOnly = hasPlus ? cleaned.slice(1) : cleaned;
+
+  if (digitsOnly.length === 0) {
+    return hasPlus ? "+" : "";
+  }
+
+  // Progressively format
+  if (digitsOnly.length <= 3) {
+    return `${hasPlus ? "+" : ""}${digitsOnly}`;
+  }
+
+  // If it's a US format (starts with 1 and has up to 11 digits)
+  if (digitsOnly.startsWith("1") && digitsOnly.length <= 11) {
+    const cc = "1";
+    const rest = digitsOnly.slice(1);
+    if (rest.length === 0) {
+      return `${hasPlus ? "+" : ""}1`;
+    } else if (rest.length <= 3) {
+      return `${hasPlus ? "+" : ""}1 (${rest}`;
+    } else if (rest.length <= 6) {
+      return `${hasPlus ? "+" : ""}1 (${rest.slice(0, 3)}) ${rest.slice(3)}`;
+    } else {
+      return `${hasPlus ? "+" : ""}1 (${rest.slice(0, 3)}) ${rest.slice(3, 6)}-${rest.slice(6, 10)}`;
+    }
+  }
+
+  // If it has more than 10 digits (non-US country code)
+  if (digitsOnly.length > 10) {
+    const ccLength = digitsOnly.length - 10;
+    const cc = digitsOnly.slice(0, ccLength);
+    const rest = digitsOnly.slice(ccLength);
+    if (rest.length === 0) {
+      return `${hasPlus ? "+" : ""}${cc}`;
+    } else if (rest.length <= 3) {
+      return `${hasPlus ? "+" : ""}${cc} (${rest}`;
+    } else if (rest.length <= 6) {
+      return `${hasPlus ? "+" : ""}${cc} (${rest.slice(0, 3)}) ${rest.slice(3)}`;
+    } else {
+      return `${hasPlus ? "+" : ""}${cc} (${rest.slice(0, 3)}) ${rest.slice(3, 6)}-${rest.slice(6, 10)}`;
+    }
+  }
+
+  // Standard 10-digit formatting: (XXX) XXX-XXXX
+  if (digitsOnly.length <= 6) {
+    return `${hasPlus ? "+" : ""}(${digitsOnly.slice(0, 3)}) ${digitsOnly.slice(3)}`;
+  } else {
+    return `${hasPlus ? "+" : ""}(${digitsOnly.slice(0, 3)}) ${digitsOnly.slice(3, 6)}-${digitsOnly.slice(6, 10)}`;
+  }
 };
 
 export const handleFormattedOperatingHoursChange = (e) => {
@@ -333,9 +383,9 @@ export function updateAuthCache(queryClient, patch) {
       user:
         patch.user !== undefined
           ? {
-              ...(old?.user ?? {}),
-              ...(patch.user ?? {}),
-            }
+            ...(old?.user ?? {}),
+            ...(patch.user ?? {}),
+          }
           : old?.user,
     };
 
@@ -378,6 +428,28 @@ export const getBookingStatusStyles = (status) => {
     default:
       return " text-slate-700";
   }
+};
+
+
+const utils = {
+  validateEmail,
+  validatePhone,
+  storage,
+  formatDate,
+  formatDateWithName,
+  formatDateTime,
+  formatTime,
+  formatTime12,
+  capitalize,
+  truncate,
+  formatCurrency,
+  formatNumber,
+  formatPercentage,
+  handleError,
+  handleSuccess,
+  phoneFormatter,
+  cleanPhoneNumber,
+  formatPhoneNumber,
 };
 
 export default utils;

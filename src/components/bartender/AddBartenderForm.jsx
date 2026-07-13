@@ -27,6 +27,21 @@ import {
 } from "@/lib/schema/bartender/bartenderSchema";
 import { useFormik } from "formik";
 import { useState } from "react";
+import { phoneFormatter, phoneToE164 } from "@/lib/utils";
+import PhoneInput from "../auth/PhoneInput";
+
+const stripCountryCode = (phone) => {
+  if (!phone) return "";
+  if (phone.startsWith("+1")) {
+    return phone.slice(2).replace(/\D/g, "");
+  }
+  const cleaned = phone.replace(/\D/g, "");
+  if (cleaned.length === 11 && cleaned.startsWith("1")) {
+    return cleaned.slice(1);
+  }
+  return cleaned;
+};
+
 
 // ─── Helper: inline error message ────────────────────────────────────────────
 const FieldError = ({ touched, error }) =>
@@ -65,21 +80,21 @@ const AddBartenderForm = ({
     enableReinitialize: true,
     initialValues: isEdit
       ? {
-          profileImage: null,
-          fullName: data?.fullName || "",
-          email: data?.email || "",
-          phoneNumber: data?.phoneNumber || "",
-          address: data?.address || "",
-        }
+        profileImage: null,
+        fullName: data?.fullName || "",
+        email: data?.email || "",
+        phoneNumber: stripCountryCode(data?.phoneNumber) || "",
+        address: data?.address || "",
+      }
       : {
-          profileImage: null,
-          fullName: "",
-          email: "",
-          phoneNumber: "",
-          address: "",
-          password: "",
-          confirmPassword: "",
-        },
+        profileImage: null,
+        fullName: "",
+        email: "",
+        phoneNumber: "",
+        address: "",
+        password: "",
+        confirmPassword: "",
+      },
     validationSchema: isEdit ? editBartenderSchema : createBartenderSchema,
     validateOnChange: true,
     validateOnBlur: true,
@@ -96,7 +111,7 @@ const AddBartenderForm = ({
             id: data._id,
             fullName: values.fullName,
             email: values.email,
-            phoneNumber: values.phoneNumber,
+            phoneNumber: phoneToE164(values.phoneNumber),
             address: values.address,
             profileImage: values.profileImage,
           },
@@ -157,7 +172,7 @@ const AddBartenderForm = ({
         fullName: pendingCreateData.fullName,
         email: pendingCreateData.email,
         password: pendingCreateData.password,
-        phoneNumber: pendingCreateData.phoneNumber,
+        phoneNumber: phoneToE164(pendingCreateData.phoneNumber),
         address: pendingCreateData.address,
         profileImage: pendingCreateData.profileImage,
       },
@@ -249,11 +264,10 @@ const AddBartenderForm = ({
                     id="fullName"
                     name="fullName"
                     placeholder="Full Name"
-                    className={`h-14 ${
-                      formik.touched.fullName && formik.errors.fullName
-                        ? "border-red-500"
-                        : ""
-                    }`}
+                    className={`h-14 ${formik.touched.fullName && formik.errors.fullName
+                      ? "border-red-500"
+                      : ""
+                      }`}
                     value={formik.values.fullName}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
@@ -274,11 +288,10 @@ const AddBartenderForm = ({
                     name="email"
                     type="email"
                     placeholder="email@example.com"
-                    className={`h-14 ${
-                      formik.touched.email && formik.errors.email
-                        ? "border-red-500"
-                        : ""
-                    }`}
+                    className={`h-14 ${formik.touched.email && formik.errors.email
+                      ? "border-red-500"
+                      : ""
+                      }`}
                     value={formik.values.email}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
@@ -291,23 +304,17 @@ const AddBartenderForm = ({
 
                 {/* ── Phone Number ── */}
                 <div className="w-full flex flex-col gap-1">
-                  <Label className={"text-base text-black"}>Phone Number</Label>
-                  <Input
-                    id="phoneNumber"
-                    name="phoneNumber"
-                    placeholder="+1 234 567 890"
-                    className={`h-14 ${
-                      formik.touched.phoneNumber && formik.errors.phoneNumber
-                        ? "border-red-500"
-                        : ""
-                    }`}
-                    value={formik.values.phoneNumber}
+                  <PhoneInput
+                    variant="light"
+                    label={"Phone Number"}
+                    value={phoneFormatter(formik.values.phoneNumber)}
+                    id={"phoneNumber"}
+                    name={"phoneNumber"}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                  />
-                  <FieldError
-                    touched={formik.touched.phoneNumber}
                     error={formik.errors.phoneNumber}
+                    touched={formik.touched.phoneNumber}
+                    autoComplete="off"
                   />
                 </div>
 
@@ -318,11 +325,10 @@ const AddBartenderForm = ({
                     id="address"
                     name="address"
                     placeholder="Enter address"
-                    className={`h-14 ${
-                      formik.touched.address && formik.errors.address
-                        ? "border-red-500"
-                        : ""
-                    }`}
+                    className={`h-14 ${formik.touched.address && formik.errors.address
+                      ? "border-red-500"
+                      : ""
+                      }`}
                     value={formik.values.address}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
@@ -344,11 +350,10 @@ const AddBartenderForm = ({
                           name="password"
                           placeholder="● ● ● ● ● ● ● ●"
                           type={showPassword ? "text" : "password"}
-                          className={`h-14 pr-10 ${
-                            formik.touched.password && formik.errors.password
-                              ? "border-red-500"
-                              : ""
-                          }`}
+                          className={`h-14 pr-10 ${formik.touched.password && formik.errors.password
+                            ? "border-red-500"
+                            : ""
+                            }`}
                           value={formik.values.password}
                           onChange={formik.handleChange}
                           onBlur={formik.handleBlur}
@@ -381,12 +386,11 @@ const AddBartenderForm = ({
                           name="confirmPassword"
                           placeholder="● ● ● ● ● ● ● ●"
                           type={showConfirmPassword ? "text" : "password"}
-                          className={`h-14 pr-10 ${
-                            formik.touched.confirmPassword &&
+                          className={`h-14 pr-10 ${formik.touched.confirmPassword &&
                             formik.errors.confirmPassword
-                              ? "border-red-500"
-                              : ""
-                          }`}
+                            ? "border-red-500"
+                            : ""
+                            }`}
                           value={formik.values.confirmPassword}
                           onChange={formik.handleChange}
                           onBlur={formik.handleBlur}
