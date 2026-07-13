@@ -84,7 +84,10 @@ const AddServiceForm = ({
     if (isEdit && data) {
       setFormData({
         serviceName: data.name || data.serviceName || "",
-        price: data.price ?? "",
+        price:
+  data?.price !== undefined && data?.price !== null
+    ? (Number(data.price) / 100).toString()
+    : "",
         description: data.description || "",
       });
       setServiceImages(normalizeImages(data));
@@ -107,7 +110,7 @@ const handleInputChange = (e) => {
     if (value === "" || Number(value) <= 1000) {
       setFormData((prev) => ({
         ...prev,
-        [name]: value,
+        price: value,
       }));
     }
     return;
@@ -120,41 +123,73 @@ const handleInputChange = (e) => {
 };
 
   const handleImageChange = async (e) => {
-    const selectedFiles = Array.from(e.target.files || []);
-    if (!selectedFiles.length) return;
+  const selectedFiles = Array.from(e.target.files || []);
+  if (!selectedFiles.length) return;
 
-    const remainingSlots = 5 - serviceImages.length;
-    if (remainingSlots <= 0) {
-      e.target.value = "";
-      return;
-    }
-
-    const filesToAdd = selectedFiles.slice(0, remainingSlots);
-
-    const readFile = (file) =>
-      new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          resolve({
-            id: `${Date.now()}-${Math.random()}`,
-            file,
-            url: event.target.result,
-            name: file.name,
-            isExisting: false,
-          });
-        };
-        reader.readAsDataURL(file);
-      });
-
-    const newImages = await Promise.all(filesToAdd.map(readFile));
-    setServiceImages((prev) => [...prev, ...newImages]);
-
-    if (errors.serviceImages) {
-      setErrors((prev) => ({ ...prev, serviceImages: "" }));
-    }
-
+  const remainingSlots = 5 - serviceImages.length;
+  if (remainingSlots <= 0) {
     e.target.value = "";
-  };
+    return;
+  }
+
+  const validFiles = [];
+
+  for (const file of selectedFiles.slice(0, remainingSlots)) {
+    // Check file type
+    if (!["image/jpeg", "image/png"].includes(file.type)) {
+      const errorMsg = "Only JPEG and PNG formats are allowed";
+      ErrorToast(errorMsg);
+      continue;
+    }
+
+    // Check file size (10MB limit)
+   // Check file size (5MB limit)
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+
+if (file.size > MAX_FILE_SIZE) {
+  ErrorToast("File size must not exceed 5 MB");
+  continue;
+}
+    // Check image resolution (215x215)
+    // const isValidResolution = await validateImageResolution(file);
+    // if (!isValidResolution) {
+    //   const errorMsg = "Image resolution must be at least 215x215";
+    //   ErrorToast(errorMsg);
+    //   continue;
+    // }
+
+    validFiles.push(file);
+  }
+
+  if (!validFiles.length) {
+    e.target.value = "";
+    return;
+  }
+
+  const readFile = (file) =>
+    new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        resolve({
+          id: `${Date.now()}-${Math.random()}`,
+          file,
+          url: event.target.result,
+          name: file.name,
+          isExisting: false,
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+
+  const newImages = await Promise.all(validFiles.map(readFile));
+  setServiceImages((prev) => [...prev, ...newImages]);
+
+  if (errors.serviceImages) {
+    setErrors((prev) => ({ ...prev, serviceImages: "" }));
+  }
+
+  e.target.value = "";
+};
 
   const deleteImage = (index) => {
     setServiceImages((prev) => {
@@ -168,35 +203,50 @@ const handleInputChange = (e) => {
     });
   };
 
-  const replaceImage = (index, e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+ const replaceImage = (index, e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setServiceImages((prev) => {
-        const updated = [...prev];
-        const target = updated[index];
-
-        if (target?.isExisting) {
-          setDeletedImageIds((ids) =>
-            ids.includes(target.id) ? ids : [...ids, target.id]
-          );
-        }
-
-        updated[index] = {
-          ...target,
-          file,
-          url: event.target.result,
-          name: file.name,
-          isExisting: false,
-        };
-        return updated;
-      });
-    };
-    reader.readAsDataURL(file);
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+  if (!["image/jpeg", "image/png"].includes(file.type)) {
+    ErrorToast("Only JPEG and PNG formats are allowed");
     e.target.value = "";
+    return;
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    ErrorToast("File size must not exceed 10 MB");
+    e.target.value = "";
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    setServiceImages((prev) => {
+      const updated = [...prev];
+      const target = updated[index];
+
+      if (target?.isExisting) {
+        setDeletedImageIds((ids) =>
+          ids.includes(target.id) ? ids : [...ids, target.id]
+        );
+      }
+
+      updated[index] = {
+        ...target,
+        file,
+        url: event.target.result,
+        name: file.name,
+        isExisting: false,
+      };
+
+      return updated;
+    });
   };
+
+  reader.readAsDataURL(file);
+  e.target.value = "";
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -323,15 +373,17 @@ payload.append("price", priceInCents);
                   <Label className="text-sm font-medium text-black">
                     Price
                   </Label>
-                 <Input
+                <Input
   name="price"
   type="number"
   min="0"
   max="1000"
   step="0.01"
-  placeholder="$"
+  placeholder="0.00"
   className={`h-12 ${
-    errors.price ? "border-red-500 focus-visible:ring-red-500" : ""
+    errors.price
+      ? "border-red-500 focus-visible:ring-red-500"
+      : ""
   }`}
   value={formData.price}
   onChange={handleInputChange}
