@@ -292,8 +292,10 @@ export const retryCampaign = async (campaignId) => {
   return data;
 };
 
-export const getCampaigns = async () => {
-  const { data } = await axios.get("/campaigns");
+export const getCampaigns = async ({ page = 1, limit = 10 } = {}) => {
+  const { data } = await axios.get("/campaigns", {
+    params: { page, limit },
+  });
   return data;
 };
 
