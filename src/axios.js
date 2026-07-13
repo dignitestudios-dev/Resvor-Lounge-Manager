@@ -38,7 +38,6 @@ instance.interceptors.request.use(async (request) => {
     });
   }
 
-  request.withCredentials = true;
 
   const token = Cookies.get("token") || Cookies.get("authorization");
   if (token) {

@@ -7,192 +7,44 @@ import ShiftDetails from "./ShiftDetails";
 import AddShiftAndScheduling from "./AddShiftAndScheduling";
 import DeleteShiftPopup from "./DeleteShiftPopup";
 import UpdateSuccessPopup from "./UpdateSuccessPopup";
+import { useGetShifts, useGetEligibleEvents } from "@/lib/hooks/queries/useShifts";
+import { useDeleteShift } from "@/lib/hooks/mutations/ShiftMutations";
+import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
 
 const Table = () => {
-  const initialEvents = [
-    {
-      date: "2025-11-10",
-      time: "07:00 PM - 01:00 AM",
-      role: "Head Bartender",
-      event: "Corporate Party",
-      bartender: {
-        name: "John Doe",
-        profileImage: "/images/profile.png",
-      },
-      status: "pending",
-      instruction:
-        "The standard Lorem Ipsum passage, m ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.",
-    },
-    {
-      date: "2025-11-11",
-      time: "06:00 PM - 12:00 AM",
-      role: "Assistant Bartender",
-      event: "Wedding Reception",
-      bartender: null,
-      status: "unfilled",
-      instruction:
-        "The standard Lorem Ipsum passage, m ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.",
-    },
-    {
-      date: "2025-11-12",
-      time: "05:00 PM - 11:00 PM",
-      role: "Bar Manager",
-      event: "Birthday Party",
-      bartender: {
-        name: "Jane Smith",
-        profileImage: "/images/profile.png",
-      },
-      status: "confirmed",
-      instruction:
-        "The standard Lorem Ipsum passage, m ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.",
-    },
-    {
-      date: "2025-11-13",
-      time: "08:00 PM - 02:00 AM",
-      role: "Bartender",
-      event: "Night Club Event",
-      bartender: null,
-      status: "pending",
-      instruction:
-        "The standard Lorem Ipsum passage, m ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.",
-    },
-    {
-      date: "2025-11-14",
-      time: "07:30 PM - 01:30 AM",
-      role: "Head Bartender",
-      event: "Private Party",
-      bartender: {
-        name: "Michael Johnson",
-        profileImage: "/images/profile.png",
-      },
-      status: "confirmed",
-      instruction:
-        "The standard Lorem Ipsum passage, m ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.",
-    },
-    {
-      date: "2025-11-15",
-      time: "06:30 PM - 12:30 AM",
-      role: "Bartender",
-      event: "Music Festival",
-      bartender: {
-        name: "Olivia Martinez",
-        profileImage: "/images/profile.png",
-      },
-      status: "pending",
-      instruction:
-        "The standard Lorem Ipsum passage, m ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.",
-    },
-    {
-      date: "2025-11-16",
-      time: "05:00 PM - 10:00 PM",
-      role: "Assistant Bartender",
-      event: "Charity Gala",
-      bartender: null,
-      status: "unfilled",
-      instruction:
-        "The standard Lorem Ipsum passage, m ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.",
-    },
-    {
-      date: "2025-11-17",
-      time: "09:00 PM - 02:00 AM",
-      role: "Bartender",
-      event: "Halloween Bash",
-      bartender: {
-        name: "Emily Davis",
-        profileImage: "/images/profile.png",
-      },
-      status: "confirmed",
-      instruction:
-        "The standard Lorem Ipsum passage, m ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.",
-    },
-    {
-      date: "2025-11-18",
-      time: "07:30 PM - 12:30 AM",
-      role: "Bar Manager",
-      event: "New Year Warmup",
-      bartender: {
-        name: "William Anderson",
-        profileImage: "/images/profile.png",
-      },
-      status: "pending",
-      instruction:
-        "The standard Lorem Ipsum passage, m ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.",
-    },
-    {
-      date: "2025-11-19",
-      time: "04:00 PM - 10:00 PM",
-      role: "Bartender",
-      event: "Corporate Mixer",
-      bartender: null,
-      status: "unfilled",
-      instruction:
-        "The standard Lorem Ipsum passage, m ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.",
-    },
-    {
-      date: "2025-11-20",
-      time: "06:00 PM - 11:30 PM",
-      role: "Head Bartender",
-      event: "Wine Tasting Night",
-      bartender: {
-        name: "James Brown",
-        profileImage: "/images/profile.png",
-      },
-      status: "confirmed",
-      instruction:
-        "The standard Lorem Ipsum passage, m ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.",
-    },
-    {
-      date: "2025-11-21",
-      time: "05:30 PM - 10:30 PM",
-      role: "Assistant Bartender",
-      event: "Outdoor BBQ",
-      bartender: null,
-      status: "pending",
-      instruction:
-        "The standard Lorem Ipsum passage, m ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.",
-    },
-    {
-      date: "2025-11-22",
-      time: "07:00 PM - 01:00 AM",
-      role: "Bartender",
-      event: "DJ Night",
-      bartender: {
-        name: "Sophia Turner",
-        profileImage: "/images/profile.png",
-      },
-      status: "confirmed",
-      instruction:
-        "The standard Lorem Ipsum passage, m ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.",
-    },
-    {
-      date: "2025-11-23",
-      time: "06:30 PM - 12:00 AM",
-      role: "Bar Manager",
-      event: "Luxury Launch Event",
-      bartender: {
-        name: "Robert Wilson",
-        profileImage: "/images/profile.png",
-      },
-      status: "pending",
-      instruction:
-        "The standard Lorem Ipsum passage, m ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.",
-    },
-    {
-      date: "2025-11-24",
-      time: "08:00 PM - 01:30 AM",
-      role: "Head Bartender",
-      event: "Holiday Celebration",
-      bartender: {
-        name: "Ava Clark",
-        profileImage: "/images/profile.png",
-      },
-      status: "confirmed",
-      instruction:
-        "The standard Lorem Ipsum passage, m ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.",
-    },
-  ];
+  const [page, setPage] = useState(1);
+  const LIMIT = 10;
 
-  const events = initialEvents;
+  const { data: shiftsResponse, isLoading } = useGetShifts({ page, limit: LIMIT });
+  const { data: eventsResponse } = useGetEligibleEvents({ page: 1, limit: 100 });
+  const { mutate: deleteShift } = useDeleteShift();
+
+  const shifts = shiftsResponse?.data || [];
+  const eventsList = eventsResponse?.data || [];
+  const totalPages = shiftsResponse?.pagination?.totalPages || 1;
+
+  const normalizedShifts = shifts.map((shift) => {
+    const firstBartender = shift.bartenderIds?.[0];
+    const startStr = utils.formatTime12(shift.startDateTime);
+    const endStr = utils.formatTime12(shift.endDateTime);
+    const foundEvent = eventsList.find((e) => e._id === shift.referenceId);
+
+    return {
+      ...shift,
+      date: shift.startDateTime,
+      time: startStr && endStr ? `${startStr} - ${endStr}` : "",
+      role: shift.role,
+      event: foundEvent ? foundEvent.title : shift.referenceId || "-",
+      bartender: firstBartender
+        ? {
+            name: firstBartender.fullName,
+            profileImage: firstBartender.profileImage?.location || "/images/profile.png",
+          }
+        : null,
+      status: shift.status || "pending",
+      instruction: shift.instructions || "",
+    };
+  });
 
   const [selected, setSelected] = useState(null); // {data, index}
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -200,8 +52,9 @@ const Table = () => {
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   const getStatusColor = (status) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case "pending":
+      case "draft":
         return "text-[#FFAE10]"; // orange
       case "unfilled":
         return "text-[#DC3545]"; // red
@@ -212,8 +65,8 @@ const Table = () => {
     }
   };
 
-  const onPageChange = (page) => {
-    // handle pagination
+  const onPageChange = (newPage) => {
+    setPage(newPage);
   };
 
   const handleRowClick = (event, index) => {
@@ -222,17 +75,29 @@ const Table = () => {
   };
 
   const handleDelete = () => {
-    // static mode: do not remove data, only close modals
-    setDeleteOpen(false);
-    setDetailsOpen(false);
-    setSelected(null);
+    if (!selected?.data?._id) return;
+    deleteShift(selected.data._id, {
+      onSuccess: () => {
+        SuccessToast("Shift deleted successfully.");
+        setDeleteOpen(false);
+        setDetailsOpen(false);
+        setSelected(null);
+      },
+      onError: (error) => {
+        ErrorToast(
+          error?.response?.data?.message ||
+            error?.message ||
+            "Failed to delete shift."
+        );
+      },
+    });
   };
 
   return (
     <CustomPagination
-      loading={false}
+      loading={isLoading}
       onPageChange={onPageChange}
-      totalPages={5}
+      totalPages={totalPages}
     >
       <div className="bg-white rounded-xl overflow-y-auto">
         <table className="w-full">
@@ -248,7 +113,7 @@ const Table = () => {
             </tr>
           </thead>
           <tbody>
-            {events.map((event, index) => (
+            {normalizedShifts.map((event, index) => (
               <tr
                 key={index}
                 className="border-b border-[#D4D4D4] cursor-pointer"

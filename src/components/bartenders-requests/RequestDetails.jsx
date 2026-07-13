@@ -9,7 +9,7 @@ import {
 import { Button } from "../ui/button";
 import utils from "@/lib/utils";
 
-const RequestDetails = ({ isOpen, onOpenChange, data, onReject, onAccept }) => {
+const RequestDetails = ({ isOpen, onOpenChange, data, onReject, onAccept, loading }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="min-w-xl! w-xl!">
@@ -84,15 +84,17 @@ const RequestDetails = ({ isOpen, onOpenChange, data, onReject, onAccept }) => {
                     type="button"
                     className="flex-1 h-12 bg-red-600 hover:bg-red-700 text-white font-semibold"
                     onClick={onReject}
+                    disabled={loading}
                   >
-                    Reject
+                    {loading ? "Processing..." : "Reject"}
                   </Button>
                   <Button
                     type="button"
                     className="flex-1 h-12 bg-green-500 hover:bg-green-600 text-white font-semibold"
                     onClick={onAccept}
+                    disabled={loading}
                   >
-                    Accept
+                    {loading ? "Processing..." : "Accept"}
                   </Button>
                 </div>
               </div>
