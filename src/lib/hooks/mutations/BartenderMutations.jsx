@@ -33,7 +33,11 @@ const updateBartender = async ({ id, ...data }) => {
   if (data.email) formData.append("email", data.email);
   if (data.phoneNumber) formData.append("phoneNumber", data.phoneNumber);
   if (data.address) formData.append("address", data.address);
-  if (data.profileImage) formData.append("profileImage", data.profileImage);
+  if (data.profileImage === null) {
+    formData.append("profileImage", "");
+  } else if (data.profileImage) {
+    formData.append("profileImage", data.profileImage);
+  }
 
   const response = await axiosInstance.patch(`/bartenders/${id}`, formData);
   return response.data;

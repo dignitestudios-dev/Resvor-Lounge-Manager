@@ -65,6 +65,7 @@ const AddShiftAndScheduling = ({
   const [endTime, setEndTime] = useState("");
   const [role, setRole] = useState("");
   const [eventId, setEventId] = useState("");
+  const [eventName, setEventName] = useState("");
   const [instructions, setInstructions] = useState("");
   const [bartenderId, setBartenderId] = useState("");
 
@@ -91,37 +92,51 @@ const AddShiftAndScheduling = ({
         }
         setRole(data.role || "");
         setInstructions(data.instruction || data.instructions || "");
-        
+
         // Match event name if possible
-        if (data.event && eventsData.length > 0) {
-          const foundEvent = eventsData.find((e) => e.title === data.event);
-          if (foundEvent) setEventId(foundEvent._id);
+        if (data.event) {
+          setEventName(data.event);
+          if (eventsData.length > 0) {
+            const foundEvent = eventsData.find((e) => e.title === data.event);
+            if (foundEvent) setEventId(foundEvent._id);
+          }
+        } else {
+          setEventName("");
+          setEventId("");
         }
-        
+
         // Match bartender name if possible
         if (data.bartender && bartendersData.length > 0) {
           const bartenderName = typeof data.bartender === "object" ? data.bartender.name : data.bartender;
           const foundBartender = bartendersData.find((b) => b.fullName === bartenderName);
           if (foundBartender) setBartenderId(foundBartender._id);
         }
-      } else {
-        // Reset form for new shift
-        setDate("");
-        setStartTime("");
-        setEndTime("");
-        setRole("");
-        setEventId("");
-        setInstructions("");
-        setBartenderId("");
       }
     }
   }, [isOpen, isEdit, data, eventsData, bartendersData]);
 
+  // Reset form states ONLY when the modal and the review popup are both closed
+  useEffect(() => {
+    if (!isOpen && !reviewPopup) {
+      setDate("");
+      setStartTime("");
+      setEndTime("");
+      setRole("");
+      setEventId("");
+      setEventName("");
+      setInstructions("");
+      setBartenderId("");
+    }
+  }, [isOpen, reviewPopup]);
+
   // Handle Event selection change to auto-fill date/time
-  const handleEventChange = (val) => {
-    setEventId(val);
-    const selectedEvent = eventsData.find((e) => e._id === val);
+  const handleEventNameChange = (val) => {
+    setEventName(val);
+    const selectedEvent = eventsData.find(
+      (e) => e.title.trim().toLowerCase() === val.trim().toLowerCase()
+    );
     if (selectedEvent) {
+      setEventId(selectedEvent._id);
       if (selectedEvent.startDateTime) {
         setDate(formatDateForInput(selectedEvent.startDateTime));
         setStartTime(formatTimeForInput(selectedEvent.startDateTime));
@@ -129,17 +144,18 @@ const AddShiftAndScheduling = ({
       if (selectedEvent.endDateTime) {
         setEndTime(formatTimeForInput(selectedEvent.endDateTime));
       }
+    } else {
+      setEventId("");
     }
   };
 
-  const selectedEventObj = eventsData.find((e) => e._id === eventId);
   const selectedBartenderObj = bartendersData.find((b) => b._id === bartenderId);
 
   const reviewData = {
     date: date,
     time: startTime && endTime ? `${startTime} - ${endTime}` : "",
     role: role,
-    event: selectedEventObj ? selectedEventObj.title : "",
+    event: eventName,
     bartender: selectedBartenderObj ? selectedBartenderObj.fullName : "",
     instruction: instructions,
     status: "published",
@@ -147,8 +163,12 @@ const AddShiftAndScheduling = ({
 
   const handleSubmit = (e) => {
     e?.preventDefault();
+    if (!eventName) {
+      ErrorToast("Please enter an event name.");
+      return;
+    }
     if (!eventId) {
-      ErrorToast("Please select an event.");
+      ErrorToast("Please enter a valid event name from the suggestions.");
       return;
     }
     if (!role) {
@@ -157,6 +177,10 @@ const AddShiftAndScheduling = ({
     }
     if (!date || !startTime || !endTime) {
       ErrorToast("Please fill in the date and both start/end times.");
+      return;
+    }
+    if (startTime >= endTime) {
+      ErrorToast("Start time must be before end time.");
       return;
     }
     if (!bartenderId) {
@@ -174,8 +198,12 @@ const AddShiftAndScheduling = ({
 
   const handleEdit = (e) => {
     e?.preventDefault();
+    if (!eventName) {
+      ErrorToast("Please enter an event name.");
+      return;
+    }
     if (!eventId) {
-      ErrorToast("Please select an event.");
+      ErrorToast("Please enter a valid event name from the suggestions.");
       return;
     }
     if (!role) {
@@ -186,6 +214,10 @@ const AddShiftAndScheduling = ({
       ErrorToast("Please fill in the date and both start/end times.");
       return;
     }
+    if (startTime >= endTime) {
+      ErrorToast("Start time must be before end time.");
+      return;
+    }
     if (!bartenderId) {
       ErrorToast("Please select a bartender.");
       return;
@@ -193,10 +225,6 @@ const AddShiftAndScheduling = ({
 
     const startObj = new Date(`${date}T${startTime}`);
     let endObj = new Date(`${date}T${endTime}`);
-
-    if (endObj <= startObj) {
-      endObj.setDate(endObj.getDate() + 1);
-    }
 
     const startDateTime = startObj.toISOString();
     const endDateTime = endObj.toISOString();
@@ -226,8 +254,8 @@ const AddShiftAndScheduling = ({
         onError: (error) => {
           ErrorToast(
             error?.response?.data?.message ||
-              error?.message ||
-              "Failed to update shift."
+            error?.message ||
+            "Failed to update shift."
           );
         },
       }
@@ -238,11 +266,6 @@ const AddShiftAndScheduling = ({
     // Parse input date and times to ISO strings
     const startObj = new Date(`${date}T${startTime}`);
     let endObj = new Date(`${date}T${endTime}`);
-
-    // If end time is before or equal to start time, it means the shift crosses midnight into the next day
-    if (endObj <= startObj) {
-      endObj.setDate(endObj.getDate() + 1);
-    }
 
     const startDateTime = startObj.toISOString();
     const endDateTime = endObj.toISOString();
@@ -263,20 +286,12 @@ const AddShiftAndScheduling = ({
           SuccessToast("Shift created successfully.");
           setReviewPopup(false);
           setConfirmPopup(true);
-          // Clear states
-          setDate("");
-          setStartTime("");
-          setEndTime("");
-          setRole("");
-          setEventId("");
-          setInstructions("");
-          setBartenderId("");
         },
         onError: (error) => {
           ErrorToast(
             error?.response?.data?.message ||
-              error?.message ||
-              "Failed to create shift."
+            error?.message ||
+            "Failed to create shift."
           );
         },
       }
@@ -350,21 +365,18 @@ const AddShiftAndScheduling = ({
 
                 <div className="w-full flex flex-col gap-1 col-span-2">
                   <Label className={"text-base text-black"}>Event</Label>
-                  <Select value={eventId} onValueChange={handleEventChange}>
-                    <SelectTrigger className={"w-full !h-14"}>
-                      <SelectValue placeholder="Select an Event" />
-                    </SelectTrigger>
-                    <SelectContent className={"h-[200px]"}>
-                      <SelectGroup>
-                        <SelectLabel>Events</SelectLabel>
-                        {eventsData.map((event) => (
-                          <SelectItem value={event._id} key={event._id}>
-                            {event.title}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+                  <Input
+                    placeholder="Type to search event..."
+                    className={"h-14"}
+                    value={eventName}
+                    list="events-list"
+                    onChange={(e) => handleEventNameChange(e.target.value)}
+                  />
+                  <datalist id="events-list">
+                    {eventsData.map((event) => (
+                      <option value={event.title} key={event._id} />
+                    ))}
+                  </datalist>
                 </div>
 
                 <div className="w-full flex flex-col gap-1 col-span-2">

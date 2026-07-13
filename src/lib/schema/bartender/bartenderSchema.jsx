@@ -60,6 +60,13 @@ export const createBartenderSchema = Yup.object({
       value ? !/<[^>]*>|<\/[^>]*>/g.test(value) : true
     )
 
+    // Must contain at least two words (separated by space)
+    .test(
+      "must-have-space",
+      "Full name must contain at least two words (e.g., first name and last name).",
+      (value) => (value ? value.trim().includes(" ") : true)
+    )
+
     // Sentence Case / Title Case validation
     .test(
       "sentence-case",
@@ -182,6 +189,13 @@ export const editBartenderSchema = Yup.object({
       value ? !/<[^>]*>|<\/[^>]*>/g.test(value) : true
     )
 
+    // Must contain at least two words (separated by space)
+    .test(
+      "must-have-space",
+      "Full name must contain at least two words (e.g., first name and last name).",
+      (value) => (value ? value.trim().includes(" ") : true)
+    )
+
     // Sentence Case / Title Case validation
     .test(
       "sentence-case",
@@ -212,8 +226,6 @@ export const editBartenderSchema = Yup.object({
     ),
 
   phoneNumber: Yup.string()
-    .transform((value) => (value ? value.replace(/\D/g, "") : ""))
-    .matches(/^[0-9]{10}$/, "Phone number must be exactly 10 digits.")
     .required("Phone number is required."),
 
   address: Yup.string()
