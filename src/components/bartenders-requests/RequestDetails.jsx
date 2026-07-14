@@ -56,7 +56,7 @@ const RequestDetails = ({ isOpen, onOpenChange, data, onReject, onAccept, loadin
                   </div>
                   <p className="mt-2  text-gray-600">
                     {data.instruction ||
-                      "The standard Lorem Ipsum passage, m ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod. The standard."}
+                      "Not Provided"}
                   </p>
                 </div>
 

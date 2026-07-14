@@ -240,7 +240,7 @@ const AddShiftAndScheduling = ({
 
     createShift(
       {
-        referenceType: "event",
+        referenceType: "Event",
         referenceId: values.eventId,
         role: values.role,
         startDateTime: startDateTime,
