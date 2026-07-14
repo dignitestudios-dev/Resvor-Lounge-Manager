@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useFormik } from "formik";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +29,8 @@ import { useGetBartenders } from "@/lib/hooks/queries/useBartenders";
 import { useGetEligibleEvents } from "@/lib/hooks/queries/useShifts";
 import { useCreateShift, useUpdateShift } from "@/lib/hooks/mutations/ShiftMutations";
 import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
+import { shiftValues } from "@/lib/init/shiftValues";
+import { addShiftSchema } from "@/lib/schema/shift/addShiftSchema";
 
 const formatDateForInput = (isoString) => {
   if (!isoString) return "";
@@ -46,6 +49,14 @@ const formatTimeForInput = (isoString) => {
   return `${hh}:${mm}`;
 };
 
+const getTodayString = () => {
+  const dateObj = new Date();
+  const yyyy = dateObj.getFullYear();
+  const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const dd = String(dateObj.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+};
+
 const AddShiftAndScheduling = ({
   isOpen,
   onOpenChange,
@@ -59,213 +70,170 @@ const AddShiftAndScheduling = ({
   const [reviewPopup, setReviewPopup] = useState(false);
   const [updatedOpen, setUpdatedOpen] = useState(false);
 
-  // Form states
-  const [date, setDate] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
-  const [role, setRole] = useState("");
-  const [eventId, setEventId] = useState("");
-  const [eventName, setEventName] = useState("");
-  const [instructions, setInstructions] = useState("");
-  const [bartenderId, setBartenderId] = useState("");
-
   // Data queries & mutation
   const { data: bartendersResponse } = useGetBartenders({ page: 1, limit: 100 });
   const { data: eventsResponse } = useGetEligibleEvents({ page: 1, limit: 100 });
-  const { mutate: createShift } = useCreateShift();
+  const { mutate: createShift, isPending: isCreating } = useCreateShift();
   const { mutate: updateShift } = useUpdateShift();
 
   const bartendersData = bartendersResponse?.data || [];
   const eventsData = eventsResponse?.data || [];
 
-  // Populate or reset form states based on mode
-  useEffect(() => {
-    if (isOpen) {
-      if (isEdit && data) {
-        setDate(data.date && data.date.includes("T") ? formatDateForInput(data.date) : data.date || "");
-        if (data.startDateTime) {
-          setDate(formatDateForInput(data.startDateTime));
-          setStartTime(formatTimeForInput(data.startDateTime));
-        }
-        if (data.endDateTime) {
-          setEndTime(formatTimeForInput(data.endDateTime));
-        }
-        setRole(data.role || "");
-        setInstructions(data.instruction || data.instructions || "");
-
-        // Match event name if possible
-        if (data.event) {
-          setEventName(data.event);
-          if (eventsData.length > 0) {
-            const foundEvent = eventsData.find((e) => e.title === data.event);
-            if (foundEvent) setEventId(foundEvent._id);
-          }
-        } else {
-          setEventName("");
-          setEventId("");
-        }
-
-        // Match bartender name if possible
-        if (data.bartender && bartendersData.length > 0) {
-          const bartenderName = typeof data.bartender === "object" ? data.bartender.name : data.bartender;
-          const foundBartender = bartendersData.find((b) => b.fullName === bartenderName);
-          if (foundBartender) setBartenderId(foundBartender._id);
-        }
+  // Formik configuration
+  const getInitialValues = () => {
+    if (isEdit && data) {
+      let editDate = data.date && data.date.includes("T") ? formatDateForInput(data.date) : data.date || "";
+      let editStartTime = "";
+      let editEndTime = "";
+      if (data.startDateTime) {
+        editDate = formatDateForInput(data.startDateTime);
+        editStartTime = formatTimeForInput(data.startDateTime);
       }
+      if (data.endDateTime) {
+        editEndTime = formatTimeForInput(data.endDateTime);
+      }
+      const editRole = data.role || "";
+      const editInstructions = data.instruction || data.instructions || "";
+
+      let editEventName = "";
+      let editEventId = data.referenceId || "";
+      if (editEventId) {
+        const foundEvent = eventsData.find((e) => e._id === editEventId);
+        if (foundEvent) editEventName = foundEvent.title;
+      } else if (data.event) {
+        editEventName = data.event;
+        const foundEvent = eventsData.find((e) => e.title === data.event);
+        if (foundEvent) editEventId = foundEvent._id;
+      }
+
+      let editBartenderId = "";
+      if (data.bartender && bartendersData.length > 0) {
+        const bartenderName = typeof data.bartender === "object" ? data.bartender.name : data.bartender;
+        const foundBartender = bartendersData.find((b) => b.fullName === bartenderName);
+        if (foundBartender) editBartenderId = foundBartender._id;
+      }
+
+      return {
+        date: editDate,
+        startTime: editStartTime,
+        endTime: editEndTime,
+        role: editRole,
+        eventId: editEventId,
+        eventName: editEventName,
+        instructions: editInstructions,
+        bartenderId: editBartenderId,
+      };
     }
-  }, [isOpen, isEdit, data, eventsData, bartendersData]);
+
+    return shiftValues;
+  };
+
+  const formik = useFormik({
+    initialValues: getInitialValues(),
+    validationSchema: addShiftSchema,
+    enableReinitialize: true,
+    onSubmit: (values) => {
+      if (isEdit) {
+        const startObj = new Date(`${values.date}T${values.startTime}`);
+        let endObj = new Date(`${values.date}T${values.endTime}`);
+
+        const startDateTime = startObj.toISOString();
+        const endDateTime = endObj.toISOString();
+
+        updateShift(
+          {
+            id: data._id,
+            referenceType: "event",
+            referenceId: values.eventId,
+            role: values.role,
+            startDateTime: startDateTime,
+            endDateTime: endDateTime,
+            bartenderIds: [values.bartenderId],
+            instructions: values.instructions,
+            status: "published",
+          },
+          {
+            onSuccess: () => {
+              SuccessToast("Shift updated successfully.");
+              onOpenChange(false);
+              if (typeof onUpdateSubmit === "function") {
+                onUpdateSubmit();
+              } else {
+                setUpdatedOpen(true);
+              }
+            },
+            onError: (error) => {
+              ErrorToast(
+                error?.response?.data?.message ||
+                error?.message ||
+                "Failed to update shift."
+              );
+            },
+          }
+        );
+      } else {
+        onOpenChange(false);
+        setReviewPopup(true);
+      }
+    },
+  });
+
+  const {
+    values,
+    handleBlur,
+    handleChange,
+    handleSubmit,
+    errors,
+    touched,
+    setFieldValue,
+    resetForm,
+  } = formik;
 
   // Reset form states ONLY when the modal and the review popup are both closed
   useEffect(() => {
     if (!isOpen && !reviewPopup) {
-      setDate("");
-      setStartTime("");
-      setEndTime("");
-      setRole("");
-      setEventId("");
-      setEventName("");
-      setInstructions("");
-      setBartenderId("");
+      resetForm();
     }
-  }, [isOpen, reviewPopup]);
+  }, [isOpen, reviewPopup, resetForm]);
 
   // Handle Event selection change to auto-fill date/time
-  const handleEventNameChange = (val) => {
-    setEventName(val);
-    const selectedEvent = eventsData.find(
-      (e) => e.title.trim().toLowerCase() === val.trim().toLowerCase()
-    );
+  const handleEventSelect = (val) => {
+    setFieldValue("eventId", val);
+    const selectedEvent = eventsData.find((e) => e._id === val);
     if (selectedEvent) {
-      setEventId(selectedEvent._id);
+      setFieldValue("eventName", selectedEvent.title);
       if (selectedEvent.startDateTime) {
-        setDate(formatDateForInput(selectedEvent.startDateTime));
-        setStartTime(formatTimeForInput(selectedEvent.startDateTime));
+        setFieldValue("date", formatDateForInput(selectedEvent.startDateTime));
+        setFieldValue("startTime", formatTimeForInput(selectedEvent.startDateTime));
       }
       if (selectedEvent.endDateTime) {
-        setEndTime(formatTimeForInput(selectedEvent.endDateTime));
+        setFieldValue("endTime", formatTimeForInput(selectedEvent.endDateTime));
       }
     } else {
-      setEventId("");
+      setFieldValue("eventName", "");
     }
   };
 
-  const selectedBartenderObj = bartendersData.find((b) => b._id === bartenderId);
+  const selectedBartenderObj = bartendersData.find((b) => b._id === values.bartenderId);
 
   const reviewData = {
-    date: date,
-    time: startTime && endTime ? `${startTime} - ${endTime}` : "",
-    role: role,
-    event: eventName,
+    date: values.date,
+    time: values.startTime && values.endTime ? `${values.startTime} - ${values.endTime}` : "",
+    role: values.role,
+    event: values.eventName,
     bartender: selectedBartenderObj ? selectedBartenderObj.fullName : "",
-    instruction: instructions,
+    instruction: values.instructions,
     status: "published",
-  };
-
-  const handleSubmit = (e) => {
-    e?.preventDefault();
-    if (!eventName) {
-      ErrorToast("Please enter an event name.");
-      return;
-    }
-    if (!eventId) {
-      ErrorToast("Please enter a valid event name from the suggestions.");
-      return;
-    }
-    if (!role) {
-      ErrorToast("Please enter a role.");
-      return;
-    }
-    if (!date || !startTime || !endTime) {
-      ErrorToast("Please fill in the date and both start/end times.");
-      return;
-    }
-    if (startTime >= endTime) {
-      ErrorToast("Start time must be before end time.");
-      return;
-    }
-    if (!bartenderId) {
-      ErrorToast("Please select a bartender.");
-      return;
-    }
-
-    onOpenChange(false);
-    setReviewPopup(true);
   };
 
   const handleSaveTemplate = () => {
     onOpenChange(false);
   };
 
-  const handleEdit = (e) => {
-    e?.preventDefault();
-    if (!eventName) {
-      ErrorToast("Please enter an event name.");
-      return;
-    }
-    if (!eventId) {
-      ErrorToast("Please enter a valid event name from the suggestions.");
-      return;
-    }
-    if (!role) {
-      ErrorToast("Please enter a role.");
-      return;
-    }
-    if (!date || !startTime || !endTime) {
-      ErrorToast("Please fill in the date and both start/end times.");
-      return;
-    }
-    if (startTime >= endTime) {
-      ErrorToast("Start time must be before end time.");
-      return;
-    }
-    if (!bartenderId) {
-      ErrorToast("Please select a bartender.");
-      return;
-    }
-
-    const startObj = new Date(`${date}T${startTime}`);
-    let endObj = new Date(`${date}T${endTime}`);
-
-    const startDateTime = startObj.toISOString();
-    const endDateTime = endObj.toISOString();
-
-    updateShift(
-      {
-        id: data._id,
-        referenceType: "event",
-        referenceId: eventId,
-        role: role,
-        startDateTime: startDateTime,
-        endDateTime: endDateTime,
-        bartenderIds: [bartenderId],
-        instructions: instructions,
-        status: "published",
-      },
-      {
-        onSuccess: () => {
-          SuccessToast("Shift updated successfully.");
-          onOpenChange(false);
-          if (typeof onUpdateSubmit === "function") {
-            onUpdateSubmit();
-          } else {
-            setUpdatedOpen(true);
-          }
-        },
-        onError: (error) => {
-          ErrorToast(
-            error?.response?.data?.message ||
-            error?.message ||
-            "Failed to update shift."
-          );
-        },
-      }
-    );
-  };
-
   const handleConfirm = () => {
     // Parse input date and times to ISO strings
-    const startObj = new Date(`${date}T${startTime}`);
-    let endObj = new Date(`${date}T${endTime}`);
+    const startObj = new Date(`${values.date}T${values.startTime}`);
+    let endObj = new Date(`${values.date}T${values.endTime}`);
 
     const startDateTime = startObj.toISOString();
     const endDateTime = endObj.toISOString();
@@ -273,12 +241,12 @@ const AddShiftAndScheduling = ({
     createShift(
       {
         referenceType: "event",
-        referenceId: eventId,
-        role: role,
+        referenceId: values.eventId,
+        role: values.role,
         startDateTime: startDateTime,
         endDateTime: endDateTime,
-        bartenderIds: [bartenderId],
-        instructions: instructions,
+        bartenderIds: [values.bartenderId],
+        instructions: values.instructions,
         status: "published",
       },
       {
@@ -319,64 +287,98 @@ const AddShiftAndScheduling = ({
               {isEdit ? "Edit Shift" : "Add New Shift"}
             </DialogTitle>
             <DialogDescription asChild>
-              <div className="mt-4 grid grid-cols-2 gap-4">
+              <form onSubmit={handleSubmit} className="mt-4 grid grid-cols-2 gap-4">
                 <div className="w-full flex flex-col gap-1 col-span-2">
                   <Label className={"text-base text-black"}>Date</Label>
                   <Input
+                    id="date"
+                    name="date"
                     placeholder="Date"
                     type={"date"}
                     className={"h-14"}
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
+                    value={values.date}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    min={getTodayString()}
                   />
+                  {touched.date && errors.date && (
+                    <p className="text-red-600 text-xs mt-1">{errors.date}</p>
+                  )}
                 </div>
 
                 <div className="w-full flex flex-col gap-1">
                   <Label className={"text-base text-black"}>Start Time</Label>
                   <Input
+                    id="startTime"
+                    name="startTime"
                     placeholder="Start Time"
                     type={"time"}
                     className={"h-14"}
-                    value={startTime}
-                    onChange={(e) => setStartTime(e.target.value)}
+                    value={values.startTime}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
                   />
+                  {touched.startTime && errors.startTime && (
+                    <p className="text-red-600 text-xs mt-1">{errors.startTime}</p>
+                  )}
                 </div>
 
                 <div className="w-full flex flex-col gap-1">
                   <Label className={"text-base text-black"}>End Time</Label>
                   <Input
+                    id="endTime"
+                    name="endTime"
                     placeholder="End Time"
                     type={"time"}
                     className={"h-14"}
-                    value={endTime}
-                    onChange={(e) => setEndTime(e.target.value)}
+                    value={values.endTime}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
                   />
+                  {touched.endTime && errors.endTime && (
+                    <p className="text-red-600 text-xs mt-1">{errors.endTime}</p>
+                  )}
                 </div>
 
                 <div className="w-full flex flex-col gap-1 col-span-2">
                   <Label className={"text-base text-black"}>Role</Label>
                   <Input
+                    id="role"
+                    name="role"
                     placeholder="Role"
                     className={"h-14"}
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
+                    value={values.role}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
                   />
+                  {touched.role && errors.role && (
+                    <p className="text-red-600 text-xs mt-1">{errors.role}</p>
+                  )}
                 </div>
 
                 <div className="w-full flex flex-col gap-1 col-span-2">
                   <Label className={"text-base text-black"}>Event</Label>
-                  <Input
-                    placeholder="Type to search event..."
-                    className={"h-14"}
-                    value={eventName}
-                    list="events-list"
-                    onChange={(e) => handleEventNameChange(e.target.value)}
-                  />
-                  <datalist id="events-list">
-                    {eventsData.map((event) => (
-                      <option value={event.title} key={event._id} />
-                    ))}
-                  </datalist>
+                  <Select
+                    value={values.eventId}
+                    onValueChange={(val) => handleEventSelect(val)}
+                  >
+                    <SelectTrigger className={"w-full !h-14"}>
+                      <SelectValue placeholder="Select an Event" />
+                    </SelectTrigger>
+                    <SelectContent className={"h-[200px]"}>
+                      <SelectGroup>
+                        <SelectLabel>Events</SelectLabel>
+                        {eventsData.map((event) => (
+                          <SelectItem value={event._id} key={event._id}>
+                            {event.title}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  {touched.eventId && errors.eventId && (
+                    <p className="text-red-600 text-xs mt-1">{errors.eventId}</p>
+                  )}
                 </div>
 
                 <div className="w-full flex flex-col gap-1 col-span-2">
@@ -385,18 +387,27 @@ const AddShiftAndScheduling = ({
                     <span className="text-gray-300">(optional)</span>
                   </Label>
                   <Textarea
+                    id="instructions"
+                    name="instructions"
                     placeholder="Add text here"
                     className={"h-28"}
-                    value={instructions}
-                    onChange={(e) => setInstructions(e.target.value)}
+                    value={values.instructions}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
                   />
+                  {touched.instructions && errors.instructions && (
+                    <p className="text-red-600 text-xs mt-1">{errors.instructions}</p>
+                  )}
                 </div>
 
                 <div className="col-span-2 flex flex-col gap-1">
                   <Label className={"text-base text-black"}>
                     Assign Bartender
                   </Label>
-                  <Select value={bartenderId} onValueChange={setBartenderId}>
+                  <Select
+                    value={values.bartenderId}
+                    onValueChange={(val) => setFieldValue("bartenderId", val)}
+                  >
                     <SelectTrigger className={"w-full !h-14"}>
                       <SelectValue placeholder="Select a Bartender" />
                     </SelectTrigger>
@@ -411,16 +422,20 @@ const AddShiftAndScheduling = ({
                       </SelectGroup>
                     </SelectContent>
                   </Select>
+                  {touched.bartenderId && errors.bartenderId && (
+                    <p className="text-red-600 text-xs mt-1">{errors.bartenderId}</p>
+                  )}
                 </div>
 
                 <Button
-                  onClick={isEdit ? handleEdit : handleSubmit}
+                  type="submit"
                   className={"col-span-2 w-full h-14 text-lg"}
                 >
                   {isEdit ? "Update" : "Create Shift"}
                 </Button>
 
                 <Button
+                  type="button"
                   onClick={handleSaveTemplate}
                   className={
                     "bg-gray-200 hover:bg-gray-100 text-black! col-span-2 w-full h-14 text-lg"
@@ -428,7 +443,7 @@ const AddShiftAndScheduling = ({
                 >
                   Save This Template
                 </Button>
-              </div>
+              </form>
             </DialogDescription>
           </DialogHeader>
         </DialogContent>
@@ -441,6 +456,7 @@ const AddShiftAndScheduling = ({
         data={reviewData}
         onBack={handleBack}
         onConfirm={handleConfirm}
+        isLoading={isCreating}
       />
 
       {/* Confirmation Popup  */}

@@ -7,8 +7,29 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "../ui/button";
+import { Loader2 } from "lucide-react";
 
-const ReviewPopup = ({ isOpen, onOpenChange, onConfirm, onBack, data }) => {
+const formatTime12 = (time24) => {
+  if (!time24) return "";
+  const [hour, minute] = time24.split(":");
+  if (hour === undefined || minute === undefined) return time24;
+  const h = Number(hour);
+  const ampm = h >= 12 ? "PM" : "AM";
+  const formattedHour = String(h % 12 || 12).padStart(2, "0");
+  return `${formattedHour}:${minute} ${ampm}`;
+};
+
+const formatRange12 = (rangeStr) => {
+  if (!rangeStr) return "";
+  const parts = rangeStr.split(" - ");
+  if (parts.length === 2) {
+    return `${formatTime12(parts[0])} - ${formatTime12(parts[1])}`;
+  }
+  return rangeStr;
+};
+
+const ReviewPopup = ({ isOpen, onOpenChange, onConfirm, onBack, data, isLoading = false }) => {
+  console.log("🚀 ~ ReviewPopup ~ data:", data)
   if (!data) return null;
 
   return (
@@ -28,7 +49,7 @@ const ReviewPopup = ({ isOpen, onOpenChange, onConfirm, onBack, data }) => {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Time</p>
-                <p className="font-medium text-black">{data.time}</p>
+                <p className="font-medium text-black">{formatRange12(data.time)}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Role</p>
@@ -62,10 +83,11 @@ const ReviewPopup = ({ isOpen, onOpenChange, onConfirm, onBack, data }) => {
 
             {/* Buttons */}
             <div className="pt-4 space-y-2">
-              <Button onClick={onConfirm} className="w-full">
-                Confirm Now
+              <Button onClick={onConfirm} className="w-full flex items-center justify-center gap-2" disabled={isLoading}>
+                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                {isLoading ? "Confirming..." : "Confirm Now"}
               </Button>
-              <Button onClick={onBack} className="w-full" variant="secondary">
+              <Button onClick={onBack} className="w-full" variant="secondary" disabled={isLoading}>
                 Back
               </Button>
             </div>

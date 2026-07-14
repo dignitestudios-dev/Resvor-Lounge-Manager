@@ -79,24 +79,26 @@ const RequestDetails = ({ isOpen, onOpenChange, data, onReject, onAccept, loadin
 
                 <hr />
 
-                <div className="flex gap-4 pt-4">
-                  <Button
-                    type="button"
-                    className="flex-1 h-12 bg-red-600 hover:bg-red-700 text-white font-semibold"
-                    onClick={onReject}
-                    disabled={loading}
-                  >
-                    {loading ? "Processing..." : "Reject"}
-                  </Button>
-                  <Button
-                    type="button"
-                    className="flex-1 h-12 bg-green-500 hover:bg-green-600 text-white font-semibold"
-                    onClick={onAccept}
-                    disabled={loading}
-                  >
-                    {loading ? "Processing..." : "Accept"}
-                  </Button>
-                </div>
+                {data.status?.toLowerCase() === "pending" && (
+                  <div className="flex gap-4 pt-4">
+                    <Button
+                      type="button"
+                      className="flex-1 h-12 bg-red-600 hover:bg-red-700 text-white font-semibold"
+                      onClick={onReject}
+                      disabled={loading}
+                    >
+                      {loading ? "Processing..." : "Reject"}
+                    </Button>
+                    <Button
+                      type="button"
+                      className="flex-1 h-12 bg-green-500 hover:bg-green-600 text-white font-semibold"
+                      onClick={onAccept}
+                      disabled={loading}
+                    >
+                      {loading ? "Processing..." : "Accept"}
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </DialogDescription>
