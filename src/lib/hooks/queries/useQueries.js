@@ -60,10 +60,10 @@ export const useWalletTransactions = ({ page = 1, limit = 10 } = {}, options = {
 /* ─── Campaign Queries ────────────────────────────── */
 import { getCampaigns, getCampaignById } from "../api/Post";
 
-export const useGetCampaigns = (options = {}) => {
+export const useGetCampaigns = ({ page = 1, limit = 10 } = {}, options = {}) => {
   return useQuery({
-    queryKey: ["campaigns"],
-    queryFn: getCampaigns,
+    queryKey: ["campaigns", page, limit],
+    queryFn: () => getCampaigns({ page, limit }),
     retry: false,
     refetchOnWindowFocus: false,
     ...options,

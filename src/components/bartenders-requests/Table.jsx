@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
 import RequestDetails from "./RequestDetails";
+import RejectReasonPopup from "./RejectReasonPopup";
 import CustomPagination from "@/components/common/CustomPagination";
 import { useGetShiftRequests } from "@/lib/hooks/queries/useShiftRequests";
 import { useReviewShiftRequest } from "@/lib/hooks/mutations/useReviewShiftRequest";
@@ -10,6 +11,7 @@ import { SuccessToast, ErrorToast } from "@/components/ui/toaster";
 const Table = () => {
   const [selected, setSelected] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [rejectReasonOpen, setRejectReasonOpen] = useState(false);
   const [page, setPage] = useState(1);
   const LIMIT = 10;
 
@@ -25,20 +27,23 @@ const Table = () => {
   const totalPages = shiftRequestsResponse?.pagination?.totalPages || 1;
 
   const handleRowClick = (req) => {
-    if (req.status.toLowerCase() === "pending") {
-      setSelected(req);
-      setDetailsOpen(true);
-    }
+    setSelected(req);
+    setDetailsOpen(true);
   };
 
-  const handleReject = () => {
+  const handleRejectInit = () => {
+    setDetailsOpen(false);
+    setRejectReasonOpen(true);
+  };
+
+  const handleConfirmReject = (reason) => {
     if (!selected) return;
     reviewRequest(
-      { id: selected._id, status: "rejected", reviewNote: "Rejected by Manager" },
+      { id: selected._id, status: "rejected", reviewNote: reason },
       {
         onSuccess: () => {
           SuccessToast("Request rejected successfully.");
-          setDetailsOpen(false);
+          setRejectReasonOpen(false);
           setSelected(null);
         },
         onError: (err) => {
@@ -46,6 +51,11 @@ const Table = () => {
         },
       }
     );
+  };
+
+  const handleCancelReject = () => {
+    setRejectReasonOpen(false);
+    setDetailsOpen(true);
   };
 
   const handleAccept = () => {
@@ -262,8 +272,16 @@ const Table = () => {
           isOpen={detailsOpen}
           onOpenChange={setDetailsOpen}
           data={selected}
-          onReject={handleReject}
+          onReject={handleRejectInit}
           onAccept={handleAccept}
+          loading={isReviewing}
+        />
+
+        <RejectReasonPopup
+          isOpen={rejectReasonOpen}
+          onOpenChange={setRejectReasonOpen}
+          onConfirm={handleConfirmReject}
+          onCancel={handleCancelReject}
           loading={isReviewing}
         />
       </div>

@@ -7,6 +7,7 @@ import { useDeleteBartender } from "@/lib/hooks/mutations/BartenderMutations";
 import DeleteBartenderPopup from "./DeleteBartenderPopup";
 import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
 import CustomPagination from "@/components/common/CustomPagination";
+import { formatPhoneNumber } from "@/lib/utils";
 
 const LIMIT = 10;
 
@@ -148,7 +149,7 @@ const Table = () => {
                     className="px-4 py-6 cursor-pointer"
                     onClick={() => handleGoToDetailsPage(bartender._id)}
                   >
-                    {bartender.phoneNumber}
+                    {formatPhoneNumber(bartender.phoneNumber)}
                   </td>
 
                   {/* Address */}

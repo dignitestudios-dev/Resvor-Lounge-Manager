@@ -18,33 +18,67 @@ export const createBartenderSchema = Yup.object({
     }),
 
   fullName: Yup.string()
-    .required("Full name is required")
+    .required("Full name is required.")
+    .min(1, "Full name must be at least 1 character.")
+    .max(100, "Full name cannot exceed 100 characters.")
+
+    // Not empty after trim
     .test(
       "not-empty-after-trim",
-      "Full name cannot be empty or just spaces.",
+      "Full name cannot be empty or only spaces.",
       (value) => value?.trim().length > 0
     )
+
+    // No leading spaces
     .test(
       "no-leading-space",
       "Full name cannot start with a space.",
       (value) => (value ? !value.startsWith(" ") : true)
     )
+
+    // No multiple consecutive spaces
     .test(
-      "not-only-numbers",
-      "Full name cannot contain only numbers.",
-      (value) => (value ? !/^\d+$/.test(value.trim()) : true)
+      "no-multiple-spaces",
+      "Full name cannot contain multiple consecutive spaces.",
+      (value) => (value ? !/ {2,}/.test(value) : true)
     )
-    .test(
-      "must-contain-letter",
-      "Full name must contain at least one letter.",
-      (value) => (value ? /[A-Za-z]/.test(value.trim()) : true)
-    )
+
+    // Only allowed characters:
+    // Unicode letters, spaces, apostrophes, hyphens
     .matches(
-      NO_SPECIAL_CHARS,
-      "Full name cannot contain special characters or symbols."
+      /^[\p{L}' -]+$/u,
+      "Full name can only contain letters, spaces, hyphens (-), and apostrophes (')."
     )
-    .min(3, "Full name must be at least 3 characters long")
-    .max(80, "Full name must not exceed 80 characters"),
+
+    // Prevent numbers
+    .test("no-numbers", "Full name cannot contain numbers.", (value) =>
+      value ? !/\d/.test(value) : true
+    )
+
+    // Prevent HTML/script tags
+    .test("no-html", "HTML or script content is not allowed.", (value) =>
+      value ? !/<[^>]*>|<\/[^>]*>/g.test(value) : true
+    )
+
+    // Must contain at least two words (separated by space)
+    .test(
+      "must-have-space",
+      "Full name must contain at least two words (e.g., first name and last name).",
+      (value) => (value ? value.trim().includes(" ") : true)
+    )
+
+    // Sentence Case / Title Case validation
+    .test(
+      "sentence-case",
+      "Each word must start with a capital letter.",
+      (value) =>
+        value
+          ? value
+            .trim()
+            .split(" ")
+            .every((word) => /^[A-ZÀ-Ÿ][\p{L}'-]*$/u.test(word))
+          : true
+    ),
 
   email: Yup.string()
     .required("Email address is required")
@@ -63,12 +97,9 @@ export const createBartenderSchema = Yup.object({
     ),
 
   phoneNumber: Yup.string()
-    .required("Phone number is required")
-    .test(
-      "no-special-chars",
-      "Phone number can only contain digits and an optional leading +.",
-      (value) => (value ? /^\+?[0-9\s\-()]{7,20}$/.test(value.trim()) : false)
-    ),
+    .transform((value) => (value ? value.replace(/\D/g, "") : ""))
+    .matches(/^[0-9]{10}$/, "Phone number must be exactly 10 digits.")
+    .required("Phone number is required."),
 
   address: Yup.string()
     .required("Address is required")
@@ -115,58 +146,6 @@ export const editBartenderSchema = Yup.object({
       return value.size <= 5 * 1024 * 1024;
     }),
 
-  fullName: Yup.string()
-    .required("Full name is required")
-    .test(
-      "not-empty-after-trim",
-      "Full name cannot be empty or just spaces.",
-      (value) => value?.trim().length > 0
-    )
-    .test(
-      "no-leading-space",
-      "Full name cannot start with a space.",
-      (value) => (value ? !value.startsWith(" ") : true)
-    )
-    .test(
-      "not-only-numbers",
-      "Full name cannot contain only numbers.",
-      (value) => (value ? !/^\d+$/.test(value.trim()) : true)
-    )
-    .test(
-      "must-contain-letter",
-      "Full name must contain at least one letter.",
-      (value) => (value ? /[A-Za-z]/.test(value.trim()) : true)
-    )
-    .matches(
-      NO_SPECIAL_CHARS,
-      "Full name cannot contain special characters or symbols."
-    )
-    .min(3, "Full name must be at least 3 characters long")
-    .max(80, "Full name must not exceed 80 characters"),
-
-  email: Yup.string()
-    .required("Email address is required")
-    .test("no-leading-space", "Email cannot start with a space.", (value) =>
-      value ? value[0] !== " " : false
-    )
-    .test(
-      "no-spaces",
-      "Email cannot contain spaces.",
-      (value) =>
-        value ? value.trim() === value && !/\s/.test(value) : false
-    )
-    .matches(
-      /^[A-Za-z0-9_+-]+(?:\.[A-Za-z0-9_+-]+)*@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/,
-      "Invalid email format."
-    ),
-
-  phoneNumber: Yup.string()
-    .required("Phone number is required")
-    .test(
-      "no-special-chars",
-      "Phone number can only contain digits and an optional leading +.",
-      (value) => (value ? /^\+?[0-9\s\-()]{7,20}$/.test(value.trim()) : false)
-    ),
 
   address: Yup.string()
     .required("Address is required")

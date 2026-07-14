@@ -93,27 +93,24 @@ export const campaignFlyerSchema = Yup.object({
     ),
 
   city: Yup.string()
-    .required("City is required.")
+    .transform((value) => (value === "" ? undefined : value))
+    .optional()
     .min(2, "City must be at least 2 characters.")
     .max(60, "City cannot exceed 60 characters.")
     .test(
       "not-empty-after-trim",
       "City cannot be empty or only spaces.",
-      (value) => value?.trim().length > 0,
+      (value) => (value === undefined ? true : value.trim().length > 0),
     )
     .test(
       "no-leading-space",
       "City cannot start with a space.",
       (value) => (value ? !value.startsWith(" ") : true),
     )
-    // Only letters, spaces, hyphens, and apostrophes
-    .matches(
-      /^[\p{L}' -]+$/u,
-      "City can only contain letters, spaces, hyphens (-), and apostrophes (').",
-    )
-    // Prevent numbers
-    .test("no-numbers", "City cannot contain numbers.", (value) =>
-      value ? !/\d/.test(value) : true,
+    .test(
+      "no-symbols-or-digits",
+      "City can only contain letters and spaces.",
+      (value) => (value ? /^[\p{L} ]+$/u.test(value) : true)
     )
     // Prevent HTML/script tags
     .test("no-html", "HTML or script content is not allowed.", (value) =>

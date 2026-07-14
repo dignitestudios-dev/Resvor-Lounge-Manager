@@ -98,6 +98,7 @@ const SendInvitationForm = ({ isOpen, onOpenChange, onSendInvitation, image, add
   const handleLimitAccept = () => {
     setShowLimitModal(false);
     onOpenChange(true); // reopen SendInvitationForm dialog
+    handleSend(true); // call handleSend, bypassing limit check
   };
 
   // When user closes the limit modal
@@ -106,7 +107,9 @@ const SendInvitationForm = ({ isOpen, onOpenChange, onSendInvitation, image, add
     onOpenChange(true); // reopen SendInvitationForm dialog
   };
 
-  const handleSend = async () => {
+  const handleSend = async (bypassLimit = false) => {
+    const shouldBypass = bypassLimit === true;
+
     if (selectedGuests.length === 0) {
       ErrorToast("Please select or enter at least one email recipient.");
       return;
@@ -117,7 +120,7 @@ const SendInvitationForm = ({ isOpen, onOpenChange, onSendInvitation, image, add
     }
 
     // Check flyer limit before sending
-    if (isAtFlyerLimit) {
+    if (isAtFlyerLimit && !shouldBypass) {
       openLimitModal();
       return;
     }
@@ -138,7 +141,8 @@ const SendInvitationForm = ({ isOpen, onOpenChange, onSendInvitation, image, add
     } catch (error) {
       const apiMessage = error?.response?.data?.message || "";
       if (apiMessage.toLowerCase().includes("insufficient wallet balance")) {
-        openLimitModal();
+        // openLimitModal();
+        ErrorToast(apiMessage || "Insufficient wallet balance");
       } else {
         ErrorToast(apiMessage || "Failed to create flyer campaign");
       }
