@@ -4,6 +4,7 @@ import {
   submitLogin,
   submitLogout,
   submitResendForgotOtp,
+  submitUpdateFcmToken,
   submitUpdatePassword,
   submitVerifyForgotEmail,
 } from "../api/Post";
@@ -41,5 +42,11 @@ export const useResendForgotOtp = () => {
 export const useLogout = () => {
   return useMutation({
     mutationFn: submitLogout,
+  });
+};
+
+export const useUpdateFcmToken = () => {
+  return useMutation({
+    mutationFn: submitUpdateFcmToken,
   });
 };

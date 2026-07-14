@@ -54,6 +54,11 @@ export const submitLogout = async () => {
   return data;
 };
 
+export const submitUpdateFcmToken = async (fcmToken) => {
+  const { data } = await axios.post("/auth/update-fcm", fcmToken);
+  return data;
+};
+
 export const submitSignUp = async (payload) => {
   const { data } = await axios.post("/auth/onboarding/register", payload);
   return data;

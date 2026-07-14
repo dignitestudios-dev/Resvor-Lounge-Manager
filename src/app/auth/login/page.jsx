@@ -4,11 +4,12 @@ import AuthInput from "../../../components/auth/AuthInput";
 import AuthButton from "../../../components/auth/AuthButton";
 import { useRouter } from "next/navigation";
 import { loginSchema } from "./../../../lib/schema/authentication/loginSchema";
-import { useLogin } from "../../../lib/hooks/mutations/AuthMutations";
+import { useLogin, useUpdateFcmToken } from "../../../lib/hooks/mutations/AuthMutations";
 import { ErrorToast } from "../../../components/ui/toaster";
 import { useQueryClient } from "@tanstack/react-query";
 import Cookies from "js-cookie";
 import { updateAuthCache } from "@/lib/utils";
+import { requestForToken } from "@/lib/firebase";
 const loginValues = {
   email: "",
   password: "",
@@ -18,6 +19,7 @@ const Login = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const loginMutation = useLogin();
+  const updateFcmMutation = useUpdateFcmToken();
 
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
     useFormik({
@@ -27,6 +29,15 @@ const Login = () => {
       validateOnBlur: true,
       onSubmit: async (values) => {
         try {
+
+          let fcmToken = "";
+          try {
+            fcmToken = await requestForToken();
+            console.log("FCM Token retrieved successfully:", fcmToken);
+          } catch (tokenError) {
+            console.error("FCM Token retrieval failed:", tokenError);
+          }
+
           const response = await loginMutation.mutateAsync({
             email: values.email,
             password: values.password,
@@ -34,7 +45,7 @@ const Login = () => {
           });
 
           const { tokenType, onboardingStep, user, token, accessToken } = response?.data ?? {};
-          console.log(response?.data, "--response?.data--- 37---"); 
+          console.log(response?.data, "--response?.data--- 37---");
           const activeToken = token || accessToken || response?.token || response?.accessToken;
 
           if (activeToken) {
@@ -49,6 +60,16 @@ const Login = () => {
             user,
           });
 
+          // Register FCM token in the background (fire-and-forget)
+          if (fcmToken) {
+            try {
+              await updateFcmMutation.mutateAsync({ fcmToken });
+              console.log("FCM token updated successfully on backend");
+            } catch (fcmUpdateError) {
+              console.error("FCM Token update on backend failed:", fcmUpdateError);
+            }
+          }
+
           if (tokenType === "registration_token") {
             console.log("🚀 ~ IF RUN LINE 46");
             // Middleware will guard the route; onboardingStep is already in cache
@@ -62,7 +83,7 @@ const Login = () => {
             error?.code === "NO_INTERNET"
               ? error.message
               : (error.response?.data?.message ??
-                  "An error occurred. Please try again."),
+                "An error occurred. Please try again."),
           );
         }
       },
