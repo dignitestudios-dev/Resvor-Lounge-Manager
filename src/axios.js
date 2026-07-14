@@ -21,7 +21,7 @@ async function getDeviceFingerprint() {
 
 const instance = axios.create({
   baseURL: baseUrl,
-  withCredentials: true, // Enable automatic HTTP-only cookie handling
+  // withCredentials: true, // Enable automatic HTTP-only cookie handling
   headers: {
     Accept: "application/json",
   },
