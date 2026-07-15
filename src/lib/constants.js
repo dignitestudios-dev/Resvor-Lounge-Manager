@@ -155,52 +155,52 @@ export const eventTypeOptions = [
 export const campaignAndFlyers = [
   {
     id: 1,
-    title: "Spring Sale",
+    title: "Happy Hour Flyer",
     image: "/images/flyerImage.jpg",
   },
   {
     id: 2,
-    title: "Winter Clearance",
-    image: "/images/flyerImage.jpg",
+    title: "Ladies Night Flyer",
+    image: "/images/flyerImageTwo.jpg",
   },
   {
     id: 3,
-    title: "Summer Festival",
-    image: "/images/flyerImage.jpg",
+    title: "Live DJ / Music Night Flyer",
+    image: "/images/flyerImageThree.jpg",
   },
   {
     id: 4,
-    title: "Fall Harvest",
-    image: "/images/flyerImage.jpg",
+    title: "Weekly Event Schedule Flyer",
+    image: "/images/flyerImageFour.jpg",
   },
   {
     id: 5,
-    title: "Spring Sale",
-    image: "/images/flyerImage.jpg",
+    title: "Anniversary Celebration Flyer",
+    image: "/images/flyerImageFive.jpg",
   },
   {
     id: 6,
-    title: "Winter Clearance",
-    image: "/images/flyerImage.jpg",
+    title: "Birthday Celebration Flyer",
+    image: "/images/flyerImageSix.jpg",
   },
   {
     id: 7,
-    title: "Summer Festival",
-    image: "/images/flyerImage.jpg",
+    title: "VIP Bottle Service Flyer",
+    image: "/images/flyerImageSeven.jpg",
   },
-  {
-    id: 8,
-    title: "Fall Harvest",
-    image: "/images/flyerImage.jpg",
-  },
-  {
-    id: 9,
-    title: "Spring Sale",
-    image: "/images/flyerImage.jpg",
-  },
-  {
-    id: 10,
-    title: "Winter Clearance",
-    image: "/images/flyerImage.jpg",
-  },
+  // {
+  //   id: 8,
+  //   title: "Fall Harvest",
+  //   image: "/images/flyerImageTwo.jpg",
+  // },
+  // {
+  //   id: 9,
+  //   title: "Spring Sale",
+  //   image: "/images/flyerImageThree.jpg",
+  // },
+  // {
+  //   id: 10,
+  //   title: "Winter Clearance",
+  //   image: "/images/flyerImageFour.jpg",
+  // },
 ];
