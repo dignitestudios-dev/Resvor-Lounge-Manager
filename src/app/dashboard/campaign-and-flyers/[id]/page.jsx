@@ -80,21 +80,16 @@ const CampaignAndFlyersDetails = () => {
   const [designedFile, setDesignedFile] = useState(null);
 
   const eventTypes = [
-    "Award Ceremony",
-    "Birthday Party",
-    "Charity Gala",
-    "Community Fair",
-    "Concert",
-    "Conference",
-    "Corporate Event",
-    "Exhibition",
-    "Festival",
-    "Fundraiser",
-    "Networking Meetup",
-    "Product Launch",
-    "Sports Event",
-    "Wedding",
-    "Workshop",
+    "Birthday Celebration",
+    "Ladies Night",
+    "Anniversary Celebration",
+    "Live DJ / Music Night",
+    "Happy Hour",
+    "VIP Bottle Service",
+    "Seafood Boil / Food Event",
+    "Special Event / Holiday",
+    "Weekly Event Schedule",
+    "Lounge Manager Announcement",
   ];
 
   const generateFlyerFile = () => {
