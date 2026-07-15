@@ -8,7 +8,7 @@ import DatePickerField from "./../common/DatePickerField";
 import SelectField from "../common/SelectField";
 import { eventTypeOptions } from "@/lib/constants";
 import moment from "moment";
-import { phoneFormatter, phoneToE164 } from "@/lib/utils";
+import { phoneFormatter, phoneToE164, formatCentsToUSD } from "@/lib/utils";
 import PhoneInput from "../auth/PhoneInput";
 import { useFormik } from "formik";
 import { addEventSchema } from "@/lib/schema/event/addEventSchema";
@@ -422,7 +422,7 @@ const AddEventForm = ({ onClose, onNext, initialData }) => {
                       key={service.id}
                       className="bg-[#012C57] text-[12px] rounded-full px-3 py-1.5 inline-flex items-center gap-2 shadow-sm font-medium"
                     >
-                      {service.title} (${service.price})
+                      {service.title} ({formatCentsToUSD(service.price)})
                       <button
                         type="button"
                         onClick={() => {

@@ -122,6 +122,15 @@ export const formatCurrency = (amount, currency = "USD") => {
   }).format(amount);
 };
 
+export const centsToUSD = (cents) => {
+  if (cents === undefined || cents === null || isNaN(cents)) return 0;
+  return cents / 100;
+};
+
+export const formatCentsToUSD = (cents) => {
+  return formatCurrency(centsToUSD(cents));
+};
+
 export const formatNumber = (num) => {
   return new Intl.NumberFormat("en-US").format(num);
 };
@@ -443,6 +452,8 @@ const utils = {
   capitalize,
   truncate,
   formatCurrency,
+  centsToUSD,
+  formatCentsToUSD,
   formatNumber,
   formatPercentage,
   handleError,

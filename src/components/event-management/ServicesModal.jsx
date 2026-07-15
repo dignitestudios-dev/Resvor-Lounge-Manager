@@ -2,6 +2,7 @@
 import { RxCross2 } from "react-icons/rx";
 import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
+import { formatCentsToUSD } from "@/lib/utils";
 
 const ServicesModal = ({
   isOpen,
@@ -91,7 +92,7 @@ const ServicesModal = ({
 
                       <div className="my-2">
                         <p className="text-indigo-950 text-[18px] font-[700]">
-                          Price: ${item.price}
+                          Price: {formatCentsToUSD(item.price)}
                         </p>
                       </div>
 
