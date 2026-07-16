@@ -1,21 +1,16 @@
 import * as Yup from "yup";
 
 const validEventTypes = [
-  "Concert",
-  "Wedding",
-  "Corporate Event",
-  "Birthday Party",
-  "Charity Gala",
-  "Festival",
-  "Product Launch",
-  "Sports Event",
-  "Networking Meetup",
-  "Conference",
-  "Workshop",
-  "Exhibition",
-  "Fundraiser",
-  "Award Ceremony",
-  "Community Fair",
+  "Birthday Celebration",
+  "Ladies Night",
+  "Anniversary Celebration",
+  "Live DJ / Music Night",
+  "Happy Hour",
+  "VIP Bottle Service",
+  "Seafood Boil / Food Event",
+  "Special Event / Holiday",
+  "Weekly Event Schedule",
+  "Lounge Manager Announcement",
 ];
 
 export const campaignFlyerSchema = Yup.object({
