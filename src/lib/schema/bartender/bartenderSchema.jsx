@@ -138,11 +138,11 @@ export const editBartenderSchema = Yup.object({
   profileImage: Yup.mixed()
     .nullable()
     .test("fileType", "Only JPG, JPEG, PNG files are allowed", (value) => {
-      if (!value) return true;
+      if (!value || value === "remove") return true;
       return ["image/jpeg", "image/jpg", "image/png"].includes(value.type);
     })
     .test("fileSize", "File size must be less than 5MB", (value) => {
-      if (!value) return true;
+      if (!value || value === "remove") return true;
       return value.size <= 5 * 1024 * 1024;
     }),
 

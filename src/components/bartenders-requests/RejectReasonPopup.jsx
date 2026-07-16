@@ -50,6 +50,7 @@ const RejectReasonPopup = ({ isOpen, onOpenChange, onConfirm, onCancel, loading 
                   placeholder="Enter rejection reason here..."
                   className="min-h-24 text-black font-normal"
                   value={reason}
+                  maxLength={250}
                   onChange={(e) => {
                     setReason(e.target.value);
                     if (e.target.value.trim()) setError("");

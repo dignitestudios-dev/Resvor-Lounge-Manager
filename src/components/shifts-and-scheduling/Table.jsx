@@ -15,7 +15,7 @@ const Table = () => {
   const [page, setPage] = useState(1);
   const LIMIT = 10;
 
-  const { data: shiftsResponse, isLoading } = useGetShifts({ page, limit: LIMIT });
+  const { data: shiftsResponse, isLoading, isError, error } = useGetShifts({ page, limit: LIMIT });
   const { data: eventsResponse } = useGetEligibleEvents({ page: 1, limit: 100 });
   const { mutate: deleteShift } = useDeleteShift();
 
@@ -24,7 +24,10 @@ const Table = () => {
   const totalPages = shiftsResponse?.pagination?.totalPages || 1;
 
   const normalizedShifts = shifts.map((shift) => {
-    const firstBartender = shift.bartenderIds?.[0];
+    const bartenders = (shift.bartenderIds || []).map((b) => ({
+      name: typeof b === "object" ? b.fullName : b,
+      profileImage: typeof b === "object" ? (b.profileImage?.location || "/images/profile.png") : "/images/profile.png",
+    }));
     const startStr = utils.formatTime12(shift.startDateTime);
     const endStr = utils.formatTime12(shift.endDateTime);
     const foundEvent = eventsList.find((e) => e._id === shift.referenceId);
@@ -35,12 +38,7 @@ const Table = () => {
       time: startStr && endStr ? `${startStr} - ${endStr}` : "",
       role: shift.role,
       event: foundEvent ? foundEvent.title : shift.referenceId || "-",
-      bartender: firstBartender
-        ? {
-            name: firstBartender.fullName,
-            profileImage: firstBartender.profileImage?.location || "/images/profile.png",
-          }
-        : null,
+      bartenders,
       status: shift.status || "pending",
       instruction: shift.instructions || "",
     };
@@ -55,13 +53,13 @@ const Table = () => {
     switch (status?.toLowerCase()) {
       case "pending":
       case "draft":
-        return "text-[#FFAE10]"; // orange
+        return "text-gray-700";
       case "unfilled":
         return "text-[#DC3545]"; // red
       case "confirmed":
         return "text-[#28A745]"; // green
       default:
-        return "text-gray-500";
+        return "text-[#28A745]";
     }
   };
 
@@ -86,8 +84,8 @@ const Table = () => {
       onError: (error) => {
         ErrorToast(
           error?.response?.data?.message ||
-            error?.message ||
-            "Failed to delete shift."
+          error?.message ||
+          "Failed to delete shift."
         );
       },
     });
@@ -113,43 +111,51 @@ const Table = () => {
             </tr>
           </thead>
           <tbody>
-            {normalizedShifts.map((event, index) => (
-              <tr
-                key={index}
-                className="border-b border-[#D4D4D4] cursor-pointer"
-                onClick={() => handleRowClick(event, index)}
-              >
-                <td className="px-4 py-6">
-                  {utils.formatDateWithName(event.date)}
-                </td>
-                <td className="px-4 py-6">{event.time}</td>
-                <td className="px-4 py-6">{event.role}</td>
-                <td className="px-4 py-6">{event.event}</td>
-                <td className="px-4 py-6">
-                  {event.bartender ? (
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="h-[43px] w-[43px] rounded-full bg-cover bg-center"
-                        style={{
-                          backgroundImage: `url(${event.bartender.profileImage})`,
-                        }}
-                      />
-                      {event.bartender.name}
-                    </div>
-                  ) : (
-                    "-"
-                  )}
-                </td>
-                <td className={`px-4 py-6 ${getStatusColor(event.status)}`}>
-                  {utils.capitalize(event.status)}
-                </td>
-                <td className="px-4 py-6">
-                  <div className="flex justify-center items-center">
-                    <IoIosArrowForward size={24} />
-                  </div>
+            {isError ? (
+              <tr>
+                <td colSpan={7} className="text-center py-10 text-red-500 font-medium">
+                  {error?.response?.data?.message || error?.message || "Failed to load shifts."}
                 </td>
               </tr>
-            ))}
+            ) : normalizedShifts.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="text-center py-10 text-gray-500">
+                  No shifts found.
+                </td>
+              </tr>
+            ) : (
+              normalizedShifts.map((event, index) => (
+                <tr
+                  key={index}
+                  className="border-b border-[#D4D4D4] cursor-pointer"
+                  onClick={() => handleRowClick(event, index)}
+                >
+                  <td className="px-4 py-6">
+                    {utils.formatDateWithName(event.date)}
+                  </td>
+                  <td className="px-4 py-6">{event.time}</td>
+                  <td className="px-4 py-6">{event.role}</td>
+                  <td className="px-4 py-6">{event.event}</td>
+                  <td className="px-4 py-6">
+                    {event.bartenders && event.bartenders.length > 0 ? (
+                      <span className="text-sm">
+                        {event.bartenders.map((b) => b.name).join(", ")}
+                      </span>
+                    ) : (
+                      "-"
+                    )}
+                  </td>
+                  <td className={`px-4 py-6 ${getStatusColor(event.status)}`}>
+                    {utils.capitalize(event.status)}
+                  </td>
+                  <td className="px-4 py-6">
+                    <div className="flex justify-center items-center">
+                      <IoIosArrowForward size={24} />
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

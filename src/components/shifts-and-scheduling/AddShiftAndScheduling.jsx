@@ -29,6 +29,9 @@ import { useGetBartenders } from "@/lib/hooks/queries/useBartenders";
 import { useGetEligibleEvents } from "@/lib/hooks/queries/useShifts";
 import { useCreateShift, useUpdateShift } from "@/lib/hooks/mutations/ShiftMutations";
 import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
+import { Loader2, X } from "lucide-react";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { IoIosArrowDown } from "react-icons/io";
 import { shiftValues } from "@/lib/init/shiftValues";
 import { addShiftSchema } from "@/lib/schema/shift/addShiftSchema";
 
@@ -69,15 +72,20 @@ const AddShiftAndScheduling = ({
   const [confirmPopup, setConfirmPopup] = useState(false);
   const [reviewPopup, setReviewPopup] = useState(false);
   const [updatedOpen, setUpdatedOpen] = useState(false);
+  const [searchVal, setSearchVal] = useState("");
 
   // Data queries & mutation
   const { data: bartendersResponse } = useGetBartenders({ page: 1, limit: 100 });
   const { data: eventsResponse } = useGetEligibleEvents({ page: 1, limit: 100 });
   const { mutate: createShift, isPending: isCreating } = useCreateShift();
-  const { mutate: updateShift } = useUpdateShift();
+  const { mutate: updateShift, isPending: isUpdating } = useUpdateShift();
 
   const bartendersData = bartendersResponse?.data || [];
   const eventsData = eventsResponse?.data || [];
+  const filteredBartenders = bartendersData.filter((b) =>
+    b.fullName?.toLowerCase().includes(searchVal.toLowerCase())
+  );
+  console.log("🚀 ~ AddShiftAndScheduling ~ eventsData:", eventsData)
 
   // Formik configuration
   const getInitialValues = () => {
@@ -106,11 +114,13 @@ const AddShiftAndScheduling = ({
         if (foundEvent) editEventId = foundEvent._id;
       }
 
-      let editBartenderId = "";
-      if (data.bartender && bartendersData.length > 0) {
+      let editBartenderIds = [];
+      if (data.bartenderIds && data.bartenderIds.length > 0) {
+        editBartenderIds = data.bartenderIds.map((b) => (typeof b === "object" && b !== null) ? b._id : b);
+      } else if (data.bartender && bartendersData.length > 0) {
         const bartenderName = typeof data.bartender === "object" ? data.bartender.name : data.bartender;
         const foundBartender = bartendersData.find((b) => b.fullName === bartenderName);
-        if (foundBartender) editBartenderId = foundBartender._id;
+        if (foundBartender) editBartenderIds = [foundBartender._id];
       }
 
       return {
@@ -121,7 +131,7 @@ const AddShiftAndScheduling = ({
         eventId: editEventId,
         eventName: editEventName,
         instructions: editInstructions,
-        bartenderId: editBartenderId,
+        bartenderIds: editBartenderIds,
       };
     }
 
@@ -133,6 +143,7 @@ const AddShiftAndScheduling = ({
     validationSchema: addShiftSchema,
     enableReinitialize: true,
     onSubmit: (values) => {
+      console.log("🚀 ~ AddShiftAndScheduling ~ values:", values)
       if (isEdit) {
         const startObj = new Date(`${values.date}T${values.startTime}`);
         let endObj = new Date(`${values.date}T${values.endTime}`);
@@ -143,12 +154,9 @@ const AddShiftAndScheduling = ({
         updateShift(
           {
             id: data._id,
-            referenceType: "event",
-            referenceId: values.eventId,
             role: values.role,
             startDateTime: startDateTime,
             endDateTime: endDateTime,
-            bartenderIds: [values.bartenderId],
             instructions: values.instructions,
             status: "published",
           },
@@ -193,6 +201,7 @@ const AddShiftAndScheduling = ({
   useEffect(() => {
     if (!isOpen && !reviewPopup) {
       resetForm();
+      setSearchVal("");
     }
   }, [isOpen, reviewPopup, resetForm]);
 
@@ -200,34 +209,108 @@ const AddShiftAndScheduling = ({
   const handleEventSelect = (val) => {
     setFieldValue("eventId", val);
     const selectedEvent = eventsData.find((e) => e._id === val);
-    if (selectedEvent) {
-      setFieldValue("eventName", selectedEvent.title);
-      if (selectedEvent.startDateTime) {
-        setFieldValue("date", formatDateForInput(selectedEvent.startDateTime));
-        setFieldValue("startTime", formatTimeForInput(selectedEvent.startDateTime));
-      }
-      if (selectedEvent.endDateTime) {
-        setFieldValue("endTime", formatTimeForInput(selectedEvent.endDateTime));
-      }
-    } else {
-      setFieldValue("eventName", "");
-    }
+    // if (selectedEvent) {
+    //   setFieldValue("eventName", selectedEvent.title);
+    //   if (selectedEvent.startDateTime) {
+    //     setFieldValue("date", formatDateForInput(selectedEvent.startDateTime));
+    //     setFieldValue("startTime", formatTimeForInput(selectedEvent.startDateTime));
+    //   }
+    //   if (selectedEvent.endDateTime) {
+    //     setFieldValue("endTime", formatTimeForInput(selectedEvent.endDateTime));
+    //   }
+    // } else {
+
+    // }
+    // setFieldValue("eventName", "");
   };
 
-  const selectedBartenderObj = bartendersData.find((b) => b._id === values.bartenderId);
+  const selectedBartenderNames = (values.bartenderIds || [])
+    .map((id) => bartendersData.find((b) => b._id === id)?.fullName)
+    .filter(Boolean);
 
   const reviewData = {
     date: values.date,
     time: values.startTime && values.endTime ? `${values.startTime} - ${values.endTime}` : "",
     role: values.role,
     event: values.eventName,
-    bartender: selectedBartenderObj ? selectedBartenderObj.fullName : "",
+    bartender: selectedBartenderNames.join(", "),
     instruction: values.instructions,
     status: "published",
   };
 
   const handleSaveTemplate = () => {
-    onOpenChange(false);
+    formik.validateForm().then((errors) => {
+      if (Object.keys(errors).length > 0) {
+        formik.setTouched(
+          Object.keys(values).reduce((acc, key) => ({ ...acc, [key]: true }), {})
+        );
+        ErrorToast("Please fill all the required fields.");
+        return;
+      }
+
+      const startObj = new Date(`${values.date}T${values.startTime}`);
+      const endObj = new Date(`${values.date}T${values.endTime}`);
+
+      const startDateTime = startObj.toISOString();
+      const endDateTime = endObj.toISOString();
+
+      if (isEdit) {
+        updateShift(
+          {
+            id: data._id,
+            role: values.role,
+            startDateTime: startDateTime,
+            endDateTime: endDateTime,
+            instructions: values.instructions,
+            status: "draft",
+          },
+          {
+            onSuccess: () => {
+              SuccessToast("Shift template saved as draft.");
+              onOpenChange(false);
+              if (typeof onUpdateSubmit === "function") {
+                onUpdateSubmit();
+              } else {
+                setUpdatedOpen(true);
+              }
+            },
+            onError: (error) => {
+              ErrorToast(
+                error?.response?.data?.message ||
+                error?.message ||
+                "Failed to update shift template."
+              );
+            },
+          }
+        );
+      } else {
+        createShift(
+          {
+            referenceType: "Event",
+            referenceId: values.eventId,
+            role: values.role,
+            startDateTime: startDateTime,
+            endDateTime: endDateTime,
+            bartenderIds: values.bartenderIds,
+            instructions: values.instructions,
+            status: "draft",
+          },
+          {
+            onSuccess: () => {
+              SuccessToast("Shift template saved as draft.");
+              onOpenChange(false);
+            },
+            onError: (error) => {
+              ErrorToast(
+                error?.response?.data?.message ||
+                error?.message ||
+                "Failed to save shift template."
+              );
+            },
+          }
+        );
+      }
+    });
   };
 
   const handleConfirm = () => {
@@ -245,7 +328,7 @@ const AddShiftAndScheduling = ({
         role: values.role,
         startDateTime: startDateTime,
         endDateTime: endDateTime,
-        bartenderIds: [values.bartenderId],
+        bartenderIds: values.bartenderIds,
         instructions: values.instructions,
         status: "published",
       },
@@ -361,6 +444,7 @@ const AddShiftAndScheduling = ({
                   <Select
                     value={values.eventId}
                     onValueChange={(val) => handleEventSelect(val)}
+                    disabled={isEdit}
                   >
                     <SelectTrigger className={"w-full !h-14"}>
                       <SelectValue placeholder="Select an Event" />
@@ -402,35 +486,112 @@ const AddShiftAndScheduling = ({
 
                 <div className="col-span-2 flex flex-col gap-1">
                   <Label className={"text-base text-black"}>
-                    Assign Bartender
+                    Assign Bartenders
                   </Label>
-                  <Select
-                    value={values.bartenderId}
-                    onValueChange={(val) => setFieldValue("bartenderId", val)}
-                  >
-                    <SelectTrigger className={"w-full !h-14"}>
-                      <SelectValue placeholder="Select a Bartender" />
-                    </SelectTrigger>
-                    <SelectContent className={"h-[200px]"}>
-                      <SelectGroup>
-                        <SelectLabel>Bartenders</SelectLabel>
-                        {bartendersData.map((bartender) => (
-                          <SelectItem value={bartender._id} key={bartender._id}>
-                            {bartender.fullName}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                  {touched.bartenderId && errors.bartenderId && (
-                    <p className="text-red-600 text-xs mt-1">{errors.bartenderId}</p>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={isEdit}
+                        className="w-full !h-14 justify-between border-[#CACACA] hover:bg-transparent rounded-[15px] font-normal text-left text-sm"
+                      >
+                        <span className="truncate">
+                          {values.bartenderIds && values.bartenderIds.length > 0
+                            ? `${values.bartenderIds.length} Bartender(s) Selected`
+                            : "Select Bartenders"}
+                        </span>
+                        <IoIosArrowDown className="text-gray-500 h-5 w-5" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[400px] p-4 bg-white border rounded-xl shadow-lg z-50">
+                      {/* Search Input */}
+                      <input
+                        type="text"
+                        placeholder="Search Bartender..."
+                        className="w-full px-3 py-2 border rounded-lg text-sm mb-3 outline-none focus:ring-1 focus:ring-blue-900"
+                        onChange={(e) => setSearchVal(e.target.value)}
+                        value={searchVal}
+                      />
+                      {/* Bartenders List */}
+                      <div className="max-h-48 overflow-y-auto space-y-2">
+                        {filteredBartenders.length > 0 ? (
+                          filteredBartenders.map((bartender) => {
+                            const isSelected = values.bartenderIds?.includes(bartender._id);
+                            return (
+                              <label
+                                key={bartender._id}
+                                className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer text-sm"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={() => {
+                                    if (isSelected) {
+                                      setFieldValue(
+                                        "bartenderIds",
+                                        values.bartenderIds.filter((id) => id !== bartender._id)
+                                      );
+                                    } else {
+                                      setFieldValue("bartenderIds", [...(values.bartenderIds || []), bartender._id]);
+                                    }
+                                  }}
+                                  className="h-4 w-4 rounded text-blue-900 border-gray-300 focus:ring-blue-800"
+                                />
+                                <span className="text-black font-medium">{bartender.fullName}</span>
+                              </label>
+                            );
+                          })
+                        ) : (
+                          <p className="text-sm text-gray-500 text-center py-2">No Bartenders found</p>
+                        )}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+
+                  {/* Display selected bartender badges below the select */}
+                  {values.bartenderIds && values.bartenderIds.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {values.bartenderIds.map((id) => {
+                        const b = bartendersData.find((bart) => bart._id === id);
+                        if (!b) return null;
+                        return (
+                          <span
+                            key={id}
+                            className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-900 text-white text-xs rounded-full font-medium"
+                          >
+                            {b.fullName}
+                            {!isEdit && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFieldValue(
+                                    "bartenderIds",
+                                    values.bartenderIds.filter((bid) => bid !== id)
+                                  );
+                                }}
+                                className="hover:text-red-400 focus:outline-none flex items-center justify-center"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            )}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {touched.bartenderIds && errors.bartenderIds && (
+                    <p className="text-red-600 text-xs mt-1">{errors.bartenderIds}</p>
                   )}
                 </div>
 
                 <Button
                   type="submit"
-                  className={"col-span-2 w-full h-14 text-lg"}
+                  className={"col-span-2 w-full h-14 text-lg flex items-center justify-center gap-2"}
+                  disabled={isCreating || isUpdating}
                 >
+                  {(isCreating || isUpdating) && <Loader2 className="h-5 w-5 animate-spin" />}
                   {isEdit ? "Update" : "Create Shift"}
                 </Button>
 
@@ -438,9 +599,11 @@ const AddShiftAndScheduling = ({
                   type="button"
                   onClick={handleSaveTemplate}
                   className={
-                    "bg-gray-200 hover:bg-gray-100 text-black! col-span-2 w-full h-14 text-lg"
+                    "bg-gray-200 hover:bg-gray-100 text-black! col-span-2 w-full h-14 text-lg flex items-center justify-center gap-2"
                   }
+                  disabled={isCreating || isUpdating}
                 >
+                  {(isCreating || isUpdating) && <Loader2 className="h-5 w-5 animate-spin" />}
                   Save This Template
                 </Button>
               </form>

@@ -48,12 +48,28 @@ const CampaignAndFlyersDetails = () => {
     },
   });
 
-  const { values, handleBlur, handleChange, handleSubmit, errors, touched, setFieldValue, setFieldTouched } = formik;
+  const {
+    values,
+    handleBlur,
+    handleChange,
+    handleSubmit,
+    errors,
+    touched,
+    setFieldValue,
+    setFieldTouched,
+  } = formik;
 
   const [editorContent, setEditorContent] = useState("");
 
   // Show glass overlay only when user has entered any data
-  const hasAnyData = !!(values.eventTitle || values.eventDate || values.eventStartTime || values.eventEndTime || values.address || values.city);
+  const hasAnyData = !!(
+    values.eventTitle ||
+    values.eventDate ||
+    values.eventStartTime ||
+    values.eventEndTime ||
+    values.address ||
+    values.city
+  );
   const [selectedTemplate, setSelectedTemplate] = useState({
     id: 1,
     image: "/images/flyer.png",
@@ -62,7 +78,7 @@ const CampaignAndFlyersDetails = () => {
   useEffect(() => {
     if (flyerId) {
       const currentCampaign = campaignAndFlyers.find(
-        (c) => String(c.id) === String(flyerId)
+        (c) => String(c.id) === String(flyerId),
       );
       if (currentCampaign) {
         setSelectedTemplate({
@@ -142,7 +158,9 @@ const CampaignAndFlyersDetails = () => {
 
           // 3. Draw Event Title / Main Description text
           // Centered vertically within the upper part of the card
-          const titleText = values.eventTitle || "Showcase weekly events including brunches, karaoke, DJs, ladies nights, etc.";
+          const titleText =
+            values.eventTitle ||
+            "Showcase weekly events including brunches, karaoke, DJs, ladies nights, etc.";
           ctx.font = "italic 36px Georgia, serif"; // Serif-style font matching the user's picture
 
           // Wrapping words helper
@@ -164,7 +182,8 @@ const CampaignAndFlyersDetails = () => {
           lines.push(currentLine.trim());
 
           const lineHeight = 50;
-          let yStart = boxY + (boxH * 0.35) - ((lines.length - 1) * lineHeight) / 2;
+          let yStart =
+            boxY + boxH * 0.35 - ((lines.length - 1) * lineHeight) / 2;
 
           lines.forEach((line, index) => {
             ctx.fillText(line, canvas.width / 2, yStart + index * lineHeight);
@@ -282,7 +301,8 @@ const CampaignAndFlyersDetails = () => {
                 Event Details
               </h3>
               <p className="text-[#333333]">
-                Fill in the details below to design your flyer card in real-time.
+                Fill in the details below to design your flyer card in
+                real-time.
               </p>
             </div>
             <div className="flex flex-col gap-1">
@@ -296,7 +316,9 @@ const CampaignAndFlyersDetails = () => {
                   setFieldTouched("eventType", true, false);
                 }}
               >
-                <SelectTrigger className={`w-full h-14! ${errors.eventType && touched.eventType ? "border-red-500 ring-red-500" : ""}`}>
+                <SelectTrigger
+                  className={`w-full h-14! ${errors.eventType && touched.eventType ? "border-red-500 ring-red-500" : ""}`}
+                >
                   <SelectValue placeholder="Select event type" />
                 </SelectTrigger>
                 <SelectContent className={"h-[200px]"}>
@@ -428,9 +450,7 @@ const CampaignAndFlyersDetails = () => {
                 className={`h-12 ${errors.city && touched.city ? "border-red-500 ring-red-500" : ""}`}
               />
               {errors.city && touched.city && (
-                <p className="text-red-600 text-[12px] mt-1">
-                  {errors.city}
-                </p>
+                <p className="text-red-600 text-[12px] mt-1">{errors.city}</p>
               )}
             </div>
           </div>
@@ -459,17 +479,20 @@ const CampaignAndFlyersDetails = () => {
 
                       {/* Glass content panel — centered on image */}
                       <div className="absolute left-4 right-4 top-1/2 -translate-y-1/2 bg-black/50 backdrop-blur-sm rounded-2xl border border-white/10 px-5 py-5 flex flex-col items-center shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
-
                         {/* Gold top accent bar */}
                         <div className="w-10 h-[3px] rounded-full bg-gradient-to-r from-[#c9a84c] via-[#f0d080] to-[#c9a84c] mb-4" />
 
                         {/* Event Title */}
                         <h2
                           className="text-white font-bold leading-snug text-center mb-4 tracking-wide break-words drop-shadow-lg w-full"
-                          style={{ fontSize: values.eventTitle && values.eventTitle.length > 40 ? "13px" : "15px" }}
+                          style={{
+                            fontSize:
+                              values.eventTitle && values.eventTitle.length > 40
+                                ? "13px"
+                                : "15px",
+                          }}
                         >
-                          {values.eventTitle ||
-                            "Event Title"}
+                          {values.eventTitle || "Event Title"}
                         </h2>
 
                         {/* Thin divider */}
@@ -479,20 +502,24 @@ const CampaignAndFlyersDetails = () => {
                         <div className="flex flex-col gap-2 w-full">
                           {/* Date */}
                           <div className="flex items-center gap-2">
-                            <span className="text-[11px] text-white/60 font-semibold min-w-[56px]">Date:</span>
+                            <span className="text-[11px] text-white/60 font-semibold min-w-[56px]">
+                              Date:
+                            </span>
                             <span className="text-[11px] text-white/90">
                               {values.eventDate
                                 ? (() => {
-                                  const d = new Date(values.eventDate);
-                                  return `${String(d.getDate()).padStart(2, "0")}-${d.getMonth() + 1}-${d.getFullYear()}`;
-                                })()
+                                    const d = new Date(values.eventDate);
+                                    return `${String(d.getDate()).padStart(2, "0")}-${d.getMonth() + 1}-${d.getFullYear()}`;
+                                  })()
                                 : "—"}
                             </span>
                           </div>
 
                           {/* Time */}
                           <div className="flex items-center gap-2">
-                            <span className="text-[11px] text-white/60 font-semibold min-w-[56px]">Time:</span>
+                            <span className="text-[11px] text-white/60 font-semibold min-w-[56px]">
+                              Time:
+                            </span>
                             <span className="text-[11px] text-white/90">
                               {values.eventStartTime
                                 ? `${values.eventStartTime}${values.eventEndTime ? ` - ${values.eventEndTime}` : ""}`
@@ -502,9 +529,13 @@ const CampaignAndFlyersDetails = () => {
 
                           {/* Location */}
                           <div className="flex items-start gap-2">
-                            <span className="text-[11px] text-white/60 font-semibold min-w-[56px] shrink-0">Location:</span>
+                            <span className="text-[11px] text-white/60 font-semibold min-w-[56px] shrink-0">
+                              Location:
+                            </span>
                             <span className="text-[11px] text-white/90 leading-snug break-words">
-                              {values.address ? `${values.address}${values.city ? `, ${values.city}` : ""}` : "—"}
+                              {values.address
+                                ? `${values.address}${values.city ? `, ${values.city}` : ""}`
+                                : "—"}
                             </span>
                           </div>
                         </div>
@@ -541,7 +572,6 @@ const CampaignAndFlyersDetails = () => {
           {isGenerating ? "Designing Flyer..." : "Save & Send Invitation"}
         </Button>
       </div>{" "}
-
       {/* Invitation Modal */}
       <SendInvitationForm
         isOpen={openInvForm}
@@ -550,7 +580,6 @@ const CampaignAndFlyersDetails = () => {
         image={designedFile}
         additionalInfo={editorContent}
       />
-
       {/* Confirmation Modal */}
       <ConfirmPopup
         isOpen={confirmPopup}
@@ -566,4 +595,3 @@ const CampaignAndFlyersDetails = () => {
 };
 
 export default CampaignAndFlyersDetails;
-

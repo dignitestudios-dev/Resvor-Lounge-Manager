@@ -1,16 +1,7 @@
 /* eslint-disable react/prop-types */
 import { RxCross2 } from "react-icons/rx";
 import { Button } from "../ui/button";
-import { useState } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 
 const EventDetailsModal = ({
   onClose,
@@ -18,12 +9,9 @@ const EventDetailsModal = ({
   serviceData,
   onClickBack,
   onClick,
-  lounges = [],
-  onLoungeSelect,
-  selectedLoungeId,
   isLoading = false,
 }) => {
-  console.log("🚀 ~ EventDetailsModal ~ serviceData:", serviceData);
+
   const {
     eventType = "Birthday Party",
     date = "26 Dec, 2024",

@@ -15,6 +15,18 @@ import { addEventSchema } from "@/lib/schema/event/addEventSchema";
 import ServicesModal from "./ServicesModal";
 import { useGetLounges } from "@/lib/hooks/queries/useLounges";
 
+const stripCountryCode = (phone) => {
+  if (!phone) return "";
+  if (phone.startsWith("+1")) {
+    return phone.slice(2).replace(/\D/g, "");
+  }
+  const cleaned = phone.replace(/\D/g, "");
+  if (cleaned.length === 11 && cleaned.startsWith("1")) {
+    return cleaned.slice(1);
+  }
+  return cleaned;
+};
+
 const normalizeEventType = (value) => {
   const normalized = String(value || "")
     .trim()
@@ -68,7 +80,7 @@ const AddEventForm = ({ onClose, onNext, initialData }) => {
       endTime: initialData?.endTime || "",
       guestName: initialData?.guestName || "",
       guestEmail: initialData?.guestEmail || "",
-      guestPhone: initialData?.guestPhone || "",
+      guestPhone: stripCountryCode(initialData?.guestPhone) || "",
       guestCount: initialData?.guestCount !== undefined ? String(initialData.guestCount) : "",
       preferredMusic: initialData?.preferredMusic === "None" ? "" : (initialData?.preferredMusic || ""),
       specialRequest: initialData?.specialRequest === "None" ? "" : (initialData?.specialRequest || ""),
@@ -128,7 +140,7 @@ const AddEventForm = ({ onClose, onNext, initialData }) => {
       ErrorToast("Please fill all the required fields.");
     }
   };
-
+  console.log("formik.isValid 131 ==> ", formik.errors)
   return (
     <div className="fixed inset-0 bg-[#0A150F80] bg-opacity-0 z-50 flex items-center justify-center">
       <div className="bg-white rounded-[12px] w-[440px] pb-2 h-[700px] overflow-y-scroll ">
@@ -428,6 +440,7 @@ const AddEventForm = ({ onClose, onNext, initialData }) => {
                         onClick={() => {
                           const updated = formik.values.services.filter(s => s.id !== service.id);
                           formik.setFieldValue("services", updated);
+                          formik.setFieldTouched("services", true, false);
                         }}
                         className="text-white hover:text-red-400 focus:outline-none cursor-pointer flex items-center justify-center"
                       >
@@ -443,7 +456,10 @@ const AddEventForm = ({ onClose, onNext, initialData }) => {
           <ServicesModal
             isOpen={servicesModalOpen}
             onClose={() => setServicesModalOpen(false)}
-            setServiceModalData={(data) => formik.setFieldValue("services", data)}
+            setServiceModalData={(data) => {
+              formik.setFieldValue("services", data);
+              formik.setFieldTouched("services", true, false);
+            }}
             loungeServices={loungeServices}
             initialSelectedServices={formik.values.services}
           />

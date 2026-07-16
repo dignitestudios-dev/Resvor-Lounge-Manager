@@ -46,8 +46,10 @@ export const addShiftSchema = Yup.object({
       }
     ),
 
-  bartenderId: Yup.string()
-    .required("Please select a bartender."),
+  bartenderIds: Yup.array()
+    .of(Yup.string())
+    .min(1, "Please select at least 1 bartender.")
+    .required("Please select at least 1 bartender."),
 
   instructions: Yup.string()
     .max(250, "Instructions cannot exceed 250 characters.")

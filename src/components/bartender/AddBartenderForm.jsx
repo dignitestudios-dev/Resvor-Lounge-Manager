@@ -113,9 +113,8 @@ const AddBartenderForm = ({
             email: values.email,
             phoneNumber: phoneToE164(values.phoneNumber),
             address: values.address,
-            profileImage: values.profileImage === "remove"
-              ? null
-              : (values.profileImage instanceof File ? values.profileImage : undefined),
+            removePFP: values.profileImage === "remove" ? true : undefined,
+            profileImage: values.profileImage instanceof File ? values.profileImage : undefined,
           },
           {
             onSuccess: () => {
@@ -202,6 +201,8 @@ const AddBartenderForm = ({
       }
     );
   };
+
+  console.log("formik.dirty 206 ==> ", formik.dirty)
 
   return (
     <>

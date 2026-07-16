@@ -171,5 +171,7 @@ export const addEventSchema = Yup.object({
   ticketAtDoor: Yup.boolean()
     .required("Ticket at door selection is required."),
 
-  services: Yup.array().optional(),
+  services: Yup.array()
+    .min(1, "Please select at least 1 service.")
+    .required("Please select at least 1 service."),
 });

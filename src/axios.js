@@ -29,13 +29,11 @@ const instance = axios.create({
 });
 
 instance.interceptors.request.use(async (request) => {
-  // Internet check
+  // Internet check — reject with a proper Error so axios and React Query handle it correctly
   if (!navigator.onLine) {
-    console.log("Network Error");
-    return Promise.reject({
-      code: "NO_INTERNET",
-      message: "No internet connection",
-    });
+    const noInternetError = new Error("No internet connection. Please check your network and try again.");
+    noInternetError.code = "NO_INTERNET";
+    return Promise.reject(noInternetError);
   }
 
 
@@ -110,6 +108,13 @@ instance.interceptors.response.use(
       status: error.response?.status,
       message: error.message,
     });
+
+    // ── Handle no-internet / network errors first ──
+    // Catches: NO_INTERNET (from request interceptor), ERR_NETWORK (axios native when DNS/TCP fails)
+    if (error.code === "NO_INTERNET" || error.code === "ERR_NETWORK" || error.message === "Network Error") {
+      ErrorToast("No internet connection. Please check your network and try again.");
+      return Promise.reject(error);
+    }
 
     if (error.response?.data) {
       const data = error.response.data;

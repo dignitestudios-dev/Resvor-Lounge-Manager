@@ -6,5 +6,5 @@ export const shiftValues = {
   eventId: "",
   eventName: "",
   instructions: "",
-  bartenderId: "",
+  bartenderIds: [],
 };

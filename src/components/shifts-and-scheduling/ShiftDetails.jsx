@@ -27,8 +27,15 @@ const ShiftDetails = ({
   const foundEvent = eventsList.find((e) => e._id === shiftDetail?.referenceId);
   const eventName = foundEvent ? foundEvent.title : shiftDetail?.referenceId || "-";
 
-  const firstBartender = shiftDetail?.bartenderIds?.[0];
-  const bartenderName = firstBartender ? firstBartender.fullName : "-";
+  const bartendersList = (shiftDetail?.bartenderIds || []).map((b) => {
+    if (typeof b === "object" && b !== null) {
+      return {
+        name: b.fullName || "-",
+        profileImage: b.profileImage?.location || "/images/profile.png",
+      };
+    }
+    return { name: b, profileImage: "/images/profile.png" };
+  });
 
   const startStr = shiftDetail ? utils.formatTime12(shiftDetail.startDateTime) : "";
   const endStr = shiftDetail ? utils.formatTime12(shiftDetail.endDateTime) : "";
@@ -95,10 +102,24 @@ const ShiftDetails = ({
                     <div className="font-semibold text-black">{eventName}</div>
                   </div>
                   <div>
-                    <div className=" text-gray-500">Bartender</div>
-                    <div className="font-semibold text-black">
-                      {bartenderName}
-                    </div>
+                    <div className=" text-gray-500">Bartender(s)</div>
+                    {bartendersList.length > 0 ? (
+                      <div className="flex flex-col gap-2 mt-1">
+                        {bartendersList.map((b, i) => (
+                          <div key={i} className="flex items-center gap-2">
+                            <div
+                              className="h-[32px] w-[32px] rounded-full bg-cover bg-center shrink-0 border border-gray-200"
+                              style={{
+                                backgroundImage: `url(${b.profileImage})`,
+                              }}
+                            />
+                            <span className="font-semibold text-black text-sm">{b.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="font-semibold text-black">-</div>
+                    )}
                   </div>
                 </div>
 

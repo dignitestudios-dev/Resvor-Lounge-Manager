@@ -170,7 +170,7 @@ export const campaignAndFlyers = [
   },
   {
     id: 4,
-    title: "Weekly Event Schedule Flyer",
+    title: "Seafood Boil / Food Event Flyer",
     image: "/images/flyerImageFour.jpg",
   },
   {
@@ -188,19 +188,19 @@ export const campaignAndFlyers = [
     title: "VIP Bottle Service Flyer",
     image: "/images/flyerImageSeven.jpg",
   },
-  // {
-  //   id: 8,
-  //   title: "Fall Harvest",
-  //   image: "/images/flyerImageTwo.jpg",
-  // },
-  // {
-  //   id: 9,
-  //   title: "Spring Sale",
-  //   image: "/images/flyerImageThree.jpg",
-  // },
-  // {
-  //   id: 10,
-  //   title: "Winter Clearance",
-  //   image: "/images/flyerImageFour.jpg",
-  // },
+  {
+    id: 8,
+    title: "Lounge Manager Announcement Flyer ",
+    image: "/images/flyerImageEight.jpg",
+  },
+  {
+    id: 9,
+    title: "Special Event / Holiday Flyer",
+    image: "/images/flyerImageNine.jpg",
+  },
+  {
+    id: 10,
+    title: "Weekly Event Schedule Flyer",
+    image: "/images/flyerImageTen.jpg",
+  },
 ];

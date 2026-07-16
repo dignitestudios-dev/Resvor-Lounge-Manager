@@ -28,19 +28,29 @@ export const useCreateBartender = () => {
 
 // ─── Update Bartender ────────────────────────────────────────────────────────
 const updateBartender = async ({ id, ...data }) => {
-  const formData = new FormData();
-  if (data.fullName) formData.append("fullName", data.fullName);
-  if (data.email) formData.append("email", data.email);
-  if (data.phoneNumber) formData.append("phoneNumber", data.phoneNumber);
-  if (data.address) formData.append("address", data.address);
-  if (data.profileImage === null) {
-    formData.append("profileImage", "");
-  } else if (data.profileImage) {
-    formData.append("profileImage", data.profileImage);
-  }
+  const hasFile = data.profileImage instanceof File;
 
-  const response = await axiosInstance.patch(`/bartenders/${id}`, formData);
-  return response.data;
+  if (hasFile) {
+    const formData = new FormData();
+    if (data.fullName) formData.append("fullName", data.fullName);
+    if (data.email) formData.append("email", data.email);
+    if (data.phoneNumber) formData.append("phoneNumber", data.phoneNumber);
+    if (data.address) formData.append("address", data.address);
+    formData.append("profileImage", data.profileImage);
+
+    const response = await axiosInstance.patch(`/bartenders/${id}`, formData);
+    return response.data;
+  } else {
+    const payload = {};
+    if (data.fullName) payload.fullName = data.fullName;
+    if (data.email) payload.email = data.email;
+    if (data.phoneNumber) payload.phoneNumber = data.phoneNumber;
+    if (data.address) payload.address = data.address;
+    if (data.removePFP !== undefined) payload.removePFP = data.removePFP;
+
+    const response = await axiosInstance.patch(`/bartenders/${id}`, payload);
+    return response.data;
+  }
 };
 
 export const useUpdateBartender = () => {
