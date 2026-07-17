@@ -3,6 +3,7 @@ import "./globals.css";
 import ReactQueryProvider from "@/lib/hooks/query/ReactQueryProvider";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/lib/context/AuthProvider";
+import NoInternetPopup from "@/components/global/NoInternetPopup";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -29,6 +30,7 @@ export default function RootLayout({ children }) {
             duration: 3000,
           }}
         />
+        <NoInternetPopup />
         <ReactQueryProvider>
           <AuthProvider>{children}</AuthProvider>
         </ReactQueryProvider>
