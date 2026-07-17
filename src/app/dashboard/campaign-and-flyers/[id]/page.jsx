@@ -73,7 +73,7 @@ const CampaignAndFlyersDetails = () => {
   );
   const [selectedTemplate, setSelectedTemplate] = useState({
     id: 1,
-    image: "/images/flyer.png",
+    image: campaignAndFlyers[0]?.image || "/images/flyerImage.jpg",
   });
 
   useEffect(() => {
@@ -450,13 +450,13 @@ const CampaignAndFlyersDetails = () => {
                 </div>
               </div>
 
-              {/* <div>
+              <div>
                 <p className="my-3 font-semibold text-lg">
                   Select Card Template
                 </p>
 
                 <TemplateCarousel selectedId={selectedTemplate.id} onSelectTemplate={setSelectedTemplate} />
-              </div> */}
+              </div>
             </div>
           </div>
         </div>

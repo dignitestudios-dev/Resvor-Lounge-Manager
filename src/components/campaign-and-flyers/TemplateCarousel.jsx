@@ -7,16 +7,15 @@ import "swiper/css";
 import "swiper/css/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+import { campaignAndFlyers } from "@/lib/constants";
+
 const TemplateCarousel = ({ onSelectTemplate, selectedId: propSelectedId }) => {
   const swiperRef = useRef(null);
   const [localSelectedId, setLocalSelectedId] = useState(1);
   const selectedId = propSelectedId !== undefined ? propSelectedId : localSelectedId;
 
-  // Create 10 template items with alternating images
-  const templates = Array.from({ length: 10 }, (_, index) => ({
-    id: index + 1,
-    image: index % 2 === 0 ? "/images/flyer.png" : "/images/flyer2.png",
-  }));
+  // Use dynamic templates from campaignAndFlyers constants
+  const templates = campaignAndFlyers;
 
   const handlePrev = () => {
     if (swiperRef.current?.swiper) {
@@ -66,11 +65,10 @@ const TemplateCarousel = ({ onSelectTemplate, selectedId: propSelectedId }) => {
                   className="cursor-pointer group"
                 >
                   <div
-                    className={`rounded-lg border-2 transition-all p-2 bg-white overflow-hidden hover:bg-gray-50 ${
-                      selectedId === template.id
-                        ? "border-primary"
-                        : "border-transparent"
-                    }`}
+                    className={`rounded-lg border-2 transition-all p-2 bg-white overflow-hidden hover:bg-gray-50 ${selectedId === template.id
+                      ? "border-primary"
+                      : "border-transparent"
+                      }`}
                   >
                     <Image
                       src={template.image}
