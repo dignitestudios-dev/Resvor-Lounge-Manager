@@ -1,6 +1,7 @@
 "use client";
 import { useParams, useRouter } from "next/navigation";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import html2canvas from "html2canvas-pro";
 import { useFormik } from "formik";
 import { campaignAndFlyers } from "@/lib/constants";
 import { Input } from "@/components/ui/input";
@@ -94,6 +95,7 @@ const CampaignAndFlyersDetails = () => {
   const [openInvForm, setOpenInvForm] = useState(false);
   const [confirmPopup, setConfirmPopup] = useState(false);
   const [designedFile, setDesignedFile] = useState(null);
+  const flyerRef = useRef(null);
 
   const eventTypes = [
     "Birthday Celebration",
@@ -108,135 +110,33 @@ const CampaignAndFlyersDetails = () => {
     "Lounge Manager Announcement",
   ];
 
+  // Convert 24h time string ("14:30") to 12h AM/PM format ("2:30 PM")
+  const formatTime12h = (time24) => {
+    if (!time24) return "";
+    const [hourStr, minute] = time24.split(":");
+    let hour = parseInt(hourStr, 10);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    hour = hour % 12 || 12;
+    return `${hour}:${minute} ${ampm}`;
+  };
+
   const generateFlyerFile = () => {
-    return new Promise((resolve, reject) => {
-      setIsGenerating(true);
-      const img = new window.Image();
-      img.crossOrigin = "anonymous";
-      img.src = selectedTemplate.image;
-
-      img.onload = () => {
-        try {
-          const canvas = document.createElement("canvas");
-          canvas.width = img.naturalWidth || 800;
-          canvas.height = img.naturalHeight || 1000;
-          const ctx = canvas.getContext("2d");
-
-          // 1. Draw template background
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-          // Calculate overlay box parameters (centered, 85% width, 75% height)
-          const boxW = canvas.width * 0.85;
-          const boxH = canvas.height * 0.75;
-          const boxX = (canvas.width - boxW) / 2;
-          const boxY = (canvas.height - boxH) / 2;
-
-          // 2. Draw card overlay border and glowing shadow
-          ctx.save();
-          ctx.shadowColor = "rgba(251, 191, 36, 0.45)"; // Gold shadow glow
-          ctx.shadowBlur = 35;
-          ctx.shadowOffsetX = 0;
-          ctx.shadowOffsetY = 0;
-
-          // Fill translucent dark background
-          ctx.fillStyle = "rgba(10, 8, 5, 0.85)";
-          ctx.beginPath();
-          ctx.roundRect(boxX, boxY, boxW, boxH, 30);
-          ctx.fill();
-
-          // Stroke border with gold color
-          ctx.strokeStyle = "rgba(251, 191, 36, 0.45)";
-          ctx.lineWidth = 4;
-          ctx.shadowBlur = 0; // disable shadow for stroke to keep it clean
-          ctx.stroke();
-          ctx.restore();
-
-          // Configure text rendering styles
-          ctx.fillStyle = "#FFFFFF";
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-
-          // 3. Draw Event Title / Main Description text
-          // Centered vertically within the upper part of the card
-          const titleText =
-            values.eventTitle ||
-            "Showcase weekly events including brunches, karaoke, DJs, ladies nights, etc.";
-          ctx.font = "italic 36px Georgia, serif"; // Serif-style font matching the user's picture
-
-          // Wrapping words helper
-          const words = titleText.split(" ");
-          let lines = [];
-          let currentLine = "";
-          const maxWidth = boxW - 80;
-
-          for (let i = 0; i < words.length; i++) {
-            let testLine = currentLine + words[i] + " ";
-            let metrics = ctx.measureText(testLine);
-            if (metrics.width > maxWidth && i > 0) {
-              lines.push(currentLine.trim());
-              currentLine = words[i] + " ";
-            } else {
-              currentLine = testLine;
-            }
-          }
-          lines.push(currentLine.trim());
-
-          const lineHeight = 50;
-          let yStart =
-            boxY + boxH * 0.35 - ((lines.length - 1) * lineHeight) / 2;
-
-          lines.forEach((line, index) => {
-            ctx.fillText(line, canvas.width / 2, yStart + index * lineHeight);
-          });
-
-          // 4. Draw Event Details (Date, Time, Location) Left Aligned as a Block
-          // Positioned at the bottom of the card
-          ctx.textAlign = "left";
-          ctx.font = "24px system-ui, -apple-system, sans-serif";
-
-          // Format date like '30-6-2026'
-          let dateStr = "00-2-2026";
-          if (values.eventDate) {
-            const dateObj = new Date(values.eventDate);
-            const day = String(dateObj.getDate()).padStart(2, "0");
-            const month = dateObj.getMonth() + 1;
-            const year = dateObj.getFullYear();
-            dateStr = `${day}-${month}-${year}`;
-          }
-
-          let timeStr = "00:00 am";
-          if (values.eventStartTime) {
-            timeStr = values.eventStartTime;
-            if (values.eventEndTime) {
-              timeStr += ` - ${values.eventEndTime}`;
-            }
-          }
-
-          const locationStr = values.address
-            ? `${values.address}${values.city ? `, ${values.city}` : ""}`
-            : "My house";
-
-          // Calculate details alignment starting X (centered block)
-          // We find a reasonable offset from the center
-          const detailsX = canvas.width / 2 - 130;
-
-          const yDate = boxY + boxH - 120;
-          const yTime = boxY + boxH - 85;
-          const yLoc = boxY + boxH - 50;
-
-          // Draw Details labels and values
-          ctx.fillStyle = "rgba(255, 255, 255, 0.6)"; // Label color
-          ctx.fillText("Date:", detailsX, yDate);
-          ctx.fillText("Time:", detailsX, yTime);
-          ctx.fillText("Location:", detailsX, yLoc);
-
-          // Draw values next to labels
-          ctx.fillStyle = "#FFFFFF"; // Value color
-          ctx.fillText(dateStr, detailsX + 70, yDate);
-          ctx.fillText(timeStr, detailsX + 70, yTime);
-          ctx.fillText(locationStr, detailsX + 110, yLoc);
-
-          canvas.toBlob((blob) => {
+    return new Promise(async (resolve, reject) => {
+      if (!flyerRef.current) {
+        reject(new Error("Flyer preview element not found"));
+        return;
+      }
+      try {
+        setIsGenerating(true);
+        const canvas = await html2canvas(flyerRef.current, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: null,
+          logging: false,
+        });
+        canvas.toBlob(
+          (blob) => {
             setIsGenerating(false);
             if (blob) {
               const file = new File([blob], "flyer.png", { type: "image/png" });
@@ -244,17 +144,14 @@ const CampaignAndFlyersDetails = () => {
             } else {
               reject(new Error("Canvas blob generation failed"));
             }
-          }, "image/png");
-        } catch (err) {
-          setIsGenerating(false);
-          reject(err);
-        }
-      };
-
-      img.onerror = (err) => {
+          },
+          "image/png",
+          1.0
+        );
+      } catch (err) {
         setIsGenerating(false);
         reject(err);
-      };
+      }
     });
   };
 
@@ -462,7 +359,7 @@ const CampaignAndFlyersDetails = () => {
 
               {/* Dynamic Overlay Preview */}
               <div className="rounded-2xl border-2 p-8 bg-gray-50 flex justify-center">
-                <div className="relative w-full aspect-[4/5] rounded-xl overflow-hidden shadow-lg select-none">
+                <div ref={flyerRef} className="relative w-full aspect-[4/5] rounded-xl overflow-hidden shadow-lg select-none">
                   {/* Base template image */}
                   <Image
                     src={selectedTemplate.image}
@@ -508,9 +405,14 @@ const CampaignAndFlyersDetails = () => {
                             <span className="text-[11px] text-white/90">
                               {values.eventDate
                                 ? (() => {
-                                    const d = new Date(values.eventDate);
-                                    return `${String(d.getDate()).padStart(2, "0")}-${d.getMonth() + 1}-${d.getFullYear()}`;
-                                  })()
+                                  const parts = values.eventDate.split("-");
+                                  if (parts.length === 3) {
+                                    const [year, month, day] = parts;
+                                    return `${month} ${day} ${year}`;
+                                  }
+                                  const d = new Date(values.eventDate);
+                                  return `${String(d.getMonth() + 1).padStart(2, "0")} ${String(d.getDate()).padStart(2, "0")} ${d.getFullYear()}`;
+                                })()
                                 : "—"}
                             </span>
                           </div>
@@ -522,7 +424,7 @@ const CampaignAndFlyersDetails = () => {
                             </span>
                             <span className="text-[11px] text-white/90">
                               {values.eventStartTime
-                                ? `${values.eventStartTime}${values.eventEndTime ? ` - ${values.eventEndTime}` : ""}`
+                                ? `${formatTime12h(values.eventStartTime)}${values.eventEndTime ? ` - ${formatTime12h(values.eventEndTime)}` : ""}`
                                 : "—"}
                             </span>
                           </div>

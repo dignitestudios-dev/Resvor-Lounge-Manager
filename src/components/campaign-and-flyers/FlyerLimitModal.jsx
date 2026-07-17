@@ -52,7 +52,7 @@ const FlyerLimitModal = ({
               </div>
             </div>
             <p className="text-[13px] text-[#666666] mt-1">
-              You have reached your monthly flyer limit. Now send flyer by paying extra <span className="text-[#181818] font-semibold">$10</span> per flyer.
+              You have reached your monthly flyer limit. Now send flyer by paying extra <span className="text-[#181818] font-semibold">$10</span> per flyer or wait for next month to renew your limit.
             </p>
           </div>
           <div className="mt-4 flex justify-center">

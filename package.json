@@ -32,6 +32,7 @@
     "embla-carousel-react": "^8.6.0",
     "firebase": "^12.16.0",
     "formik": "^2.4.9",
+    "html2canvas-pro": "^2.2.4",
     "js-cookie": "^3.0.8",
     "lucide-react": "^0.553.0",
     "moment": "^2.30.1",
