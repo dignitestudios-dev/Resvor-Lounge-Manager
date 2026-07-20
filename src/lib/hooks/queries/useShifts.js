@@ -20,6 +20,23 @@ export const useGetEligibleEvents = ({ page = 1, limit = 100 } = {}) => {
   });
 };
 
+// ─── Get Confirmed Events and Bookings ───────────────────────────────────────
+const fetchConfirmedEventsAndBookings = async (date) => {
+  if (!date) return [];
+  const { data } = await axiosInstance.get("/shifts/confirmed-events-and-bookings", {
+    params: { date },
+  });
+  return data?.data || [];
+};
+
+export const useGetConfirmedEventsAndBookings = (date) => {
+  return useQuery({
+    queryKey: ["confirmed-events-and-bookings", date],
+    queryFn: () => fetchConfirmedEventsAndBookings(date),
+    enabled: !!date,
+  });
+};
+
 // ─── Get All Shifts ──────────────────────────────────────────────────────────
 const fetchShifts = async ({ page = 1, limit = 10 } = {}) => {
   const { data } = await axiosInstance.get("/shifts", {

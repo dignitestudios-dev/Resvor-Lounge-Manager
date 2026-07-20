@@ -26,7 +26,7 @@ import ReviewPopup from "./ReviewPopup";
 import ConfirmPopup from "./ConfirmPopup";
 import UpdateSuccessPopup from "./UpdateSuccessPopup";
 import { useGetBartenders } from "@/lib/hooks/queries/useBartenders";
-import { useGetEligibleEvents } from "@/lib/hooks/queries/useShifts";
+import { useGetConfirmedEventsAndBookings } from "@/lib/hooks/queries/useShifts";
 import { useCreateShift, useUpdateShift } from "@/lib/hooks/mutations/ShiftMutations";
 import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
 import { Loader2, X } from "lucide-react";
@@ -76,16 +76,13 @@ const AddShiftAndScheduling = ({
 
   // Data queries & mutation
   const { data: bartendersResponse } = useGetBartenders({ page: 1, limit: 100 });
-  const { data: eventsResponse } = useGetEligibleEvents({ page: 1, limit: 100 });
   const { mutate: createShift, isPending: isCreating } = useCreateShift();
   const { mutate: updateShift, isPending: isUpdating } = useUpdateShift();
 
   const bartendersData = bartendersResponse?.data || [];
-  const eventsData = eventsResponse?.data || [];
   const filteredBartenders = bartendersData.filter((b) =>
     b.fullName?.toLowerCase().includes(searchVal.toLowerCase())
   );
-  console.log("🚀 ~ AddShiftAndScheduling ~ eventsData:", eventsData)
 
   // Formik configuration
   const getInitialValues = () => {
@@ -105,13 +102,11 @@ const AddShiftAndScheduling = ({
 
       let editEventName = "";
       let editEventId = data.referenceId || "";
-      if (editEventId) {
-        const foundEvent = eventsData.find((e) => e._id === editEventId);
-        if (foundEvent) editEventName = foundEvent.title;
-      } else if (data.event) {
+      if (typeof data.event === "object" && data.event !== null) {
+        editEventName = data.event.title || data.event.name || "";
+        if (!editEventId) editEventId = data.event._id || "";
+      } else if (typeof data.event === "string") {
         editEventName = data.event;
-        const foundEvent = eventsData.find((e) => e.title === data.event);
-        if (foundEvent) editEventId = foundEvent._id;
       }
 
       let editBartenderIds = [];
@@ -143,7 +138,7 @@ const AddShiftAndScheduling = ({
     validationSchema: addShiftSchema,
     enableReinitialize: true,
     onSubmit: (values) => {
-      console.log("🚀 ~ AddShiftAndScheduling ~ values:", values)
+
       if (isEdit) {
         const startObj = new Date(`${values.date}T${values.startTime}`);
         let endObj = new Date(`${values.date}T${values.endTime}`);
@@ -197,6 +192,15 @@ const AddShiftAndScheduling = ({
     resetForm,
   } = formik;
 
+  // Fetch confirmed events and bookings for selected date
+  const {
+    data: eventsData = [],
+    isLoading: isLoadingEvents,
+    isFetching: isFetchingEvents,
+  } = useGetConfirmedEventsAndBookings(values.date);
+
+  const isEventsLoading = isLoadingEvents || isFetchingEvents;
+
   // Reset form states ONLY when the modal and the review popup are both closed
   useEffect(() => {
     if (!isOpen && !reviewPopup) {
@@ -205,23 +209,13 @@ const AddShiftAndScheduling = ({
     }
   }, [isOpen, reviewPopup, resetForm]);
 
-  // Handle Event selection change to auto-fill date/time
+  // Handle Event selection change to auto-fill eventName
   const handleEventSelect = (val) => {
     setFieldValue("eventId", val);
-    const selectedEvent = eventsData.find((e) => e._id === val);
-    // if (selectedEvent) {
-    //   setFieldValue("eventName", selectedEvent.title);
-    //   if (selectedEvent.startDateTime) {
-    //     setFieldValue("date", formatDateForInput(selectedEvent.startDateTime));
-    //     setFieldValue("startTime", formatTimeForInput(selectedEvent.startDateTime));
-    //   }
-    //   if (selectedEvent.endDateTime) {
-    //     setFieldValue("endTime", formatTimeForInput(selectedEvent.endDateTime));
-    //   }
-    // } else {
-
-    // }
-    // setFieldValue("eventName", "");
+    const selectedEvent = eventsData?.find((e) => e._id === val);
+    if (selectedEvent) {
+      setFieldValue("eventName", selectedEvent.title || selectedEvent.name || selectedEvent.eventName || "");
+    }
   };
 
   const selectedBartenderNames = (values.bartenderIds || [])
@@ -380,7 +374,13 @@ const AddShiftAndScheduling = ({
                     type={"date"}
                     className={"h-14"}
                     value={values.date}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      handleChange(e);
+                      if (!isEdit) {
+                        setFieldValue("eventId", "");
+                        setFieldValue("eventName", "");
+                      }
+                    }}
                     onBlur={handleBlur}
                     min={getTodayString()}
                   />
@@ -440,23 +440,48 @@ const AddShiftAndScheduling = ({
                 </div>
 
                 <div className="w-full flex flex-col gap-1 col-span-2">
-                  <Label className={"text-base text-black"}>Event</Label>
+                  <Label className={"text-base text-black flex items-center justify-between"}>
+                    <span>Event</span>
+                    {isEventsLoading && (
+                      <span className="text-xs text-blue-900 flex items-center gap-1 font-normal">
+                        <Loader2 className="h-3 w-3 animate-spin" /> Loading events...
+                      </span>
+                    )}
+                  </Label>
                   <Select
                     value={values.eventId}
                     onValueChange={(val) => handleEventSelect(val)}
-                    disabled={isEdit}
+                    disabled={isEdit || isEventsLoading}
                   >
                     <SelectTrigger className={"w-full !h-14"}>
-                      <SelectValue placeholder="Select an Event" />
+                      {isEventsLoading ? (
+                        <div className="flex items-center gap-2 text-gray-500">
+                          <Loader2 className="h-4 w-4 animate-spin text-blue-900" />
+                          <span>Loading events...</span>
+                        </div>
+                      ) : (
+                        <SelectValue placeholder="Select an Event" />
+                      )}
                     </SelectTrigger>
                     <SelectContent className={"h-[200px]"}>
                       <SelectGroup>
                         <SelectLabel>Events</SelectLabel>
-                        {eventsData.map((event) => (
-                          <SelectItem value={event._id} key={event._id}>
-                            {event.title}
-                          </SelectItem>
-                        ))}
+                        {isEventsLoading ? (
+                          <div className="flex items-center justify-center p-4 text-sm text-gray-500 gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin text-blue-900" />
+                            Loading events...
+                          </div>
+                        ) : eventsData?.events?.length > 0 ? (
+                          eventsData?.events?.map((event) => (
+                            <SelectItem value={event._id} key={event._id}>
+                              {event.title || event.name || event.eventName}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <div className="p-4 text-sm text-gray-500 text-center">
+                            {values.date ? "No events found for selected date" : "Please select a date first"}
+                          </div>
+                        )}
                       </SelectGroup>
                     </SelectContent>
                   </Select>

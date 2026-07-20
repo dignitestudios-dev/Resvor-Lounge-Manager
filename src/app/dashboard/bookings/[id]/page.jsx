@@ -10,7 +10,6 @@ const BookingDetails = () => {
   const bookingId = params.id;
 
   const { data: bookingData, isLoading } = useGetBookingDetail(bookingId);
-  console.log("🚀 ~ BookingDetails ~ bookingData:", bookingData);
 
   if (isLoading) {
     return <PageLoader />;

@@ -13,7 +13,7 @@ const Table = ({
   totalPages = 1,
   onPageChange = () => { },
 }) => {
-  console.log("🚀 ~ Table ~ bookings:", bookings);
+
   const router = useRouter();
   const [filteredBookings, setFilteredBookings] = React.useState([]);
   const [sortConfig, setSortConfig] = React.useState({

@@ -11,14 +11,12 @@ const GuestDetails = () => {
   const router = useRouter();
   const params = useParams();
   const guestId = useMemo(() => params.id, [params]);
-  console.log("guestId: ", guestId);
 
   // Modal triggers
   const [openEditForm, setOpenEditForm] = useState(false);
   const [openDeletePopup, setOpenDeletePopup] = useState(false);
 
   const handleDelete = () => {
-    console.log("ID to delete: ", guestId);
     router.push("/dashboard/guestbook");
   };
 

@@ -140,7 +140,7 @@ const AddEventForm = ({ onClose, onNext, initialData }) => {
       ErrorToast("Please fill all the required fields.");
     }
   };
-  console.log("formik.isValid 131 ==> ", formik.errors)
+
   return (
     <div className="fixed inset-0 bg-[#0A150F80] bg-opacity-0 z-50 flex items-center justify-center">
       <div className="bg-white rounded-[12px] w-[440px] pb-2 h-[700px] overflow-y-scroll ">

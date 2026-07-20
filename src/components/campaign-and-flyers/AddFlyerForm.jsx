@@ -41,7 +41,7 @@ const AddFlyerForm = ({ isOpen, onOpenChange }) => {
       alert("Please upload a flyer image.");
       return;
     }
-    console.log("Flyer Added");
+
     onOpenChange(false);
     setOpenInvForm(true);
   };

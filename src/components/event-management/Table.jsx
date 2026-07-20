@@ -39,7 +39,7 @@ const Table = ({
   const displayedEvents = Object.keys(filters).some((key) => filters[key])
     ? filteredEvents
     : events;
-  console.log("🚀 ~ Table ~ displayedEvents:", displayedEvents)
+
 
   const handleRowClick = (eventId) => {
     router.push(`/dashboard/event-management/${eventId}`);

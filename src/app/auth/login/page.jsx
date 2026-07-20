@@ -33,7 +33,6 @@ const Login = () => {
           let fcmToken = "";
           try {
             fcmToken = await requestForToken();
-            console.log("FCM Token retrieved successfully:", fcmToken);
           } catch (tokenError) {
             console.error("FCM Token retrieval failed:", tokenError);
           }
@@ -64,14 +63,13 @@ const Login = () => {
           if (fcmToken) {
             try {
               await updateFcmMutation.mutateAsync({ fcmToken });
-              console.log("FCM token updated successfully on backend");
             } catch (fcmUpdateError) {
               console.error("FCM Token update on backend failed:", fcmUpdateError);
             }
           }
 
           if (tokenType === "registration_token") {
-            console.log("🚀 ~ IF RUN LINE 46");
+
             // Middleware will guard the route; onboardingStep is already in cache
             router.replace("/auth/signup");
           } else {

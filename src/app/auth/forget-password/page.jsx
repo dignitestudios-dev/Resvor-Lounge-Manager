@@ -23,8 +23,7 @@ const ForgotPassword = () => {
       validationSchema: forgotPasswordSchema,
       validateOnChange: true,
       validateOnBlur: true,
-      onSubmit: async (values, action) => {
-        console.log("🚀 ~ ForgotPassword ~ action:", action);
+      onSubmit: async (values) => {
 
         try {
           const data = {
@@ -33,7 +32,6 @@ const ForgotPassword = () => {
           };
 
           const response = await forgotPasswordMutation.mutateAsync(data);
-          console.log("🚀 ~ ForgotPassword ~ response:", response);
           router.push("/auth/verify-forget-otp");
 
           sessionStorage.setItem("resetEmail", values.email);
@@ -43,7 +41,7 @@ const ForgotPassword = () => {
           } else {
             ErrorToast(
               error.response?.data?.message ||
-                "An error occurred. Please try again.",
+              "An error occurred. Please try again.",
             );
           }
         }
