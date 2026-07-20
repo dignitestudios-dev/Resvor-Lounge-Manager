@@ -42,6 +42,22 @@ export const useWalletMe = (options = {}) => {
   });
 };
 
+/* ─── Stripe Connect Queries ───────────────────────── */
+const fetchConnectStatus = async () => {
+  const { data } = await axios.get("/connect/status");
+  return data;
+};
+
+export const useGetConnectStatus = (options = {}) => {
+  return useQuery({
+    queryKey: ["connect-status"],
+    queryFn: fetchConnectStatus,
+    retry: false,
+    refetchOnWindowFocus: false,
+    ...options,
+  });
+};
+
 const fetchWalletTransactions = async ({ page = 1, limit = 10 } = {}) => {
   const { data } = await axios.get(`/wallet/transactions?page=${page}&limit=${limit}`);
   return data;
