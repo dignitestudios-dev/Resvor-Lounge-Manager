@@ -154,7 +154,7 @@ const BookingDetails = () => {
                     {utils.capitalize(bookingData.paymentStatus || "N/A")}
                   </p>
                   <p className="text-gray-600 text-sm font-semibold">
-                    Amount Paid: ${bookingData.amountPaid || 0}
+                    Amount Paid: ${Number(bookingData.amountPaid || 0).toFixed(2)}
                   </p>
                 </div>
               </div>

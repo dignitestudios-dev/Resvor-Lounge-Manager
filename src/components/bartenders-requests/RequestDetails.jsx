@@ -71,7 +71,8 @@ const RequestDetails = ({ isOpen, onOpenChange, data, onReject, onAccept, loadin
 
                 <div>
                   <div className=" text-black mt-3">Reason for Time Off</div>
-                  <p className="mt-2  text-gray-600">
+                  <p className="mt-2 text-wrap break-words text-gray-600">
+                   
                     {data.reason ||
                       "The standard Lorem Ipsum passage, m ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod. The standard."}
                   </p>

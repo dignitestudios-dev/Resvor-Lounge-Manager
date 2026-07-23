@@ -145,7 +145,7 @@ const Table = ({
                             backgroundImage: `url(${"/images/profile.png"})`,
                           }}
                         /> */}
-                        {guest.fullName}{" "}
+                        {guest.fullName.slice(0, 20)}...{""}
                       </div>
                     </td>
                     <td className="px-4 py-6">{guest.email}</td>
