@@ -5,7 +5,7 @@ export const addShiftSchema = Yup.object({
     .optional(),
 
   eventId: Yup.string()
-    .required("Please select an event."),
+    .optional(),
 
   role: Yup.string()
     .required("Role is required.")

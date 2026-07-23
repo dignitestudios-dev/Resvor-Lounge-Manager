@@ -146,15 +146,23 @@ const AddShiftAndScheduling = ({
         const startDateTime = startObj.toISOString();
         const endDateTime = endObj.toISOString();
 
+        const updatePayload = {
+          id: data._id,
+          role: values.role,
+          startDateTime: startDateTime,
+          endDateTime: endDateTime,
+          instructions: values.instructions,
+          status: "published",
+        };
+
+        if (values.eventId) {
+          updatePayload.referenceType = "Event";
+          updatePayload.referenceId = values.eventId;
+          updatePayload.eventId = values.eventId;
+        }
+
         updateShift(
-          {
-            id: data._id,
-            role: values.role,
-            startDateTime: startDateTime,
-            endDateTime: endDateTime,
-            instructions: values.instructions,
-            status: "published",
-          },
+          updatePayload,
           {
             onSuccess: () => {
               SuccessToast("Shift updated successfully.");
@@ -211,8 +219,14 @@ const AddShiftAndScheduling = ({
 
   // Handle Event selection change to auto-fill eventName
   const handleEventSelect = (val) => {
+    if (!val || val === "none") {
+      setFieldValue("eventId", "");
+      setFieldValue("eventName", "");
+      return;
+    }
     setFieldValue("eventId", val);
-    const selectedEvent = eventsData?.find((e) => e._id === val);
+    const eventsList = eventsData?.events || (Array.isArray(eventsData) ? eventsData : []);
+    const selectedEvent = eventsList.find((e) => e._id === val);
     if (selectedEvent) {
       setFieldValue("eventName", selectedEvent.title || selectedEvent.name || selectedEvent.eventName || "");
     }
@@ -249,15 +263,23 @@ const AddShiftAndScheduling = ({
       const endDateTime = endObj.toISOString();
 
       if (isEdit) {
+        const updatePayload = {
+          id: data._id,
+          role: values.role,
+          startDateTime: startDateTime,
+          endDateTime: endDateTime,
+          instructions: values.instructions,
+          status: "draft",
+        };
+
+        if (values.eventId) {
+          updatePayload.referenceType = "Event";
+          updatePayload.referenceId = values.eventId;
+          updatePayload.eventId = values.eventId;
+        }
+
         updateShift(
-          {
-            id: data._id,
-            role: values.role,
-            startDateTime: startDateTime,
-            endDateTime: endDateTime,
-            instructions: values.instructions,
-            status: "draft",
-          },
+          updatePayload,
           {
             onSuccess: () => {
               SuccessToast("Shift template saved as draft.");
@@ -278,17 +300,23 @@ const AddShiftAndScheduling = ({
           }
         );
       } else {
+        const createPayload = {
+          role: values.role,
+          startDateTime: startDateTime,
+          endDateTime: endDateTime,
+          bartenderIds: values.bartenderIds,
+          instructions: values.instructions,
+          status: "draft",
+        };
+
+        if (values.eventId) {
+          createPayload.referenceType = "Event";
+          createPayload.referenceId = values.eventId;
+          createPayload.eventId = values.eventId;
+        }
+
         createShift(
-          {
-            referenceType: "Event",
-            referenceId: values.eventId,
-            role: values.role,
-            startDateTime: startDateTime,
-            endDateTime: endDateTime,
-            bartenderIds: values.bartenderIds,
-            instructions: values.instructions,
-            status: "draft",
-          },
+          createPayload,
           {
             onSuccess: () => {
               SuccessToast("Shift template saved as draft.");
@@ -315,17 +343,23 @@ const AddShiftAndScheduling = ({
     const startDateTime = startObj.toISOString();
     const endDateTime = endObj.toISOString();
 
+    const createPayload = {
+      role: values.role,
+      startDateTime: startDateTime,
+      endDateTime: endDateTime,
+      bartenderIds: values.bartenderIds,
+      instructions: values.instructions,
+      status: "published",
+    };
+
+    if (values.eventId) {
+      createPayload.referenceType = "Event";
+      createPayload.referenceId = values.eventId;
+      createPayload.eventId = values.eventId;
+    }
+
     createShift(
-      {
-        referenceType: "Event",
-        referenceId: values.eventId,
-        role: values.role,
-        startDateTime: startDateTime,
-        endDateTime: endDateTime,
-        bartenderIds: values.bartenderIds,
-        instructions: values.instructions,
-        status: "published",
-      },
+      createPayload,
       {
         onSuccess: () => {
           SuccessToast("Shift created successfully.");
@@ -441,7 +475,9 @@ const AddShiftAndScheduling = ({
 
                 <div className="w-full flex flex-col gap-1 col-span-2">
                   <Label className={"text-base text-black flex items-center justify-between"}>
-                    <span>Event</span>
+                    <span>
+                      Event <span className="text-gray-400 font-normal text-sm">(optional)</span>
+                    </span>
                     {isEventsLoading && (
                       <span className="text-xs text-blue-900 flex items-center gap-1 font-normal">
                         <Loader2 className="h-3 w-3 animate-spin" /> Loading events...
@@ -449,7 +485,7 @@ const AddShiftAndScheduling = ({
                     )}
                   </Label>
                   <Select
-                    value={values.eventId}
+                    value={values.eventId || "none"}
                     onValueChange={(val) => handleEventSelect(val)}
                     disabled={isEdit || isEventsLoading}
                   >
@@ -466,6 +502,9 @@ const AddShiftAndScheduling = ({
                     <SelectContent className={"h-[200px]"}>
                       <SelectGroup>
                         <SelectLabel>Events</SelectLabel>
+                        <SelectItem value="none">
+                          <span className="text-gray-500 font-normal">None (No Event)</span>
+                        </SelectItem>
                         {isEventsLoading ? (
                           <div className="flex items-center justify-center p-4 text-sm text-gray-500 gap-2">
                             <Loader2 className="h-4 w-4 animate-spin text-blue-900" />

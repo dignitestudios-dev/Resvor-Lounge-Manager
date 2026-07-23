@@ -32,12 +32,17 @@ export default function InputField({
           type={showToggle ? (showPassword ? "text" : "password") : type}
           value={value}
           name={name}
-          onChange={onChange}
+          onChange={(e) => {
+            if (maxLength && e.target.value.length > maxLength) {
+              e.target.value = e.target.value.slice(0, maxLength);
+            }
+            if (onChange) onChange(e);
+          }}
           placeholder={placeholder}
           onBlur={onBlur}
           maxLength={maxLength}
           required={required}
-          className={`w-full px-4 py-2 text-sm rounded-[15px] bg-transparent ring-1 ring-[#CACACA] 
+          className={`w-full px-4 py-2 text-sm text-[#181818] rounded-[15px] bg-transparent ring-1 ring-[#CACACA] 
             focus:ring-2 focus:ring-gray-200 focus:outline-none pr-12 placeholder:font-light placeholder:text-[12px] placeholder:text-[#727272] ${
               className || ""
             }`}

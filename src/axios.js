@@ -9,8 +9,8 @@ import Cookies from "js-cookie";
 //     ? "/api" // Use Next.js rewrites proxy in development
 //     : "https://api-dev.resvor.com"; // Use direct URL in production
 
-export const baseUrl = "https://api-staging.resvor.com";
-// export const baseUrl = "https://api-dev.resvor.com";
+// export const baseUrl = "https://api-staging.resvor.com";
+export const baseUrl = "https://api-dev.resvor.com";
 
 async function getDeviceFingerprint() {
   const fp = await FingerprintJS.load();
@@ -112,7 +112,7 @@ instance.interceptors.response.use(
     // ── Handle no-internet / network errors first ──
     // Catches: NO_INTERNET (from request interceptor), ERR_NETWORK (axios native when DNS/TCP fails)
     if (error.code === "NO_INTERNET" || error.code === "ERR_NETWORK" || error.message === "Network Error") {
-      ErrorToast("No internet connection. Please check your network and try again.");
+      // ErrorToast("No internet connection. Please check your network and try again.");
       return Promise.reject(error);
     }
 

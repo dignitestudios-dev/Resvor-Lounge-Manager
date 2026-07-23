@@ -93,7 +93,7 @@ const formatDate = (dateStr) => {
 };
 
 const SubscriptionPlans = () => {
-  const [tab, setTab] = useState("billing");
+  const [tab, setTab] = useState("wallet");
   const [cancelOpen, setCancelOpen] = useState(false);
   const [purchasingPlanId, setPurchasingPlanId] = useState(null);
   const queryClient = useQueryClient();
@@ -153,7 +153,7 @@ const SubscriptionPlans = () => {
       <div className="mt-6 bg-white rounded-2xl p-6">
         <div className="border-b">
           <nav className="flex gap-6">
-            <button
+            {/* <button
               onClick={() => setTab("billing")}
               className={`py-4 cursor-pointer ${tab === "billing"
                 ? "border-b-2 border-gray-800 font-semibold"
@@ -161,6 +161,15 @@ const SubscriptionPlans = () => {
                 }`}
             >
               Billing
+            </button> */}
+            <button
+              onClick={() => setTab("wallet")}
+              className={`py-4 cursor-pointer ${tab === "wallet"
+                ? "border-b-2 border-gray-800 font-semibold"
+                : "text-gray-500"
+                }`}
+            >
+              Wallet
             </button>
             <button
               onClick={() => setTab("plan")}
@@ -171,63 +180,58 @@ const SubscriptionPlans = () => {
             >
               Plan
             </button>
-            <button
-              onClick={() => setTab("wallet")}
-              className={`py-4 cursor-pointer ${tab === "wallet"
-                ? "border-b-2 border-gray-800 font-semibold"
-                : "text-gray-500"
-                }`}
-            >
-              Wallet
-            </button>
+
           </nav>
         </div>
+        {/* tab === "wallet" ? (
+          <Wallet />
+        ) : */}
 
         {tab === "wallet" ? (
           <Wallet />
-        ) : tab === "billing" ? (
-          <div className="mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div className="bg-white rounded-lg border p-6">
-                <p className="text-sm text-gray-500">Next Invoice Issue Date</p>
-                <div className="text-xl font-semibold mt-3">
-                  {subscription ? formatDate(subscription.periodEnd) : "—"}
-                </div>
-              </div>
 
-              <div className="bg-white rounded-lg border p-6">
-                <p className="text-sm text-gray-500">Invoice Total</p>
-                <div className="text-xl font-semibold mt-3">
-                  {subscription?.planId
-                    ? `$${subscription.planId.displayPrice}`
-                    : "—"}
-                </div>
-              </div>
-            </div>
+          // <div className="mt-6">
+          //   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          //     <div className="bg-white rounded-lg border p-6">
+          //       <p className="text-sm text-gray-500">Next Invoice Issue Date</p>
+          //       <div className="text-xl font-semibold mt-3">
+          //         {subscription ? formatDate(subscription.periodEnd) : "—"}
+          //       </div>
+          //     </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left text-gray-500 border-b">
-                    <th className="py-3">Date</th>
-                    <th className="py-3">Description</th>
-                    <th className="py-3">Invoice Total</th>
-                    <th className="py-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {invoices.map((inv) => (
-                    <tr key={inv.id} className="border-b hover:bg-gray-50">
-                      <td className="py-4 text-gray-700">{inv.date}</td>
-                      <td className="py-4 text-gray-700">{inv.desc}</td>
-                      <td className="py-4 text-gray-700">{inv.total}</td>
-                      <td className="py-4 text-gray-700">{inv.status}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          //     <div className="bg-white rounded-lg border p-6">
+          //       <p className="text-sm text-gray-500">Invoice Total</p>
+          //       <div className="text-xl font-semibold mt-3">
+          //         {subscription?.planId
+          //           ? `$${subscription.planId.displayPrice}`
+          //           : "—"}
+          //       </div>
+          //     </div>
+          //   </div>
+
+          //   <div className="overflow-x-auto">
+          //     <table className="w-full text-sm">
+          //       <thead>
+          //         <tr className="text-left text-gray-500 border-b">
+          //           <th className="py-3">Date</th>
+          //           <th className="py-3">Description</th>
+          //           <th className="py-3">Invoice Total</th>
+          //           <th className="py-3">Status</th>
+          //         </tr>
+          //       </thead>
+          //       <tbody>
+          //         {invoices.map((inv) => (
+          //           <tr key={inv.id} className="border-b hover:bg-gray-50">
+          //             <td className="py-4 text-gray-700">{inv.date}</td>
+          //             <td className="py-4 text-gray-700">{inv.desc}</td>
+          //             <td className="py-4 text-gray-700">{inv.total}</td>
+          //             <td className="py-4 text-gray-700">{inv.status}</td>
+          //           </tr>
+          //         ))}
+          //       </tbody>
+          //     </table>
+          //   </div>
+          // </div>
         ) : (
           <div className="mt-6">
             {isPlansLoading || isMySubLoading ? (

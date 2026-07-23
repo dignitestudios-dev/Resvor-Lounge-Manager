@@ -59,7 +59,6 @@ export const AuthProvider = ({ children }) => {
     initialData: cachedAuth || undefined,
     enabled: hasToken,
   });
-  console.log("🚀 ~ AuthProvider ~ authData:", authData)
 
   const sessionType = authData?.sessionType ?? authData?.tokenType ?? null;
   const onboardingStep = authData?.onboardingStep ?? "create_account";

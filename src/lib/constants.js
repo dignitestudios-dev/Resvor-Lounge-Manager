@@ -10,6 +10,7 @@ import Payments from "@/components/icons/sidebar/payments";
 import ScanQrCode from "@/components/icons/sidebar/scan-qr-code";
 import Service from "@/components/icons/sidebar/service";
 import Shift from "@/components/icons/sidebar/shift";
+import WalletIcon from "@/components/icons/sidebar/wallet";
 
 export const navLinks = [
   {
@@ -60,9 +61,16 @@ export const navLinks = [
     icon: <Bookings />,
     selectedIcon: <Bookings color="#010053" />,
   },
+  // {
+  //   name: "Payments",
+  //   path: "/dashboard/payments",
+  //   icon: <Payments />,
+  //   selectedIcon: <Payments color="#010053" />,
+  // },
   {
     name: "Payments",
-    path: "/dashboard/payments",
+    path: "/dashboard/wallet",
+    // icon: <WalletIcon />,
     icon: <Payments />,
     selectedIcon: <Payments color="#010053" />,
   },

@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
 
 import NotificationSettings from "@/components/settings/NotificationSettings";
+import BanksDetail from "@/components/settings/BanksDetail";
 import TermsAndConditions from "@/components/settings/TermsAndConditions";
 import PrivacyPolicy from "@/components/settings/PrivacyPolicy";
 import ProfileFlow from "@/components/settings/ProfileFlow";
@@ -38,6 +39,9 @@ const Settings = () => {
 
         {/* Notification Settings opens a dialog */}
         <NotificationSettings />
+
+        {/* Banks Detail opens a dialog */}
+        <BanksDetail />
 
         <button
           onClick={() => setOpenChangePassword(true)}

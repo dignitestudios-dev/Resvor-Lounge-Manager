@@ -13,6 +13,7 @@ const Topbar = () => {
   const showBackButton = useMemo(
     () =>
       pathname === "/dashboard/settings" ||
+      pathname === "/dashboard/notifications" ||
       pathname.includes("/dashboard/guestbook/") ||
       pathname.includes("/dashboard/bartenders/") ||
       pathname.includes("/dashboard/event-management/") ||

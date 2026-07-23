@@ -332,3 +332,9 @@ export const submitUpdateService = async ({ serviceId, payload }) => {
 
   return data;
 };
+
+export const submitChangePassword = async (payload) => {
+  const { data } = await axios.post("/auth/change-password", payload);
+
+  return data;
+};

@@ -14,6 +14,8 @@ import { useLogout } from "@/lib/hooks/mutations/AuthMutations";
 import { ErrorToast } from "../ui/toaster";
 import LogoutConfirmationModal from "../common/LogoutConfirmationModal";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuthMe } from "@/lib/hooks/queries/useQueries";
+import { useAuthContext } from "@/lib/context/AuthProvider";
 
 const ProfileMenu = () => {
   const router = useRouter();
@@ -23,6 +25,36 @@ const ProfileMenu = () => {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   const logoutMutation = useLogout();
+  const { data: authMeData } = useAuthMe();
+  const authContext = useAuthContext();
+  const user = authMeData?.user || authMeData || authContext?.user || {};
+
+  const firstName = user?.firstName || "";
+  const lastName = user?.lastName || "";
+
+  const displayName =
+    firstName || lastName
+      ? `${firstName} ${lastName}`.trim()
+      : user?.fullName || user?.name || "Lounge Manager";
+
+  const getInitials = (fName, lName, fallbackName) => {
+    if (fName || lName) {
+      const f = fName ? fName.charAt(0).toUpperCase() : "";
+      const l = lName ? lName.charAt(0).toUpperCase() : "";
+      return `${f}${l}` || "LM";
+    }
+    if (fallbackName) {
+      const parts = fallbackName.trim().split(" ").filter(Boolean);
+      if (parts.length >= 2) {
+        return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+      } else if (parts.length === 1) {
+        return parts[0].substring(0, 2).toUpperCase();
+      }
+    }
+    return "LM";
+  };
+
+  const initials = getInitials(firstName, lastName, user?.fullName || user?.name);
 
   const handleLogoutClick = () => {
     setOpen(false); // close popover
@@ -44,7 +76,7 @@ const ProfileMenu = () => {
       } else {
         ErrorToast(
           error.response?.data?.message ||
-            "An error occurred during logout. Please try again.",
+          "An error occurred during logout. Please try again.",
         );
       }
       setIsLogoutModalOpen(false);
@@ -60,8 +92,10 @@ const ProfileMenu = () => {
       <Popover open={open} onOpenChange={setOpen} className="w-20! max-w-20!">
         <PopoverTrigger asChild>
           <Button className="flex items-center gap-2 bg-transparent hover:bg-transparent p-0">
-            <div className="h-11 w-11 bg-[url(/images/profile.png)] bg-cover bg-center rounded-full" />
-            <p className="text-black font-medium">Store Name</p>
+            <div className="h-11 w-11 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-sm border border-primary/20 shadow-xs uppercase select-none">
+              {initials}
+            </div>
+            <p className="text-black font-medium">{displayName}</p>
             <IoIosArrowDropdownCircle className="text-primary text-xl" />
           </Button>
         </PopoverTrigger>

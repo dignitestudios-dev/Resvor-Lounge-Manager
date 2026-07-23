@@ -1,15 +1,21 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { useParams } from "next/navigation";
 import { useGetBookingDetail } from "@/lib/hooks/queries/useBookingDetail";
+import { useAppealDispute } from "@/lib/hooks/mutations/DisputeMutations";
+import { SuccessToast, ErrorToast } from "@/components/ui/toaster";
 import utils, { getBookingStatusStyles } from "@/lib/utils";
 import PageLoader from "@/components/common/PageLoader";
+import AppealDisputeModal from "@/components/bookings/AppealDisputeModal";
 
 const BookingDetails = () => {
   const params = useParams();
   const bookingId = params.id;
 
+  const [isAppealModalOpen, setIsAppealModalOpen] = useState(false);
+
   const { data: bookingData, isLoading } = useGetBookingDetail(bookingId);
+  const appealDisputeMutation = useAppealDispute();
 
   if (isLoading) {
     return <PageLoader />;
@@ -24,6 +30,31 @@ const BookingDetails = () => {
       </div>
     );
   }
+
+  const disputeId =
+    typeof bookingData?.disputeId === "object"
+      ? bookingData?.disputeId?._id
+      : bookingData?.disputeId || bookingData?.dispute_id;
+
+  const handleAppealSubmit = (formData, resetForm) => {
+    if (!disputeId) return;
+    appealDisputeMutation.mutate(
+      { disputeId, formData },
+      {
+        onSuccess: (res) => {
+          SuccessToast(res?.message || "Dispute appeal submitted successfully!");
+          setIsAppealModalOpen(false);
+          if (resetForm) resetForm();
+        },
+        onError: (err) => {
+          ErrorToast(
+            err?.response?.data?.message ||
+              "Failed to submit dispute appeal. Please try again."
+          );
+        },
+      }
+    );
+  };
 
   // Parse dates and times
   const startTime = new Date(bookingData.startTime);
@@ -40,15 +71,26 @@ const BookingDetails = () => {
     <div className="flex-1 flex flex-col overflow-y-auto">
       <div className="flex justify-between items-center mb-5">
         <h1 className="text-2xl font-bold">Booking Details</h1>
-        {bookingData?.status && (
-          <span
-            className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${getBookingStatusStyles(
-              bookingData.status,
-            )}`}
-          >
-            {utils.capitalize(bookingData.status.replaceAll("_", " "))}
-          </span>
-        )}
+        <div className="flex items-center gap-3">
+          {disputeId && (
+            <button
+              type="button"
+              onClick={() => setIsAppealModalOpen(true)}
+              className="px-4 py-2 text-sm font-bold rounded-xl bg-gradient-to-r from-[#012C57] to-[#061523] text-white hover:opacity-95 transition shadow-sm cursor-pointer"
+            >
+              Appeal Dispute
+            </button>
+          )}
+          {bookingData?.status && (
+            <span
+              className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${getBookingStatusStyles(
+                bookingData.status,
+              )}`}
+            >
+              {utils.capitalize(bookingData.status.replaceAll("_", " "))}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto bg-white p-5 rounded-2xl">
@@ -154,7 +196,7 @@ const BookingDetails = () => {
                     {utils.capitalize(bookingData.paymentStatus || "N/A")}
                   </p>
                   <p className="text-gray-600 text-sm font-semibold">
-                    Amount Paid: ${bookingData.amountPaid || 0}
+                    Amount Paid: {utils.formatCentsToUSD(bookingData.amountPaid || 0)}
                   </p>
                 </div>
               </div>
@@ -234,6 +276,13 @@ const BookingDetails = () => {
           </div>
         </div>
       </div>
+
+      <AppealDisputeModal
+        open={isAppealModalOpen}
+        setOpen={setIsAppealModalOpen}
+        onSubmit={handleAppealSubmit}
+        isLoading={appealDisputeMutation.isPending}
+      />
     </div>
   );
 };

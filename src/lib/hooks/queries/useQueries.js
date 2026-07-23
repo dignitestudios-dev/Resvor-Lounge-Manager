@@ -58,6 +58,22 @@ export const useGetConnectStatus = (options = {}) => {
   });
 };
 
+/* ─── Get Connect Banks ────────────────────────────── */
+const fetchConnectBanks = async () => {
+  const { data } = await axios.get("/connect/banks");
+  return data;
+};
+
+export const useGetConnectBanks = (options = {}) => {
+  return useQuery({
+    queryKey: ["connect-banks"],
+    queryFn: fetchConnectBanks,
+    retry: false,
+    refetchOnWindowFocus: false,
+    ...options,
+  });
+};
+
 const fetchWalletTransactions = async ({ page = 1, limit = 10 } = {}) => {
   const { data } = await axios.get(`/wallet/transactions?page=${page}&limit=${limit}`);
   return data;
@@ -91,6 +107,24 @@ export const useGetCampaignById = (campaignId, options = {}) => {
     queryKey: ["campaign", campaignId],
     queryFn: () => getCampaignById(campaignId),
     enabled: !!campaignId,
+    retry: false,
+    refetchOnWindowFocus: false,
+    ...options,
+  });
+};
+
+/* ─── Notification Queries ────────────────────────── */
+const fetchNotifications = async (page = 1, limit = 10) => {
+  const { data } = await axios.get("/notifications", {
+    params: { page, limit },
+  });
+  return data;
+};
+
+export const useNotifications = (page = 1, limit = 10, options = {}) => {
+  return useQuery({
+    queryKey: ["notifications", page, limit],
+    queryFn: () => fetchNotifications(page, limit),
     retry: false,
     refetchOnWindowFocus: false,
     ...options,
