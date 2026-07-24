@@ -7,8 +7,8 @@ import CustomTooltip from "./CustomTooltip";
 import { walkthroughSteps } from "./walkthroughSteps";
 
 const WalkthroughWrapper = () => {
-  const [showWelcome, setShowWelcome] = useState(true);
-  const [runTour, setRunTour] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [runTour, setRunTour] = useState(false);
 
   useEffect(() => {
     // Check if new user signup / onboarding flag is set
