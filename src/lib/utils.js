@@ -131,8 +131,15 @@ export const formatCentsToUSD = (cents) => {
   return formatCurrency(centsToUSD(cents));
 };
 
-export const formatNumber = (num) => {
-  return new Intl.NumberFormat("en-US").format(num);
+export const formatNumber = (num, decimals) => {
+  const n = Number(num || 0);
+  if (decimals !== undefined && decimals !== null) {
+    return new Intl.NumberFormat("en-US", {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    }).format(n);
+  }
+  return new Intl.NumberFormat("en-US").format(n);
 };
 
 export const formatPercentage = (num, fractionDigits = 2) => {
@@ -438,6 +445,20 @@ export const getBookingStatusStyles = (status) => {
       return " text-slate-700";
   }
 };
+
+export const getEventStatusStyles = (status) => {
+  switch (status) {
+    case "pending":
+      return " text-yellow-800";
+    case "completed":
+      return " text-green-700";
+    case "rejected":
+      return " text-red-700";
+    default:
+      return " text-slate-700";
+  }
+};
+
 
 
 const utils = {

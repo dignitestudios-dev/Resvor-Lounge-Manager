@@ -2,7 +2,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import CustomPagination from "@/components/common/CustomPagination";
-import utils, { capitalize, getBookingStatusStyles } from "@/lib/utils";
+import utils, { capitalize, getBookingStatusStyles, getEventStatusStyles } from "@/lib/utils";
 import { IoIosArrowForward } from "react-icons/io";
 
 const Table = ({
@@ -129,13 +129,13 @@ const Table = ({
                   <td className="px-4 py-6 text-nowrap">{event?.eventTime}</td>
                   <td className="px-4 py-6">
                     <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getBookingStatusStyles(event?.status) || ""}`}
+                      className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getEventStatusStyles(event?.status) || ""}`}
                     >
                       {capitalize(event?.status || "pending")}
                     </span>
                   </td>
                   <td className="px-4 py-6">
-                    {utils.formatNumber(event?.budget)}
+                    {utils.formatNumber(event?.budget, 2)}
                   </td>
                   <td className="px-4 py-6 text-nowrap">
                     <div className="flex justify-center items-center cursor-pointer">

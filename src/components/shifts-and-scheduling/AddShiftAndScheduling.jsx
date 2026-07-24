@@ -73,6 +73,7 @@ const AddShiftAndScheduling = ({
   const [reviewPopup, setReviewPopup] = useState(false);
   const [updatedOpen, setUpdatedOpen] = useState(false);
   const [searchVal, setSearchVal] = useState("");
+  const [actionType, setActionType] = useState(null); // 'submit' | 'template' | null
 
   // Data queries & mutation
   const { data: bartendersResponse } = useGetBartenders({ page: 1, limit: 100 });
@@ -101,12 +102,26 @@ const AddShiftAndScheduling = ({
       const editInstructions = data.instruction || data.instructions || "";
 
       let editEventName = "";
-      let editEventId = data.referenceId || "";
+      let editEventId = "";
+
+      if (typeof data.referenceId === "object" && data.referenceId !== null) {
+        editEventId = data.referenceId._id || "";
+        editEventName =
+          data.referenceId.title ||
+          data.referenceId.name ||
+          data.referenceId.guestName ||
+          "";
+      } else if (typeof data.referenceId === "string") {
+        editEventId = data.referenceId;
+      }
+
       if (typeof data.event === "object" && data.event !== null) {
-        editEventName = data.event.title || data.event.name || "";
+        if (!editEventName)
+          editEventName =
+            data.event.title || data.event.name || data.event.guestName || "";
         if (!editEventId) editEventId = data.event._id || "";
       } else if (typeof data.event === "string") {
-        editEventName = data.event;
+        if (!editEventName) editEventName = data.event;
       }
 
       let editBartenderIds = [];
@@ -138,8 +153,8 @@ const AddShiftAndScheduling = ({
     validationSchema: addShiftSchema,
     enableReinitialize: true,
     onSubmit: (values) => {
-
       if (isEdit) {
+        setActionType("submit");
         const startObj = new Date(`${values.date}T${values.startTime}`);
         let endObj = new Date(`${values.date}T${values.endTime}`);
 
@@ -165,6 +180,7 @@ const AddShiftAndScheduling = ({
           updatePayload,
           {
             onSuccess: () => {
+              setActionType(null);
               SuccessToast("Shift updated successfully.");
               onOpenChange(false);
               if (typeof onUpdateSubmit === "function") {
@@ -174,6 +190,7 @@ const AddShiftAndScheduling = ({
               }
             },
             onError: (error) => {
+              setActionType(null);
               ErrorToast(
                 error?.response?.data?.message ||
                 error?.message ||
@@ -214,6 +231,7 @@ const AddShiftAndScheduling = ({
     if (!isOpen && !reviewPopup) {
       resetForm();
       setSearchVal("");
+      setActionType(null);
     }
   }, [isOpen, reviewPopup, resetForm]);
 
@@ -256,6 +274,8 @@ const AddShiftAndScheduling = ({
         return;
       }
 
+      setActionType("template");
+
       const startObj = new Date(`${values.date}T${values.startTime}`);
       const endObj = new Date(`${values.date}T${values.endTime}`);
 
@@ -282,6 +302,7 @@ const AddShiftAndScheduling = ({
           updatePayload,
           {
             onSuccess: () => {
+              setActionType(null);
               SuccessToast("Shift template saved as draft.");
               onOpenChange(false);
               if (typeof onUpdateSubmit === "function") {
@@ -291,6 +312,7 @@ const AddShiftAndScheduling = ({
               }
             },
             onError: (error) => {
+              setActionType(null);
               ErrorToast(
                 error?.response?.data?.message ||
                 error?.message ||
@@ -319,10 +341,12 @@ const AddShiftAndScheduling = ({
           createPayload,
           {
             onSuccess: () => {
+              setActionType(null);
               SuccessToast("Shift template saved as draft.");
               onOpenChange(false);
             },
             onError: (error) => {
+              setActionType(null);
               ErrorToast(
                 error?.response?.data?.message ||
                 error?.message ||
@@ -336,6 +360,7 @@ const AddShiftAndScheduling = ({
   };
 
   const handleConfirm = () => {
+    setActionType("submit");
     // Parse input date and times to ISO strings
     const startObj = new Date(`${values.date}T${values.startTime}`);
     let endObj = new Date(`${values.date}T${values.endTime}`);
@@ -362,11 +387,13 @@ const AddShiftAndScheduling = ({
       createPayload,
       {
         onSuccess: () => {
+          setActionType(null);
           SuccessToast("Shift created successfully.");
           setReviewPopup(false);
           setConfirmPopup(true);
         },
         onError: (error) => {
+          setActionType(null);
           ErrorToast(
             error?.response?.data?.message ||
             error?.message ||
@@ -475,55 +502,66 @@ const AddShiftAndScheduling = ({
 
                 <div className="w-full flex flex-col gap-1 col-span-2">
                   <Label className={"text-base text-black flex items-center justify-between"}>
-                    <span>
-                      Event <span className="text-gray-400 font-normal text-sm">(optional)</span>
-                    </span>
-                    {isEventsLoading && (
+                    <span>Event</span>
+                    {!isEdit && isEventsLoading && (
                       <span className="text-xs text-blue-900 flex items-center gap-1 font-normal">
                         <Loader2 className="h-3 w-3 animate-spin" /> Loading events...
                       </span>
                     )}
                   </Label>
-                  <Select
-                    value={values.eventId || "none"}
-                    onValueChange={(val) => handleEventSelect(val)}
-                    disabled={isEdit || isEventsLoading}
-                  >
-                    <SelectTrigger className={"w-full !h-14"}>
-                      {isEventsLoading ? (
-                        <div className="flex items-center gap-2 text-gray-500">
-                          <Loader2 className="h-4 w-4 animate-spin text-blue-900" />
-                          <span>Loading events...</span>
-                        </div>
-                      ) : (
-                        <SelectValue placeholder="Select an Event" />
-                      )}
-                    </SelectTrigger>
-                    <SelectContent className={"h-[200px]"}>
-                      <SelectGroup>
-                        <SelectLabel>Events</SelectLabel>
-                        <SelectItem value="none">
-                          <span className="text-gray-500 font-normal">None (No Event)</span>
-                        </SelectItem>
+                  {isEdit ? (
+                    <Input
+                      readOnly
+                      disabled
+                      className={"h-14 bg-gray-100 text-gray-700 font-medium cursor-not-allowed"}
+                      value={values.eventName || "N/A"}
+                    />
+                  ) : (
+                    <Select
+                      value={values.eventId}
+                      onValueChange={(val) => handleEventSelect(val)}
+                      disabled={isEventsLoading}
+                    >
+                      <SelectTrigger className={"w-full !h-14"}>
                         {isEventsLoading ? (
-                          <div className="flex items-center justify-center p-4 text-sm text-gray-500 gap-2">
+                          <div className="flex items-center gap-2 text-gray-500">
                             <Loader2 className="h-4 w-4 animate-spin text-blue-900" />
-                            Loading events...
+                            <span>Loading events...</span>
                           </div>
-                        ) : eventsData?.events?.length > 0 ? (
-                          eventsData?.events?.map((event) => (
-                            <SelectItem value={event._id} key={event._id}>
-                              {event.title || event.name || event.eventName}
-                            </SelectItem>
-                          ))
                         ) : (
-                          <div className="p-4 text-sm text-gray-500 text-center">
-                            {values.date ? "No events found for selected date" : "Please select a date first"}
-                          </div>
+                          <SelectValue placeholder="Select an Event">
+                            {values.eventName || undefined}
+                          </SelectValue>
                         )}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+                      </SelectTrigger>
+                      <SelectContent className={"h-[200px]"}>
+                        <SelectGroup>
+                          <SelectLabel>Events</SelectLabel>
+                          {values.eventId && !eventsData?.events?.some((e) => e._id === values.eventId) && (
+                            <SelectItem key={values.eventId} value={values.eventId}>
+                              {values.eventName || "Selected Event"}
+                            </SelectItem>
+                          )}
+                          {isEventsLoading ? (
+                            <div className="flex items-center justify-center p-4 text-sm text-gray-500 gap-2">
+                              <Loader2 className="h-4 w-4 animate-spin text-blue-900" />
+                              Loading events...
+                            </div>
+                          ) : eventsData?.events?.length > 0 ? (
+                            eventsData?.events?.map((event) => (
+                              <SelectItem value={event._id} key={event._id}>
+                                {event.title || event.name || event.eventName}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <div className="p-4 text-sm text-gray-500 text-center">
+                              {values.date ? "No events found for selected date" : "Please select a date first"}
+                            </div>
+                          )}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  )}
                   {touched.eventId && errors.eventId && (
                     <p className="text-red-600 text-xs mt-1">{errors.eventId}</p>
                   )}
@@ -655,7 +693,9 @@ const AddShiftAndScheduling = ({
                   className={"col-span-2 w-full h-14 text-lg flex items-center justify-center gap-2"}
                   disabled={isCreating || isUpdating}
                 >
-                  {(isCreating || isUpdating) && <Loader2 className="h-5 w-5 animate-spin" />}
+                  {(isCreating || isUpdating) && actionType === "submit" && (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  )}
                   {isEdit ? "Update" : "Create Shift"}
                 </Button>
 
@@ -667,7 +707,9 @@ const AddShiftAndScheduling = ({
                   }
                   disabled={isCreating || isUpdating}
                 >
-                  {(isCreating || isUpdating) && <Loader2 className="h-5 w-5 animate-spin" />}
+                  {(isCreating || isUpdating) && actionType === "template" && (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  )}
                   Save This Template
                 </Button>
               </form>

@@ -24,20 +24,48 @@ const Table = () => {
   const totalPages = shiftsResponse?.pagination?.totalPages || 1;
 
   const normalizedShifts = shifts.map((shift) => {
-    const bartenders = (shift.bartenderIds || []).map((b) => ({
-      name: typeof b === "object" ? b.fullName : b,
-      profileImage: typeof b === "object" ? (b.profileImage?.location || "/images/profile.png") : "/images/profile.png",
-    }));
+    const bartenders = (shift.bartenderIds || []).map((b) => {
+      if (typeof b === "object" && b !== null) {
+        const imgUrl =
+          typeof b.profileImage === "object" && b.profileImage !== null
+            ? b.profileImage.location || b.profileImage.url
+            : typeof b.profileImage === "string" && b.profileImage.trim() !== ""
+            ? b.profileImage
+            : null;
+        return {
+          name: b.fullName || b.name || "-",
+          profileImage: imgUrl,
+        };
+      }
+      return {
+        name: typeof b === "string" ? b : "-",
+        profileImage: null,
+      };
+    });
+
     const startStr = utils.formatTime12(shift.startDateTime);
     const endStr = utils.formatTime12(shift.endDateTime);
-    const foundEvent = eventsList.find((e) => e._id === shift.referenceId);
+
+    let eventTitle = "-";
+    if (typeof shift.referenceId === "object" && shift.referenceId !== null) {
+      eventTitle =
+        shift.referenceId.title ||
+        shift.referenceId.name ||
+        shift.referenceId.guestName ||
+        "-";
+    } else if (typeof shift.referenceId === "string") {
+      const foundEvent = eventsList.find((e) => e._id === shift.referenceId);
+      eventTitle = foundEvent
+        ? foundEvent.title || foundEvent.name || foundEvent.guestName
+        : shift.referenceId;
+    }
 
     return {
       ...shift,
       date: shift.startDateTime,
       time: startStr && endStr ? `${startStr} - ${endStr}` : "",
       role: shift.role,
-      event: foundEvent ? foundEvent.title : shift.referenceId || "-",
+      event: eventTitle,
       bartenders,
       status: shift.status || "pending",
       instruction: shift.instructions || "",
@@ -138,9 +166,28 @@ const Table = () => {
                   <td className="px-4 py-6">{event.event}</td>
                   <td className="px-4 py-6">
                     {event.bartenders && event.bartenders.length > 0 ? (
-                      <span className="text-sm">
-                        {event.bartenders.map((b) => b.name).join(", ")}
-                      </span>
+                      <div className="flex items-center gap-3 flex-wrap">
+                        {event.bartenders.map((b, bIdx) => (
+                          <div key={bIdx} className="flex items-center gap-2">
+                            {b.profileImage ? (
+                              <img
+                                src={b.profileImage}
+                                alt={b.name}
+                                className="w-7 h-7 rounded-full object-cover border border-gray-200"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.style.display = 'none';
+                                }}
+                              />
+                            ) : (
+                              <div className="w-7 h-7 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center text-xs font-bold border border-gray-300">
+                                {b.name ? b.name.charAt(0).toUpperCase() : "B"}
+                              </div>
+                            )}
+                            <span className="text-sm font-medium">{b.name}</span>
+                          </div>
+                        ))}
+                      </div>
                     ) : (
                       "-"
                     )}

@@ -49,7 +49,7 @@ const BookingDetails = () => {
         onError: (err) => {
           ErrorToast(
             err?.response?.data?.message ||
-              "Failed to submit dispute appeal. Please try again."
+            "Failed to submit dispute appeal. Please try again."
           );
         },
       }
@@ -196,7 +196,7 @@ const BookingDetails = () => {
                     {utils.capitalize(bookingData.paymentStatus || "N/A")}
                   </p>
                   <p className="text-gray-600 text-sm font-semibold">
-                    Amount Paid: {utils.formatCentsToUSD(bookingData.amountPaid || 0)}
+                    Amount Paid: ${Number(bookingData.amountPaid || 0).toFixed(2)}
                   </p>
                 </div>
               </div>

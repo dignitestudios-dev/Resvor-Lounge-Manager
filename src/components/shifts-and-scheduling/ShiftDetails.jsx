@@ -24,17 +24,35 @@ const ShiftDetails = ({
   const { data: eventsResponse } = useGetEligibleEvents({ page: 1, limit: 100 });
   const eventsList = eventsResponse?.data || [];
 
-  const foundEvent = eventsList.find((e) => e._id === shiftDetail?.referenceId);
-  const eventName = foundEvent ? foundEvent.title : shiftDetail?.referenceId || "-";
+  let eventName = "-";
+  if (typeof shiftDetail?.referenceId === "object" && shiftDetail?.referenceId !== null) {
+    eventName =
+      shiftDetail.referenceId.title ||
+      shiftDetail.referenceId.name ||
+      shiftDetail.referenceId.guestName ||
+      "-";
+  } else if (typeof shiftDetail?.referenceId === "string") {
+    const foundEvent = eventsList.find((e) => e._id === shiftDetail.referenceId);
+    eventName = foundEvent
+      ? foundEvent.title || foundEvent.name || foundEvent.guestName
+      : shiftDetail.referenceId;
+  }
 
   const bartendersList = (shiftDetail?.bartenderIds || []).map((b) => {
     if (typeof b === "object" && b !== null) {
+      const imgUrl =
+        typeof b.profileImage === "object" && b.profileImage !== null
+          ? b.profileImage.location || b.profileImage.url
+          : typeof b.profileImage === "string" && b.profileImage.trim() !== ""
+          ? b.profileImage
+          : null;
+
       return {
-        name: b.fullName || "-",
-        profileImage: b.profileImage?.location || "/images/profile.png",
+        name: b.fullName || b.name || "-",
+        profileImage: imgUrl,
       };
     }
-    return { name: b, profileImage: "/images/profile.png" };
+    return { name: typeof b === "string" ? b : "-", profileImage: null };
   });
 
   const startStr = shiftDetail ? utils.formatTime12(shiftDetail.startDateTime) : "";
@@ -107,12 +125,21 @@ const ShiftDetails = ({
                       <div className="flex flex-col gap-2 mt-1">
                         {bartendersList.map((b, i) => (
                           <div key={i} className="flex items-center gap-2">
-                            <div
-                              className="h-[32px] w-[32px] rounded-full bg-cover bg-center shrink-0 border border-gray-200"
-                              style={{
-                                backgroundImage: `url(${b.profileImage})`,
-                              }}
-                            />
+                            {b.profileImage ? (
+                              <img
+                                src={b.profileImage}
+                                alt={b.name}
+                                className="h-[32px] w-[32px] rounded-full object-cover shrink-0 border border-gray-200"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.style.display = "none";
+                                }}
+                              />
+                            ) : (
+                              <div className="h-[32px] w-[32px] rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center text-xs shrink-0 border border-gray-300">
+                                {b.name ? b.name.charAt(0).toUpperCase() : "B"}
+                              </div>
+                            )}
                             <span className="font-semibold text-black text-sm">{b.name}</span>
                           </div>
                         ))}
@@ -130,7 +157,7 @@ const ShiftDetails = ({
                     Any Instruction{" "}
                     <span className="text-gray-300">(optional)</span>
                   </div>
-                  <p className="mt-2  text-gray-600">
+                  <p className="mt-2 text-wrap break-words text-gray-600">
                     {shiftDetail.instructions || "-"}
                   </p>
                 </div>

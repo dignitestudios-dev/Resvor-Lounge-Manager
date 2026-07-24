@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -125,6 +126,7 @@ const PersonalInfoModal = ({
               <Button
                 onClick={() => {
                   if (onSave) onSave({ fullName });
+                  if (onSave) onSave({ fullName });
                   setOpen(false);
                 }}
                 className="w-full max-w-xl"
@@ -140,3 +142,4 @@ const PersonalInfoModal = ({
 };
 
 export default PersonalInfoModal;
+
