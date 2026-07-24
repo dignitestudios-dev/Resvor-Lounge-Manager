@@ -14,11 +14,11 @@ import { Button } from "../ui/button";
 
 const NotificationSettings = () => {
   const [toggles, setToggles] = useState([
-    { id: 1, title: "Notification title", value: true },
-    { id: 2, title: "Notification title", value: true },
-    { id: 3, title: "Notification title", value: false },
-    { id: 4, title: "Notification title", value: false },
-    { id: 5, title: "Notification title", value: false },
+    { id: 1, title: "Notifications", value: true },
+    // { id: 2, title: "Notification title", value: true },
+    // { id: 3, title: "Notification title", value: false },
+    // { id: 4, title: "Notification title", value: false },
+    // { id: 5, title: "Notification title", value: false },
   ]);
 
   // control dialog open state so we can close it programmatically on save
@@ -73,14 +73,12 @@ const NotificationSettings = () => {
                     className="sr-only"
                   />
                   <span
-                    className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ${
-                      t.value ? "bg-green-400" : "bg-gray-300"
-                    }`}
+                    className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ${t.value ? "bg-green-400" : "bg-gray-300"
+                      }`}
                   >
                     <span
-                      className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${
-                        t.value ? "translate-x-6" : "translate-x-0"
-                      }`}
+                      className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${t.value ? "translate-x-6" : "translate-x-0"
+                        }`}
                     />
                   </span>
                 </label>

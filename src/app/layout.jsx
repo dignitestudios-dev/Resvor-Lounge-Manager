@@ -4,6 +4,7 @@ import ReactQueryProvider from "@/lib/hooks/query/ReactQueryProvider";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/lib/context/AuthProvider";
 import NoInternetPopup from "@/components/global/NoInternetPopup";
+import WalkthroughWrapper from "@/components/walkthrough/WalkthroughWrapper";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -32,7 +33,10 @@ export default function RootLayout({ children }) {
         />
         <NoInternetPopup />
         <ReactQueryProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            <WalkthroughWrapper />
+            {children}
+          </AuthProvider>
         </ReactQueryProvider>
       </body>
     </html>

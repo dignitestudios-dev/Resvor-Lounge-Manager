@@ -99,12 +99,12 @@ const CampaignAndFlyersDetails = () => {
 
   const eventTypes = [
     "Birthday Celebration",
-    "Ladies Night",
+    // "Ladies Night",
     "Anniversary Celebration",
-    "Live DJ / Music Night",
-    "Happy Hour",
-    "VIP Bottle Service",
-    "Seafood Boil / Food Event",
+    // "Live DJ / Music Night",
+    // "Happy Hour",
+    // "VIP Bottle Service",
+    // "Seafood Boil / Food Event",
     "Special Event / Holiday",
     "Weekly Event Schedule",
     "Lounge Manager Announcement",

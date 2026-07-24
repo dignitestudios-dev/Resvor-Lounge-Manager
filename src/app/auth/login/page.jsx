@@ -33,6 +33,12 @@ const Login = () => {
           let fcmToken = "";
           try {
             fcmToken = await requestForToken();
+            if (fcmToken) {
+              Cookies.set("fcmToken", fcmToken, { expires: 365, path: "/" });
+              if (typeof window !== "undefined") {
+                localStorage.setItem("fcmToken", fcmToken);
+              }
+            }
           } catch (tokenError) {
             console.error("FCM Token retrieval failed:", tokenError);
           }

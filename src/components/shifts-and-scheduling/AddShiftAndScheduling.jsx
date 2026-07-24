@@ -161,15 +161,23 @@ const AddShiftAndScheduling = ({
         const startDateTime = startObj.toISOString();
         const endDateTime = endObj.toISOString();
 
+        const updatePayload = {
+          id: data._id,
+          role: values.role,
+          startDateTime: startDateTime,
+          endDateTime: endDateTime,
+          instructions: values.instructions,
+          status: "published",
+        };
+
+        if (values.eventId) {
+          updatePayload.referenceType = "Event";
+          updatePayload.referenceId = values.eventId;
+          updatePayload.eventId = values.eventId;
+        }
+
         updateShift(
-          {
-            id: data._id,
-            role: values.role,
-            startDateTime: startDateTime,
-            endDateTime: endDateTime,
-            instructions: values.instructions,
-            status: "published",
-          },
+          updatePayload,
           {
             onSuccess: () => {
               setActionType(null);
@@ -229,8 +237,14 @@ const AddShiftAndScheduling = ({
 
   // Handle Event selection change to auto-fill eventName
   const handleEventSelect = (val) => {
+    if (!val || val === "none") {
+      setFieldValue("eventId", "");
+      setFieldValue("eventName", "");
+      return;
+    }
     setFieldValue("eventId", val);
-    const selectedEvent = eventsData?.find((e) => e._id === val);
+    const eventsList = eventsData?.events || (Array.isArray(eventsData) ? eventsData : []);
+    const selectedEvent = eventsList.find((e) => e._id === val);
     if (selectedEvent) {
       setFieldValue("eventName", selectedEvent.title || selectedEvent.name || selectedEvent.eventName || "");
     }
@@ -269,15 +283,23 @@ const AddShiftAndScheduling = ({
       const endDateTime = endObj.toISOString();
 
       if (isEdit) {
+        const updatePayload = {
+          id: data._id,
+          role: values.role,
+          startDateTime: startDateTime,
+          endDateTime: endDateTime,
+          instructions: values.instructions,
+          status: "draft",
+        };
+
+        if (values.eventId) {
+          updatePayload.referenceType = "Event";
+          updatePayload.referenceId = values.eventId;
+          updatePayload.eventId = values.eventId;
+        }
+
         updateShift(
-          {
-            id: data._id,
-            role: values.role,
-            startDateTime: startDateTime,
-            endDateTime: endDateTime,
-            instructions: values.instructions,
-            status: "draft",
-          },
+          updatePayload,
           {
             onSuccess: () => {
               setActionType(null);
@@ -300,17 +322,23 @@ const AddShiftAndScheduling = ({
           }
         );
       } else {
+        const createPayload = {
+          role: values.role,
+          startDateTime: startDateTime,
+          endDateTime: endDateTime,
+          bartenderIds: values.bartenderIds,
+          instructions: values.instructions,
+          status: "draft",
+        };
+
+        if (values.eventId) {
+          createPayload.referenceType = "Event";
+          createPayload.referenceId = values.eventId;
+          createPayload.eventId = values.eventId;
+        }
+
         createShift(
-          {
-            referenceType: "Event",
-            referenceId: values.eventId,
-            role: values.role,
-            startDateTime: startDateTime,
-            endDateTime: endDateTime,
-            bartenderIds: values.bartenderIds,
-            instructions: values.instructions,
-            status: "draft",
-          },
+          createPayload,
           {
             onSuccess: () => {
               setActionType(null);
@@ -340,17 +368,23 @@ const AddShiftAndScheduling = ({
     const startDateTime = startObj.toISOString();
     const endDateTime = endObj.toISOString();
 
+    const createPayload = {
+      role: values.role,
+      startDateTime: startDateTime,
+      endDateTime: endDateTime,
+      bartenderIds: values.bartenderIds,
+      instructions: values.instructions,
+      status: "published",
+    };
+
+    if (values.eventId) {
+      createPayload.referenceType = "Event";
+      createPayload.referenceId = values.eventId;
+      createPayload.eventId = values.eventId;
+    }
+
     createShift(
-      {
-        referenceType: "Event",
-        referenceId: values.eventId,
-        role: values.role,
-        startDateTime: startDateTime,
-        endDateTime: endDateTime,
-        bartenderIds: values.bartenderIds,
-        instructions: values.instructions,
-        status: "published",
-      },
+      createPayload,
       {
         onSuccess: () => {
           setActionType(null);

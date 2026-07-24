@@ -10,11 +10,15 @@ import { userDetailsValues } from "@/lib/init/signUpValues";
 import { userDetailsSchema } from "@/lib/schema/authentication/signupSchema";
 import { ErrorToast } from "../ui/toaster";
 import { useSignUp } from "@/lib/hooks/mutations/OnBoardingMutations";
+import { useUpdateFcmToken } from "@/lib/hooks/mutations/AuthMutations";
 import { useQueryClient } from "@tanstack/react-query";
+import { requestForToken } from "@/lib/firebase";
+import Cookies from "js-cookie";
 
 const CreateAccount = ({ setEmail }) => {
   const router = useRouter();
   const signUpMutation = useSignUp();
+  const updateFcmMutation = useUpdateFcmToken();
   const queryClient = useQueryClient();
 
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
@@ -26,6 +30,20 @@ const CreateAccount = ({ setEmail }) => {
       onSubmit: async (values) => {
         try {
           setEmail(values.email);
+
+          let fcmToken = "";
+          try {
+            fcmToken = await requestForToken();
+            if (fcmToken) {
+              Cookies.set("fcmToken", fcmToken, { expires: 365, path: "/" });
+              if (typeof window !== "undefined") {
+                localStorage.setItem("fcmToken", fcmToken);
+              }
+            }
+          } catch (tokenError) {
+            console.error("FCM Token retrieval failed:", tokenError);
+          }
+
           const data = {
             email: values.email,
             password: values.password,
@@ -33,7 +51,17 @@ const CreateAccount = ({ setEmail }) => {
             fullName: values.name,
             phoneNumber: phoneToE164(values.number),
           };
+
           const response = await signUpMutation.mutateAsync(data);
+
+          if (fcmToken) {
+            try {
+              await updateFcmMutation.mutateAsync({ fcmToken });
+            } catch (fcmUpdateError) {
+              console.error("FCM Token update on backend failed:", fcmUpdateError);
+            }
+          }
+
           updateAuthCache(queryClient, {
             onboardingStep: response?.data?.onboardingStep,
             user: { email: values.email }, // keep email available downstream

@@ -10,6 +10,7 @@ import Payments from "@/components/icons/sidebar/payments";
 import ScanQrCode from "@/components/icons/sidebar/scan-qr-code";
 import Service from "@/components/icons/sidebar/service";
 import Shift from "@/components/icons/sidebar/shift";
+import WalletIcon from "@/components/icons/sidebar/wallet";
 
 export const navLinks = [
   {
@@ -60,9 +61,16 @@ export const navLinks = [
     icon: <Bookings />,
     selectedIcon: <Bookings color="#010053" />,
   },
+  // {
+  //   name: "Payments",
+  //   path: "/dashboard/payments",
+  //   icon: <Payments />,
+  //   selectedIcon: <Payments color="#010053" />,
+  // },
   {
     name: "Payments",
-    path: "/dashboard/payments",
+    path: "/dashboard/wallet",
+    // icon: <WalletIcon />,
     icon: <Payments />,
     selectedIcon: <Payments color="#010053" />,
   },
@@ -153,26 +161,26 @@ export const eventTypeOptions = [
 ];
 
 export const campaignAndFlyers = [
-  {
-    id: 1,
-    title: "Happy Hour Flyer",
-    image: "/images/flyerImage.jpg",
-  },
-  {
-    id: 2,
-    title: "Ladies Night Flyer",
-    image: "/images/flyerImageTwo.jpg",
-  },
-  {
-    id: 3,
-    title: "Live DJ / Music Night Flyer",
-    image: "/images/flyerImageThree.jpg",
-  },
-  {
-    id: 4,
-    title: "Seafood Boil / Food Event Flyer",
-    image: "/images/flyerImageFour.jpg",
-  },
+  // {
+  //   id: 1,
+  //   title: "Happy Hour Flyer",
+  //   image: "/images/flyerImage.jpg",
+  // },
+  // {
+  //   id: 2,
+  //   title: "Ladies Night Flyer",
+  //   image: "/images/flyerImageTwo.jpg",
+  // },
+  // {
+  //   id: 3,
+  //   title: "Live DJ / Music Night Flyer",
+  //   image: "/images/flyerImageThree.jpg",
+  // },
+  // {
+  //   id: 4,
+  //   title: "Seafood Boil / Food Event Flyer",
+  //   image: "/images/flyerImageFour.jpg",
+  // },
   {
     id: 5,
     title: "Anniversary Celebration Flyer",
@@ -183,15 +191,15 @@ export const campaignAndFlyers = [
     title: "Birthday Celebration Flyer",
     image: "/images/flyerImageSix.jpg",
   },
-  {
-    id: 7,
-    title: "VIP Bottle Service Flyer",
-    image: "/images/flyerImageSeven.jpg",
-  },
+  // {
+  //   id: 7,
+  //   title: "VIP Bottle Service Flyer",
+  //   image: "/images/flyerImageSeven.jpg",
+  // },
   {
     id: 8,
     title: "Lounge Manager Announcement Flyer ",
-    image: "/images/flyerImageEight.jpg",
+    image: "/images/flyerImageSeven.jpg",
   },
   {
     id: 9,

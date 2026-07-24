@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect } from "react";
+import { useFormik } from "formik";
+import { Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -10,72 +12,63 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import AuthInput from "@/components/auth/AuthInput";
+import { changePasswordValues } from "@/lib/init/changePasswordValues";
+import { changePasswordSchema } from "@/lib/schema/settings/changePasswordSchema";
+import { useChangePassword } from "@/lib/hooks/mutations/AuthMutations";
+import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
 
-const ChangePasswordModal = ({ open, setOpen, onRequestOTP, onUpdate }) => {
-  const [current, setCurrent] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const [error, setError] = useState("");
+const ChangePasswordModal = ({ open, setOpen, onUpdate }) => {
+  const changePasswordMutation = useChangePassword();
 
-  const [showCurrent, setShowCurrent] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
+  const {
+    values,
+    handleBlur,
+    handleChange,
+    handleSubmit,
+    errors,
+    touched,
+    resetForm,
+  } = useFormik({
+    initialValues: changePasswordValues,
+    validationSchema: changePasswordSchema,
+    validateOnChange: true,
+    validateOnBlur: true,
+    onSubmit: async (values) => {
+      try {
+        const data = {
+          password: values.currentPassword,
+          newPassword: values.password,
+          role: 'lounge_manager'
+        };
 
-  function handleSubmit() {
-    setError("");
-    if (!current || !password || !confirm) {
-      setError("Please fill all fields.");
-      return;
+        const response = await changePasswordMutation.mutateAsync(data);
+        SuccessToast(response?.message || "Password updated successfully.");
+
+        resetForm();
+        setOpen(false);
+
+        if (onUpdate) {
+          onUpdate(response);
+        }
+      } catch (error) {
+        if (error?.code === "NO_INTERNET") {
+          ErrorToast(error.message);
+        } else {
+          ErrorToast(
+            error?.response?.data?.message ||
+            "An error occurred while updating password."
+          );
+        }
+      }
+    },
+  });
+
+  useEffect(() => {
+    if (open) {
+      resetForm();
     }
-    if (password !== confirm) {
-      setError("New password and confirm password do not match.");
-      return;
-    }
-
-    // Prefer to request OTP flow from parent; if not provided, fallback to onUpdate
-    if (onRequestOTP) {
-      onRequestOTP({ current, password });
-    } else if (onUpdate) {
-      onUpdate({ current, password });
-    }
-  }
-
-  function renderPasswordField(
-    label,
-    value,
-    setValue,
-    show,
-    setShow,
-    placeholder
-  ) {
-    return (
-      <div>
-        <label className="block text-sm font-medium">{label}</label>
-        <div className="relative mt-2">
-          <input
-            type={show ? "text" : "password"}
-            className="w-full rounded-md border px-4 py-3 pr-10"
-            placeholder={placeholder}
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-          />
-          <button
-            type="button"
-            onClick={() => setShow(!show)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-            aria-label={show ? "Hide password" : "Show password"}
-          >
-            {!show ? (
-              <AiOutlineEyeInvisible size={18} />
-            ) : (
-              <AiOutlineEye size={18} />
-            )}
-          </button>
-        </div>
-      </div>
-    );
-  }
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -87,46 +80,73 @@ const ChangePasswordModal = ({ open, setOpen, onRequestOTP, onUpdate }) => {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="mt-6 space-y-4">
-          {renderPasswordField(
-            "Current Password",
-            current,
-            setCurrent,
-            showCurrent,
-            setShowCurrent,
-            "Enter password here"
-          )}
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          <AuthInput
+            label="Current Password"
+            placeholder="Enter password here"
+            type="password"
+            id="currentPassword"
+            name="currentPassword"
+            showToggle={true}
+            variant="light"
+            value={values.currentPassword}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            error={errors?.currentPassword}
+            touched={touched?.currentPassword}
+          />
 
-          {renderPasswordField(
-            "New Password",
-            password,
-            setPassword,
-            showPassword,
-            setShowPassword,
-            "Enter new password here"
-          )}
+          <AuthInput
+            label="New Password"
+            placeholder="Enter new password here"
+            type="password"
+            id="password"
+            name="password"
+            showToggle={true}
+            variant="light"
+            value={values.password}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            error={errors?.password}
+            touched={touched?.password}
+          />
 
-          {renderPasswordField(
-            "Confirm Password",
-            confirm,
-            setConfirm,
-            showConfirm,
-            setShowConfirm,
-            "Re enter password here"
-          )}
+          <AuthInput
+            label="Confirm Password"
+            placeholder="Re enter password here"
+            type="password"
+            id="cPassword"
+            name="cPassword"
+            showToggle={true}
+            variant="light"
+            value={values.cPassword}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            error={errors?.cPassword}
+            touched={touched?.cPassword}
+          />
 
-          {error && <div className="text-sm text-red-600">{error}</div>}
-        </div>
-
-        <div className="mt-8">
-          <DialogFooter>
-            <div className="w-full flex justify-center">
-              <Button onClick={handleSubmit} className="w-full max-w-xl">
-                Update
-              </Button>
-            </div>
-          </DialogFooter>
-        </div>
+          <div className="mt-8 pt-4">
+            <DialogFooter>
+              <div className="w-full flex justify-center">
+                <Button
+                  type="submit"
+                  disabled={changePasswordMutation.isPending}
+                  className="w-full max-w-xl flex items-center justify-center gap-2"
+                >
+                  {changePasswordMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <span>Updating...</span>
+                    </>
+                  ) : (
+                    "Update"
+                  )}
+                </Button>
+              </div>
+            </DialogFooter>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

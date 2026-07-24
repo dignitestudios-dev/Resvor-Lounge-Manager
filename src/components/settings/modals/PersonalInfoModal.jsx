@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Edit from "@/components/icons/Edit";
 import { useAuthMe } from "@/lib/hooks/queries/useQueries";
-import { Loader2 } from "lucide-react";
+import { useAuthContext } from "@/lib/context/AuthProvider";
 
 const PersonalInfoModal = ({
   open,
@@ -20,27 +21,33 @@ const PersonalInfoModal = ({
   onEditPhone,
   onSave,
 }) => {
-  const { data: authData, isLoading, refetch } = useAuthMe();
-  const user = authData?.user;
 
-  const [fullName, setFullName] = useState("");
+  const { data: authMeData } = useAuthMe();
+
+  const authContext = useAuthContext();
+  const user = authMeData?.user || authMeData || authContext?.user || {};
+  console.log("🚀 ~ PersonalInfoModal ~ user:", user)
+
+  const nameVal = user?.firstName + " " + user?.lastName || "";
+  const emailVal = user?.email || "";
+  const phoneVal = user?.phoneNumber || user?.phone || "";
+  const rawRole = user?.role || user?.roleName || "lounge_manager";
+
+  const [fullName, setFullName] = useState(nameVal);
 
   useEffect(() => {
-    if (open) {
-      refetch();
+    if (nameVal) {
+      setFullName(nameVal);
     }
-  }, [open, refetch]);
+  }, [nameVal]);
 
-  useEffect(() => {
-    if (user) {
-      // const name = [user.fullName, user.lastName].filter(Boolean).join(" ");
-      setFullName(user?.fullName);
-    }
-  }, [user]);
-
-  const roleDisplay = user?.role
-    ? user.role.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
-    : "Lounge Manager";
+  const formatRole = (roleStr) => {
+    if (!roleStr) return "Lounge Manager";
+    return roleStr
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -49,81 +56,76 @@ const PersonalInfoModal = ({
           <DialogTitle className="text-3xl">Personal Information</DialogTitle>
         </DialogHeader>
 
-        {isLoading && !user ? (
-          <div className="py-12 flex justify-center items-center">
-            <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
+        <div className="mt-6 space-y-6">
+          <div>
+            <label className="block text-sm font-medium">Full Name</label>
+            <input
+              className="w-full mt-2 rounded-md border px-4 py-3"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Enter full name"
+            />
           </div>
-        ) : (
-          <div className="mt-6 space-y-6">
-            <div>
-              <label className="block text-sm font-medium">Full Name</label>
+
+          <div>
+            <label className="block text-sm font-medium">Role</label>
+            <div className="w-full mt-2 rounded-md bg-gray-100 px-4 py-3 text-gray-500 capitalize">
+              {formatRole(rawRole)}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium">Email Address</label>
+            <div className="relative mt-2">
               <input
-                className="w-full mt-2 rounded-md border px-4 py-3"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Full Name"
+                readOnly
+                type="email"
+                className="w-full rounded-md border px-4 py-3 pr-10 bg-gray-100 text-gray-600"
+                value={emailVal}
+                placeholder="No email provided"
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium">Role</label>
-              <div className="w-full mt-2 rounded-md bg-gray-100 px-4 py-3 text-gray-500 capitalize">
-                {roleDisplay}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium">Email Address</label>
-              <div className="relative mt-2">
-                <input
-                  readOnly
-                  type="email"
-                  className="w-full rounded-md border px-4 py-3 pr-10 bg-gray-100 text-gray-600"
-                  value={user?.email || ""}
-                  placeholder="Email Address"
-                />
-                <button
-                  type="button"
-                  className="absolute right-3 top-3 text-gray-500 cursor-pointer"
-                  onClick={() => {
-                    if (onEditEmail) onEditEmail();
-                  }}
-                  aria-label="Edit email"
-                >
-                  <Edit />
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium">Phone Number</label>
-              <div className="relative mt-2">
-                <input
-                  readOnly
-                  className="w-full rounded-md border px-4 py-3 pr-10 bg-gray-100 text-gray-600"
-                  value={user?.phoneNumber || ""}
-                  placeholder="Phone Number"
-                />
-                <button
-                  type="button"
-                  className="absolute right-3 top-3 text-gray-500 cursor-pointer"
-                  onClick={() => {
-                    if (onEditPhone) onEditPhone();
-                  }}
-                  aria-label="Edit phone"
-                >
-                  <Edit />
-                </button>
-              </div>
+              <button
+                type="button"
+                className="absolute right-3 top-3 text-gray-500 cursor-pointer"
+                onClick={() => {
+                  if (onEditEmail) onEditEmail();
+                }}
+                aria-label="Edit email"
+              >
+                <Edit />
+              </button>
             </div>
           </div>
-        )}
+
+          <div>
+            <label className="block text-sm font-medium">Phone Number</label>
+            <div className="relative mt-2">
+              <input
+                readOnly
+                className="w-full rounded-md border px-4 py-3 pr-10 bg-gray-100 text-gray-600"
+                value={phoneVal}
+                placeholder="No phone number provided"
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-3 text-gray-500 cursor-pointer"
+                onClick={() => {
+                  if (onEditPhone) onEditPhone();
+                }}
+                aria-label="Edit phone"
+              >
+                <Edit />
+              </button>
+            </div>
+          </div>
+        </div>
 
         <div className="mt-8">
           <DialogFooter>
             <div className="w-full flex justify-center">
               <Button
                 onClick={() => {
+                  if (onSave) onSave({ fullName });
                   if (onSave) onSave({ fullName });
                   setOpen(false);
                 }}

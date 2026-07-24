@@ -1,13 +1,15 @@
 "use client";
 import React, { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useWalletMe, useGetConnectStatus } from "@/lib/hooks/queries/useQueries";
+import { useWalletMe, useGetConnectStatus, useGetConnectBanks } from "@/lib/hooks/queries/useQueries";
 import { useWalletTopup } from "@/lib/hooks/mutations/OnBoardingMutations";
 import { SuccessToast, ErrorToast } from "@/components/ui/toaster";
 import { RxCross2 } from "react-icons/rx";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { getStripe } from "@/lib/Stripe";
 import axiosInstance from "@/axios";
+import InputField from "@/components/auth/InputField";
+import { Button } from "@/components/ui/button";
 
 // Helper for cents to dollars
 const centsToDollars = (cents) => (cents / 100).toFixed(2);
@@ -330,12 +332,17 @@ const WithdrawalModalContent = ({ onClose }) => {
   const [holderTypeVal, setHolderTypeVal] = useState("company");
   const [isTokenizing, setIsTokenizing] = useState(false);
 
+  // Withdrawal form state
+  const [withdrawalAmount, setWithdrawalAmount] = useState("");
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+
   // Fetch connect status
   const {
     data: statusResponse,
     isLoading: isLoadingStatus,
     refetch,
   } = useGetConnectStatus();
+  console.log("🚀 ~ WithdrawalModalContent ~ statusResponse:", statusResponse)
 
   const statusData = statusResponse?.data || statusResponse || {};
   const status = statusData?.status || "not_created";
@@ -344,6 +351,58 @@ const WithdrawalModalContent = ({ onClose }) => {
   const requirementsDue = statusData?.requirementsDue || [];
   const requirementsPastDue = statusData?.requirementsPastDue || [];
   const hasRequirements = requirementsDue.length > 0 || requirementsPastDue.length > 0;
+
+  const isActive = status === "active" || (chargesEnabled && payoutsEnabled);
+
+  // Fetch bank accounts when status is active
+  const { data: banksResponse } = useGetConnectBanks({
+    enabled: isActive,
+  });
+
+  const banksList = banksResponse?.data || [];
+  const selectedBank = banksList.find((b) => b.selected) || banksList[0];
+  const selectedBankId = selectedBank?._id || selectedBank?.bankId || "";
+
+  // Handle Withdrawal Submission
+  const handleWithdraw = async (e) => {
+    e?.preventDefault();
+    const dollars = parseFloat(withdrawalAmount);
+    if (!withdrawalAmount || isNaN(dollars) || dollars <= 0) {
+      ErrorToast("Please enter a valid withdrawal amount.");
+      return;
+    }
+
+    if (!selectedBankId) {
+      ErrorToast("No selected bank account found. Please link a bank account first.");
+      return;
+    }
+
+    // Convert dollars to cents (e.g. 100 USD -> 10000 cents)
+    const amountInCents = Math.round(dollars * 100);
+
+    setIsWithdrawing(true);
+    try {
+      const response = await axiosInstance.post("/wallet/withdraw", {
+        amount: amountInCents,
+        bankId: selectedBankId,
+      });
+
+      SuccessToast(
+        response?.data?.message || "Withdrawal request submitted successfully!"
+      );
+      queryClient.invalidateQueries({ queryKey: ["wallet-me"] });
+      queryClient.invalidateQueries({ queryKey: ["wallet-transactions"] });
+      setWithdrawalAmount("");
+      onClose();
+    } catch (err) {
+      console.error(err);
+      ErrorToast(
+        err?.response?.data?.message || "Failed to process withdrawal. Please try again."
+      );
+    } finally {
+      setIsWithdrawing(false);
+    }
+  };
 
   // Handle "Set up Payouts with Stripe" CTA (for not_created)
   const handleCreateAccount = async () => {
@@ -354,8 +413,8 @@ const WithdrawalModalContent = ({ onClose }) => {
 
       const response = await axiosInstance.post("/connect/account", {
         country: "US",
-        // refreshUrl,
-        // returnUrl,
+        refreshUrl,
+        returnUrl,
       });
 
       const url = response?.data?.data?.url || response?.data?.url || response?.url;
@@ -465,7 +524,7 @@ const WithdrawalModalContent = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-[#0A150F80] bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-[16px] w-[540px] max-w-full pb-6 max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div className="bg-white text-black rounded-[16px] w-[540px] max-w-full pb-6 max-h-[90vh] overflow-y-auto shadow-2xl">
         <div className="flex justify-between items-center px-8 pt-5 pb-4 border-b border-gray-200">
           <h2 className="text-[24px] font-bold text-gray-900">Withdrawal & Payouts</h2>
           <div onClick={onClose} className="cursor-pointer p-1 text-gray-500 hover:text-gray-900 transition">
@@ -483,24 +542,33 @@ const WithdrawalModalContent = ({ onClose }) => {
             <div className="space-y-6">
               {/* ACTIVE STATUS */}
               {(status === "active" || (chargesEnabled && payoutsEnabled)) && (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
-                    <div className="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                          Active
-                        </span>
-                        <span className="text-sm font-semibold text-emerald-950">
-                          Stripe Connect Linked Successfully
-                        </span>
-                      </div>
-                      <p className="text-xs text-emerald-700 mt-1">
-                        Your account is fully verified and ready for payouts and withdrawals.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <form onSubmit={handleWithdraw} className="space-y-4">
+                  <InputField
+                    label="Withdrawal Amount"
+                    type="number"
+                    placeholder="Enter withdrawal amount"
+                    maxLength={5}
+                    value={withdrawalAmount}
+                    onChange={(e) => setWithdrawalAmount(e.target.value)}
+                    disabled={isWithdrawing}
+                    required
+                  />
+
+                  <Button
+                    type="submit"
+                    disabled={isWithdrawing || !withdrawalAmount}
+                    className="w-full bg-gradient-to-r from-[#012C57] to-[#061523] text-white text-sm font-bold py-3.5 px-4 rounded-xl hover:opacity-95 transition disabled:opacity-60 flex justify-center items-center gap-2 shadow-md"
+                  >
+                    {isWithdrawing ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Processing...
+                      </>
+                    ) : (
+                      "Withdraw"
+                    )}
+                  </Button>
+                </form>
               )}
 
               {/* NOT CREATED STATUS */}

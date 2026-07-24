@@ -59,7 +59,6 @@ export const AuthProvider = ({ children }) => {
     initialData: cachedAuth || undefined,
     enabled: hasToken,
   });
-  console.log("🚀 ~ AuthProvider ~ authData:", authData)
 
   const sessionType = authData?.sessionType ?? authData?.tokenType ?? null;
   const onboardingStep = authData?.onboardingStep ?? "create_account";
@@ -98,6 +97,7 @@ export const AuthProvider = ({ children }) => {
       Cookies.remove("sessionType", { path: "/" });
       Cookies.remove("onboardingStep", { path: "/" });
       Cookies.remove("user", { path: "/" });
+      Cookies.remove("fcmToken", { path: "/" });
     }
   }, [authData, isError]);
 

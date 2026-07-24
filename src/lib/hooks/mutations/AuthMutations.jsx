@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import {
+  submitChangePassword,
   submitForgotPassword,
   submitLogin,
   submitLogout,
@@ -48,5 +49,11 @@ export const useLogout = () => {
 export const useUpdateFcmToken = () => {
   return useMutation({
     mutationFn: submitUpdateFcmToken,
+  });
+};
+
+export const useChangePassword = () => {
+  return useMutation({
+    mutationFn: submitChangePassword,
   });
 };

@@ -8,9 +8,7 @@ import {
   DialogTitle,
   DialogHeader,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "../ui/button";
 import { IoIosArrowForward } from "react-icons/io";
 
 const PrivacyPolicy = () => {
@@ -25,44 +23,76 @@ const PrivacyPolicy = () => {
         </button>
       </DialogTrigger>
 
-      <DialogContent className="min-w-3xl max-w-full">
+      <DialogContent className="max-w-4xl max-h-[85vh]">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Privacy Policy</DialogTitle>
-          <DialogDescription className="mt-2 text-base text-gray-600">
-            This privacy policy explains how we collect and use your
-            information.
+          <DialogTitle className="text-2xl md:text-3xl font-bold">Privacy Policy</DialogTitle>
+          <DialogDescription className="mt-1 text-sm text-gray-500">
+            Effective Date: October 1, 2025
           </DialogDescription>
         </DialogHeader>
 
-        <div className="mt-6 space-y-6 max-h-[60vh] overflow-y-auto pr-4">
-          <section>
-            <h3 className="font-semibold">What We Collect</h3>
-            <p className="text-sm text-gray-700 mt-2">
-              We may collect personal information such as name, email, and usage
-              data to improve our services.
-            </p>
-            <ul className="list-disc pl-6 mt-2 text-sm text-gray-700">
-              <li>Account information (name, email)</li>
-              <li>Usage metrics and analytics</li>
-              <li>Device and browser information</li>
-            </ul>
-          </section>
+        <div className="mt-4 space-y-4 max-h-[60vh] overflow-y-auto pr-4 text-gray-700 text-sm md:text-base leading-relaxed">
+          <p className="font-semibold">
+            Effective Date: October 1, 2025
+          </p>
 
-          <section>
-            <h3 className="font-semibold">How We Use Data</h3>
-            <p className="text-sm text-gray-700 mt-2">
-              Data is used to provide, maintain, and improve our services,
-              personalize user experience, and for security purposes.
-            </p>
-          </section>
+          <p>
+            Lladner Business Solutions LLC ("Lladner," "we," "our," or "us")
+            respects your privacy and is committed to protecting your personal
+            information. This Privacy Policy ("Policy") explains how we collect,
+            use, and safeguard your data when you access our website at{" "}
+            <span className="text-indigo-400">www.lladner.com</span>, use the{" "}
+            <span className="font-semibold">ResVor web application</span> or
+            engage with any of our other online platforms, services, or web
+            applications (collectively, the "Services").
+          </p>
 
-          <section>
-            <h3 className="font-semibold">Your Rights</h3>
-            <p className="text-sm text-gray-700 mt-2">
-              You can request access to, correction or deletion of your personal
-              data. Contact support for any requests.
-            </p>
-          </section>
+          <p>
+            By using the ResVor web application or any of our Services, you
+            agree to the practices outlined in this Policy. If we make
+            significant changes to how we use your information, we will update
+            this Policy and post a revised version on our web application.
+            Continued use of our Services after updates are published will
+            indicate your acceptance of those changes. If you have any questions
+            about this Privacy Policy, please contact us at:{" "}
+            <span className="text-indigo-400">privacy@lladner.com</span>.
+          </p>
+
+          <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mt-6 mb-2">
+            Information We Collect
+          </h2>
+
+          <p>
+            To use the ResVor web application or other Services, you may be
+            asked to register and provide personal details such as your name,
+            email address, and other profile information (e.g., location,
+            preferences, or date of birth). Additional details you choose to
+            share will help us improve your experience but are not mandatory.
+          </p>
+
+          <p>
+            We do not knowingly collect information from individuals under the
+            age of 16. If we learn that a child under 16 has registered for our
+            Services, we will promptly delete their information. If you suspect
+            that we may have collected data from a minor, please notify us at{" "}
+            <span className="text-indigo-400">privacy@lladner.com</span>.
+          </p>
+
+          <p>
+            We may also automatically collect technical details such as your IP
+            address, browser type, operating system, pages you visit, features
+            you use, and the referring website. This information is used to
+            monitor system performance, improve functionality, and analyze user
+            trends.
+          </p>
+
+          <p>
+            When inviting others to access your ResVor web application, you may
+            provide us with their contact details (e.g., email address or phone
+            number). While we store this information to deliver invitations and
+            messages, we will not sell or share your guests' contact information
+            without permission.
+          </p>
         </div>
       </DialogContent>
     </Dialog>
