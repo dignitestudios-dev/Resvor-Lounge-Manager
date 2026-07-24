@@ -121,6 +121,17 @@ const ProfileMenu = () => {
               Settings
             </Link>
 
+            <button
+              onClick={() => {
+                handleItemClick();
+                localStorage.setItem("show_welcome_walkthrough", "true");
+                window.location.reload();
+              }}
+              className="px-4 py-3 text-sm text-primary font-medium hover:bg-gray-100 text-left cursor-pointer"
+            >
+              Take Walkthrough
+            </button>
+
             <div className="border-t border-gray-200" />
 
             <button

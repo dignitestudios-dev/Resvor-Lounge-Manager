@@ -156,9 +156,9 @@ const Table = ({ data = [], isLoading = false, pagination, onPageChange }) => {
                   <td className="px-4 py-6 text-sm">
                     {order?.booking
                       ? `${utils.formatDateWithName(order?.booking)} ${utils.formatTime(
-                          order?.booking,
-                          "12"
-                        )}`
+                        order?.booking,
+                        "12"
+                      )}`
                       : "N/A"}
                   </td>
                   <td className="px-4 py-6 text-nowrap font-medium text-gray-700">

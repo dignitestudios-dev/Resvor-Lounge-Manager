@@ -17,6 +17,7 @@ const NotificationPopup = () => {
   const [open, setOpen] = useState(false);
 
   const { data: notificationsData, isLoading } = useNotifications();
+
   const notificationsList = notificationsData?.data || [];
   const notifications = notificationsList.slice(0, 5);
 
@@ -24,9 +25,27 @@ const NotificationPopup = () => {
     (n) => !(n.isRead ?? n.read)
   ).length;
 
-  const handleNavigate = () => {
+  const handleNavigateAll = () => {
     setOpen(false);
     router.push("/dashboard/notifications");
+  };
+
+  const handleItemClick = (item) => {
+    setOpen(false);
+
+    const resourceType =
+      item?.metadata?.resourceType || item?.resourceType;
+    const resource = item?.metadata?.resource || item?.resource;
+
+    if (resourceType === "TimeOffRequest") {
+      router.push("/dashboard/requests");
+    } else if (resourceType === "Shift") {
+      router.push("/dashboard/shift");
+    } else if (resourceType === "Booking" && resource) {
+      router.push(`/dashboard/bookings/${resource}`);
+    } else {
+      router.push("/dashboard/notifications");
+    }
   };
 
   return (
@@ -50,7 +69,7 @@ const NotificationPopup = () => {
         <div className="p-4 border-b border-gray-200 flex justify-between items-center">
           <h2 className="text-lg font-semibold text-gray-900">Notifications</h2>
           <button
-            onClick={handleNavigate}
+            onClick={handleNavigateAll}
             className="text-xs font-semibold text-primary hover:underline cursor-pointer"
           >
             View All
@@ -77,7 +96,7 @@ const NotificationPopup = () => {
             notifications.map((n, idx) => (
               <div
                 key={n._id || n.id || idx}
-                onClick={handleNavigate}
+                onClick={() => handleItemClick(n)}
                 className="flex justify-between items-start p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 <div className="flex-1">
@@ -110,7 +129,7 @@ const NotificationPopup = () => {
         {/* Footer */}
         <div className="p-3 border-t border-gray-100 text-center bg-gray-50 rounded-b-xl">
           <button
-            onClick={handleNavigate}
+            onClick={handleNavigateAll}
             className="text-xs font-semibold text-primary hover:underline cursor-pointer"
           >
             See all notifications

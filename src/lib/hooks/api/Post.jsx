@@ -1,6 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
 import axios from "../../../axios";
 import { phoneToE164 } from "@/lib/utils";
+import Cookies from "js-cookie";
+import { requestForToken } from "@/lib/firebase";
 
 // Helper function to convert data URL to File object
 const dataURLtoFile = (dataurl, filename) => {
@@ -49,8 +51,29 @@ export const submitResendForgotOtp = async (credentials) => {
   return data;
 };
 
-export const submitLogout = async () => {
-  const { data } = await axios.post("/auth/logout");
+export const submitLogout = async (payload) => {
+  let fcmToken =
+    (typeof payload === "string" ? payload : payload?.fcmToken) ||
+    Cookies.get("fcmToken") ||
+    (typeof window !== "undefined" ? localStorage.getItem("fcmToken") : null);
+
+  if (!fcmToken && typeof window !== "undefined") {
+    try {
+      fcmToken = await requestForToken();
+    } catch (e) {
+      console.error("Failed to get FCM token during logout:", e);
+    }
+  }
+
+  const { data } = await axios.post("/auth/logout", {
+    fcmToken: fcmToken || "",
+  });
+
+  Cookies.remove("fcmToken", { path: "/" });
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("fcmToken");
+  }
+
   return data;
 };
 

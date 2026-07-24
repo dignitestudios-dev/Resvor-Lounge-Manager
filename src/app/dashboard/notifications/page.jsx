@@ -2,15 +2,29 @@
 
 import React, { useState } from "react";
 import moment from "moment";
+import { useRouter } from "next/navigation";
 import { useNotifications } from "@/lib/hooks/queries/useQueries";
 
 const NotificationsPage = () => {
+  const router = useRouter();
   const [selectTab, setSelectTab] = useState("all");
   const { data: notificationsData, isLoading } = useNotifications();
   const notifications = notificationsData?.data || [];
 
   const handleSelect = (val) => {
     setSelectTab(val);
+  };
+
+  const handleItemClick = (item) => {
+    const resourceType =
+      item?.metadata?.resourceType || item?.resourceType;
+    const resource = item?.metadata?.resource || item?.resource;
+
+    if (resourceType === "TimeOffRequest") {
+      router.push("/dashboard/bartenders-requests");
+    } else if (resourceType === "Booking" && resource) {
+      router.push(`/dashboard/bookings/${resource}`);
+    }
   };
 
   // Filter tasks from notifications based on selected tab
@@ -83,11 +97,12 @@ const NotificationsPage = () => {
         ) : (
           <div>
             {filteredTasks?.length > 0 ? (
-              <div className="h-full  divide-y divide-gray-100">
+              <div className="h-full divide-y divide-gray-100">
                 {filteredTasks.map((item, index) => (
                   <div
                     key={item._id || index}
-                    className="flex justify-between items-start py-4 px-2 hover:bg-gray-50 rounded-lg transition-colors"
+                    onClick={() => handleItemClick(item)}
+                    className="flex justify-between items-start py-4 px-2 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
                   >
                     <div className="flex-1 pr-4">
                       <h2 className="text-base text-gray-900 font-semibold">

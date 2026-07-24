@@ -43,6 +43,7 @@ const EventManagement = () => {
     filters.endDate || undefined,
     filters.selectedStatus || undefined,
   );
+  console.log("🚀 ~ EventManagement ~ eventsResponse:", eventsResponse)
 
   // Transform API data to match table structure
   const transformEventData = (apiEvents) => {

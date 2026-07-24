@@ -47,17 +47,20 @@ const Sidebar = () => {
 
   return (
     <>
-      <nav className="h-full flex flex-col bg-[url(/images/bg-image.png)] bg-cover bg-center min-w-[227px] w-fit rounded-3xl p-5 overflow-y-auto hidden-scrollbar">
+      <nav className="joyride-sidebar h-full flex flex-col bg-[url(/images/bg-image.png)] bg-cover bg-center min-w-[227px] w-fit rounded-3xl p-5 overflow-y-auto hidden-scrollbar">
         <Logo />
         <ul className="h-full flex-1 flex flex-col justify-between mt-7 space-y-2">
           <div className="space-y-3">
             {navLinks.map((link, index) => {
               const isActive = pathname === link.path; // active link check
+              const joyrideClass = `joyride-nav-${link.name
+                .toLowerCase()
+                .replace(/[^a-z0-9]/g, "-")}`;
               return (
                 <li key={index}>
                   <Link
                     href={link.path}
-                    className={`flex items-center text-[13px] font-medium gap-2 py-2.5 px-5 rounded-lg ${
+                    className={`flex items-center text-[13px] font-medium gap-2 py-2.5 px-5 rounded-lg ${joyrideClass} ${
                       isActive ? "text-primary bg-white" : "text-white"
                     }`}
                   >

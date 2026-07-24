@@ -186,7 +186,7 @@ const Table = () => {
       onPageChange={(p) => setPage(p)}
       totalPages={totalPages}
     >
-      <div className="bg-white rounded-xl overflow-y-auto shadow-sm">
+      <div className=" rounded-xl overflow-y-auto ">
         <table className="w-full">
           <thead className="sticky top-0 z-10 bg-[#E8E8FF]">
             <tr>

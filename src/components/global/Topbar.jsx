@@ -24,7 +24,7 @@ const Topbar = () => {
   );
 
   return (
-    <div className="rounded-3xl w-full bg-white p-4 flex justify-between items-center">
+    <div className="joyride-topbar rounded-3xl w-full bg-white p-4 flex justify-between items-center">
       <div>
         {showBackButton && (
           <button
@@ -37,11 +37,17 @@ const Topbar = () => {
         )}
       </div>
       <div className="flex items-center gap-5">
-        <LoungeSelector />
+        <div className="joyride-lounge-selector">
+          <LoungeSelector />
+        </div>
 
-        <NotificationPopup />
+        <div className="joyride-notifications">
+          <NotificationPopup />
+        </div>
 
-        <ProfileMenu />
+        <div className="joyride-profile-menu">
+          <ProfileMenu />
+        </div>
       </div>
     </div>
   );

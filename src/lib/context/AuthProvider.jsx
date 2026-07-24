@@ -97,6 +97,7 @@ export const AuthProvider = ({ children }) => {
       Cookies.remove("sessionType", { path: "/" });
       Cookies.remove("onboardingStep", { path: "/" });
       Cookies.remove("user", { path: "/" });
+      Cookies.remove("fcmToken", { path: "/" });
     }
   }, [authData, isError]);
 

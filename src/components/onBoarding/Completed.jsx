@@ -12,6 +12,7 @@ const Completed = () => {
     const handleExplore = async () => {
         try {
             setLoading(true);
+            localStorage.setItem("show_welcome_walkthrough", "true");
             await refetchAuth();
             router.push("/dashboard");
         } catch (error) {
