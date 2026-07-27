@@ -23,6 +23,7 @@ import { useLogout } from "@/lib/hooks/mutations/AuthMutations";
 import { ErrorToast } from "@/components/ui/toaster";
 import { useAuthContext } from "@/lib/context/AuthProvider";
 import Completed from "@/components/onBoarding/Completed";
+import Cookies from "js-cookie";
 
 export default function SignUp() {
   const router = useRouter();
@@ -79,6 +80,37 @@ export default function SignUp() {
     active: index === currentStep,
   }));
 
+  /**
+   * Soft logout — used on early onboarding screens (VerifyEmail, VerifyPhone, Subscription)
+   * where only a registration_token exists and calling /auth/logout would fail.
+   * Simply clears all local state/cookies and returns the user to the signup screen.
+   */
+  const handleSoftLogout = () => {
+    // Clear all auth cookies
+    Cookies.remove("token", { path: "/" });
+    Cookies.remove("authorization", { path: "/" });
+    Cookies.remove("sessionType", { path: "/" });
+    Cookies.remove("onboardingStep", { path: "/" });
+    Cookies.remove("user", { path: "/" });
+    Cookies.remove("fcmToken", { path: "/" });
+
+    // Clear localStorage
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("fcmToken");
+    }
+
+    // Clear query cache
+    queryClient.setQueryData(["auth-me"], null);
+    queryClient.clear();
+
+    // Redirect to signup start
+    router.replace("/auth/signup");
+  };
+
+  /**
+   * Full API logout — only used on PersonalDetails (create_lounge step) where the user
+   * already has a valid access_token and the logout API call is appropriate.
+   */
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
@@ -109,14 +141,14 @@ export default function SignUp() {
         return <CreateAccount setEmail={setEmail} />;
       case "verify_email":
         return (
-          <VerifyEmail email={email || user?.email} handlePrevious={handleLogout} />
+          <VerifyEmail email={email || user?.email} handlePrevious={handleSoftLogout} />
         );
       case "verify_mobile":
         return (
-          <VerifyPhone email={email || user?.email} handlePrevious={handleLogout} />
+          <VerifyPhone email={email || user?.email} handlePrevious={handleSoftLogout} />
         );
       case "buy_subscription":
-        return <Subscription handlePrevious={handleLogout} />;
+        return <Subscription handlePrevious={handleSoftLogout} />;
       case "create_lounge":
         return <PersonalDetails handlePrevious={handleLogout} />;
       case "completed":
