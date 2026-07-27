@@ -8,12 +8,16 @@ import { floorPlanSetupValues } from "@/lib/init/floorPlanSetupValues";
 import { floorPlanSetupSchema } from "@/lib/schema/onboarding/floorPlanSetupSchema";
 import { ErrorToast } from "../ui/toaster";
 import { useCreateLounge } from "@/lib/hooks/mutations/OnBoardingMutations";
+import { useUpdateFcmToken } from "@/lib/hooks/mutations/AuthMutations";
 import { updateAuthCache, validateImageResolution } from "@/lib/utils";
 import { LogOutIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { requestForToken } from "@/lib/firebase";
+import Cookies from "js-cookie";
 
 const FloorPlanSetup = ({ handlePrevious, combinedData = {} }) => {
   const createLoungeMutation = useCreateLounge();
+  const updateFcmMutation = useUpdateFcmToken();
   const queryClient = useQueryClient();
   const handleTablesChange = (e) => {
     const { name, value } = e.target;
@@ -36,16 +40,26 @@ const FloorPlanSetup = ({ handlePrevious, combinedData = {} }) => {
         try {
           // Submit combined data to API
           const response = await createLoungeMutation.mutateAsync(values);
-          // updateAuthCache(queryClient, {
-          //   data: {
-          //     sessionType: response?.data?.tokenType,
-          //     onboardingStep: "completed",
-          //   },
-          // });
+
           updateAuthCache(queryClient, {
             sessionType: response?.data?.tokenType,
             onboardingStep: "completed",
           });
+
+          // Now that we have a real access_token, request FCM token and update backend silently
+          try {
+            const fcmToken = await requestForToken();
+            if (fcmToken) {
+              Cookies.set("fcmToken", fcmToken, { expires: 365, path: "/" });
+              if (typeof window !== "undefined") {
+                localStorage.setItem("fcmToken", fcmToken);
+              }
+              await updateFcmMutation.mutateAsync({ fcmToken });
+            }
+          } catch (fcmError) {
+            // FCM failure is non-critical — silently ignore
+            console.warn("FCM token update failed (non-critical):", fcmError);
+          }
         } catch (error) {
           console.log("error==> 44", error);
           if (error.code === "NO_INTERNET") {

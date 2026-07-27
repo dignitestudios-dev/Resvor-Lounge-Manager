@@ -4,12 +4,16 @@ import React, { useState } from "react";
 import moment from "moment";
 import { useRouter } from "next/navigation";
 import { useNotifications } from "@/lib/hooks/queries/useQueries";
+import CustomPagination from "@/components/common/CustomPagination";
 
 const NotificationsPage = () => {
   const router = useRouter();
   const [selectTab, setSelectTab] = useState("all");
-  const { data: notificationsData, isLoading } = useNotifications();
+  const [page, setPage] = useState(1);
+
+  const { data: notificationsData, isLoading } = useNotifications(page, 10);
   const notifications = notificationsData?.data || [];
+  const totalPages = notificationsData?.pagination?.totalPages || 1;
 
   const handleSelect = (val) => {
     setSelectTab(val);
@@ -78,23 +82,11 @@ const NotificationsPage = () => {
         </div>
 
         {/* Content */}
-        {isLoading ? (
-          <div className="mt-4 space-y-4 max-h-[500px] overflow-y-auto">
-            {Array(4)
-              .fill()
-              .map((_, index) => (
-                <div key={index} className="py-3 border-b border-gray-100">
-                  <div className="flex justify-between items-center">
-                    <div className="space-y-2">
-                      <div className="w-36 h-4 bg-gray-200 rounded animate-pulse"></div>
-                      <div className="w-64 h-4 bg-gray-200 rounded animate-pulse"></div>
-                    </div>
-                    <div className="w-16 h-4 bg-gray-200 rounded animate-pulse"></div>
-                  </div>
-                </div>
-              ))}
-          </div>
-        ) : (
+        <CustomPagination
+          loading={isLoading}
+          totalPages={totalPages}
+          onPageChange={(newPage) => setPage(newPage)}
+        >
           <div>
             {filteredTasks?.length > 0 ? (
               <div className="h-full divide-y divide-gray-100">
@@ -134,7 +126,7 @@ const NotificationsPage = () => {
               </div>
             )}
           </div>
-        )}
+        </CustomPagination>
       </div>
     </div>
   );

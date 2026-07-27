@@ -63,6 +63,7 @@ export const AuthProvider = ({ children }) => {
   const sessionType = authData?.sessionType ?? authData?.tokenType ?? null;
   const onboardingStep = authData?.onboardingStep ?? "create_account";
   const user = authData?.user ?? null;
+  console.log("🚀 ~ AuthProvider ~ user:", user)
   const isAuthenticated = sessionType === "access_token";
   const isOnboarding = sessionType === "registration_token";
 

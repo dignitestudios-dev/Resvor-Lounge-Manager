@@ -5,20 +5,15 @@ import AuthInput from "../auth/AuthInput";
 import PhoneInput from "../auth/PhoneInput";
 import { phoneFormatter, phoneToE164, updateAuthCache } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { userDetailsValues } from "@/lib/init/signUpValues";
 import { userDetailsSchema } from "@/lib/schema/authentication/signupSchema";
 import { ErrorToast } from "../ui/toaster";
 import { useSignUp } from "@/lib/hooks/mutations/OnBoardingMutations";
-import { useUpdateFcmToken } from "@/lib/hooks/mutations/AuthMutations";
 import { useQueryClient } from "@tanstack/react-query";
-import { requestForToken } from "@/lib/firebase";
-import Cookies from "js-cookie";
 
 const CreateAccount = ({ setEmail }) => {
   const router = useRouter();
   const signUpMutation = useSignUp();
-  const updateFcmMutation = useUpdateFcmToken();
   const queryClient = useQueryClient();
 
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
@@ -31,19 +26,6 @@ const CreateAccount = ({ setEmail }) => {
         try {
           setEmail(values.email);
 
-          let fcmToken = "";
-          try {
-            fcmToken = await requestForToken();
-            if (fcmToken) {
-              Cookies.set("fcmToken", fcmToken, { expires: 365, path: "/" });
-              if (typeof window !== "undefined") {
-                localStorage.setItem("fcmToken", fcmToken);
-              }
-            }
-          } catch (tokenError) {
-            console.error("FCM Token retrieval failed:", tokenError);
-          }
-
           const data = {
             email: values.email,
             password: values.password,
@@ -54,20 +36,12 @@ const CreateAccount = ({ setEmail }) => {
 
           const response = await signUpMutation.mutateAsync(data);
 
-          if (fcmToken) {
-            try {
-              await updateFcmMutation.mutateAsync({ fcmToken });
-            } catch (fcmUpdateError) {
-              console.error("FCM Token update on backend failed:", fcmUpdateError);
-            }
-          }
-
           updateAuthCache(queryClient, {
             onboardingStep: response?.data?.onboardingStep,
             user: { email: values.email }, // keep email available downstream
           });
         } catch (error) {
-          console.log("🚀 ~ CreateAccount ~39---?> errors:", error);
+          console.log("🚀 ~ CreateAccount ~39--->errors:", error);
           if (error.code === "NO_INTERNET") {
             ErrorToast(error.message);
           } else {
@@ -77,10 +51,6 @@ const CreateAccount = ({ setEmail }) => {
             );
           }
         }
-
-        // Use the loading state to show loading spinner
-        // Use the response if you want to perform any specific functionality
-        // Otherwise you can just pass a callback that will process everything
       },
     });
 
