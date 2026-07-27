@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -30,7 +30,9 @@ export default function SignUp() {
 
   const queryClient = useQueryClient();
 
-  const { onboardingStep: sessionOnboardingStep, user } = useAuthContext();
+  const { onboardingStep: sessionOnboardingStep, user, refetchAuth } = useAuthContext();
+
+  const searchParams = useSearchParams();
 
   const logoutMutation = useLogout();
 
@@ -79,6 +81,33 @@ export default function SignUp() {
     completed: index < currentStep,
     active: index === currentStep,
   }));
+
+  // When Stripe redirects back to /auth/signup, the cached onboardingStep is stale.
+  // Force-refetch auth-me so the UI advances to the next step automatically.
+  // Covers two cases:
+  //   1. Stripe query params (?session_id, ?success) present in the URL on mount
+  //   2. User returns to the tab (visibilitychange) while on the buy_subscription step
+  useEffect(() => {
+    const isStripeReturn =
+      searchParams.get("session_id") ||
+      searchParams.get("success") ||
+      searchParams.get("subscription");
+
+    const isOnSubscriptionStep = onboardingStep === "buy_subscription";
+
+    if (isStripeReturn || isOnSubscriptionStep) {
+      refetchAuth();
+    }
+
+    // Also refetch when user returns to this tab (e.g. Stripe opened in same tab)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible" && onboardingStep === "buy_subscription") {
+        refetchAuth();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
 
   /**
    * Soft logout — used on early onboarding screens (VerifyEmail, VerifyPhone, Subscription)
