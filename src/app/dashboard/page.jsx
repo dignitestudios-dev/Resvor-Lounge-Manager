@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import StatsCard from "@/components/dashboard/StatsCard";
 import Table from "@/components/dashboard/Table";
 import DateAndMonthFilter from "@/components/common/DateAndMonthFilter";
@@ -9,12 +9,44 @@ import Guestbook from "@/components/icons/sidebar/guestbook";
 import EventManagement from "@/components/icons/sidebar/event-management";
 import Bookings from "@/components/icons/sidebar/bookings";
 import utils from "@/lib/utils";
+import { requestForToken } from "@/lib/firebase";
+import { useUpdateFcmToken } from "@/lib/hooks/mutations/AuthMutations";
+import Cookies from "js-cookie";
 
 const Dashboard = () => {
+  const updateFcmMutation = useUpdateFcmToken();
+
   const [filterDates, setFilterDates] = useState({
     startDate: "",
     endDate: "",
   });
+
+  // Register FCM token once when the user first lands on Dashboard after login.
+  // We use "fromLogin" flag set by the login page so this only runs once per login session,
+  // not on every subsequent dashboard visit or page refresh.
+  useEffect(() => {
+    const fromLogin = localStorage.getItem("fromLogin");
+    if (!fromLogin) return;
+
+    // Clear the flag immediately so this block only runs once
+    localStorage.removeItem("fromLogin");
+
+    const registerFcmToken = async () => {
+      try {
+        const fcmToken = await requestForToken();
+        if (fcmToken) {
+          Cookies.set("fcmToken", fcmToken, { expires: 365, path: "/" });
+          localStorage.setItem("fcmToken", fcmToken);
+          await updateFcmMutation.mutateAsync({ fcmToken });
+        }
+      } catch (err) {
+        // FCM is non-critical — swallow the error silently
+        console.warn("FCM token registration failed (non-critical):", err);
+      }
+    };
+
+    registerFcmToken();
+  }, []);
 
   const { data: dashboardResponse, isLoading } = useGetDashboard({
     startDate: filterDates.startDate,

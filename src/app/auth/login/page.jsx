@@ -4,12 +4,11 @@ import AuthInput from "../../../components/auth/AuthInput";
 import AuthButton from "../../../components/auth/AuthButton";
 import { useRouter } from "next/navigation";
 import { loginSchema } from "./../../../lib/schema/authentication/loginSchema";
-import { useLogin, useUpdateFcmToken } from "../../../lib/hooks/mutations/AuthMutations";
+import { useLogin } from "../../../lib/hooks/mutations/AuthMutations";
 import { ErrorToast } from "../../../components/ui/toaster";
 import { useQueryClient } from "@tanstack/react-query";
 import Cookies from "js-cookie";
 import { updateAuthCache } from "@/lib/utils";
-import { requestForToken } from "@/lib/firebase";
 const loginValues = {
   email: "",
   password: "",
@@ -19,7 +18,6 @@ const Login = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const loginMutation = useLogin();
-  const updateFcmMutation = useUpdateFcmToken();
 
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
     useFormik({
@@ -29,20 +27,6 @@ const Login = () => {
       validateOnBlur: true,
       onSubmit: async (values) => {
         try {
-
-          let fcmToken = "";
-          try {
-            fcmToken = await requestForToken();
-            if (fcmToken) {
-              Cookies.set("fcmToken", fcmToken, { expires: 365, path: "/" });
-              if (typeof window !== "undefined") {
-                localStorage.setItem("fcmToken", fcmToken);
-              }
-            }
-          } catch (tokenError) {
-            console.error("FCM Token retrieval failed:", tokenError);
-          }
-
           const response = await loginMutation.mutateAsync({
             email: values.email,
             password: values.password,
@@ -65,17 +49,7 @@ const Login = () => {
             user,
           });
 
-          // Register FCM token in the background (fire-and-forget)
-          if (fcmToken) {
-            try {
-              await updateFcmMutation.mutateAsync({ fcmToken });
-            } catch (fcmUpdateError) {
-              console.error("FCM Token update on backend failed:", fcmUpdateError);
-            }
-          }
-
           if (tokenType === "registration_token") {
-
             // Middleware will guard the route; onboardingStep is already in cache
             router.replace("/auth/signup");
           } else {
