@@ -15,6 +15,23 @@ import { useGetEvents } from "@/lib/hooks/queries/useEvents";
 import utils from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 
+/**
+ * Helper to extract YYYY-MM-DD reliably without timezone conversion shifts
+ */
+export const extractDateString = (dateInput) => {
+  if (!dateInput) return "";
+  if (typeof dateInput === "string") {
+    const match = dateInput.match(/^(\d{4}-\d{2}-\d{2})/);
+    if (match) return match[1];
+  }
+  const d = new Date(dateInput);
+  if (isNaN(d.getTime())) return "";
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
 const EventManagement = () => {
   const queryClient = useQueryClient();
   const [isEventRequest, setIsEventRequest] = useState(false);
@@ -33,54 +50,77 @@ const EventManagement = () => {
     selectedStatus: "",
   });
 
+  // Calculate parameters for API query based on view and date selection
+  const queryLimit = view === "calendar" ? 100 : 10;
+  const effectiveStartDate =
+    view === "calendar" && selectedDate
+      ? selectedDate
+      : filters.startDate || undefined;
+  const effectiveEndDate =
+    view === "calendar" && selectedDate
+      ? selectedDate
+      : filters.endDate || undefined;
+  const effectivePage = view === "calendar" ? 1 : currentPage;
+
   // Mutations and Queries
   const createEventMutation = useCreateEvent();
   const { data: lounges = [] } = useGetLounges();
   const { data: eventsResponse, isLoading: isEventsLoading } = useGetEvents(
-    currentPage,
-    10,
-    filters.startDate || undefined,
-    filters.endDate || undefined,
+    effectivePage,
+    queryLimit,
+    effectiveStartDate,
+    effectiveEndDate,
     filters.selectedStatus || undefined,
   );
-  console.log("🚀 ~ EventManagement ~ eventsResponse:", eventsResponse)
 
-  // Transform API data to match table structure
+  // Transform API data to match table and calendar structure
   const transformEventData = (apiEvents) => {
-    return apiEvents.map((event) => {
-      const startDateTime = new Date(event.startDateTime);
-      const endDateTime = new Date(event.endDateTime);
+    return (apiEvents || []).map((event) => {
+      const startDateTime = event.startDateTime
+        ? new Date(event.startDateTime)
+        : new Date();
+      const endDateTime = event.endDateTime
+        ? new Date(event.endDateTime)
+        : new Date();
 
       // Find lounge name from lounges array
       const lounge = lounges.find((l) => l._id === event.loungeId);
-      const loungeName = lounge?.loungeName || "Unknown Lounge";
+      const loungeName =
+        lounge?.loungeName || event.loungeId?.name || "Unknown Lounge";
 
-      // Get user info from userId or bookedByManagerId
+      // Get user info from userId or guestName
       const userData = event.userId || {
-        firstName: "Unknown",
+        firstName: event.guestName || "Unknown",
         lastName: "",
         _id: "",
       };
-      const userName = `${userData.firstName} ${userData.lastName}`.trim();
+      const userName =
+        `${userData.firstName || ""} ${userData.lastName || ""}`.trim() ||
+        event.guestName ||
+        "Unknown Guest";
 
       // Format event time
       const eventTime = `${utils.formatTime12(
         startDateTime,
       )} - ${utils.formatTime12(endDateTime)}`;
 
+      const eventDateStr = extractDateString(event.startDateTime);
+
       return {
         _id: event._id,
         loungeName,
-        eventName: event.title,
+        eventName: event.title || event.eventName || "Untitled Event",
         user: {
           name: userName,
           profile: "/images/profile.png",
         },
-        guestLimit: event.guestCount,
-        eventType: event.eventType,
+        guestLimit: event.guestCount || 0,
+        eventType: event.eventType || "N/A",
         eventDate: event.startDateTime,
+        eventDateStr,
         eventTime,
         ticketDoor: event.budget || 0,
+        guestName: event.guestName || userName,
         ...event, // Include all original data for reference
       };
     });
@@ -93,26 +133,28 @@ const EventManagement = () => {
     return [];
   }, [eventsResponse, lounges]);
 
+  // List of YYYY-MM-DD date strings that have events (for calendar dots)
+  const eventDatesList = useMemo(() => {
+    return transformedEvents
+      .map((e) => e.eventDateStr || extractDateString(e.eventDate || e.startDateTime))
+      .filter(Boolean);
+  }, [transformedEvents]);
+
   const handleFilterChange = (filterData) => {
     setFilters(filterData);
     setCurrentPage(1); // Reset to first page on filter change
   };
 
-  // Filter events for the selected date
-  const filteredEventsForCalendar = selectedDate
-    ? transformedEvents.filter((event) => {
-      try {
-        const dateObj = new Date(event.eventDate);
-        const year = dateObj.getFullYear();
-        const month = String(dateObj.getMonth() + 1).padStart(2, "0");
-        const day = String(dateObj.getDate()).padStart(2, "0");
-        const eventDateLocal = `${year}-${month}-${day}`;
-        return eventDateLocal === selectedDate;
-      } catch (e) {
-        return false;
-      }
-    })
-    : transformedEvents;
+  // Filter events for the selected date on calendar view
+  const filteredEventsForCalendar = useMemo(() => {
+    if (!selectedDate) return transformedEvents;
+    return transformedEvents.filter((event) => {
+      const eDateStr =
+        event.eventDateStr ||
+        extractDateString(event.eventDate || event.startDateTime);
+      return eDateStr === selectedDate;
+    });
+  }, [transformedEvents, selectedDate]);
 
   const handleEventRequestNext = (data) => {
     setEventData(data);
@@ -122,18 +164,12 @@ const EventManagement = () => {
 
   const handleEventDetailsClose = async () => {
     try {
-      // if (!selectedLoungeId) {
-      //   ErrorToast("Please select a lounge first");
-      //   return;
-      // }
-
       if (!eventData) {
         ErrorToast("Event data is missing");
         return;
       }
 
       const payload = {
-        // loungeId: selectedLoungeId,
         title: eventData.title || eventData.eventName,
         eventType: eventData.eventType,
         description: eventData.description,
@@ -185,24 +221,24 @@ const EventManagement = () => {
               setEventData(null);
               setIsEventRequest(true);
             }}
-            className={"border-2 h-12 text-[14px] px-6"}
+            className={"border-2 h-12 text-[14px] px-6 cursor-pointer"}
           >
             Add New Event
           </Button>
           <div className="w-[260px] flex ">
             <button
-              className={`text-[12px] py-3.5 px-2 rounded-l-lg w-full ${view === "list"
-                ? "bg-gradient text-white"
-                : "bg-[#FFFFFF] text-[#222246]"
+              className={`text-[12px] py-3.5 px-2 rounded-l-lg w-full cursor-pointer transition ${view === "list"
+                  ? "bg-gradient text-white"
+                  : "bg-[#FFFFFF] text-[#222246]"
                 }`}
               onClick={() => setView("list")}
             >
               List View
             </button>
             <button
-              className={`text-[12px] py-3.5 px-2 rounded-r-lg w-full ${view === "calendar"
-                ? "bg-gradient text-white"
-                : "bg-[#FFFFFF] text-[#222246]"
+              className={`text-[12px] py-3.5 px-2 rounded-r-lg w-full cursor-pointer transition ${view === "calendar"
+                  ? "bg-gradient text-white"
+                  : "bg-[#FFFFFF] text-[#222246]"
                 }`}
               onClick={() => setView("calendar")}
             >
@@ -232,7 +268,7 @@ const EventManagement = () => {
                 "completed",
                 "cancelled",
                 "expired",
-                "refunded"
+                "refunded",
               ]}
             />
           )}
@@ -252,7 +288,6 @@ const EventManagement = () => {
               selectedLoungeId={selectedLoungeId}
               onLoungeSelect={setSelectedLoungeId}
               isLoading={createEventMutation.isPending}
-            // serviceData={eventServices}
             />
           )}
         </div>
@@ -261,8 +296,8 @@ const EventManagement = () => {
       {view === "calendar" ? (
         <div className="flex-1 flex gap-8 mt-6 w-full overflow-y-auto">
           {/* Event Cards */}
-          <div className="flex overflow-y-auto flex-col bg-white rounded-2xl p-4">
-            <h2 className="text-lg font-semibold mb-4">
+          <div className="w-1/2 flex overflow-y-auto flex-col bg-white rounded-2xl p-4">
+            <h2 className="text-lg font-semibold mb-4 text-[#1a1a6e]">
               {selectedDate
                 ? `Events on ${new Date(
                   selectedDate + "T00:00:00",
@@ -271,9 +306,9 @@ const EventManagement = () => {
                   month: "long",
                   year: "numeric",
                 })}`
-                : "All Events"}
+                : "All Scheduled Events"}
             </h2>
-            <div className="h-full overflow-y-auto">
+            <div className="h-full overflow-y-auto pr-1">
               <EventCards events={filteredEventsForCalendar} />
             </div>
           </div>
@@ -282,6 +317,7 @@ const EventManagement = () => {
             <Calendar
               selectedDate={selectedDate}
               onDateSelect={(iso) => setSelectedDate(iso)}
+              eventDates={eventDatesList}
             />
           </div>
         </div>

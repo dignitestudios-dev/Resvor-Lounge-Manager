@@ -14,20 +14,7 @@ import { useSwitchLounge } from "@/lib/hooks/mutations/LoungeMutations";
 import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
 import { useQueryClient } from "@tanstack/react-query";
 
-// Map route prefixes → query keys to invalidate after a lounge switch
-// More specific prefixes (with trailing slash) must come before general ones
-const ROUTE_QUERY_MAP = [
-  { prefix: "/dashboard/guestbook/", key: ["guestbook-list"] },
-  { prefix: "/dashboard/guestbook", key: ["guestbook-list"] },
-  { prefix: "/dashboard/event-management/", key: ["event-detail"] },
-  { prefix: "/dashboard/event-management", key: ["events-list"] },
-  { prefix: "/dashboard/bookings/", key: ["booking-detail"] },
-  { prefix: "/dashboard/bookings", key: ["bookings-list"] },
-  { prefix: "/dashboard/bartenders", key: ["bartenders-list"] },
-  { prefix: "/dashboard/campaign-and-flyers", key: ["campaigns-list"] },
-  { prefix: "/dashboard/profile", key: ["lounges-list"] },
-];
-
+// ─── LoungeSelector ─────────────────────────────────────────────────────────
 const LoungeSelector = () => {
   const [open, setOpen] = useState(false);
   const [switchingId, setSwitchingId] = useState(null);
@@ -77,12 +64,6 @@ const LoungeSelector = () => {
     };
   }, []);
 
-  // Resolve which query key belongs to the current open page
-  const getPageQueryKey = () => {
-    const match = ROUTE_QUERY_MAP.find((r) => pathname.startsWith(r.prefix));
-    return match?.key ?? null;
-  };
-
   const handleSelect = async (lounge) => {
     if (switchLoungeMutation.isPending) return;
     try {
@@ -95,11 +76,8 @@ const LoungeSelector = () => {
         window.dispatchEvent(new Event("activeLoungeChanged"));
       }
 
-      // Invalidate only the query for the current page
-      const pageKey = getPageQueryKey();
-      if (pageKey) {
-        queryClient.invalidateQueries({ queryKey: pageKey });
-      }
+      // Invalidate all API queries across the app for the newly selected lounge
+      await queryClient.invalidateQueries();
 
       SuccessToast(`Switched to ${lounge.name}`);
       setOpen(false);

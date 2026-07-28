@@ -7,7 +7,10 @@ import EventAcceptedModal from "@/components/event-management/EventAcceptedModal
 import EventAcceptConfirmModal from "@/components/event-management/EventAcceptConfirmModal";
 import EventRejectModal from "@/components/event-management/EventRejectModal";
 import { useGetEventDetail } from "@/lib/hooks/queries/useEventDetail";
-import { useRejectEvent, useAcceptEvent } from "@/lib/hooks/mutations/EventMutations";
+import {
+  useRejectEvent,
+  useAcceptEvent,
+} from "@/lib/hooks/mutations/EventMutations";
 import utils, { capitalize } from "@/lib/utils";
 import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
 import PageLoader from "@/components/common/PageLoader";
@@ -18,7 +21,8 @@ const EventDetails = () => {
   const queryClient = useQueryClient();
 
   const [isAccepted, setIsAccepted] = useState(false);
-  const [isAcceptConfirmModalOpen, setIsAcceptConfirmModalOpen] = useState(false);
+  const [isAcceptConfirmModalOpen, setIsAcceptConfirmModalOpen] =
+    useState(false);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
 
   const { data: eventData, isLoading } = useGetEventDetail(eventId);
@@ -39,10 +43,11 @@ const EventDetails = () => {
       SuccessToast("Event rejected successfully");
       setIsRejectModalOpen(false);
 
-      // Invalidate the event detail query to fetch updated status
-      await queryClient.invalidateQueries({
-        queryKey: ["event-detail", eventId],
-      });
+      // Invalidate queries to fetch updated status & update list/calendar views
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["event-detail", eventId] }),
+        queryClient.invalidateQueries({ queryKey: ["events-list"] }),
+      ]);
     } catch (error) {
       ErrorToast(
         error?.response?.data?.message ||
@@ -65,10 +70,11 @@ const EventDetails = () => {
       setIsAcceptConfirmModalOpen(false);
       setIsAccepted(true);
 
-      // Invalidate the event detail query to fetch updated status
-      await queryClient.invalidateQueries({
-        queryKey: ["event-detail", eventId],
-      });
+      // Invalidate queries to fetch updated status & update list/calendar views
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["event-detail", eventId] }),
+        queryClient.invalidateQueries({ queryKey: ["events-list"] }),
+      ]);
     } catch (error) {
       ErrorToast(
         error?.response?.data?.message ||
@@ -107,7 +113,6 @@ const EventDetails = () => {
       <div className="flex justify-between items-center mb-5">
         <div className="flex items-center gap-4">
           <h1 className="text-2xl font-bold">Event Details</h1>
-
         </div>
         <div className="flex gap-3">
           {eventData?.status === "pending" && (
@@ -132,7 +137,6 @@ const EventDetails = () => {
       <div className="flex-1 overflow-y-auto bg-white p-5 rounded-2xl">
         <div className="bg-[#F5F5F5] rounded-2xl p-5">
           <div>
-
             <h2 className="text-lg font-bold mb-3">Reservation Details</h2>
           </div>
 
@@ -148,7 +152,9 @@ const EventDetails = () => {
               <div className="flex-1">
                 <div className="flex justify-between">
                   <div>
-                    <h3 className="text-xl font-bold mb-2">{eventData?.title}</h3>
+                    <h3 className="text-xl font-bold mb-2">
+                      {eventData?.title}
+                    </h3>
                     {eventData?.loungeId?.tags?.length > 0 && (
                       <div className="flex gap-2 mb-4">
                         {eventData?.loungeId?.tags.map((tag, index) => (
@@ -170,12 +176,12 @@ const EventDetails = () => {
                     {eventData?.status && (
                       <span
                         className={`px-4 py-2 rounded-full text-sm font-semibold ${eventData.status === "pending"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : eventData.status === "accepted"
-                            ? "bg-green-100 text-green-800"
-                            : eventData.status === "rejected"
-                              ? "bg-red-100 text-red-800"
-                              : "bg-gray-100 text-gray-800"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : eventData.status === "accepted"
+                              ? "bg-green-100 text-green-800"
+                              : eventData.status === "rejected"
+                                ? "bg-red-100 text-red-800"
+                                : "bg-gray-100 text-gray-800"
                           }`}
                       >
                         {eventData.status.charAt(0).toUpperCase() +
@@ -218,8 +224,31 @@ const EventDetails = () => {
                   {eventData.guestCount || 0} Guests
                 </p>
               </div>
+            </div>
 
-              {/* Second row - 4 columns */}
+            <div className="grid grid-cols-5 gap-6 border-t pt-6 mb-8">
+              <div>
+                <p className="text-black font-semibold mb-2">Budget</p>
+                <p className="text-gray-600 text-sm font-semibold">
+                  ${eventData.budget || 0}
+                </p>
+              </div>
+              <div>
+                <p className="text-black font-semibold mb-2">Amount Paid</p>
+                <p className="text-gray-600 text-sm font-semibold">
+                  {typeof eventData?.amountPaid === "number"
+                    ? utils.formatCurrency(
+                      eventData.amountPaid >= 100 && Number.isInteger(eventData.amountPaid)
+                        ? eventData.amountPaid / 100
+                        : eventData.amountPaid
+                    )
+                    : eventData?.amountPaid
+                      ? `$${eventData.amountPaid}`
+                      : eventData?.paidAmount
+                        ? `$${eventData.paidAmount}`
+                        : "$0"}
+                </p>
+              </div>
               <div>
                 <p className="text-black font-semibold mb-2">Preferred Music</p>
                 <p className="text-gray-600 text-sm font-semibold">
@@ -230,12 +259,6 @@ const EventDetails = () => {
                 <p className="text-black font-semibold mb-2">Special Request</p>
                 <p className="text-gray-600 text-sm font-semibold">
                   {eventData.specialRequest || "None"}
-                </p>
-              </div>
-              <div>
-                <p className="text-black font-semibold mb-2">Budget</p>
-                <p className="text-gray-600 text-sm font-semibold">
-                  ${eventData.budget || 0}
                 </p>
               </div>
               <div>
@@ -268,7 +291,6 @@ const EventDetails = () => {
                     No services selected
                   </p>
                 )}
-
 
                 {/* <div className="border-l pl-12">
                   <p className="text-black font-semibold mb-2">

@@ -8,10 +8,6 @@ import { Loader2 } from "lucide-react";
 
 const Table = ({ data = [], isLoading = false, pagination, onPageChange }) => {
   const router = useRouter();
-  const [sortConfig, setSortConfig] = useState({
-    key: "customerName",
-    direction: "asc",
-  });
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
@@ -37,6 +33,7 @@ const Table = ({ data = [], isLoading = false, pagination, onPageChange }) => {
       `${item?.userId?.firstName || ""} ${item?.userId?.lastName || ""}`.trim() ||
       "Unknown Guest";
     const profilePic = item?.userId?.profilePicture?.location || "/images/profile.png";
+    const createdAt = item?.createdAt;
     const bookingDate = item?.bookingDate || item?.startTime;
     const tableCode = item?.tableIds?.map((t) => t.code).join(", ") || "N/A";
     const qty = item?.guestCount || 0;
@@ -50,37 +47,14 @@ const Table = ({ data = [], isLoading = false, pagination, onPageChange }) => {
       orderId,
       customerName,
       profilePic,
-      booking: bookingDate,
+      createdAt,
+      bookingDate,
       tableCode,
       qty,
       amount,
       status,
     };
   });
-
-  const sortedItems = [...formattedItems].sort((a, b) => {
-    if (!sortConfig.key) return 0;
-
-    let valA = a[sortConfig.key];
-    let valB = b[sortConfig.key];
-
-    if (sortConfig.key === "qty" || sortConfig.key === "amount") {
-      valA = Number(valA) || 0;
-      valB = Number(valB) || 0;
-    }
-
-    if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
-    if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
-    return 0;
-  });
-
-  const requestSort = (key) => {
-    let direction = "asc";
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
-  };
 
   return (
     <CustomPagination
@@ -93,24 +67,11 @@ const Table = ({ data = [], isLoading = false, pagination, onPageChange }) => {
           <thead className="sticky top-0 z-10">
             <tr className="bg-[#E8E8FF]">
               <th className="px-4 py-5 text-left text-nowrap">Order ID</th>
-              <th
-                onClick={() => requestSort("customerName")}
-                className="px-4 py-5 text-left text-nowrap cursor-pointer select-none"
-              >
+              <th className="px-4 py-5 text-left text-nowrap cursor-pointer select-none">
                 Customer Name
-                {sortConfig.key === "customerName" ? (
-                  sortConfig.direction === "asc" ? (
-                    <span className="ml-1">↑</span>
-                  ) : (
-                    <span className="ml-1">↓</span>
-                  )
-                ) : (
-                  ""
-                )}
               </th>
-              <th className="px-4 py-5 text-left text-nowrap">Booking</th>
-              <th className="px-4 py-5 text-left text-nowrap">Table</th>
-              <th className="px-4 py-5 text-left text-nowrap">Qty</th>
+              <th className="px-4 py-5 text-left text-nowrap">Created Date</th>
+              <th className="px-4 py-5 text-left text-nowrap">Booking Date</th>
               <th className="px-4 py-5 text-left text-nowrap">Amount</th>
               <th className="px-4 py-5 text-left text-nowrap">Status</th>
               <th className="px-4 py-5 text-center text-nowrap">Action</th>
@@ -119,21 +80,21 @@ const Table = ({ data = [], isLoading = false, pagination, onPageChange }) => {
           <tbody className="mt-10">
             {isLoading ? (
               <tr>
-                <td colSpan={8} className="py-12 text-center text-gray-500">
+                <td colSpan={7} className="py-12 text-center text-gray-500">
                   <div className="flex flex-col items-center justify-center gap-2">
                     <Loader2 className="w-6 h-6 animate-spin text-[#012C57]" />
                     <p className="text-sm font-medium">Loading dashboard data...</p>
                   </div>
                 </td>
               </tr>
-            ) : sortedItems?.length === 0 ? (
+            ) : formattedItems?.length === 0 ? (
               <tr>
-                <td colSpan={8} className="py-12 text-center text-gray-500 font-medium">
+                <td colSpan={7} className="py-12 text-center text-gray-500 font-medium">
                   No dashboard records found.
                 </td>
               </tr>
             ) : (
-              sortedItems?.map((order, index) => (
+              formattedItems?.map((order, index) => (
                 <tr
                   key={order._id || index}
                   onClick={() => order._id && router.push(`/dashboard/bookings/${order._id}`)}
@@ -153,20 +114,17 @@ const Table = ({ data = [], isLoading = false, pagination, onPageChange }) => {
                       <span className="font-semibold text-gray-900">{order?.customerName}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-6 text-sm">
-                    {order?.booking
-                      ? `${utils.formatDateWithName(order?.booking)} ${utils.formatTime(
-                        order?.booking,
-                        "12"
-                      )}`
+                  <td className="px-4 py-6 text-sm text-nowrap">
+                    {order?.createdAt
+                      ? utils.formatDateWithName(order?.createdAt)
                       : "N/A"}
                   </td>
-                  <td className="px-4 py-6 text-nowrap font-medium text-gray-700">
-                    {order?.tableCode}
+                  <td className="px-4 py-6 text-sm text-nowrap">
+                    {order?.bookingDate
+                      ? utils.formatDateWithName(order?.bookingDate)
+                      : "N/A"}
                   </td>
-                  <td className="px-4 py-6 text-sm font-medium">
-                    {utils.formatNumber(order?.qty)}
-                  </td>
+
                   <td className="px-4 py-6 text-sm font-semibold">
                     {utils.formatCurrency(order?.amount)}
                   </td>

@@ -9,8 +9,8 @@ import Cookies from "js-cookie";
 //     ? "/api" // Use Next.js rewrites proxy in development
 //     : "https://api-dev.resvor.com"; // Use direct URL in production
 
-export const baseUrl = "https://api-staging.resvor.com";
-// export const baseUrl = "https://api-dev.resvor.com";
+// export const baseUrl = "https://api-staging.resvor.com";
+export const baseUrl = "https://api-dev.resvor.com";
 
 async function getDeviceFingerprint() {
   const fp = await FingerprintJS.load();
@@ -31,11 +31,12 @@ const instance = axios.create({
 instance.interceptors.request.use(async (request) => {
   // Internet check — reject with a proper Error so axios and React Query handle it correctly
   if (!navigator.onLine) {
-    const noInternetError = new Error("No internet connection. Please check your network and try again.");
+    const noInternetError = new Error(
+      "No internet connection. Please check your network and try again.",
+    );
     noInternetError.code = "NO_INTERNET";
     return Promise.reject(noInternetError);
   }
-
 
   const token = Cookies.get("token") || Cookies.get("authorization");
   if (token) {
@@ -64,8 +65,8 @@ instance.interceptors.request.use(async (request) => {
     ...(isFormData
       ? {}
       : {
-        "Content-Type": "application/json",
-      }),
+          "Content-Type": "application/json",
+        }),
     devicemodel: fingerprint,
     deviceuniqueid: fingerprint,
   };
@@ -111,7 +112,11 @@ instance.interceptors.response.use(
 
     // ── Handle no-internet / network errors first ──
     // Catches: NO_INTERNET (from request interceptor), ERR_NETWORK (axios native when DNS/TCP fails)
-    if (error.code === "NO_INTERNET" || error.code === "ERR_NETWORK" || error.message === "Network Error") {
+    if (
+      error.code === "NO_INTERNET" ||
+      error.code === "ERR_NETWORK" ||
+      error.message === "Network Error"
+    ) {
       // ErrorToast("No internet connection. Please check your network and try again.");
       return Promise.reject(error);
     }

@@ -176,8 +176,8 @@ const ScanQrCode = () => {
     typeof verifiedPass?.user?.profilePicture === "object"
       ? verifiedPass?.user?.profilePicture?.location
       : typeof verifiedPass?.user?.profilePicture === "string"
-      ? verifiedPass?.user?.profilePicture
-      : null;
+        ? verifiedPass?.user?.profilePicture
+        : null;
 
   const userFullName =
     `${verifiedPass?.user?.firstName || ""} ${verifiedPass?.user?.lastName || ""}`.trim() ||
@@ -276,38 +276,50 @@ const ScanQrCode = () => {
 
       {/* VIP Verification Modal */}
       {isModalOpen && verifiedPass && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-md p-4 animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-slate-100 transform transition-all scale-100">
-            {/* Header banner */}
-            <div className="bg-gradient-to-r from-amber-500 via-purple-800 to-[#0f0a2e] p-6 text-white text-center relative overflow-hidden">
-              <button
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A150F80] p-4 animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-[515px] rounded-[26px] shadow-lg p-6 sm:p-8 border border-slate-100 transform transition-all scale-100">
+            {/* Close button matching AuthSuccessModal */}
+            <div className="flex justify-end items-center pb-2">
+              <span
                 onClick={handleCloseModal}
-                className="absolute top-4 right-4 text-white/80 hover:text-white p-1.5 rounded-full bg-black/20 hover:bg-black/40 transition-all"
+                className="cursor-pointer border-[1px] border-gray-200 rounded-sm p-[2px] hover:bg-gray-50 text-gray-400 transition-colors"
               >
-                <X className="w-5 h-5" />
-              </button>
-
-              <div className="w-16 h-16 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 mx-auto flex items-center justify-center shadow-lg mb-3">
-                <Crown className="w-9 h-9 text-amber-300 animate-pulse" />
-              </div>
-
-              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 text-[11px] font-bold uppercase tracking-wider mb-2">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> VIP VERIFIED
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 font-light text-gray-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 8.586l4.95-4.95a1 1 0 111.414 1.414L11.414 10l4.95 4.95a1 1 0 01-1.414 1.414L10 11.414l-4.95 4.95a1 1 0 01-1.414-1.414L8.586 10 3.636 5.05A1 1 0 015.05 3.636L10 8.586z"
+                    clipRule="evenodd"
+                  />
+                </svg>
               </span>
+            </div>
 
-              <h2 className="text-2xl font-black text-white tracking-tight">
+            {/* Header Content */}
+            <div className="flex flex-col justify-center items-center text-center">
+              <img
+                src="/images/SuccessCheck.png"
+                alt="success"
+                className="w-[90px] mb-3"
+              />
+
+              <h2 className="text-[24px] sm:text-[28px] text-[#181818] font-[600] capitalize tracking-tight">
                 User is VIP Verified
               </h2>
-              <p className="text-slate-200 text-xs mt-1">
+              <p className="text-[14px] sm:text-[15px] text-[#565656] mt-1">
                 VIP Pass access granted successfully
               </p>
             </div>
 
-            {/* Modal Body */}
-            <div className="p-6 space-y-5">
-              {/* User Profile Card with Avatar & Name */}
-              <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 flex items-center gap-4 shadow-sm">
-                <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-gradient-to-br from-purple-500 to-indigo-700 text-white font-bold text-2xl flex items-center justify-center shadow-md flex-shrink-0 border-2 border-white">
+            {/* Modal Body / Pass details */}
+            <div className="mt-6 space-y-4">
+              {/* User Profile Card */}
+              <div className="bg-[#F9FAFB] rounded-[16px] p-4 border border-gray-100 flex items-center gap-4">
+                <div className="relative w-14 h-14 rounded-full overflow-hidden bg-[#0f0a2e] text-white font-bold text-xl flex items-center justify-center flex-shrink-0 border-2 border-white shadow-sm">
                   {profilePicUrl && !imgError ? (
                     <img
                       src={profilePicUrl}
@@ -326,62 +338,58 @@ const ScanQrCode = () => {
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <h4 className="text-lg font-extrabold text-slate-900 truncate">
+                    <h4 className="text-base font-bold text-[#181818] truncate">
                       {userFullName}
                     </h4>
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
                   </div>
-                  
+
                   {verifiedPass?.user?.phoneNumber ? (
-                    <p className="text-xs font-medium text-slate-500 flex items-center gap-1.5 mt-1">
-                      <Phone className="w-3.5 h-3.5 text-slate-400" />
+                    <p className="text-xs text-[#565656] flex items-center gap-1.5 mt-1">
+                      <Phone className="w-3.5 h-3.5 text-gray-400" />
                       {verifiedPass.user.phoneNumber}
                     </p>
                   ) : (
-                    <p className="text-xs text-slate-400 mt-1 font-medium">VIP Pass Member</p>
+                    <p className="text-xs text-[#565656] mt-1">VIP Pass Member</p>
                   )}
                 </div>
               </div>
 
-              {/* Detailed Verified Profile Info Table */}
-              <div className="space-y-3 bg-slate-50/70 p-4 rounded-2xl border border-slate-200/70 text-xs">
-                {/* User ID */}
+              {/* Detailed Info Table */}
+              <div className="space-y-2.5 bg-[#F9FAFB] p-4 rounded-[16px] border border-gray-100 text-xs">
                 {verifiedPass?.user?._id && (
-                  <div className="flex justify-between items-center py-1 border-b border-slate-200/60">
-                    <span className="text-slate-500 font-medium flex items-center gap-1.5">
-                      <User className="w-3.5 h-3.5 text-slate-400" /> User ID:
+                  <div className="flex justify-between items-center py-1 border-b border-gray-200/60">
+                    <span className="text-[#565656] font-medium flex items-center gap-1.5">
+                      <User className="w-3.5 h-3.5 text-gray-400" /> User ID:
                     </span>
-                    <span className="font-mono font-bold text-slate-800 bg-white px-2 py-0.5 rounded border border-slate-200">
+                    <span className="font-mono font-bold text-[#181818] bg-white px-2 py-0.5 rounded border border-gray-200">
                       {verifiedPass.user._id}
                     </span>
                   </div>
                 )}
 
-                {/* Pass ID */}
-                <div className="flex justify-between items-center py-1 border-b border-slate-200/60">
-                  <span className="text-slate-500 font-medium flex items-center gap-1.5">
-                    <IdCard className="w-3.5 h-3.5 text-slate-400" /> Pass ID:
+                <div className="flex justify-between items-center py-1 border-b border-gray-200/60">
+                  <span className="text-[#565656] font-medium flex items-center gap-1.5">
+                    <IdCard className="w-3.5 h-3.5 text-gray-400" /> Pass ID:
                   </span>
-                  <span className="font-mono font-bold text-slate-800 bg-white px-2 py-0.5 rounded border border-slate-200">
+                  <span className="font-mono font-bold text-[#181818] bg-white px-2 py-0.5 rounded border border-gray-200">
                     {verifiedPass?._id || "N/A"}
                   </span>
                 </div>
 
-                {/* Status */}
-                <div className="flex justify-between items-center py-1 border-b border-slate-200/60">
-                  <span className="text-slate-500 font-medium">VIP Status:</span>
-                  <span className="font-extrabold text-emerald-600 bg-emerald-100/80 px-2.5 py-0.5 rounded-full border border-emerald-300 flex items-center gap-1">
+                <div className="flex justify-between items-center py-1 border-b border-gray-200/60">
+                  <span className="text-[#565656] font-medium">VIP Status:</span>
+                  <span className="font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
                     <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Valid
                   </span>
                 </div>
 
-                {/* Date Created */}
                 {verifiedPass?.createdAt && (
                   <div className="flex justify-between items-center py-1">
-                    <span className="text-slate-500 font-medium flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-slate-400" /> Verified On:
+                    <span className="text-[#565656] font-medium flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-gray-400" /> Verified On:
                     </span>
-                    <span className="font-semibold text-slate-700">
+                    <span className="font-semibold text-[#181818]">
                       {moment(verifiedPass.createdAt).format("MMM DD, YYYY · hh:mm A")}
                     </span>
                   </div>
@@ -394,7 +402,7 @@ const ScanQrCode = () => {
                   handleCloseModal();
                   startScanner();
                 }}
-                className="w-full py-3.5 rounded-2xl bg-[#0f0a2e] hover:bg-[#1a1442] text-white font-bold text-sm transition-all shadow-lg flex items-center justify-center gap-2"
+                className="w-full py-3.5 rounded-[12px] bg-[#0f0a2e] hover:bg-[#1a1442] text-white font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 mt-2"
               >
                 <RefreshCw className="w-4 h-4 text-amber-400" /> Scan Next QR Code
               </button>

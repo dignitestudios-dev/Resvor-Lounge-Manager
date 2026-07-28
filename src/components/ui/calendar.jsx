@@ -24,7 +24,9 @@ const addDays = (d, n) => {
 
 const isSameDay = (a, b) => a.getTime() === b.getTime();
 
-const Calendar = ({ selectedDate, onDateSelect, initialMonth }) => {
+const Calendar = ({ selectedDate, onDateSelect, initialMonth, eventDates = [] }) => {
+  const eventDatesSet = useMemo(() => new Set(eventDates), [eventDates]);
+
   const today = useMemo(() => {
     const d = initialMonth ? new Date(initialMonth + "-01") : new Date();
     d.setDate(1);
@@ -66,7 +68,7 @@ const Calendar = ({ selectedDate, onDateSelect, initialMonth }) => {
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={prevMonth}
-          className="p-2 shadow-sm rounded-full hover:bg-gray-100 transition"
+          className="p-2 shadow-sm rounded-full hover:bg-gray-100 transition cursor-pointer"
         >
           <ChevronLeft size={28} className="text-[#1a1a6e]" />
         </button>
@@ -82,7 +84,7 @@ const Calendar = ({ selectedDate, onDateSelect, initialMonth }) => {
 
         <button
           onClick={nextMonth}
-          className="p-2 shadow-sm rounded-full hover:bg-gray-100 transition"
+          className="p-2 shadow-sm rounded-full hover:bg-gray-100 transition cursor-pointer"
         >
           <ChevronRight size={28} className="text-[#1a1a6e]" />
         </button>
@@ -104,21 +106,15 @@ const Calendar = ({ selectedDate, onDateSelect, initialMonth }) => {
       <div className="grid grid-cols-7 gap-2">
         {gridDays.map((day, idx) => {
           const isCurrentMonth = day.getMonth() === currentMonth.getMonth();
-          const isSelected = selectedDate && formatISO(day) === selectedDate;
-          console.log(
-            "🚀 ~ Calendar ~ isSelected:",
-            isSelected,
-            "day:",
-            formatISO(day),
-            "selectedDate:",
-            selectedDate
-          );
+          const dateStr = formatISO(day);
+          const isSelected = selectedDate && dateStr === selectedDate;
+          const hasEvent = eventDatesSet.has(dateStr);
 
           return (
             <button
               key={idx}
-              onClick={() => onDateSelect && onDateSelect(formatISO(day))}
-              className={`h-14 w-14 flex items-center justify-center rounded-2xl font-semibold text-lg transition ${
+              onClick={() => onDateSelect && onDateSelect(isSelected ? null : dateStr)}
+              className={`relative h-14 w-14 flex flex-col items-center justify-center rounded-2xl font-semibold text-lg transition cursor-pointer ${
                 isSelected
                   ? "bg-linear-to-br from-[#0d0d6b] to-[#2d1e6b] text-white shadow-lg"
                   : isCurrentMonth
@@ -126,7 +122,14 @@ const Calendar = ({ selectedDate, onDateSelect, initialMonth }) => {
                   : "text-[#bdbdd7] opacity-50"
               }`}
             >
-              {day.getDate()}
+              <span>{day.getDate()}</span>
+              {hasEvent && (
+                <span
+                  className={`w-1.5 h-1.5 rounded-full mt-0.5 ${
+                    isSelected ? "bg-amber-300" : "bg-[#0d0d6b]"
+                  }`}
+                />
+              )}
             </button>
           );
         })}

@@ -168,11 +168,11 @@ function MessageBubble({ msg, isOwn, selectedUser }) {
     selectedUser?.otherParticipant?.details?.profilePicture;
 
   return (
-    <div className={`flex items-end gap-2 ${isOwn ? "justify-end" : "justify-start"}`}>
+    <div className={`flex items-end gap-2 ${isOwn ? "justify-end" : "justify-start"} w-full`}>
       {!isOwn && <Avatar name={name} img={img} size="sm" />}
-      <div className={`flex flex-col ${isOwn ? "items-end" : "items-start"} max-w-[65%]`}>
+      <div className={`flex flex-col ${isOwn ? "items-end" : "items-start"} max-w-[80%] md:max-w-[65%] min-w-0`}>
         <div
-          className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${isOwn
+          className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap break-all [word-break:break-word] [overflow-wrap:anywhere] min-w-0 ${isOwn
             ? "bg-gradient text-white rounded-tr-none"
             : "bg-[#E6E6E6] text-gray-900 rounded-tl-none"
             }`}
@@ -181,11 +181,6 @@ function MessageBubble({ msg, isOwn, selectedUser }) {
         </div>
         <span className="text-[11px] text-gray-400 mt-1 px-1">
           {formatMessageTime(msg.createdAt)}
-          {/* {isOwn && (
-            <span className="ml-1">
-              {msg.isRead ? " ✓✓" : msg.isDelivered ? " ✓✓" : " ✓"}
-            </span>
-          )} */}
         </span>
       </div>
     </div>
@@ -746,7 +741,7 @@ export default function ChatUI() {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 py-4 space-y-3">
               {isLoadingMessages ? (
                 <div className="flex items-center justify-center h-full text-gray-400">
                   <Loader2 className="w-5 h-5 animate-spin mr-2" />

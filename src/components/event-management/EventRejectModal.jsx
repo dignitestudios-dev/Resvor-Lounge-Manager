@@ -33,6 +33,7 @@ const EventRejectModal = ({ isOpen, onOpenChange, onSubmit, isLoading }) => {
         <div className="flex flex-col gap-4 py-4">
           <Textarea
             placeholder="Enter rejection reason..."
+            maxLength={250}
             value={rejectionReason}
             onChange={(e) => setRejectionReason(e.target.value)}
             className="min-h-32 resize-none break-all"

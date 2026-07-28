@@ -117,7 +117,7 @@ const EditProfileModal = ({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="min-w-4xl max-w-full">
         <DialogHeader>
-          <DialogTitle className="text-3xl">Edit Lounge Profile</DialogTitle>
+          <DialogTitle className="text-3xl">Edit Lounge </DialogTitle>
         </DialogHeader>
 
         <div className="mt-6 space-y-6">
