@@ -10,6 +10,8 @@ import {
   submitVerifyForgotEmail,
 } from "../api/Post";
 
+import { submitUpdateLoungeManager } from "../api/Patch";
+
 export const useLogin = () => {
   return useMutation({
     mutationFn: submitLogin,
@@ -55,5 +57,11 @@ export const useUpdateFcmToken = () => {
 export const useChangePassword = () => {
   return useMutation({
     mutationFn: submitChangePassword,
+  });
+};
+
+export const useUpdateLoungeManager = () => {
+  return useMutation({
+    mutationFn: submitUpdateLoungeManager,
   });
 };

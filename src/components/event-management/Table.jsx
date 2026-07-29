@@ -2,8 +2,9 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import CustomPagination from "@/components/common/CustomPagination";
-import utils, { capitalize, getBookingStatusStyles, getEventStatusStyles } from "@/lib/utils";
+import utils, { capitalize } from "@/lib/utils";
 import { IoIosArrowForward } from "react-icons/io";
+import { Loader2 } from "lucide-react";
 
 const Table = ({
   filters = {},
@@ -15,6 +16,25 @@ const Table = ({
 }) => {
   const router = useRouter();
   const [filteredEvents, setFilteredEvents] = React.useState([]);
+
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case "incoming":
+      case "pending":
+        return "text-[#7D72F1]";
+      case "processing":
+      case "confirmed":
+        return "text-[#0052CC]";
+      case "completed":
+      case "accepted":
+        return "text-[#28A745]";
+      case "cancelled":
+      case "rejected":
+        return "text-[#DC3545]";
+      default:
+        return "text-gray-500";
+    }
+  };
 
   React.useEffect(() => {
     let filtered = [...events];
@@ -40,35 +60,9 @@ const Table = ({
     ? filteredEvents
     : events;
 
-
   const handleRowClick = (eventId) => {
     router.push(`/dashboard/event-management/${eventId}`);
   };
-
-  // const sortedServices = [...displayedEvents].sort((a, b) => {
-  //   if (!sortConfig.key) return 0;
-
-  //   let valA = a[sortConfig.key];
-  //   let valB = b[sortConfig.key];
-
-  //   // Convert guestLimit to number for numeric sorting
-  //   if (sortConfig.key === "qty") {
-  //     valA = parseInt(valA, 10);
-  //     valB = parseInt(valB, 10);
-  //   }
-
-  //   if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
-  //   if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
-  //   return 0;
-  // });
-
-  // const requestSort = (key) => {
-  //   let direction = "asc";
-  //   if (sortConfig.key === key && sortConfig.direction === "asc") {
-  //     direction = "desc";
-  //   }
-  //   setSortConfig({ key, direction });
-  // };
 
   return (
     <CustomPagination
@@ -77,7 +71,7 @@ const Table = ({
       totalPages={totalPages}
       currentPage={currentPage}
     >
-      <div className="bg-white rounded-xl overflow-y-auto">
+      <div className="bg-white rounded-xl overflow-y-auto min-h-[300px]">
         <table className="w-full">
           <thead className="sticky top-0 z-10">
             <tr className="bg-[#E8E8FF]">
@@ -94,56 +88,84 @@ const Table = ({
           </thead>
 
           <tbody className="mt-10">
-            {displayedEvents?.length === 0 ? (
+            {isLoading ? (
               <tr>
-                <td colSpan={10} className="text-center py-10 text-gray-500">
+                <td colSpan={9} className="py-12 text-center text-gray-500">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <Loader2 className="w-6 h-6 animate-spin text-[#012C57]" />
+                    <p className="text-sm font-medium">Loading events data...</p>
+                  </div>
+                </td>
+              </tr>
+            ) : displayedEvents?.length === 0 ? (
+              <tr>
+                <td colSpan={9} className="py-12 text-center text-gray-500 font-medium">
                   No Events Found.
                 </td>
               </tr>
             ) : (
-              displayedEvents?.map((event, index) => (
-                <tr
-                  key={event._id || index}
-                  className="border-b border-[#D4D4D4] cursor-pointer hover:bg-gray-50"
-                  onClick={() => handleRowClick(event._id)}
-                >
-                  <td className="px-4 py-6">{event?.eventName}</td>
-                  <td className="px-4 py-6">
-                    <div className="flex items-center gap-3">
-                      {/* <div
-                        className="h-[43px] w-[43px] rounded-full bg-cover bg-center"
-                        style={{
-                          backgroundImage: `url(${event.user.profile})`,
-                        }}
-                      /> */}
-                      {event?.guestName}
-                    </div>
-                  </td>
-                  <td className="px-4 py-6">
-                    {utils.formatNumber(event?.guestLimit)}
-                  </td>
-                  <td className="px-4 py-6 text-nowrap">{capitalize(event?.eventType)}</td>
-                  <td className="px-4 py-6 text-nowrap">
-                    {utils.formatDateWithName(event?.eventDate)}
-                  </td>
-                  <td className="px-4 py-6 text-nowrap">{event?.eventTime}</td>
-                  <td className="px-4 py-6">
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getEventStatusStyles(event?.status) || ""}`}
-                    >
+              displayedEvents?.map((event, index) => {
+                const profilePic =
+                  event?.userId?.profilePicture?.location ||
+                  event?.user?.profile ||
+                  "/images/profile.png";
+                const userName =
+                  event?.guestName ||
+                  `${event?.userId?.firstName || ""} ${event?.userId?.lastName || ""}`.trim() ||
+                  "Unknown Guest";
+                const budgetAmount =
+                  typeof event?.budget === "number"
+                    ? event.budget >= 100 && Number.isInteger(event.budget)
+                      ? event.budget / 100
+                      : event.budget
+                    : Number(event?.budget || 0);
+
+                return (
+                  <tr
+                    key={event._id || index}
+                    className="border-b border-[#D4D4D4] hover:bg-gray-50/80 cursor-pointer transition-colors"
+                    onClick={() => handleRowClick(event._id)}
+                  >
+                    <td className="px-4 py-6 text-sm font-semibold text-gray-900">
+                      {event?.eventName}
+                    </td>
+                    <td className="px-4 py-6">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="h-[43px] w-[43px] rounded-full bg-cover bg-center bg-gray-200 border border-gray-100 shrink-0"
+                          style={{
+                            backgroundImage: `url(${profilePic})`,
+                          }}
+                        />
+                        <span className="font-semibold text-gray-900">{userName}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-6 text-sm text-nowrap">
+                      {utils.formatNumber(event?.guestLimit)}
+                    </td>
+                    <td className="px-4 py-6 text-sm text-nowrap">
+                      {capitalize(event?.eventType)}
+                    </td>
+                    <td className="px-4 py-6 text-sm text-nowrap">
+                      {utils.formatDateWithName(event?.eventDate)}
+                    </td>
+                    <td className="px-4 py-6 text-sm text-nowrap">
+                      {event?.eventTime}
+                    </td>
+                    <td className={`px-4 py-6 text-sm font-bold ${getStatusColor(event?.status)}`}>
                       {capitalize(event?.status || "pending")}
-                    </span>
-                  </td>
-                  <td className="px-4 py-6">
-                    {utils.formatNumber(event?.budget, 2)}
-                  </td>
-                  <td className="px-4 py-6 text-nowrap">
-                    <div className="flex justify-center items-center cursor-pointer">
-                      <IoIosArrowForward size={24} />
-                    </div>
-                  </td>
-                </tr>
-              ))
+                    </td>
+                    <td className="px-4 py-6 text-sm font-semibold">
+                      {utils.formatCurrency(budgetAmount)}
+                    </td>
+                    <td className="px-4 py-6 text-nowrap">
+                      <div className="flex justify-center items-center text-gray-400 hover:text-gray-900 transition">
+                        <IoIosArrowForward size={24} />
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

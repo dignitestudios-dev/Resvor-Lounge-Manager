@@ -19,7 +19,7 @@ const ViewServiceModal = ({
 
   useEffect(() => {
     if (images.length) {
-      setSelectedImage(images[0].location);
+      setSelectedImage(images[0].location || images[0].url || images[0].src);
     } else {
       setSelectedImage("/images/service.jpg");
     }
@@ -29,116 +29,138 @@ const ViewServiceModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-<DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto rounded-2xl p-0">        {/* Header */}
-        <DialogHeader className="border-b bg-white px-6 py-5">
-          <DialogTitle className="text-3xl font-bold text-slate-900">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto overflow-x-hidden rounded-2xl p-0 w-full">
+        {/* Header */}
+        <DialogHeader className=" bg-white px-6 py-5">
+          {/* <DialogTitle className="text-2xl md:text-3xl font-bold text-slate-900 break-words break-all">
             {service.serviceName || service.name}
-          </DialogTitle>
+          </DialogTitle> */}
         </DialogHeader>
 
         {/* Top Section */}
-        <div className="grid gap-8 p-6 md:grid-cols-2">
+        <div className="grid gap-6 p-6 md:grid-cols-1">
           {/* LEFT */}
-          <div>
+          <div className="w-full min-w-0 overflow-hidden flex flex-col">
             {/* Main Image */}
-            <div className="aspect-[4/3] overflow-hidden rounded-2xl border bg-gray-100 shadow-sm">
+            <div className="w-full h-64 md:h-72 overflow-hidden rounded-2xl border bg-slate-100 shadow-sm flex items-center justify-center p-2">
               <img
                 src={selectedImage}
                 alt={service.serviceName || service.name}
                 className="h-full w-full object-contain transition duration-300"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = "/images/service.jpg";
+                }}
               />
             </div>
 
             {/* Thumbnails */}
             {images.length > 1 && (
-              <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
-                {images.map((image) => (
-                  <button
-                    key={image._id}
-                    onClick={() => setSelectedImage(image.location)}
-                    className={`h-10 w-10 overflow-hidden rounded-lg border-2 transition-all ${
-                      selectedImage === image.location
-                        ? " border-indigo-600"
+              <div className="mt-4 flex gap-2.5 flex-wrap w-full max-w-full">
+                {images.map((image, index) => {
+                  const imgUrl = image.location || image.url || image.src;
+                  const isSelected = selectedImage === imgUrl;
+                  return (
+                    <button
+                      key={image._id || image.id || index}
+                      type="button"
+                      onClick={() => setSelectedImage(imgUrl)}
+                      className={`h-14 w-14 shrink-0 overflow-hidden rounded-xl border-2 transition-all bg-slate-50 flex items-center justify-center p-0.5 ${isSelected
+                        ? "border-indigo-600 ring-2 ring-indigo-200"
                         : "border-gray-200 hover:border-indigo-400"
-                    }`}
-                  >
-                    <img
-                      src={image.location}
-                      alt={image.filename}
-                      className="h-full w-full object-cover"
-                    />
-                  </button>
-                ))}
+                        }`}
+                    >
+                      <img
+                        src={imgUrl}
+                        alt={image.filename || `service-img-${index}`}
+                        className="h-full w-full object-contain rounded-lg"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = "/images/service.jpg";
+                        }}
+                      />
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
 
-          {/* RIGHT */}
-          <div className="space-y-6">
-            {/* Price */}
-            <div className="rounded-2xl  p-6 text-white border">
-              <p className="text-sm uppercase tracking-widest  text-gray-500">
-                Price
-              </p>
+        </div>
 
-              <h2 className="mt-2 text-4xl font-bold text-slate-800">
-                ${(Number(service.price) / 100).toFixed(2)}
-              </h2>
- 
-            </div>
+        <div className="grid gap-6 p-6 md:grid-cols-2">
 
-            {/* Details */}
-            <div className="grid grid-cols-2 gap-4">
-              {service.category && (
-                <div className="rounded-xl  bg-white p-4 ">
-                  <p className="text-xs uppercase text-gray-500">
-                    Category
-                  </p>
+          {/* Price */}
+          <div className="rounded-2xl p-5 bg-slate-50 border">
+            <p className="text-xs uppercase font-semibold tracking-wider text-gray-500">
+              Price
+            </p>
 
-                  <p className="mt-2 font-semibold text-slate-800">
-                    {service.category}
-                  </p>
-                </div>
-              )}
+            <h2 className="mt-1 text-3xl font-bold text-slate-800 break-words break-all">
+              ${(Number(service.price) / 100).toFixed(2)}
+            </h2>
+          </div>
 
-              {service.duration && (
-                <div className="rounded-xl border bg-white p-4 shadow-sm">
-                  <p className="text-xs uppercase text-gray-500">
-                    Duration
-                  </p>
-
-                  <p className="mt-2 font-semibold text-slate-800">
-                    {service.duration}
-                  </p>
-                </div>
-              )}
-
-              <div className="col-span-2 rounded-xl border bg-white p-4 ">
+          {/* Details */}
+          <div className="grid grid-cols-2 gap-4">
+            {service.category && (
+              <div className="rounded-xl border bg-white p-4 min-w-0">
                 <p className="text-xs uppercase text-gray-500">
-                  Created At
+                  Category
                 </p>
 
-                <p className="mt-2 font-semibold text-slate-800">
-                  {new Date(service.createdAt).toLocaleDateString()}
+                <p className="mt-1 font-semibold text-slate-800 break-words break-all">
+                  {service.category}
                 </p>
               </div>
+            )}
+
+            {service.duration && (
+              <div className="rounded-xl border bg-white p-4 min-w-0">
+                <p className="text-xs uppercase text-gray-500">
+                  Duration
+                </p>
+
+                <p className="mt-1 font-semibold text-slate-800 break-words break-all">
+                  {service.duration}
+                </p>
+              </div>
+            )}
+
+            <div className="col-span-2 rounded-xl border bg-white p-4 min-w-0">
+              <p className="text-xs uppercase text-gray-500">
+                Created At
+              </p>
+
+              <p className="mt-1 font-semibold text-slate-800">
+                {service.createdAt ? new Date(service.createdAt).toLocaleDateString() : "N/A"}
+              </p>
             </div>
           </div>
+
+        </div>
+
+        <div className="p-6 ">
+          <h3 className="mb-3 text-lg font-semibold text-slate-900">
+            Service Name
+          </h3>
+          <p className="whitespace-pre-wrap break-words break-all leading-relaxed text-slate-600 text-sm">
+            {service.serviceName || service.name}
+          </p>
         </div>
 
         {/* Description */}
-       {/* Description */}
-<div className="border-t bg-slate-50 px-6 py-6">
-  <h3 className="mb-4 text-xl font-semibold text-slate-900">
-    Description
-  </h3>
+        <div className="border-t bg-slate-50 px-6 py-6">
+          <h3 className="mb-3 text-lg font-semibold text-slate-900">
+            Description
+          </h3>
 
-  <div className="rounded-xl border bg-white p-5 shadow-sm">
-    <p className="whitespace-pre-line break-words leading-8 text-slate-600">
-      {service.description || "No description available."}
-    </p>
-  </div>
-</div>
+          <div className="rounded-xl border bg-white p-5 shadow-sm min-w-0">
+            <p className="whitespace-pre-wrap break-words break-all leading-relaxed text-slate-600 text-sm">
+              {service.description || "No description available."}
+            </p>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

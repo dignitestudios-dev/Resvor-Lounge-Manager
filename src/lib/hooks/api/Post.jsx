@@ -168,8 +168,9 @@ export const submitCreateLounge = async (payload) => {
   if (payload.services && Array.isArray(payload.services)) {
     payload.services.forEach((service, serviceIndex) => {
       // Add service basic fields
+      const priceInCents = Math.round(Number(service.price || 0) * 100);
       formData.append(`services[${serviceIndex}][name]`, service.serviceName);
-      formData.append(`services[${serviceIndex}][price]`, service.price);
+      formData.append(`services[${serviceIndex}][price]`, priceInCents);
       formData.append(
         `services[${serviceIndex}][description]`,
         service.description,

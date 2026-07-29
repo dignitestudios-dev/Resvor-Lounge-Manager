@@ -149,7 +149,7 @@ const EventDetailsModal = ({
                   ))
                 )}
               </div>
-              <div className="border-l-2 border-gray-300 pl-2 min-w-0">
+              {/* <div className="border-l-2 border-gray-300 pl-2 min-w-0">
                 <p className="font-semibold text-[#000000] mb-1">
                   Preferred Seating Area
                 </p>
@@ -161,7 +161,7 @@ const EventDetailsModal = ({
                 {(!serviceData?.selectedSeating || serviceData.selectedSeating.length === 0) && preferredSeatingArea && (
                   <p className="text-[#000000] break-words">{preferredSeatingArea}</p>
                 )}
-              </div>
+              </div> */}
             </div>
           </div>
 

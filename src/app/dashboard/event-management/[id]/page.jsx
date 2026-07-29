@@ -11,7 +11,7 @@ import {
   useRejectEvent,
   useAcceptEvent,
 } from "@/lib/hooks/mutations/EventMutations";
-import utils, { capitalize } from "@/lib/utils";
+import utils, { capitalize, getStatusColor } from "@/lib/utils";
 import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
 import PageLoader from "@/components/common/PageLoader";
 
@@ -175,17 +175,11 @@ const EventDetails = () => {
                   <div>
                     {eventData?.status && (
                       <span
-                        className={`px-4 py-2 rounded-full text-sm font-semibold ${eventData.status === "pending"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : eventData.status === "accepted"
-                            ? "bg-green-100 text-green-800"
-                            : eventData.status === "rejected"
-                              ? "bg-red-100 text-red-800"
-                              : "bg-gray-100 text-gray-800"
-                          }`}
+                        className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-slate-50 ${getStatusColor(
+                          eventData.status,
+                        )}`}
                       >
-                        {eventData.status.charAt(0).toUpperCase() +
-                          eventData.status.slice(1)}
+                        {capitalize(eventData.status.replaceAll("_", " "))}
                       </span>
                     )}
                   </div>

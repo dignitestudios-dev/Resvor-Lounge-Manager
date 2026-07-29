@@ -12,6 +12,9 @@ import { Button } from "@/components/ui/button";
 import Edit from "@/components/icons/Edit";
 import { useAuthMe } from "@/lib/hooks/queries/useQueries";
 import { useAuthContext } from "@/lib/context/AuthProvider";
+import { useUpdateLoungeManager } from "@/lib/hooks/mutations/AuthMutations";
+import { useQueryClient } from "@tanstack/react-query";
+import { SuccessToast, ErrorToast } from "@/components/ui/toaster";
 
 const PersonalInfoModal = ({
   open,
@@ -20,25 +23,27 @@ const PersonalInfoModal = ({
   onEditPhone,
   onSave,
 }) => {
-
+  const queryClient = useQueryClient();
   const { data: authMeData } = useAuthMe();
 
   const authContext = useAuthContext();
   const user = authMeData?.user || authMeData || authContext?.user || {};
-  console.log("🚀 ~ PersonalInfoModal ~ user:", user)
 
-  const nameVal = user?.firstName + " " + user?.lastName || "";
+  const initialFirstName = user?.firstName || "";
+  const initialLastName = user?.lastName || "";
+  const initialFullName = `${initialFirstName} ${initialLastName}`.trim();
+
   const emailVal = user?.email || "";
   const phoneVal = user?.phoneNumber || user?.phone || "";
   const rawRole = user?.role || user?.roleName || "lounge_manager";
 
-  const [fullName, setFullName] = useState(nameVal);
+  const [fullName, setFullName] = useState(initialFullName);
+
+  const updateLoungeManagerMutation = useUpdateLoungeManager();
 
   useEffect(() => {
-    if (nameVal) {
-      setFullName(nameVal);
-    }
-  }, [nameVal]);
+    setFullName(initialFullName);
+  }, [initialFullName]);
 
   const formatRole = (roleStr) => {
     if (!roleStr) return "Lounge Manager";
@@ -46,6 +51,45 @@ const PersonalInfoModal = ({
       .split("_")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(" ");
+  };
+
+  const handleSave = async () => {
+    const loungeManagerId = user?._id || user?.id;
+
+    if (!loungeManagerId) {
+      ErrorToast("Lounge Manager ID not found");
+      return;
+    }
+
+    const trimmed = fullName.trim();
+    if (!trimmed) {
+      ErrorToast("Please enter a valid name");
+      return;
+    }
+
+    const nameParts = trimmed.split(/\s+/);
+    const firstName = nameParts[0] || "";
+    const lastName = nameParts.slice(1).join(" ") || "";
+
+    try {
+      const res = await updateLoungeManagerMutation.mutateAsync({
+        loungeManagerId,
+        firstName,
+        lastName,
+      });
+
+      SuccessToast(res?.message || "Personal information updated successfully");
+      await queryClient.invalidateQueries({ queryKey: ["auth-me"] });
+
+      if (onSave) onSave({ fullName, firstName, lastName });
+      setOpen(false);
+    } catch (error) {
+      ErrorToast(
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to update personal information",
+      );
+    }
   };
 
   return (
@@ -59,10 +103,11 @@ const PersonalInfoModal = ({
           <div>
             <label className="block text-sm font-medium">Full Name</label>
             <input
-              className="w-full mt-2 rounded-md border px-4 py-3"
+              className="w-full mt-2 rounded-md border px-4 py-3 text-black font-medium focus:outline-none focus:ring-2 focus:ring-slate-400"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="Enter full name"
+              disabled={updateLoungeManagerMutation.isPending}
             />
           </div>
 
@@ -83,16 +128,6 @@ const PersonalInfoModal = ({
                 value={emailVal}
                 placeholder="No email provided"
               />
-              <button
-                type="button"
-                className="absolute right-3 top-3 text-gray-500 cursor-pointer"
-                onClick={() => {
-                  if (onEditEmail) onEditEmail();
-                }}
-                aria-label="Edit email"
-              >
-                <Edit />
-              </button>
             </div>
           </div>
 
@@ -105,16 +140,6 @@ const PersonalInfoModal = ({
                 value={phoneVal}
                 placeholder="No phone number provided"
               />
-              <button
-                type="button"
-                className="absolute right-3 top-3 text-gray-500 cursor-pointer"
-                onClick={() => {
-                  if (onEditPhone) onEditPhone();
-                }}
-                aria-label="Edit phone"
-              >
-                <Edit />
-              </button>
             </div>
           </div>
         </div>
@@ -123,14 +148,11 @@ const PersonalInfoModal = ({
           <DialogFooter>
             <div className="w-full flex justify-center">
               <Button
-                onClick={() => {
-                  if (onSave) onSave({ fullName });
-                  if (onSave) onSave({ fullName });
-                  setOpen(false);
-                }}
+                onClick={handleSave}
+                disabled={updateLoungeManagerMutation.isPending}
                 className="w-full max-w-xl"
               >
-                Save
+                {updateLoungeManagerMutation.isPending ? "Saving..." : "Save"}
               </Button>
             </div>
           </DialogFooter>

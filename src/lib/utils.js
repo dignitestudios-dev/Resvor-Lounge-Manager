@@ -421,43 +421,30 @@ export function updateAuthCache(queryClient, patch) {
   });
 }
 
-export const getBookingStatusStyles = (status) => {
-  switch (status) {
-    case "awaiting_payment":
-      return " text-yellow-800";
-
-    case "confirmed":
-      return " text-green-700";
-
-    case "failed":
-      return " text-red-700";
-
-    case "cancelled":
-      return " text-gray-700";
-
-    case "rejected":
-      return " text-rose-700";
-
-    case "completed":
-      return " text-blue-700";
-
-    default:
-      return " text-slate-700";
-  }
-};
-
-export const getEventStatusStyles = (status) => {
-  switch (status) {
+export const getStatusColor = (status) => {
+  switch (status?.toLowerCase()) {
+    case "incoming":
     case "pending":
-      return " text-yellow-800";
+    case "awaiting_payment":
+      return "text-[#7D72F1]";
+    case "processing":
+    case "confirmed":
+      return "text-[#0052CC]";
     case "completed":
-      return " text-green-700";
+    case "accepted":
+      return "text-[#28A745]";
+    case "cancelled":
     case "rejected":
-      return " text-red-700";
+    case "failed":
+      return "text-[#DC3545]";
     default:
-      return " text-slate-700";
+      return "text-gray-500";
   }
 };
+
+export const getBookingStatusStyles = getStatusColor;
+
+export const getEventStatusStyles = getStatusColor;
 
 
 
@@ -482,6 +469,7 @@ const utils = {
   phoneFormatter,
   cleanPhoneNumber,
   formatPhoneNumber,
+  getStatusColor,
 };
 
 export default utils;

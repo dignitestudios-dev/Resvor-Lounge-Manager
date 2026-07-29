@@ -101,8 +101,8 @@ const ProfileFlow = ({
           setOpenPersonal(false);
           setOpenChangeEmail(true);
         }}
-        onSave={() => {
-          if (onSavePersonal) onSavePersonal();
+        onSave={(savedData) => {
+          if (onSavePersonal) onSavePersonal(savedData);
           setOpenPersonal(false);
         }}
       />

@@ -148,6 +148,32 @@ const AddShiftAndScheduling = ({
     return shiftValues;
   };
 
+  // Helper to determine capitalized referenceType ('Event' | 'Booking')
+  const getReferenceType = (eventId, selectedItem, fallbackType) => {
+    if (!eventId) return undefined;
+    if (selectedItem) {
+      const typeStr = (
+        selectedItem.type ||
+        selectedItem.referenceType ||
+        selectedItem.modelType ||
+        selectedItem.kind ||
+        ""
+      ).toLowerCase();
+      if (
+        typeStr === "booking" ||
+        (selectedItem.bookingDate && !selectedItem.title && !selectedItem.eventName)
+      ) {
+        return "Booking";
+      }
+      return "Event";
+    }
+    if (fallbackType) {
+      const fb = String(fallbackType).toLowerCase();
+      if (fb === "booking") return "Booking";
+    }
+    return "Event";
+  };
+
   const formik = useFormik({
     initialValues: getInitialValues(),
     validationSchema: addShiftSchema,
@@ -171,7 +197,9 @@ const AddShiftAndScheduling = ({
         };
 
         if (values.eventId) {
-          updatePayload.referenceType = "Event";
+          const eventsList = eventsData?.events || (Array.isArray(eventsData) ? eventsData : []);
+          const selectedItem = eventsList.find((e) => e._id === values.eventId);
+          updatePayload.referenceType = getReferenceType(values.eventId, selectedItem, data?.referenceType);
           updatePayload.referenceId = values.eventId;
           updatePayload.eventId = values.eventId;
         }
@@ -293,7 +321,9 @@ const AddShiftAndScheduling = ({
         };
 
         if (values.eventId) {
-          updatePayload.referenceType = "Event";
+          const eventsList = eventsData?.events || (Array.isArray(eventsData) ? eventsData : []);
+          const selectedItem = eventsList.find((e) => e._id === values.eventId);
+          updatePayload.referenceType = getReferenceType(values.eventId, selectedItem, data?.referenceType);
           updatePayload.referenceId = values.eventId;
           updatePayload.eventId = values.eventId;
         }
@@ -332,7 +362,9 @@ const AddShiftAndScheduling = ({
         };
 
         if (values.eventId) {
-          createPayload.referenceType = "Event";
+          const eventsList = eventsData?.events || (Array.isArray(eventsData) ? eventsData : []);
+          const selectedItem = eventsList.find((e) => e._id === values.eventId);
+          createPayload.referenceType = getReferenceType(values.eventId, selectedItem);
           createPayload.referenceId = values.eventId;
           createPayload.eventId = values.eventId;
         }
@@ -378,7 +410,9 @@ const AddShiftAndScheduling = ({
     };
 
     if (values.eventId) {
-      createPayload.referenceType = "Event";
+      const eventsList = eventsData?.events || (Array.isArray(eventsData) ? eventsData : []);
+      const selectedEvent = eventsList.find((e) => e._id === values.eventId);
+      createPayload.referenceType = getReferenceType(values.eventId, selectedEvent);
       createPayload.referenceId = values.eventId;
       createPayload.eventId = values.eventId;
     }

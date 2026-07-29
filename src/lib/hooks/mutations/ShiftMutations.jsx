@@ -3,16 +3,21 @@ import axiosInstance from "@/axios";
 
 // ─── Create Shift ───────────────────────────────────────────────────────────
 const createShift = async (data) => {
-  const response = await axiosInstance.post("/shifts", {
-    referenceType: data.referenceType || "event",
-    referenceId: data.referenceId,
+  const payload = {
     role: data.role,
     startDateTime: data.startDateTime,
     endDateTime: data.endDateTime,
     bartenderIds: data.bartenderIds,
     instructions: data.instructions,
     status: data.status,
-  });
+  };
+
+  if (data.referenceId) {
+    payload.referenceId = data.referenceId;
+    payload.referenceType = data.referenceType || "Event";
+  }
+
+  const response = await axiosInstance.post("/shifts", payload);
   return response.data;
 };
 
@@ -28,16 +33,21 @@ export const useCreateShift = () => {
 
 // ─── Update Shift ───────────────────────────────────────────────────────────
 const updateShift = async ({ id, ...data }) => {
-  const response = await axiosInstance.patch(`/shifts/${id}`, {
-    referenceType: data.referenceType,
-    referenceId: data.referenceId,
+  const payload = {
     role: data.role,
     startDateTime: data.startDateTime,
     endDateTime: data.endDateTime,
     bartenderIds: data.bartenderIds,
     instructions: data.instructions,
     status: data.status,
-  });
+  };
+
+  if (data.referenceId) {
+    payload.referenceId = data.referenceId;
+    payload.referenceType = data.referenceType || "Event";
+  }
+
+  const response = await axiosInstance.patch(`/shifts/${id}`, payload);
   return response.data;
 };
 

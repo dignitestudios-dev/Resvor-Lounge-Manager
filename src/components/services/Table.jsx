@@ -80,33 +80,33 @@ const Table = () => {
 
   return (
     <>
-      <div className="bg-white rounded-xl overflow-y-auto shadow-sm">
-        <table className="w-full">
+      <div className="bg-white rounded-xl overflow-x-auto shadow-sm">
+        <table className="w-full text-sm">
           <thead className="sticky top-0 z-10 bg-[#E8E8FF]">
             <tr>
               <th
                 onClick={() => requestSort("serviceName")}
-                className="px-4 py-5 text-left cursor-pointer"
+                className="px-4 py-5 text-left cursor-pointer w-64 md:w-72"
               >
                 Service Name{" "}
                 {/* {sortConfig.key === "serviceName" &&
                   (sortConfig.direction === "asc" ? "↑" : "↓")} */}
               </th>
 
-              <th className="px-4 py-5 text-left">
+              <th className="px-4 py-5 text-left w-80 md:w-96">
                 Description
               </th>
 
               <th
                 onClick={() => requestSort("price")}
-                className="px-4 py-5 text-left cursor-pointer"
+                className="px-4 py-5 text-left cursor-pointer w-32"
               >
                 Price ($){" "}
                 {sortConfig.key === "price" &&
                   (sortConfig.direction === "asc" ? "↑" : "↓")}
               </th>
 
-              <th className="px-4 py-5 text-center">
+              <th className="px-4 py-5 text-center w-36">
                 Action
               </th>
             </tr>
@@ -134,71 +134,76 @@ const Table = () => {
             ) : (
               sortedServices.map((service) => (
                 <tr
-                  key={service.id}
+                  key={service._id || service.id}
                   className="border-b border-[#D4D4D4] hover:bg-gray-50"
                 >
-                  <td className="px-4 py-5">
+                  <td className="px-4 py-5 w-64 md:w-72">
                     <div className="flex items-center gap-3">
-                     <div
-  className="h-10 w-10 rounded-full bg-cover bg-center"
-  style={{
-    backgroundImage: `url(${
-      service.images?.[0]?.location ||
-      "/images/service.jpg"
-    })`,
-  }}
-/>
+                      <div
+                        className="h-10 w-10 rounded-full bg-cover bg-center shrink-0"
+                        style={{
+                          backgroundImage: `url(${service.images?.[0]?.location ||
+                            service.images?.[0]?.url ||
+                            "/images/service.jpg"
+                            })`,
+                        }}
+                      />
 
-                      <span className="font-medium">
+                      <span
+                        className="font-medium truncate block max-w-[170px] md:max-w-[200px]"
+                        title={service.serviceName || service.name}
+                      >
                         {service.serviceName || service.name}
                       </span>
                     </div>
                   </td>
 
-                 <td className="px-4 py-5 text-gray-700">
-  {service.description?.length > 15
-    ? service.description.substring(0, 15) + "..."
-    : service.description}
-</td>
+                  <td className="px-4 py-5 text-gray-700 w-80 md:w-96">
+                    <p
+                      className="truncate max-w-[280px] md:max-w-[340px]"
+                      title={service.description}
+                    >
+                      {service.description || "—"}
+                    </p>
+                  </td>
 
-              <td className="px-4 py-5 font-semibold">
-  ${(Number(service.price) / 100).toFixed(2)}
-</td>
+                  <td className="px-4 py-5 font-semibold w-32">
+                    ${(Number(service.price) / 100).toFixed(2)}
+                  </td>
 
-                  <td>
-                   <div className="flex items-c
-                   enter justify-center gap-2">
-  <Button
-    variant="ghost"
-    onClick={() => {
-      setSelectedService(service);
-      setOpenViewModal(true);
-    }}
-  >
-    <Eye className="h-5 w-5 text-blue-600" />
-  </Button>
+                  <td className="w-36">
+                    <div className="flex items-center justify-center gap-2">
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          setSelectedService(service);
+                          setOpenViewModal(true);
+                        }}
+                      >
+                        <Eye className="h-5 w-5 text-blue-600" />
+                      </Button>
 
-  <Button
-    variant="ghost"
-    onClick={() => {
-      setSelectedService(service);
-      setOpenEditForm(true);
-    }}
-  >
-    <Edit />
-  </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          setSelectedService(service);
+                          setOpenEditForm(true);
+                        }}
+                      >
+                        <Edit />
+                      </Button>
 
-  <Button
-    variant="ghost"
-    disabled={deleting}
-    onClick={() => {
-      setSelectedService(service);
-      setOpenDeletePopup(true);
-    }}
-  >
-    <Delete />
-  </Button>
-</div>
+                      <Button
+                        variant="ghost"
+                        disabled={deleting}
+                        onClick={() => {
+                          setSelectedService(service);
+                          setOpenDeletePopup(true);
+                        }}
+                      >
+                        <Delete />
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -216,30 +221,30 @@ const Table = () => {
       />
 
       <ViewServiceModal
-  isOpen={openViewModal}
-  onOpenChange={setOpenViewModal}
-  service={selectedService}
-/>
+        isOpen={openViewModal}
+        onOpenChange={setOpenViewModal}
+        service={selectedService}
+      />
 
       <DeleteServicePopup
         isOpen={openDeletePopup}
         onOpenChange={setOpenDeletePopup}
-          deleting={deleting}
+        deleting={deleting}
 
-       onDelete={() => {
-  if (!selectedService) return;
+        onDelete={() => {
+          if (!selectedService) return;
 
-  deleteService(selectedService._id, {
-    onSuccess: () => {
-      setOpenDeletePopup(false);
-      setSelectedService(null);
-    },
+          deleteService(selectedService._id, {
+            onSuccess: () => {
+              setOpenDeletePopup(false);
+              setSelectedService(null);
+            },
 
-    onError: (error) => {
-      console.error(error);
-    },
-  });
-}}
+            onError: (error) => {
+              console.error(error);
+            },
+          });
+        }}
       />
     </>
   );

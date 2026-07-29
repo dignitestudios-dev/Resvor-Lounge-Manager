@@ -275,12 +275,11 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
       return; // Stop execution if validation fails
     }
 
-    const priceInCents = Math.round(Number(formData.price) * 100);
-
+    const priceInCents = Math.round(Number(formData.price || 0) * 100);
 
     const payload = new FormData();
     payload.append("name", formData.serviceName);
-payload.append("price", priceInCents);
+    payload.append("price", priceInCents);
     payload.append("description", formData.description);
 
     serviceImages.forEach((img) => {

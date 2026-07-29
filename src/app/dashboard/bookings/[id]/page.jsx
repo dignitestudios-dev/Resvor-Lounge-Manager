@@ -93,7 +93,7 @@ const BookingDetails = () => {
           )}
           {bookingData?.status && (
             <span
-              className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${getBookingStatusStyles(
+              className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-slate-50 ${getBookingStatusStyles(
                 bookingData.status,
               )}`}
             >
