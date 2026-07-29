@@ -94,7 +94,7 @@ const BartenderDetails = () => {
                     className="h-14 px-5 gap-2 bg-blue-900 hover:bg-blue-800"
                     onClick={() => setOpenPasswordModal(true)}
                   >
-                    <KeyRound className="w-5 h-5" />
+                    {/* <KeyRound className="w-5 h-5" /> */}
                     Update Password
                   </Button>
 
@@ -149,7 +149,7 @@ const BartenderDetails = () => {
                 </p>
               </div>
 
-         
+
             </div>
 
           </div>

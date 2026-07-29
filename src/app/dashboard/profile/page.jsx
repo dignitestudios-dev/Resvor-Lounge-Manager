@@ -292,6 +292,7 @@ const Profile = () => {
             updateLoungeMutation.mutate(payload, {
               onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: ["active-lounge"] });
+                setEditingFloorPlan(false);
                 setOpenEditFloorPlan(false);
                 setOpenSuccess(true);
               },
@@ -300,6 +301,7 @@ const Profile = () => {
               }
             });
           } else {
+            setEditingFloorPlan(false);
             setOpenEditFloorPlan(false);
           }
         }}

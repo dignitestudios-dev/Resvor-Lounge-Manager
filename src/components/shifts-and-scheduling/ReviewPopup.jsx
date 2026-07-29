@@ -78,7 +78,7 @@ const ReviewPopup = ({ isOpen, onOpenChange, onConfirm, onBack, data, isLoading 
               <p className="text-sm text-black font-semibold">
                 Any Instruction <span className="text-xs">(optional)</span>
               </p>
-              <p className="text-sm text-gray-500">{data.instruction}</p>
+              <p className="text-sm text-gray-500 break-words break-all">{data.instruction}</p>
             </div>
 
             {/* Buttons */}

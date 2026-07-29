@@ -382,7 +382,7 @@ const AddBartenderForm = ({
                         <Input
                           id="password"
                           name="password"
-                          placeholder="● ● ● ● ● ● ● ●"
+                          placeholder="Enter password"
                           type={showPassword ? "text" : "password"}
                           className={`h-14 pr-10 ${formik.touched.password && formik.errors.password
                             ? "border-red-500"
@@ -418,7 +418,7 @@ const AddBartenderForm = ({
                         <Input
                           id="confirmPassword"
                           name="confirmPassword"
-                          placeholder="● ● ● ● ● ● ● ●"
+                          placeholder="Re-enter password"
                           type={showConfirmPassword ? "text" : "password"}
                           className={`h-14 pr-10 ${formik.touched.confirmPassword &&
                             formik.errors.confirmPassword
@@ -455,7 +455,7 @@ const AddBartenderForm = ({
                   type="submit"
                   disabled={isPending || !formik.isValid || !formik.dirty}
                   className={
-                    "w-full h-14 text-lg text-white bg-blue-900 hover:bg-blue-800"
+                    "w-full h-14 text-lg "
                   }
                 >
                   {isPending ? (

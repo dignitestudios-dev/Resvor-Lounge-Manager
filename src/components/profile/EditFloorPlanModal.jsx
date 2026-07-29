@@ -45,12 +45,6 @@ const EditFloorPlanModal = ({
           vipTables: values.vipTables,
         });
       }
-      if (isEdit) {
-        onEditChange(false);
-      }
-      if (!isLoading) {
-        setOpen(false);
-      }
     },
   });
 

@@ -157,7 +157,7 @@ const ShiftDetails = ({
                     Any Instruction{" "}
                     <span className="text-gray-300">(optional)</span>
                   </div>
-                  <p className="mt-2 text-wrap break-words text-gray-600">
+                  <p className="mt-2 text-wrap break-words break-all text-gray-600">
                     {shiftDetail.instructions || "-"}
                   </p>
                 </div>

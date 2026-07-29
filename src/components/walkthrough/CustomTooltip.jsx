@@ -31,6 +31,13 @@ const CustomTooltip = ({
         {/* Skip button */}
         <button
           {...closeProps}
+          onClick={(e) => {
+            try {
+              localStorage.removeItem("show_welcome_walkthrough");
+              localStorage.removeItem("is_new_signup");
+            } catch (err) { }
+            if (closeProps?.onClick) closeProps.onClick(e);
+          }}
           className="flex-1 py-3 px-5 rounded-2xl bg-[#f0f0f4] hover:bg-[#e4e4ea] text-slate-800 font-semibold text-sm transition-all active:scale-95 text-center"
         >
           Skip
@@ -49,6 +56,15 @@ const CustomTooltip = ({
         {/* Next / Finish button */}
         <button
           {...primaryProps}
+          onClick={(e) => {
+            if (isLastStep) {
+              try {
+                localStorage.removeItem("show_welcome_walkthrough");
+                localStorage.removeItem("is_new_signup");
+              } catch (err) { }
+            }
+            if (primaryProps?.onClick) primaryProps.onClick(e);
+          }}
           className="flex-1 py-3 px-6 rounded-2xl bg-[#000053] hover:bg-[#00003b] text-white font-bold text-sm transition-all shadow-md active:scale-95 text-center"
         >
           {isLastStep ? "Finish" : "Next"}

@@ -21,8 +21,18 @@ const WalkthroughWrapper = () => {
     }
   }, []);
 
+  const clearWalkthroughFlags = () => {
+    try {
+      localStorage.removeItem("show_welcome_walkthrough");
+      localStorage.removeItem("is_new_signup");
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const handleStartWalkthrough = () => {
     setShowWelcome(false);
+    clearWalkthroughFlags();
     // Short delay to let WelcomeModal unmount before starting Joyride tour
     setTimeout(() => {
       setRunTour(true);
@@ -35,16 +45,17 @@ const WalkthroughWrapper = () => {
     clearWalkthroughFlags();
   };
 
-  const clearWalkthroughFlags = () => {
-    localStorage.removeItem("show_welcome_walkthrough");
-    localStorage.removeItem("is_new_signup");
-  };
-
   const handleJoyrideCallback = (data) => {
-    const { status } = data;
+    const { status, type, action } = data;
 
     const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
-    if (finishedStatuses.includes(status)) {
+    if (
+      finishedStatuses.includes(status) ||
+      type === "tour:end" ||
+      action === "close" ||
+      action === "reset" ||
+      action === "stop"
+    ) {
       setRunTour(false);
       clearWalkthroughFlags();
     }

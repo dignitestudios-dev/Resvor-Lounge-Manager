@@ -18,21 +18,21 @@ const RequestDetails = ({ isOpen, onOpenChange, data, onReject, onAccept, loadin
 
           <DialogDescription>
             {data && (
-              <div className="mt-6 space-y-4">
+              <div className="mt-6 space-y-4 break-words break-all">
                 <div className="grid grid-cols-3 gap-4">
                   <div>
                     <div className=" text-gray-500">Date</div>
-                    <div className="font-semibold text-black">
+                    <div className="font-semibold text-black break-words break-all">
                       {utils.formatDateWithName(data.date)}
                     </div>
                   </div>
                   <div>
                     <div className=" text-gray-500">Time</div>
-                    <div className="font-semibold text-black">{data.time}</div>
+                    <div className="font-semibold text-black break-words break-all">{data.time}</div>
                   </div>
                   <div>
                     <div className=" text-gray-500">Role</div>
-                    <div className="font-semibold text-black">
+                    <div className="font-semibold text-black break-words break-all">
                       {data.role || "Bar Server"}
                     </div>
                   </div>
@@ -42,7 +42,7 @@ const RequestDetails = ({ isOpen, onOpenChange, data, onReject, onAccept, loadin
 
                 <div>
                   <div className=" text-gray-500">Event</div>
-                  <div className="font-semibold text-black">
+                  <div className="font-semibold text-black break-words break-all">
                     {data.event || "Corporate Networking Night"}
                   </div>
                 </div>
@@ -54,7 +54,7 @@ const RequestDetails = ({ isOpen, onOpenChange, data, onReject, onAccept, loadin
                     Any Instruction{" "}
                     <span className="text-gray-300">(optional)</span>
                   </div>
-                  <p className="mt-2  text-gray-600">
+                  <p className="mt-2 text-gray-600 break-words break-all">
                     {data.instruction ||
                       "Not Provided"}
                   </p>
@@ -64,14 +64,14 @@ const RequestDetails = ({ isOpen, onOpenChange, data, onReject, onAccept, loadin
 
                 <div>
                   <div className=" text-gray-500">Bartender</div>
-                  <div className="font-semibold text-black">
+                  <div className="font-semibold text-black break-words break-all">
                     {data.bartender?.name || "Christine Easom"}
                   </div>
                 </div>
 
                 <div>
                   <div className=" text-black mt-3">Reason for Time Off</div>
-                  <p className="mt-2 text-wrap break-words text-gray-600">
+                  <p className="mt-2 text-wrap break-words break-all text-gray-600">
 
                     {data.reason ||
                       "The standard Lorem Ipsum passage, m ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod. The standard."}
