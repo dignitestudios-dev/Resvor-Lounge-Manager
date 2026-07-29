@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useParams } from "next/navigation";
+import { IoLocation } from "react-icons/io5";
 import { useGetBookingDetail } from "@/lib/hooks/queries/useBookingDetail";
 import { useAppealDispute } from "@/lib/hooks/mutations/DisputeMutations";
 import { SuccessToast, ErrorToast } from "@/components/ui/toaster";
@@ -139,7 +140,7 @@ const BookingDetails = () => {
                   </div>
                 )}
                 <div className="flex items-center gap-2 text-gray-700">
-                  <span className="text-lg">📍</span>
+                  <IoLocation className="text-xl text-[#010067] mt-0.5 flex-shrink-0" />
                   <span>
                     {bookingData.loungeId?.location?.address ||
                       "Unknown Lounge"}
