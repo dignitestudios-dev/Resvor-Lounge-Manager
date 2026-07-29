@@ -217,7 +217,7 @@ const Table = () => {
             {!isLoading && sortedBartenders.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-                  No shift requests found.
+                  No Shift Requests Found.
                 </td>
               </tr>
             ) : (

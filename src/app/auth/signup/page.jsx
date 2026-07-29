@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { useQueryClient } from "@tanstack/react-query";
@@ -25,7 +25,7 @@ import { useAuthContext } from "@/lib/context/AuthProvider";
 import Completed from "@/components/onBoarding/Completed";
 import Cookies from "js-cookie";
 
-export default function SignUp() {
+function SignUpContent() {
   const router = useRouter();
 
   const queryClient = useQueryClient();
@@ -206,5 +206,19 @@ export default function SignUp() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignUp() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center h-screen w-screen">
+          <p className="text-white text-xl">Loading...</p>
+        </div>
+      }
+    >
+      <SignUpContent />
+    </Suspense>
   );
 }

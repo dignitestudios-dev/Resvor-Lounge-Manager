@@ -84,7 +84,7 @@ const Table = () => {
           </div>
         ) : !isLoading && bartenders.length === 0 ? (
           <div className="flex justify-center items-center py-20 text-gray-500">
-            No bartenders found.
+            No Bartenders Found.
           </div>
         ) : (
           <table className="w-full">

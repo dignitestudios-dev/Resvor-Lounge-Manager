@@ -30,7 +30,7 @@ const TransactionHistoryTable = ({
   transactions = [],
   isLoadingTx = false,
   totalPages = 1,
-  onPageChange = () => {},
+  onPageChange = () => { },
   currentPage = 1,
 }) => {
   return (
@@ -57,7 +57,7 @@ const TransactionHistoryTable = ({
               {transactions.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-12 text-center text-gray-400 text-sm">
-                    No transactions yet.
+                    No Transactions Yet.
                   </td>
                 </tr>
               ) : (
@@ -88,7 +88,7 @@ const TransactionHistoryTable = ({
         {/* Mobile cards */}
         <div className="space-y-4 md:hidden">
           {transactions.length === 0 ? (
-            <p className="text-center text-gray-400 text-sm py-8">No transactions yet.</p>
+            <p className="text-center text-gray-400 text-sm py-8">No Transactions Yet.</p>
           ) : (
             transactions.map((tx) => (
               <div

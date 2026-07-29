@@ -147,7 +147,7 @@ const Table = ({
             {sortedBookings?.length === 0 ? (
               <tr>
                 <td colSpan={8} className="text-center py-10 text-gray-500">
-                  No bookings found.
+                  No Bookings Found.
                 </td>
               </tr>
             ) : (

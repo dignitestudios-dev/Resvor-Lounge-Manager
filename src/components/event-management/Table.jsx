@@ -97,7 +97,7 @@ const Table = ({
             {displayedEvents?.length === 0 ? (
               <tr>
                 <td colSpan={10} className="text-center py-10 text-gray-500">
-                  No events found.
+                  No Events Found.
                 </td>
               </tr>
             ) : (

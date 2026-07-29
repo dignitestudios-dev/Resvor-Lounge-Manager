@@ -135,7 +135,7 @@ const BanksDetailContent = () => {
     >
       <DialogTrigger asChild>
         <button className="w-full border-b flex items-center justify-between p-6 cursor-pointer hover:bg-gray-50 text-left">
-          <p className="text-base font-medium text-gray-900">Banks Detail</p>
+          <p className="text-base font-medium text-gray-900">Bank Details</p>
           <IoIosArrowForward size={24} />
 
         </button>
@@ -146,7 +146,7 @@ const BanksDetailContent = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pr-6">
             <div>
               <DialogTitle className="text-2xl font-bold text-gray-900">
-                Banks Detail
+                Bank Details
               </DialogTitle>
               <DialogDescription className="mt-1 text-sm text-gray-600">
                 Manage your connected bank accounts and select your default account for payouts and withdrawals.

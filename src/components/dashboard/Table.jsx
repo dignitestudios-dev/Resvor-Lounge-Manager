@@ -67,10 +67,10 @@ const Table = ({ data = [], isLoading = false, pagination, onPageChange }) => {
           <thead className="sticky top-0 z-10">
             <tr className="bg-[#E8E8FF]">
               <th className="px-4 py-5 text-left text-nowrap">Order ID</th>
+              <th className="px-4 py-5 text-left text-nowrap">Created Date</th>
               <th className="px-4 py-5 text-left text-nowrap cursor-pointer select-none">
                 Customer Name
               </th>
-              <th className="px-4 py-5 text-left text-nowrap">Created Date</th>
               <th className="px-4 py-5 text-left text-nowrap">Booking Date</th>
               <th className="px-4 py-5 text-left text-nowrap">Amount</th>
               <th className="px-4 py-5 text-left text-nowrap">Status</th>
@@ -103,6 +103,11 @@ const Table = ({ data = [], isLoading = false, pagination, onPageChange }) => {
                   <td className="px-4 py-6 text-sm font-medium text-gray-800">
                     {order?.orderId}
                   </td>
+                  <td className="px-4 py-6 text-sm text-nowrap">
+                    {order?.createdAt
+                      ? utils.formatDateWithName(order?.createdAt)
+                      : "N/A"}
+                  </td>
                   <td className="px-4 py-6">
                     <div className="flex items-center gap-3">
                       <div
@@ -114,11 +119,7 @@ const Table = ({ data = [], isLoading = false, pagination, onPageChange }) => {
                       <span className="font-semibold text-gray-900">{order?.customerName}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-6 text-sm text-nowrap">
-                    {order?.createdAt
-                      ? utils.formatDateWithName(order?.createdAt)
-                      : "N/A"}
-                  </td>
+
                   <td className="px-4 py-6 text-sm text-nowrap">
                     {order?.bookingDate
                       ? utils.formatDateWithName(order?.bookingDate)

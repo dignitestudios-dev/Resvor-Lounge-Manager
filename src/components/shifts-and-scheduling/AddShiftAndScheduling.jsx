@@ -645,7 +645,7 @@ const AddShiftAndScheduling = ({
                             );
                           })
                         ) : (
-                          <p className="text-sm text-gray-500 text-center py-2">No Bartenders found</p>
+                          <p className="text-sm text-gray-500 text-center py-2">No Bartenders Found</p>
                         )}
                       </div>
                     </PopoverContent>

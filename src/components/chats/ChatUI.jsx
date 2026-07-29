@@ -698,7 +698,7 @@ export default function ChatUI() {
                 filteredBartenderChats.length === 0 &&
                 filteredBartendersWithoutChat.length === 0 && (
                   <div className="flex flex-col items-center justify-center h-32 text-gray-400 px-6 text-center">
-                    <p className="text-sm">No bartenders found</p>
+                    <p className="text-sm">No Bartenders Conversations Yet.</p>
                   </div>
                 )}
             </>
