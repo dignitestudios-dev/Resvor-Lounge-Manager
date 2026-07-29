@@ -23,6 +23,7 @@ const Table = ({
 
   // Transform API data to match table structure
   const transformBookingData = (apiBookings) => {
+    console.log("🚀 ~ transformBookingData ~ apiBookings:", apiBookings)
     return apiBookings.map((booking) => {
       const startTime = new Date(booking.startTime);
       const endTime = new Date(booking.endTime);
@@ -138,7 +139,7 @@ const Table = ({
               <th className="px-4 py-5 text-left text-nowrap">Date</th>
               <th className="px-4 py-5 text-left text-nowrap">Time</th>
               <th className="px-4 py-5 text-left text-nowrap">Status</th>
-              <th className="px-4 py-5 text-left text-nowrap">Ticket Door</th>
+              {/* <th className="px-4 py-5 text-left text-nowrap">Ticket Door</th> */}
               <th className="px-4 py-5 text-center text-nowrap">Action</th>
             </tr>
           </thead>
@@ -184,9 +185,9 @@ const Table = ({
                       {utils.capitalize(booking?.status?.replaceAll("_", " "))}
                     </span>
                   </td>
-                  <td className="px-4 py-6">
+                  {/* <td className="px-4 py-6">
                     {utils.formatNumber(booking?.ticketDoor)}
-                  </td>
+                  </td> */}
                   <td className="px-4 py-6 text-nowrap">
                     <div className="flex justify-center items-center cursor-pointer">
                       <IoIosArrowForward size={24} />

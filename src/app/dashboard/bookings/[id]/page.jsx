@@ -51,7 +51,7 @@ const BookingDetails = () => {
         onError: (err) => {
           ErrorToast(
             err?.response?.data?.message ||
-              "Failed to submit dispute appeal. Please try again.",
+            "Failed to submit dispute appeal. Please try again.",
           );
         },
       },
@@ -64,7 +64,15 @@ const BookingDetails = () => {
   const bookingDate = utils.formatDateWithName(bookingData.bookingDate);
   const startTimeFormatted = utils.formatTime12(startTime);
   const endTimeFormatted = utils.formatTime12(endTime);
-  const tableInfo = bookingData.tableIds?.[0] || {};
+
+  const tables = Array.isArray(bookingData.tableIds) ? bookingData.tableIds : [];
+  const vipTables = tables.filter(
+    (item) => typeof item === "object" && item?.type?.toLowerCase() === "vip",
+  );
+  const regularTables = tables.filter(
+    (item) => !(typeof item === "object" && item?.type?.toLowerCase() === "vip"),
+  );
+
   const userName =
     `${bookingData.userId?.firstName || ""} ${bookingData.userId?.lastName || ""}`.trim() ||
     "Unknown";
@@ -140,7 +148,7 @@ const BookingDetails = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-5 gap-6 py-5">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-6 py-5">
               <div>
                 <p className="text-gray-600 text-sm font-semibold mb-2">
                   Booking Date
@@ -169,50 +177,57 @@ const BookingDetails = () => {
               </div>
               <div>
                 <p className="text-gray-600 text-sm font-semibold mb-2">
-                  Table
+                  Amount Paid
                 </p>
                 <p className="text-black font-semibold">
-                  {tableInfo.code || "N/A"}
+                  {formatCentsToUSD(
+                    Number(bookingData.amountPaid || 0).toFixed(2),
+                  )}
                 </p>
               </div>
+
             </div>
 
             <div className="border-t pt-6 mb-8">
-              <div className="grid grid-cols-2 gap-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
                 <div>
-                  <p className="text-gray-600 text-sm font-semibold mb-2">
+                  <p className="text-gray-600 text-sm font-semibold mb-3">
                     Table Details
                   </p>
-                  <p className="text-black font-semibold">
-                    Type: {tableInfo.type || "N/A"}
-                  </p>
-                  <p className="text-black font-semibold">
-                    Capacity: {tableInfo.capacity || "N/A"}
-                  </p>
+                  {tables.length > 0 ? (
+                    <div className="flex items-center gap-3">
+                      {vipTables.length > 0 && (
+                        <div>
+                          <span className="text-xs font-bold text-amber-800 bg-amber-100 inline-block px-2.5 py-0.5 rounded-md uppercase tracking-wide mb-1">
+                            VIP Tables ({vipTables.length})
+                          </span>
+                          <p className="text-black font-semibold text-sm leading-relaxed break-words">
+                            {vipTables
+                              .map((t) => (typeof t === "object" ? t.code : t))
+                              .filter(Boolean)
+                              .join(", ")}
+                          </p>
+                        </div>
+                      )}
+                      {regularTables.length > 0 && (
+                        <div>
+                          <span className="text-xs font-bold text-blue-800 bg-blue-100 inline-block px-2.5 py-0.5 rounded-md uppercase tracking-wide mb-1">
+                            Regular Tables ({regularTables.length})
+                          </span>
+                          <p className="text-black font-semibold text-sm leading-relaxed break-words">
+                            {regularTables
+                              .map((t) => (typeof t === "object" ? t.code : t))
+                              .filter(Boolean)
+                              .join(", ")}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-black font-semibold">N/A</p>
+                  )}
                 </div>
-                <div className="border-l pl-12">
-                  <p className="text-gray-600 text-sm font-semibold mb-2">
-                    Amount Paid
-                  </p>
-                  <p className="text-black font-semibold">
-                    {formatCentsToUSD(
-                      Number(bookingData.amountPaid || 0).toFixed(2),
-                    )}
-                    {/* $
-                    {formatCentsToUSD()(
-                      Number(bookingData.amountPaid || 0).toFixed(2),
-                    )} */}
-                  </p>
-                  {/* <p className="text-gray-600 text-sm font-semibold mb-2">
-                    Payment Status
-                  </p>
-                  <p className="text-black font-semibold">
-                    {utils.capitalize(bookingData.paymentStatus || "N/A")}
-                  </p>
-                  <p className="text-gray-600 text-sm font-semibold">
-                    Amount Paid: ${Number(bookingData.amountPaid || 0).toFixed(2)}
-                  </p> */}
-                </div>
+
               </div>
             </div>
 
@@ -221,17 +236,16 @@ const BookingDetails = () => {
                 Services & Packages
               </p>
               {bookingData.servicePackageIds &&
-              bookingData.servicePackageIds.length > 0 ? (
+                bookingData.servicePackageIds.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
                   {bookingData.servicePackageIds.map((item, index) => (
                     <div
                       key={item._id}
-                      className={`flex flex-col ${
-                        index % 2 !== 0 ? "md:border-l md:pl-12" : ""
-                      }`}
+                      className={`flex flex-col ${index % 2 !== 0 ? "md:border-l md:pl-12" : ""
+                        }`}
                     >
-                      <div className="flex items-start gap-4 mb-2">
-                        <span className="font-semibold text-gray-800 text-sm">
+                      <div className="flex items-start gap-4 mb-2 flex-wrap">
+                        <span className="font-semibold text-gray-800 text-sm break-words break-all">
                           {item.name}
                         </span>
                         <span className="text-gray-700">
@@ -241,7 +255,7 @@ const BookingDetails = () => {
                         </span>
                       </div>
                       {item.description && (
-                        <p className="text-gray-500 text-xs leading-relaxed">
+                        <p className="text-gray-500 text-xs leading-relaxed break-words break-all">
                           {item.description}
                         </p>
                       )}
@@ -260,7 +274,7 @@ const BookingDetails = () => {
                 Any Special Requests{" "}
                 <span className="text-gray-400 font-normal">(Optional)</span>
               </p>
-              <p className="text-gray-700 leading-relaxed text-sm">
+              <p className="text-gray-700 leading-relaxed text-sm break-words break-all">
                 {bookingData.specialRequest || "No special requests provided"}
               </p>
             </div>
@@ -272,7 +286,7 @@ const BookingDetails = () => {
             <div className="grid grid-cols-3 gap-12">
               <div>
                 <p className="text-gray-600 text-sm font-semibold mb-2">Name</p>
-                <p className="text-black font-semibold">
+                <p className="text-black font-semibold break-words break-all">
                   {bookingData?.guestName || userName}
                 </p>
               </div>
@@ -280,7 +294,7 @@ const BookingDetails = () => {
                 <p className="text-gray-600 text-sm font-semibold mb-2">
                   Email Address
                 </p>
-                <p className="text-black font-semibold">
+                <p className="text-black font-semibold break-words break-all">
                   {bookingData?.guestEmail ||
                     bookingData?.userId?.email ||
                     "N/A"}
@@ -290,7 +304,7 @@ const BookingDetails = () => {
                 <p className="text-gray-600 text-sm font-semibold mb-2">
                   Phone Number
                 </p>
-                <p className="text-black font-semibold">
+                <p className="text-black font-semibold break-words break-all">
                   {bookingData?.guestPhone ||
                     bookingData?.userId?.phone ||
                     "N/A"}

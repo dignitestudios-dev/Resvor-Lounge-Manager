@@ -57,7 +57,7 @@ const StripeCardForm = ({ onSubmitCard, isValidatingCard }) => {
     <form onSubmit={handleSubmit}>
       <div className="flex flex-col gap-5 w-full pt-2 px-16">
         <div className="pt-2 space-y-2 text-center">
-          <h2 className="text-[36px] font-semibold capitalize">
+          <h2 className="text-[36px] font-semibold capitalize text-black">
             Card Details
           </h2>
           <p className="text-[#565656] text-[16px]">
@@ -75,7 +75,7 @@ const StripeCardForm = ({ onSubmitCard, isValidatingCard }) => {
             placeholder="Enter cardholder name"
             value={cardName}
             onChange={(e) => setCardName(e.target.value)}
-            className="w-full px-4 py-2.5 text-sm rounded-[12px] bg-transparent ring-1 ring-[#BEBEBE] focus:ring-2 focus:ring-gray-200 focus:outline-none placeholder:text-[#737373] placeholder:font-light"
+            className="w-full px-4 py-2.5 text-sm rounded-[12px] bg-transparent ring-1 ring-[#BEBEBE] focus:ring-2 focus:ring-gray-200 focus:outline-none placeholder:text-[#737373] placeholder:font-light text-black"
             disabled={isValidatingCard}
             required
           />
@@ -267,7 +267,7 @@ const TopUpModalContent = ({ onClose }) => {
                     placeholder="5.00"
                     value={amountDollars}
                     onChange={(e) => setAmountDollars(e.target.value)}
-                    className="w-full pl-8 pr-4 py-2.5 text-sm rounded-[12px] bg-transparent ring-1 ring-[#BEBEBE] focus:ring-2 focus:ring-gray-200 focus:outline-none placeholder:text-[#737373] placeholder:font-light"
+                    className="w-full pl-8 pr-4 py-2.5 text-sm rounded-[12px] bg-transparent ring-1 ring-[#BEBEBE] focus:ring-2 focus:ring-gray-200 focus:outline-none placeholder:text-[#737373] placeholder:font-light text-black"
                     disabled={isLoading}
                     required
                   />
@@ -342,7 +342,7 @@ const WithdrawalModalContent = ({ onClose }) => {
     isLoading: isLoadingStatus,
     refetch,
   } = useGetConnectStatus();
-  console.log("🚀 ~ WithdrawalModalContent ~ statusResponse:", statusResponse)
+
 
   const statusData = statusResponse?.data || statusResponse || {};
   const status = statusData?.status || "not_created";
@@ -367,8 +367,8 @@ const WithdrawalModalContent = ({ onClose }) => {
   const handleWithdraw = async (e) => {
     e?.preventDefault();
     const dollars = parseFloat(withdrawalAmount);
-    if (!withdrawalAmount || isNaN(dollars) || dollars <= 0) {
-      ErrorToast("Please enter a valid withdrawal amount.");
+    if (!withdrawalAmount || isNaN(dollars) || dollars < 10) {
+      ErrorToast("Minimum withdrawal amount is $10.00.");
       return;
     }
 
@@ -543,20 +543,30 @@ const WithdrawalModalContent = ({ onClose }) => {
               {/* ACTIVE STATUS */}
               {(status === "active" || (chargesEnabled && payoutsEnabled)) && (
                 <form onSubmit={handleWithdraw} className="space-y-4">
-                  <InputField
-                    label="Withdrawal Amount"
-                    type="number"
-                    placeholder="Enter withdrawal amount"
-                    maxLength={5}
-                    value={withdrawalAmount}
-                    onChange={(e) => setWithdrawalAmount(e.target.value)}
-                    disabled={isWithdrawing}
-                    required
-                  />
+                  <div>
+                    <InputField
+                      label="Withdrawal Amount ($ USD)"
+                      type="number"
+                      min={10}
+                      placeholder="Enter withdrawal amount (min $10)"
+                      value={withdrawalAmount}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === "" || (Number(val) >= 0 && !val.includes("-"))) {
+                          setWithdrawalAmount(val);
+                        }
+                      }}
+                      disabled={isWithdrawing}
+                      required
+                    />
+                    <p className="text-[11px] text-[#737373] font-light mt-1">
+                      Minimum withdrawal amount is $10.00
+                    </p>
+                  </div>
 
                   <Button
                     type="submit"
-                    disabled={isWithdrawing || !withdrawalAmount}
+                    disabled={isWithdrawing || !withdrawalAmount || parseFloat(withdrawalAmount) < 10}
                     className="w-full bg-gradient-to-r from-[#012C57] to-[#061523] text-white text-sm font-bold py-3.5 px-4 rounded-xl hover:opacity-95 transition disabled:opacity-60 flex justify-center items-center gap-2 shadow-md"
                   >
                     {isWithdrawing ? (

@@ -152,11 +152,11 @@ const EventDetails = () => {
               <div className="flex-1">
                 <div className="flex justify-between">
                   <div>
-                    <h3 className="text-xl font-bold mb-2">
+                    <h3 className="text-xl font-bold mb-2 break-words break-all">
                       {eventData?.title}
                     </h3>
                     {eventData?.loungeId?.tags?.length > 0 && (
-                      <div className="flex gap-2 mb-4">
+                      <div className="flex gap-2 mb-4 flex-wrap">
                         {eventData?.loungeId?.tags.map((tag, index) => (
                           <span
                             key={index}
@@ -169,19 +169,19 @@ const EventDetails = () => {
                     )}
                     <div className="flex items-center gap-2 text-gray-700">
                       <span className="text-lg">📍</span>
-                      <span>{eventData?.loungeId?.location?.address}</span>
+                      <span className="break-words break-all">{eventData?.loungeId?.location?.address}</span>
                     </div>
                   </div>
                   <div>
                     {eventData?.status && (
                       <span
                         className={`px-4 py-2 rounded-full text-sm font-semibold ${eventData.status === "pending"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : eventData.status === "accepted"
-                              ? "bg-green-100 text-green-800"
-                              : eventData.status === "rejected"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-gray-100 text-gray-800"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : eventData.status === "accepted"
+                            ? "bg-green-100 text-green-800"
+                            : eventData.status === "rejected"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-gray-100 text-gray-800"
                           }`}
                       >
                         {eventData.status.charAt(0).toUpperCase() +
@@ -196,7 +196,7 @@ const EventDetails = () => {
             <div className="grid grid-cols-5 gap-6 py-5">
               <div>
                 <p className="text-black font-semibold mb-2">Event Type</p>
-                <p className="text-gray-600 text-sm font-semibold">
+                <p className="text-gray-600 text-sm font-semibold break-words break-all">
                   {capitalize(eventData.eventType) || "N/A"}
                 </p>
               </div>
@@ -251,13 +251,13 @@ const EventDetails = () => {
               </div>
               <div>
                 <p className="text-black font-semibold mb-2">Preferred Music</p>
-                <p className="text-gray-600 text-sm font-semibold">
+                <p className="text-gray-600 text-sm font-semibold break-words break-all">
                   {eventData.preferredMusic || "N/A"}
                 </p>
               </div>
               <div>
                 <p className="text-black font-semibold mb-2">Special Request</p>
-                <p className="text-gray-600 text-sm font-semibold">
+                <p className="text-gray-600 text-sm font-semibold break-words break-all">
                   {eventData.specialRequest || "None"}
                 </p>
               </div>
@@ -274,14 +274,14 @@ const EventDetails = () => {
               <p className="text-black font-semibold mb-2">
                 Services and Packages
               </p>
-              <div className="flex gap-12">
+              <div className="flex gap-12 flex-wrap">
                 {eventData?.servicePackageIds?.length > 0 ? (
                   eventData?.servicePackageIds?.map((service, index) => (
-                    <div key={index}>
-                      <p className="text-gray-600 text-sm font-semibold">
+                    <div key={index} className="max-w-md">
+                      <p className="text-gray-600 text-sm font-semibold break-words break-all">
                         {service.name}
                       </p>
-                      <p className="text-gray-600 text-sm font-semibold">
+                      <p className="text-gray-600 text-sm font-semibold break-words break-all">
                         {service.description}
                       </p>
                     </div>
@@ -291,15 +291,6 @@ const EventDetails = () => {
                     No services selected
                   </p>
                 )}
-
-                {/* <div className="border-l pl-12">
-                  <p className="text-black font-semibold mb-2">
-                    Preferred Seating Area
-                  </p>
-                  <p className="text-gray-600 text-sm font-semibold">
-                    Outdoor Terrace/ Rooftop
-                  </p>
-                </div> */}
               </div>
             </div>
 
@@ -308,7 +299,7 @@ const EventDetails = () => {
                 Any Instructions{" "}
                 <span className="text-gray-400 font-normal">(Optional)</span>
               </p>
-              <p className="text-gray-700 leading-relaxed text-sm">
+              <p className="text-gray-700 leading-relaxed text-sm break-words break-all">
                 {eventData.description || "No instructions provided"}
               </p>
             </div>
@@ -320,19 +311,19 @@ const EventDetails = () => {
             <div className="grid grid-cols-3 gap-12">
               <div>
                 <p className="text-black font-semibold mb-2">Name</p>
-                <p className="text-gray-600 text-sm font-semibold">
+                <p className="text-gray-600 text-sm font-semibold break-words break-all">
                   {eventData.userId?.firstName || eventData?.guestName || "N/A"}
                 </p>
               </div>
               <div>
                 <p className="text-black font-semibold mb-2">Email Address</p>
-                <p className="text-gray-600 text-sm font-semibold">
+                <p className="text-gray-600 text-sm font-semibold break-words break-all">
                   {eventData.userId?.email || eventData?.guestEmail || "N/A"}
                 </p>
               </div>
               <div>
                 <p className="text-black font-semibold mb-2">Phone Number</p>
-                <p className="text-gray-600 text-sm font-semibold">
+                <p className="text-gray-600 text-sm font-semibold break-words break-all">
                   {eventData.userId?.phone || eventData?.guestPhone || "N/A"}
                 </p>
               </div>

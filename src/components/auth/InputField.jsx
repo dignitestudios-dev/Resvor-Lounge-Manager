@@ -16,6 +16,7 @@ export default function InputField({
   touched,
   name,
   maxLength,
+  min,
   disabled,
   required = false,
 }) {
@@ -32,6 +33,7 @@ export default function InputField({
           type={showToggle ? (showPassword ? "text" : "password") : type}
           value={value}
           name={name}
+          min={min}
           onChange={(e) => {
             if (maxLength && e.target.value.length > maxLength) {
               e.target.value = e.target.value.slice(0, maxLength);
