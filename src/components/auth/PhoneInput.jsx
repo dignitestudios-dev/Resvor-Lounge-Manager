@@ -26,9 +26,8 @@ const PhoneInput = ({
       {/* Label */}
       <label
         htmlFor={id}
-        className={`block text-[14px] font-[500] mb-2 ${
-          isDark ? "text-white" : "text-gray-700"
-        }`}
+        className={`block text-[14px] font-[500] mb-2 ${isDark ? "text-white" : "text-gray-700"
+          }`}
       >
         {label}
       </label>
@@ -36,24 +35,25 @@ const PhoneInput = ({
       {/* Wrapper */}
       <div
         className={`
-          flex items-center w-full px-4 py-3 rounded-[15px]
+          flex items-center w-full  rounded-[15px]
           transition-all duration-200
-          ${
-            isDark
-              ? `
+          ${isDark
+            ? `
                 bg-white/10
                 backdrop-blur-[28px]
                 border border-white/20
                 text-white
                 focus-within:border-white/40
                 focus-within:ring-2 focus-within:ring-white/20
+                px-4 py-3
               `
-              : `
+            : `
                 bg-white
                 border border-gray-300
                 text-gray-800
                 focus-within:ring-2 focus-within:ring-blue-200
                 focus-within:border-blue-500
+                px-2 py-2
               `
           }
         `}
@@ -67,18 +67,16 @@ const PhoneInput = ({
 
         {/* Country Code */}
         <span
-          className={`text-[13px] font-[500] w-[40px] text-center ${
-            isDark ? "text-gray-200" : "text-gray-700"
-          }`}
+          className={`text-[13px] font-[500] w-[40px] text-center ${isDark ? "text-gray-200" : "text-gray-700"
+            }`}
         >
           +1
         </span>
 
         {/* Divider */}
         <div
-          className={`border-l h-6 mx-2 ${
-            isDark ? "border-white/20" : "border-gray-300"
-          }`}
+          className={`border-l  mx-2 ${isDark ? "border-white/20 h-6" : "border-gray-300"
+            }`}
         />
 
         {/* Input */}
@@ -99,13 +97,12 @@ const PhoneInput = ({
             focus:outline-none
             placeholder:text-[12px] placeholder:font-light
             disabled:opacity-50 disabled:cursor-not-allowed
-            ${
-              isDark
-                ? `
+            ${isDark
+              ? `
                   text-white
                   placeholder:text-gray-300
                 `
-                : `
+              : `
                   text-gray-800
                   placeholder:text-gray-400
                 `

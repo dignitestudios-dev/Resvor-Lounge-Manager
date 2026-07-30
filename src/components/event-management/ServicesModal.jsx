@@ -126,7 +126,7 @@ const ServicesModal = ({
           <button
             onClick={handleDateData}
             type="button"
-            className="bg-gradient-to-l from-[#012C57] to-[#061523] text-white text-[13px] px-6 py-3 rounded-[12px] w-[350px] font-semibold hover:opacity-95 transition cursor-pointer"
+            className="bg-gradient text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-[12px] w-[350px]  hover:opacity-95 transition cursor-pointer"
           >
             Continue
           </button>

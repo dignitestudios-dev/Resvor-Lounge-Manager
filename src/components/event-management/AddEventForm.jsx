@@ -289,7 +289,7 @@ const AddEventForm = ({ onClose, onNext, initialData }) => {
               touched={formik.touched.guestEmail}
             />
           </div>
-          <div className="w-full flex items-center gap-2 my-2 px-1">
+          <div className="grid grid-cols-2 gap-2 my-2 px-1">
             <PhoneInput
               variant="light"
               label="Phone Number"
@@ -344,22 +344,23 @@ const AddEventForm = ({ onClose, onNext, initialData }) => {
               onBlur={formik.handleBlur}
             />
           </div>
-          <div className="w-full flex items-center gap-2 my-2 px-1">
+          <div className="grid grid-cols-2 gap-2 my-2 px-1">
             <InputField
-              label="Budget"
+              label="Budget ($)"
               text="budget"
-              placeholder="Add here"
+              placeholder="0.00"
               type="text"
               id="budget"
               name="budget"
               maxLength={5}
+              prefix="$"
               value={formik.values.budget}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               error={formik.errors.budget}
               touched={formik.touched.budget}
             />
-            <div className="w-[70%]">
+            <div className="w-full">
               <SelectField
                 label="Ticket at Door"
                 name="ticketAtDoor"
@@ -376,7 +377,7 @@ const AddEventForm = ({ onClose, onNext, initialData }) => {
               />
             </div>
           </div>
-          <div className="w-full flex items-center gap-2 my-2 px-1">
+          <div className=" gap-2 my-2 px-1">
             <InputField
               label="Instructions (optional)"
               text="instructions"

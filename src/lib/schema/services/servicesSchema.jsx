@@ -70,7 +70,7 @@ const descriptionValidation = Yup.string()
 const priceValidation = Yup.number()
   .typeError("Price must be a valid number")
   .positive("Price must be greater than 0")
-  .max(1000, "Price cannot exceed 1000");
+  .max(99999.99, "Price cannot exceed 99,999.99");
 
 export const serviceSchema = (isEdit = false) =>
   Yup.object({
