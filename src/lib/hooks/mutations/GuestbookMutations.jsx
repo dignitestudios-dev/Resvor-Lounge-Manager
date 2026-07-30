@@ -43,3 +43,32 @@ export const useDeleteGuest = () => {
     mutationFn: deleteGuest,
   });
 };
+
+// Import CSV guestbook
+const importGuestbook = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await axiosInstance.post("/guestbook/import", formData);
+  return response.data;
+};
+
+export const useImportGuestbook = () => {
+  return useMutation({
+    mutationFn: importGuestbook,
+  });
+};
+
+// Export CSV guestbook
+const exportGuestbook = async () => {
+  const response = await axiosInstance.get("/guestbook/export", {
+    responseType: "blob",
+  });
+  return response.data;
+};
+
+export const useExportGuestbook = () => {
+  return useMutation({
+    mutationFn: exportGuestbook,
+  });
+};
+
