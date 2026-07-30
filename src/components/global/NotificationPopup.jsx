@@ -38,7 +38,7 @@ const NotificationPopup = () => {
     const resource = item?.metadata?.resource || item?.resource;
 
     if (resourceType === "TimeOffRequest") {
-      router.push("/dashboard/requests");
+      router.push("/dashboard/bartenders-requests");
     } else if (resourceType === "Shift") {
       router.push("/dashboard/shift");
     } else if (resourceType === "Booking" && resource) {

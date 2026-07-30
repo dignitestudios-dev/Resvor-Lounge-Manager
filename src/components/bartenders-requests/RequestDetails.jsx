@@ -10,6 +10,7 @@ import { Button } from "../ui/button";
 import utils from "@/lib/utils";
 
 const RequestDetails = ({ isOpen, onOpenChange, data, onReject, onAccept, loading }) => {
+  console.log("🚀 ~ RequestDetails ~ data:", data)
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="min-w-xl! w-xl!">
@@ -19,31 +20,91 @@ const RequestDetails = ({ isOpen, onOpenChange, data, onReject, onAccept, loadin
           <DialogDescription>
             {data && (
               <div className="mt-6 space-y-4 break-words break-all">
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <div className=" text-gray-500">Date</div>
-                    <div className="font-semibold text-black break-words break-all">
-                      {utils.formatDateWithName(data.date)}
+                {data.isShiftSwap ? (
+                  <>
+                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-3">
+                      <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        Original Shift (Swapping Out)
+                      </div>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div>
+                          <div className="text-gray-500 text-xs">Date</div>
+                          <div className="font-semibold text-black text-sm break-words break-all">
+                            {data.requestorShift?.startDateTime
+                              ? utils.formatDateWithName(data.requestorShift.startDateTime)
+                              : utils.formatDateWithName(data.date)}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-500 text-xs">Time</div>
+                          <div className="font-semibold text-black text-sm break-words break-all">
+                            {data.requestorShiftTime || "-"}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-500 text-xs">Role</div>
+                          <div className="font-semibold text-black text-sm break-words break-all">
+                            {data.requestorShift?.role || data.role || "-"}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-blue-50/60 p-4 rounded-xl border border-blue-100 space-y-3">
+                      <div className="text-xs font-bold text-blue-700 uppercase tracking-wider">
+                        Swap With Shift (Target)
+                      </div>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div>
+                          <div className="text-gray-500 text-xs">Date</div>
+                          <div className="font-semibold text-black text-sm break-words break-all">
+                            {data.targetShift?.startDateTime
+                              ? utils.formatDateWithName(data.targetShift.startDateTime)
+                              : "-"}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-500 text-xs">Time</div>
+                          <div className="font-semibold text-black text-sm break-words break-all">
+                            {data.targetShiftTime || "-"}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-500 text-xs">Role</div>
+                          <div className="font-semibold text-black text-sm break-words break-all">
+                            {data.targetShift?.role || "-"}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <div className=" text-gray-500">Date</div>
+                      <div className="font-semibold text-black break-words break-all">
+                        {utils.formatDateWithName(data.date)}
+                      </div>
+                    </div>
+                    <div>
+                      <div className=" text-gray-500">Time</div>
+                      <div className="font-semibold text-black break-words break-all">{data.time}</div>
+                    </div>
+                    <div>
+                      <div className=" text-gray-500">Role</div>
+                      <div className="font-semibold text-black break-words break-all">
+                        {data.role || "Bar Server"}
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <div className=" text-gray-500">Time</div>
-                    <div className="font-semibold text-black break-words break-all">{data.time}</div>
-                  </div>
-                  <div>
-                    <div className=" text-gray-500">Role</div>
-                    <div className="font-semibold text-black break-words break-all">
-                      {data.role || "Bar Server"}
-                    </div>
-                  </div>
-                </div>
+                )}
 
                 <hr />
 
                 <div>
                   <div className=" text-gray-500">Event</div>
                   <div className="font-semibold text-black break-words break-all">
-                    {data.event || "Corporate Networking Night"}
+                    {data.event}
                   </div>
                 </div>
 
@@ -70,11 +131,12 @@ const RequestDetails = ({ isOpen, onOpenChange, data, onReject, onAccept, loadin
                 </div>
 
                 <div>
-                  <div className=" text-black mt-3">Reason for Time Off</div>
+                  <div className=" text-black mt-3">
+                    {data.isShiftSwap ? "Reason for Shift Swap" : "Reason for Time Off"}
+                  </div>
                   <p className="mt-2 text-wrap break-words break-all text-gray-600">
-
                     {data.reason ||
-                      "The standard Lorem Ipsum passage, m ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod. The standard."}
+                      "No reason provided"}
                   </p>
                 </div>
 

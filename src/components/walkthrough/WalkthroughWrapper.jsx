@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Joyride, STATUS } from "react-joyride";
 import WelcomeModal from "./WelcomeModal";
 import CustomTooltip from "./CustomTooltip";
@@ -9,9 +10,14 @@ import { walkthroughSteps } from "./walkthroughSteps";
 const WalkthroughWrapper = () => {
   const [showWelcome, setShowWelcome] = useState(false);
   const [runTour, setRunTour] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
-    // Check if new user signup / onboarding flag is set
+    // Only check and show walkthrough on dashboard pages
+    if (!pathname?.startsWith("/dashboard")) {
+      return;
+    }
+
     const shouldShow =
       localStorage.getItem("show_welcome_walkthrough") === "true" ||
       localStorage.getItem("is_new_signup") === "true";
@@ -19,7 +25,7 @@ const WalkthroughWrapper = () => {
     if (shouldShow) {
       setShowWelcome(true);
     }
-  }, []);
+  }, [pathname]);
 
   const clearWalkthroughFlags = () => {
     try {

@@ -155,16 +155,31 @@ const EditServiceModal = ({
     if (isDark) {
       return `
         bg-white/10
+        backdrop-blur-[28px]
         text-white
-        border ${hasError ? "border-red-500 focus:border-red-500 focus-within:border-red-500" : "border-white/20 focus:border-white/40 focus-within:border-white/40"}
+        text-sm
+        rounded-[15px]
+        border ${hasError
+          ? "border-red-500 focus:border-red-500 focus-within:border-red-500"
+          : "border-white/20 focus:border-white/40 focus-within:border-white/40 focus:ring-2 focus:ring-white/20 focus-within:ring-2 focus-within:ring-white/20"
+        }
         placeholder:text-gray-300
+        placeholder:text-[12px]
+        placeholder:font-light
       `;
     } else {
       return `
         bg-white
         text-gray-800
-        border ${hasError ? "border-red-500 focus:border-red-500 focus-within:border-red-500" : "border-gray-300 focus:border-[#012C57] focus-within:border-[#012C57]"}
+        text-sm
+        rounded-[15px]
+        border ${hasError
+          ? "border-red-500 focus:border-red-500 focus-within:border-red-500"
+          : "border-gray-300 focus:border-[#012C57] focus-within:border-[#012C57]"
+        }
         placeholder:text-gray-400
+        placeholder:text-[12px]
+        placeholder:font-light
       `;
     }
   };
@@ -199,7 +214,7 @@ const EditServiceModal = ({
         {/* Service Name */}
         <div className="mb-4">
           <label
-            className={`block text-[13px] font-semibold mb-1.5 ${isDark ? "text-white" : "text-gray-800"
+            className={`block text-[14px] font-[500] mb-2 ${isDark ? "text-white" : "text-gray-800"
               }`}
           >
             Service Name
@@ -216,7 +231,7 @@ const EditServiceModal = ({
               }
             }}
             placeholder="Food and Drink Package"
-            className={`w-full rounded-xl px-4 py-2.5 text-[13px] outline-none transition-all ${getInputStyles(
+            className={`w-full px-4 py-3 outline-none transition-all duration-200 ${getInputStyles(
               errors.serviceName
             )}`}
           />
@@ -228,38 +243,40 @@ const EditServiceModal = ({
         {/* Price */}
         <div className="mb-4">
           <label
-            className={`block text-[13px] font-semibold mb-1.5 ${isDark ? "text-white" : "text-gray-800"
+            className={`block text-[14px] font-[500] mb-2 ${isDark ? "text-white" : "text-gray-800"
               }`}
           >
             Price
           </label>
 
           <div
-            className={`flex items-center rounded-xl px-4 py-2.5 transition-all ${getInputStyles(
+            className={`flex items-center px-4 py-3 transition-all duration-200 ${getInputStyles(
               errors.price
             )}`}
           >
             <span
-              className={`text-[13px] mr-1 ${isDark ? "text-gray-300" : "text-gray-500"
+              className={`text-sm mr-1 ${isDark ? "text-gray-300" : "text-gray-500"
                 }`}
             >
               $
             </span>
 
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
               value={price}
               onChange={(e) => {
-                setPrice(e.target.value);
+                const val = e.target.value.replace(/\D/g, "").slice(0, 5);
+                setPrice(val);
                 if (errors.price) {
                   setErrors((prev) => ({ ...prev, price: "" }));
                 }
               }}
               placeholder="0"
               maxLength={5}
-              className={`flex-1 text-[13px] outline-none bg-transparent ${isDark
-                ? "text-white placeholder:text-gray-300"
-                : "text-gray-800 placeholder:text-gray-400"
+              className={`flex-1 text-sm outline-none bg-transparent ${isDark
+                ? "text-white placeholder:text-gray-300 placeholder:text-[12px] placeholder:font-light"
+                : "text-gray-800 placeholder:text-gray-400 placeholder:text-[12px] placeholder:font-light"
                 }`}
             />
           </div>
@@ -271,7 +288,7 @@ const EditServiceModal = ({
         {/* Description */}
         <div className="mb-4">
           <label
-            className={`block text-[13px] font-semibold mb-1.5 ${isDark ? "text-white" : "text-gray-800"
+            className={`block text-[14px] font-[500] mb-2 ${isDark ? "text-white" : "text-gray-800"
               }`}
           >
             Description
@@ -283,7 +300,7 @@ const EditServiceModal = ({
             placeholder="Describe your service"
             maxLength={250}
             rows={4}
-            className={`w-full rounded-xl px-4 py-2.5 text-[13px] outline-none resize-none transition-all ${getInputStyles(
+            className={`w-full px-4 py-3 outline-none resize-none transition-all duration-200 ${getInputStyles(
               false
             )}`}
           />
@@ -292,7 +309,7 @@ const EditServiceModal = ({
         {/* Images */}
         <div className="mb-6">
           <label
-            className={`block text-[13px] font-semibold mb-1.5 ${isDark ? "text-white" : "text-gray-800"
+            className={`block text-[14px] font-[500] mb-2 ${isDark ? "text-white" : "text-gray-800"
               }`}
           >
             Service Images{" "}
@@ -342,8 +359,8 @@ const EditServiceModal = ({
           {images.length < 5 ? (
             <div
               onClick={() => fileRef.current.click()}
-              className={`rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all ${isDark
-                ? "border border-white/20 hover:bg-white/5"
+              className={`rounded-[15px] px-4 py-3 flex flex-col items-center justify-center cursor-pointer transition-all duration-200 ${isDark
+                ? "border border-white/20 bg-white/10 backdrop-blur-[28px] hover:border-white/40"
                 : "border border-gray-300 hover:bg-gray-50"
                 }`}
             >
@@ -409,14 +426,14 @@ const ServiceCard = ({ service, onEdit, onDelete, variant = "dark" }) => {
           className={`flex items-center gap-3 text-[13px] font-medium ${isDark ? "text-white" : "text-gray-800"
             }`}
         >
-          <span>{service.serviceName}</span>
+          <span className="break-words [overflow-wrap:anywhere]">{service.serviceName}</span>
 
           <span className={isDark ? "text-white/40" : "text-gray-400"}>|</span>
 
-          <span>{service.price ? `$${service.price}` : "—"}</span>
+          <span className="flex-shrink-0">{service.price ? `$${service.price}` : "—"}</span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <button
             type="button"
             onClick={onEdit}
@@ -449,7 +466,7 @@ const ServiceCard = ({ service, onEdit, onDelete, variant = "dark" }) => {
       {/* Description */}
       {service.description && (
         <p
-          className={`text-[12px] leading-relaxed mb-3 ${isDark ? "text-white/70" : "text-gray-600"
+          className={`text-[12px] leading-relaxed mb-3 break-words [overflow-wrap:anywhere] ${isDark ? "text-white/70" : "text-gray-600"
             }`}
         >
           {service.description}
@@ -517,7 +534,7 @@ export default function AddServicesAndPackages({
       <div className="w-full max-w-[440px]">
         {/* Title */}
         <h2
-          className={`text-[14px] font-medium mb-1.5 ${isDark ? "text-white" : "text-gray-800"
+          className={`block text-[14px] font-[500] mb-2 ${isDark ? "text-white" : "text-gray-800"
             }`}
         >
           Add Services And Packages
@@ -525,13 +542,13 @@ export default function AddServicesAndPackages({
 
         {/* Input Trigger */}
         <div
-          className={`flex items-center text-sm rounded-[14px] overflow-hidden p-[3px] mb-4 ${isDark
-            ? "border border-gray-600 bg-white/10 backdrop-blur-[28px]"
-            : "border border-gray-300 bg-white"
+          className={`flex items-center text-sm rounded-[15px] overflow-hidden mb-4 transition-all duration-200 ${isDark
+            ? "border border-white/20 bg-white/10 px-4 py-3 backdrop-blur-[28px]"
+            : "border border-gray-300 bg-white px-2 py-2"
             }`}
         >
           <div
-            className={`flex-1 px-3 py-1.5 text-[12px] font-[300] ${isDark ? "text-[#E6E6F0]" : "text-gray-400"
+            className={`flex-1 text-[12px] font-light ${isDark ? "text-gray-300" : "text-gray-400"
               }`}
           >
             Add services & packages
@@ -540,7 +557,7 @@ export default function AddServicesAndPackages({
           <button
             type="button"
             onClick={openAdd}
-            className={`p-1 rounded-md transition-colors ${isDark ? "bg-white text-[#012C57]" : "bg-[#012C57] text-white"
+            className={`p-1 cursor-pointer rounded-md transition-colors ${isDark ? "bg-white text-[#012C57]" : "bg-[#012C57] text-white"
               }`}
           >
             <svg

@@ -7,6 +7,7 @@ import CustomPagination from "@/components/common/CustomPagination";
 import { useGetShiftRequests } from "@/lib/hooks/queries/useShiftRequests";
 import { useReviewShiftRequest } from "@/lib/hooks/mutations/useReviewShiftRequest";
 import { SuccessToast, ErrorToast } from "@/components/ui/toaster";
+import utils from "@/lib/utils";
 
 const Table = () => {
   const [selected, setSelected] = useState(null);
@@ -90,10 +91,8 @@ const Table = () => {
 
   const bartenderRequests = rawRequests.map((req) => {
     // Determine type display
-    let displayType = "Time off";
-    if (req.type === "shift_swap" || req.type === "swap_shift") {
-      displayType = "Shift Swap";
-    }
+    const isShiftSwap = req.type === "shift_swap" || req.type === "swap_shift";
+    let displayType = isShiftSwap ? "Shift Swap" : "Time off";
 
     // Parse status
     let displayStatus = "Pending";
@@ -101,8 +100,38 @@ const Table = () => {
       displayStatus = req.status.charAt(0).toUpperCase() + req.status.slice(1);
     }
 
-    // Fallback date
-    const dateVal = req.startDate || req.shiftId?.startDateTime || req.createdAt;
+    // Shift objects
+    const reqShiftObj = req.requestorShiftId || req.shiftId;
+    const targetShiftObj = req.targetShiftId;
+
+    // Helper for formatting start/end times
+    const formatRange = (startIso, endIso) => {
+      if (!startIso || !endIso) return "";
+      const startStr = utils.formatTime12(startIso);
+      const endStr = utils.formatTime12(endIso);
+      return startStr && endStr ? `${startStr} - ${endStr}` : "";
+    };
+
+    const reqTimeStr = formatRange(reqShiftObj?.startDateTime, reqShiftObj?.endDateTime);
+    const targetTimeStr = formatRange(targetShiftObj?.startDateTime, targetShiftObj?.endDateTime);
+
+    // Fallback date & time
+    const dateVal = reqShiftObj?.startDateTime || req.startDate || req.createdAt;
+
+    let timeStr = reqTimeStr;
+    if (!timeStr && req.startDate && req.endDate) {
+      timeStr = formatRange(req.startDate, req.endDate);
+    }
+    if (!timeStr) timeStr = "N/A";
+
+    // Event display
+    let eventTitle = "Not Assigned";
+    const refObj = reqShiftObj?.referenceId || req.shiftId?.referenceId;
+    if (typeof refObj === "object" && refObj !== null) {
+      eventTitle = refObj.title || refObj.name || refObj.guestName || "Not Assigned";
+    } else if (reqShiftObj?.referenceType) {
+      eventTitle = reqShiftObj.referenceType;
+    }
 
     // Normalize profile image URL
     const profileImageUrl =
@@ -110,51 +139,31 @@ const Table = () => {
         ? req.requestorId.profileImage
         : req.requestorId?.profileImage?.location || "/images/profile.png";
 
-    // Time formatting helper
-    let timeStr = "N/A";
-    if (req.shiftId?.startDateTime && req.shiftId?.endDateTime) {
-      const start = new Date(req.shiftId.startDateTime);
-      const end = new Date(req.shiftId.endDateTime);
-      const formatTime = (d) => {
-        let hours = d.getHours();
-        let minutes = d.getMinutes();
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12;
-        hours = hours ? hours : 12;
-        minutes = minutes < 10 ? '0' + minutes : minutes;
-        return `${hours}:${minutes} ${ampm}`;
-      };
-      timeStr = `${formatTime(start)} - ${formatTime(end)}`;
-    } else if (req.startDate && req.endDate) {
-      const start = new Date(req.startDate);
-      const end = new Date(req.endDate);
-      const formatTime = (d) => {
-        let hours = d.getHours();
-        let minutes = d.getMinutes();
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12;
-        hours = hours ? hours : 12;
-        minutes = minutes < 10 ? '0' + minutes : minutes;
-        return `${hours}:${minutes} ${ampm}`;
-      };
-      timeStr = `${formatTime(start)} - ${formatTime(end)}`;
-    }
-
     return {
       _id: req._id,
+      raw: req,
+      isShiftSwap,
       bartender: {
         name: req.requestorId?.fullName || "Unknown Bartender",
         image: profileImageUrl,
       },
       date: dateVal,
-      time: timeStr,
+      // time: isShiftSwap && targetTimeStr ? `${reqTimeStr} ➔ ${targetTimeStr}` : timeStr,
+      time: isShiftSwap && targetTimeStr ? `${reqTimeStr}` : timeStr,
       type: displayType,
       reason: req.reason || "No reason provided",
       status: displayStatus,
-      // For details popup
-      event: req.shiftId?.referenceId?.title || req.shiftId?.referenceType || "N/A",
-      role: req.shiftId?.role || req.role || "Bartender",
-      instruction: req.shiftId?.instructions || "N/A",
+
+      // Details popup fields
+      event: eventTitle,
+      role: reqShiftObj?.role || req.role || "Bartender",
+      instruction: reqShiftObj?.instructions || "Not Provided",
+
+      // Detailed shift swap objects
+      requestorShift: reqShiftObj,
+      requestorShiftTime: reqTimeStr,
+      targetShift: targetShiftObj,
+      targetShiftTime: targetTimeStr,
     };
   });
 

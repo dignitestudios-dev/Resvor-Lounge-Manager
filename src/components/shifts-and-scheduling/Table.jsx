@@ -20,6 +20,7 @@ const Table = () => {
   const { mutate: deleteShift } = useDeleteShift();
 
   const shifts = shiftsResponse?.data || [];
+  console.log("🚀 ~ Table ~ shifts:", shifts)
   const eventsList = eventsResponse?.data || [];
   const totalPages = shiftsResponse?.pagination?.totalPages || 1;
 
@@ -46,18 +47,18 @@ const Table = () => {
     const startStr = utils.formatTime12(shift.startDateTime);
     const endStr = utils.formatTime12(shift.endDateTime);
 
-    let eventTitle = "-";
+    let eventTitle = "Not Assigned";
     if (typeof shift.referenceId === "object" && shift.referenceId !== null) {
       eventTitle =
         shift.referenceId.title ||
         shift.referenceId.name ||
         shift.referenceId.guestName ||
-        "-";
+        "Not Assigned";
     } else if (typeof shift.referenceId === "string") {
       const foundEvent = eventsList.find((e) => e._id === shift.referenceId);
       eventTitle = foundEvent
         ? foundEvent.title || foundEvent.name || foundEvent.guestName
-        : shift.referenceId;
+        : "Not Assigned";
     }
 
     return {
@@ -79,15 +80,22 @@ const Table = () => {
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
+      case "published":
+      case "publish":
+        return "text-[#0052CC]"; // Blue (same as Dashboard table)
+      case "completed":
+      case "complete":
+      case "confirmed":
+        return "text-[#28A745]"; // Green (same as Dashboard table)
+      case "unfilled":
+      case "cancelled":
+      case "rejected":
+        return "text-[#DC3545]"; // Red
       case "pending":
       case "draft":
-        return "text-gray-700";
-      case "unfilled":
-        return "text-[#DC3545]"; // red
-      case "confirmed":
-        return "text-[#28A745]"; // green
+        return "text-gray-500";
       default:
-        return "text-[#28A745]";
+        return "text-gray-500";
     }
   };
 

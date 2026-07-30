@@ -36,7 +36,7 @@ const PhoneInput = ({
       {/* Wrapper */}
       <div
         className={`
-          flex items-center w-full px-3 py-2 rounded-[15px]
+          flex items-center w-full px-4 py-3 rounded-[15px]
           transition-all duration-200
           ${
             isDark
@@ -45,6 +45,7 @@ const PhoneInput = ({
                 backdrop-blur-[28px]
                 border border-white/20
                 text-white
+                focus-within:border-white/40
                 focus-within:ring-2 focus-within:ring-white/20
               `
               : `
@@ -94,7 +95,7 @@ const PhoneInput = ({
           autoComplete={autoComplete}
           placeholder="Enter Phone Number"
           className={`
-            w-full bg-transparent text-sm py-1
+            w-full bg-transparent text-sm py-0
             focus:outline-none
             placeholder:text-[12px] placeholder:font-light
             disabled:opacity-50 disabled:cursor-not-allowed

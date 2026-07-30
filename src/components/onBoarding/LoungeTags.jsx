@@ -113,6 +113,7 @@ export default function LoungeTags({
                   backdrop-blur-[28px]
                   border border-white/20
                   placeholder:text-gray-300
+                  focus:border-white/40
                   focus:ring-2 focus:ring-white/20
                 `
                 : `

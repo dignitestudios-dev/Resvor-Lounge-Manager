@@ -33,19 +33,13 @@ export const useCreateShift = () => {
 
 // ─── Update Shift ───────────────────────────────────────────────────────────
 const updateShift = async ({ id, ...data }) => {
-  const payload = {
-    role: data.role,
-    startDateTime: data.startDateTime,
-    endDateTime: data.endDateTime,
-    bartenderIds: data.bartenderIds,
-    instructions: data.instructions,
-    status: data.status,
-  };
+  const payload = {};
 
-  if (data.referenceId) {
-    payload.referenceId = data.referenceId;
-    payload.referenceType = data.referenceType || "Event";
-  }
+  if (data.role !== undefined) payload.role = data.role;
+  if (data.status !== undefined) payload.status = data.status;
+  if (data.startDateTime) payload.startDateTime = data.startDateTime;
+  if (data.endDateTime) payload.endDateTime = data.endDateTime;
+  if (data.instructions !== undefined) payload.instructions = data.instructions;
 
   const response = await axiosInstance.patch(`/shifts/${id}`, payload);
   return response.data;

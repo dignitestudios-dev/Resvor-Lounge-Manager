@@ -43,7 +43,6 @@ const PersonalDetailsRemaining = ({
       }
     },
   });
-  console.log("🚀 ~ PersonalDetailsRemaining ~ errors:", errors)
 
   const handleMultipleImagesChange = async (e) => {
     const selectedFiles = Array.from(e.target.files || []);
@@ -119,7 +118,7 @@ const PersonalDetailsRemaining = ({
         <div className="xxl:space-y-8 space-y-6 xxl:w-[650px] lg:w-[450px] md:w-[550px] w-[320px] mt-10">
           <div className="mt-4 grid grid-cols-1 gap-4 items-start">
             <div>
-              <label className="text-[14px] font-medium text-white block mb-1">
+              <label className="block text-[14px] font-[500] mb-2 text-white">
                 Lounge Specialization
               </label>
               <textarea
@@ -130,10 +129,10 @@ const PersonalDetailsRemaining = ({
                 onChange={handleChange}
                 onBlur={handleBlur}
                 placeholder="Enter Lounge Specialization"
-                className="w-full h-20 rounded-[12px] border-2 border-white bg-white/10 placeholder:text-gray-400 text-[#E6E6F0] p-3"
+                className="w-full h-20 px-4 py-3 text-sm text-white rounded-[15px] bg-white/10 backdrop-blur-[28px] border border-white/20 placeholder:text-gray-300 placeholder:text-[12px] placeholder:font-light focus:outline-none focus:border-white/40 focus:ring-2 focus:ring-white/20 transition-all duration-200 resize-none"
               />
               {touched.specialization && errors.specialization && (
-                <p className="text-red-600 text-xs mt-0">
+                <p className="text-red-600 text-xs mt-1">
                   {errors.specialization}
                 </p>
               )}
@@ -150,10 +149,10 @@ const PersonalDetailsRemaining = ({
 
 
             <div>
-              <label className="text-[14px] font-medium text-white block mb-1">
+              <label className="block text-[14px] font-[500] mb-2 text-white">
                 Upload Lounge Images
               </label>
-              <div className="w-full h-[70px] rounded-[12px] border-2 border-dashed border-white/30 bg-white/10 flex items-center justify-center relative">
+              <div className="w-full h-[70px] rounded-[15px] border border-dashed border-white/30 bg-white/10 backdrop-blur-[28px] flex items-center justify-center relative">
                 <input
                   type="file"
                   accept="image/jpeg,image/png"
@@ -161,8 +160,8 @@ const PersonalDetailsRemaining = ({
                   onChange={handleMultipleImagesChange}
                   className="absolute inset-0 opacity-0 cursor-pointer"
                 />
-                <div className="text-center text-white/70 flex flex-col items-center gap-2">
-                  <Upload />
+                <div className="text-center text-gray-300 text-[12px] font-light flex flex-col items-center gap-1">
+                  <Upload size={20} />
                   <p>Choose file to upload</p>
                 </div>
               </div>
@@ -199,7 +198,7 @@ const PersonalDetailsRemaining = ({
             </div>
 
             <div>
-              <label className="text-[14px] font-medium text-white block mb-1">
+              <label className="block text-[14px] font-[500] mb-2 text-white">
                 Lounge Description
               </label>
               <textarea
@@ -208,11 +207,12 @@ const PersonalDetailsRemaining = ({
                 value={values.description}
                 onChange={handleChange}
                 onBlur={handleBlur}
+                maxLength={250}
                 placeholder="Describe Your Business"
-                className="w-full h-20 rounded-[12px] border-2 border-white bg-white/10 placeholder:text-gray-400 text-[#E6E6F0] p-3"
+                className="w-full h-20 px-4 py-3 text-sm text-white rounded-[15px] bg-white/10 backdrop-blur-[28px] border border-white/20 placeholder:text-gray-300 placeholder:text-[12px] placeholder:font-light focus:outline-none focus:border-white/40 focus:ring-2 focus:ring-white/20 transition-all duration-200 resize-none"
               />
               {touched.description && errors.description && (
-                <p className="text-red-600 text-xs mt-0">
+                <p className="text-red-600 text-xs mt-1">
                   {errors.description}
                 </p>
               )}

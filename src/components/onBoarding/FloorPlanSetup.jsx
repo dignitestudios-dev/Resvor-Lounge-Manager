@@ -67,7 +67,7 @@ const FloorPlanSetup = ({ handlePrevious, combinedData = {} }) => {
           } else {
             ErrorToast(
               error.response?.data?.message ||
-                "An error occurred. Please try again.",
+              "An error occurred. Please try again.",
             );
           }
         }
@@ -137,11 +137,11 @@ const FloorPlanSetup = ({ handlePrevious, combinedData = {} }) => {
           {/* Floor Plan Upload */}
           {/* Floor Plan Upload */}
           <div className="space-y-2">
-            <label className="text-[14px] font-medium text-white block">
+            <label className="block text-[14px] font-[500] mb-2 text-white">
               Upload Floor Plan
             </label>
 
-            <div className="relative w-full h-[220px] rounded-[20px] overflow-hidden border-2 border-dashed border-white/30 bg-white/10">
+            <div className="relative w-full h-[220px] rounded-[15px] overflow-hidden border border-dashed border-white/30 bg-white/10 backdrop-blur-[28px]">
               <input
                 type="file"
                 accept="image/jpeg,image/png"
@@ -164,14 +164,14 @@ const FloorPlanSetup = ({ handlePrevious, combinedData = {} }) => {
                   {/* Overlay */}
                   <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition flex flex-col items-center justify-center text-white z-10">
                     <div className="text-2xl mb-2">+</div>
-                    <p className="underline text-sm">
+                    <p className="underline text-sm font-light">
                       Click to change floor plan
                     </p>
                   </div>
                 </>
               ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center text-white/70">
-                  <div className="text-2xl mb-2">+</div>
+                <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 text-[12px] font-light">
+                  <div className="text-2xl mb-2 text-white">+</div>
                   <p className="underline">Upload Floor Plan</p>
                 </div>
               )}

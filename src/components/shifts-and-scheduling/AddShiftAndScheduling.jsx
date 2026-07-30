@@ -80,6 +80,8 @@ const AddShiftAndScheduling = ({
   const { mutate: createShift, isPending: isCreating } = useCreateShift();
   const { mutate: updateShift, isPending: isUpdating } = useUpdateShift();
 
+  const isPublished = (data?.status || "").toLowerCase() === "published";
+
   const bartendersData = bartendersResponse?.data || [];
   const filteredBartenders = bartendersData.filter((b) =>
     b.fullName?.toLowerCase().includes(searchVal.toLowerCase())
@@ -180,28 +182,31 @@ const AddShiftAndScheduling = ({
     enableReinitialize: true,
     onSubmit: (values) => {
       if (isEdit) {
+        const isDraftStatus = (data?.status || "").toLowerCase() === "draft";
+        if (isDraftStatus && values.date && values.endTime) {
+          const endObj = new Date(`${values.date}T${values.endTime}`);
+          if (!isNaN(endObj.getTime()) && endObj < new Date()) {
+            ErrorToast("Cannot update a draft shift whose end time is in the past. Please select an ongoing or upcoming end time.");
+            return;
+          }
+        }
+
         setActionType("submit");
-        const startObj = new Date(`${values.date}T${values.startTime}`);
-        let endObj = new Date(`${values.date}T${values.endTime}`);
-
-        const startDateTime = startObj.toISOString();
-        const endDateTime = endObj.toISOString();
-
         const updatePayload = {
           id: data._id,
           role: values.role,
-          startDateTime: startDateTime,
-          endDateTime: endDateTime,
-          instructions: values.instructions,
           status: "published",
         };
 
-        if (values.eventId) {
-          const eventsList = eventsData?.events || (Array.isArray(eventsData) ? eventsData : []);
-          const selectedItem = eventsList.find((e) => e._id === values.eventId);
-          updatePayload.referenceType = getReferenceType(values.eventId, selectedItem, data?.referenceType);
-          updatePayload.referenceId = values.eventId;
-          updatePayload.eventId = values.eventId;
+        if (values.date && values.startTime && values.endTime) {
+          const startObj = new Date(`${values.date}T${values.startTime}`);
+          const endObj = new Date(`${values.date}T${values.endTime}`);
+          updatePayload.startDateTime = startObj.toISOString();
+          updatePayload.endDateTime = endObj.toISOString();
+        }
+
+        if (values.instructions !== undefined) {
+          updatePayload.instructions = values.instructions;
         }
 
         updateShift(
@@ -311,21 +316,30 @@ const AddShiftAndScheduling = ({
       const endDateTime = endObj.toISOString();
 
       if (isEdit) {
+        const isDraftStatus = (data?.status || "").toLowerCase() === "draft";
+        if (isDraftStatus && values.date && values.endTime) {
+          const endObj = new Date(`${values.date}T${values.endTime}`);
+          if (!isNaN(endObj.getTime()) && endObj < new Date()) {
+            ErrorToast("Cannot update a draft shift whose end time is in the past. Please select an ongoing or upcoming end time.");
+            return;
+          }
+        }
+
         const updatePayload = {
           id: data._id,
           role: values.role,
-          startDateTime: startDateTime,
-          endDateTime: endDateTime,
-          instructions: values.instructions,
           status: "draft",
         };
 
-        if (values.eventId) {
-          const eventsList = eventsData?.events || (Array.isArray(eventsData) ? eventsData : []);
-          const selectedItem = eventsList.find((e) => e._id === values.eventId);
-          updatePayload.referenceType = getReferenceType(values.eventId, selectedItem, data?.referenceType);
-          updatePayload.referenceId = values.eventId;
-          updatePayload.eventId = values.eventId;
+        if (values.date && values.startTime && values.endTime) {
+          const startObj = new Date(`${values.date}T${values.startTime}`);
+          const endObj = new Date(`${values.date}T${values.endTime}`);
+          updatePayload.startDateTime = startObj.toISOString();
+          updatePayload.endDateTime = endObj.toISOString();
+        }
+
+        if (values.instructions !== undefined) {
+          updatePayload.instructions = values.instructions;
         }
 
         updateShift(
@@ -467,7 +481,8 @@ const AddShiftAndScheduling = ({
                     name="date"
                     placeholder="Date"
                     type={"date"}
-                    className={"h-14"}
+                    disabled={isPublished}
+                    className={"h-14 disabled:bg-gray-100 disabled:text-gray-700 disabled:cursor-not-allowed"}
                     value={values.date}
                     onChange={(e) => {
                       handleChange(e);
@@ -730,22 +745,24 @@ const AddShiftAndScheduling = ({
                   {(isCreating || isUpdating) && actionType === "submit" && (
                     <Loader2 className="h-5 w-5 animate-spin" />
                   )}
-                  {isEdit ? "Update" : "Create Shift"}
+                  {isEdit ? "Assign Shift" : "Create Shift"}
                 </Button>
 
-                <Button
-                  type="button"
-                  onClick={handleSaveTemplate}
-                  className={
-                    "bg-gray-200 hover:bg-gray-100 text-black! col-span-2 w-full h-14 text-lg flex items-center justify-center gap-2"
-                  }
-                  disabled={isCreating || isUpdating}
-                >
-                  {(isCreating || isUpdating) && actionType === "template" && (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  )}
-                  Save This Template
-                </Button>
+                {!isPublished && (
+                  <Button
+                    type="button"
+                    onClick={handleSaveTemplate}
+                    className={
+                      "bg-gray-200 hover:bg-gray-100 text-black! col-span-2 w-full h-14 text-lg flex items-center justify-center gap-2"
+                    }
+                    disabled={isCreating || isUpdating}
+                  >
+                    {(isCreating || isUpdating) && actionType === "template" && (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    )}
+                    Save This Template
+                  </Button>
+                )}
               </form>
             </DialogDescription>
           </DialogHeader>

@@ -324,11 +324,11 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
               </div>
 
               <div className="mt-4">
-                <label className="text-[14px] font-[500] text-white block mb-2">
+                <label className="block text-[14px] font-[500] mb-2 text-white">
                   Select Your Role
                 </label>
                 <div className="flex gap-6 items-center">
-                  <label className="flex items-center gap-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="radio"
                       name="role"
@@ -336,9 +336,9 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
                       checked={values.role === "lounge_manager"}
                       onChange={(e) => setFieldValue("role", e.target.value)}
                     />
-                    <span className="text-[#E6E6F0]">Lounge Manager</span>
+                    <span className="text-white text-sm">Lounge Manager</span>
                   </label>
-                  <label className="flex items-center gap-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="radio"
                       name="role"
@@ -346,7 +346,7 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
                       checked={values.role === "promoter"}
                       onChange={(e) => setFieldValue("role", e.target.value)}
                     />
-                    <span className="text-[#E6E6F0]">Promoter</span>
+                    <span className="text-white text-sm">Promoter</span>
                   </label>
                 </div>
               </div>

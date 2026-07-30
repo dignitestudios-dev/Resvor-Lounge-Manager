@@ -14,10 +14,10 @@ const Completed = () => {
             setLoading(true);
             localStorage.setItem("show_welcome_walkthrough", "true");
             await refetchAuth();
-            router.push("/dashboard");
+            window.location.href = "/dashboard";
         } catch (error) {
             console.error("Failed to refetch auth status:", error);
-            router.push("/dashboard");
+            window.location.href = "/dashboard";
         } finally {
             setLoading(false);
         }

@@ -24,7 +24,10 @@ const ShiftDetails = ({
   const { data: eventsResponse } = useGetEligibleEvents({ page: 1, limit: 100 });
   const eventsList = eventsResponse?.data || [];
 
-  let eventName = "-";
+  const status = (shiftDetail?.status || data?.status || "").toLowerCase();
+  const isCompleted = status === "completed";
+
+  let eventName = "Not Assigned";
   if (typeof shiftDetail?.referenceId === "object" && shiftDetail?.referenceId !== null) {
     eventName =
       shiftDetail.referenceId.title ||
@@ -44,8 +47,8 @@ const ShiftDetails = ({
         typeof b.profileImage === "object" && b.profileImage !== null
           ? b.profileImage.location || b.profileImage.url
           : typeof b.profileImage === "string" && b.profileImage.trim() !== ""
-          ? b.profileImage
-          : null;
+            ? b.profileImage
+            : null;
 
       return {
         name: b.fullName || b.name || "-",
@@ -71,15 +74,26 @@ const ShiftDetails = ({
           <div className="mt-4 flex items-center justify-end">
             <div className="flex items-center gap-4">
               <button
-                className="cursor-pointer scale-125"
-                onClick={onEditClick}
+                type="button"
+                className={`transition-all ${isCompleted
+                  ? "opacity-40 cursor-not-allowed scale-125"
+                  : "cursor-pointer scale-125 hover:opacity-80"
+                  }`}
+                disabled={isCompleted}
+                onClick={isCompleted ? undefined : onEditClick}
+                title={isCompleted ? "Completed shifts cannot be edited" : "Edit Shift"}
               >
                 <Edit />
               </button>
 
               <button
+                type="button"
+                className={`transition-all ${isCompleted
+                  ? "opacity-40 cursor-not-allowed"
+                  : "cursor-pointer hover:opacity-80"
+                  }`}
                 onClick={onDeleteClick}
-                className="cursor-pointer scale-90"
+                disabled={isCompleted}
               >
                 <Delete color={"red"} />
               </button>

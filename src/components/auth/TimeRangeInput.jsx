@@ -21,6 +21,10 @@ export default function TimeRangeInput({
       bg-white/10
       backdrop-blur-[28px]
       border border-white/20
+      placeholder:text-gray-300
+      placeholder:text-[12px]
+      placeholder:font-light
+      focus:border-white/40
       focus:ring-2 focus:ring-white/20
       [color-scheme:dark]
     `
@@ -28,6 +32,9 @@ export default function TimeRangeInput({
       text-gray-800
       bg-white
       border border-gray-300
+      placeholder:text-gray-400
+      placeholder:text-[12px]
+      placeholder:font-light
       focus:ring-2 focus:ring-blue-200
       focus:border-blue-500
       [color-scheme:light]
