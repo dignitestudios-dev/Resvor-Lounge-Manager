@@ -77,15 +77,17 @@ const Table = () => {
   };
 
   const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
-      case "pending":
-        return "text-[#FFAE10]";
-      case "approved":
-        return "text-[#28A745]";
-      case "rejected":
-        return "text-[#DC3545]";
-      default:
-        return "text-gray-500";
+    switch (status?.toLowerCase()?.replace(/_/g, " ")) {
+      case "completed":  return "text-[#22C55E]";
+      case "confirmed":  return "text-[#3B82F6]";
+      case "expired":    return "text-[#6B7280]";
+      case "rejected":   return "text-[#EF4444]";
+      case "approved":   return "text-[#10B981]";
+      case "published":  return "text-[#6366F1]";
+      case "cancelled":  return "text-[#DC2626]";
+      case "upcoming":   return "text-[#8B5CF6]";
+      case "pending":    return "text-[#F59E0B]";
+      default:           return "text-gray-500";
     }
   };
 
@@ -201,7 +203,7 @@ const Table = () => {
             <tr>
               <th
                 onClick={() => requestSort("name")}
-                className="px-4 py-5 text-left text-nowrap cursor-pointer"
+                className="px-4 py-5 text-left text-nowrap cursor-pointer max-w-[200px] w-[200px]"
               >
                 Name
                 {sortConfig.key === "name" ? (
@@ -236,15 +238,17 @@ const Table = () => {
                   className="border-b border-[#D4D4D4] hover:bg-gray-50 cursor-pointer"
                   onClick={() => handleRowClick(req)}
                 >
-                  <td className="px-4 py-5">
-                    <div className="flex items-center gap-3">
+                  <td className="px-4 py-5 max-w-[200px]">
+                    <div className="flex items-center gap-3 min-w-0">
                       <div
-                        className="h-10 w-10 rounded-full bg-cover bg-center"
+                        className="h-10 w-10 shrink-0 rounded-full bg-cover bg-center"
                         style={{
                           backgroundImage: `url(${req.bartender.image})`,
                         }}
                       />
-                      {req.bartender.name}
+                      <span className="truncate" title={req.bartender.name}>
+                        {req.bartender.name}
+                      </span>
                     </div>
                   </td>
                   <td className="px-4 py-5">

@@ -172,6 +172,7 @@ const EventDetails = () => {
                       <span className="break-words break-all">{eventData?.loungeId?.location?.address}</span>
                     </div>
                   </div>
+
                   <div>
                     {eventData?.status && (
                       <span
@@ -183,6 +184,12 @@ const EventDetails = () => {
                       </span>
                     )}
                   </div>
+
+                </div>
+                <div>
+                  <p className="mt-1 text-[13px] leading-5 text-gray-600 break-all whitespace-pre-wrap">
+                    {eventData?.description}
+                  </p>
                 </div>
               </div>
             </div>
@@ -220,11 +227,11 @@ const EventDetails = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-5 gap-6 border-t pt-6 mb-8">
+            <div className="grid grid-cols-4 gap-6 border-t pt-6 mb-8">
               <div>
                 <p className="text-black font-semibold mb-2">Budget</p>
                 <p className="text-gray-600 text-sm font-semibold">
-                  ${eventData.budget || 0}
+                  {utils.formatCurrency(eventData.budget || 0)}
                 </p>
               </div>
               <div>
@@ -249,12 +256,12 @@ const EventDetails = () => {
                   {eventData.preferredMusic || "N/A"}
                 </p>
               </div>
-              <div>
+              {/* <div>
                 <p className="text-black font-semibold mb-2">Special Request</p>
                 <p className="text-gray-600 text-sm font-semibold break-words break-all">
                   {eventData.specialRequest || "None"}
                 </p>
-              </div>
+              </div> */}
               <div>
                 <p className="text-black font-semibold mb-2">
                   Ticket at Door{" "}
@@ -306,7 +313,7 @@ const EventDetails = () => {
                 <span className="text-gray-400 font-normal">(Optional)</span>
               </p>
               <p className="text-gray-700 leading-relaxed text-sm break-words break-all">
-                {eventData.description || "No instructions provided"}
+                {eventData.specialRequest || "No instructions provided"}
               </p>
             </div>
           </div>

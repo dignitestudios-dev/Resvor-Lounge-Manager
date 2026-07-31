@@ -264,7 +264,7 @@ const EditProfileModal = ({
           </div>
 
           {/* Map Image */}
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Map Location
             </label>
@@ -277,7 +277,7 @@ const EditProfileModal = ({
                 className="w-full h-full object-cover"
               />
             </div>
-          </div>
+          </div> */}
         </div>
 
         <DialogFooter className="mt-8">

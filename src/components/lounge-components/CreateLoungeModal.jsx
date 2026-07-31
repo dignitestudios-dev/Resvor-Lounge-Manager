@@ -521,13 +521,13 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
                   />
                 </div>
 
-                <div>
+                {/* <div>
                   <img
                     src={"/images/mapImg.png"}
                     alt="map"
                     className="mt-1 rounded-xl w-full h-40 object-cover"
                   />
-                </div>
+                </div> */}
 
                 <div>
                   <label className="text-[14px] font-[500] text-black block mb-2">

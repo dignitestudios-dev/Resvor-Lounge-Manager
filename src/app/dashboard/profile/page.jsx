@@ -225,12 +225,12 @@ const Profile = () => {
           <div className="bg-white rounded-xl shadow-sm p-6 flex flex-col h-[450px]">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">Gallery</h2>
-              <button
+              {/* <button
                 onClick={() => setOpenAddGalleryImages(true)}
                 className="text-black underline font-medium hover:underline cursor-pointer"
               >
                 Add New Images
-              </button>
+              </button> */}
             </div>{" "}
             <div className="grid grid-cols-4 gap-3 overflow-y-auto pr-2">
               {displayGalleryImages.length > 0 ? (

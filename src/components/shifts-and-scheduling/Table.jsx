@@ -79,23 +79,18 @@ const Table = () => {
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case "published":
-      case "publish":
-        return "text-[#0052CC]"; // Blue (same as Dashboard table)
-      case "completed":
-      case "complete":
-      case "confirmed":
-        return "text-[#28A745]"; // Green (same as Dashboard table)
-      case "unfilled":
-      case "cancelled":
-      case "rejected":
-        return "text-[#DC3545]"; // Red
+    switch (status?.toLowerCase()?.replace(/_/g, " ")) {
+      case "completed":  return "text-[#22C55E]";
+      case "confirmed":  return "text-[#3B82F6]";
+      case "expired":    return "text-[#6B7280]";
+      case "rejected":   return "text-[#EF4444]";
+      case "approved":   return "text-[#10B981]";
+      case "published":  return "text-[#6366F1]";
+      case "cancelled":  return "text-[#DC2626]";
+      case "upcoming":   return "text-[#8B5CF6]";
       case "pending":
-      case "draft":
-        return "text-gray-500";
-      default:
-        return "text-gray-500";
+      case "draft":      return "text-[#F59E0B]";
+      default:           return "text-gray-500";
     }
   };
 

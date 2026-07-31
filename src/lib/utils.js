@@ -422,21 +422,32 @@ export function updateAuthCache(queryClient, patch) {
 }
 
 export const getStatusColor = (status) => {
-  switch (status?.toLowerCase()) {
-    case "incoming":
-    case "pending":
-    case "awaiting_payment":
-      return "text-[#7D72F1]";
-    case "processing":
-    case "confirmed":
-      return "text-[#0052CC]";
+  switch (status?.toLowerCase()?.replace(/_/g, " ")) {
     case "completed":
-    case "accepted":
-      return "text-[#28A745]";
-    case "cancelled":
+      return "text-[#22C55E]";
+    case "confirmed":
+      return "text-[#3B82F6]";
+    case "expired":
+      return "text-[#6B7280]";
     case "rejected":
+      return "text-[#EF4444]";
+    case "approved":
+      return "text-[#10B981]";
+    case "published":
+      return "text-[#6366F1]";
+    case "cancelled":
+      return "text-[#DC2626]";
+    case "upcoming":
+      return "text-[#8B5CF6]";
+    case "pending":
+    case "awaiting payment":
+    case "incoming":
+    case "processing":
+      return "text-[#F59E0B]";
+    case "accepted":
+      return "text-[#10B981]";
     case "failed":
-      return "text-[#DC3545]";
+      return "text-[#EF4444]";
     default:
       return "text-gray-500";
   }

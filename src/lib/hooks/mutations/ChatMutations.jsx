@@ -33,3 +33,20 @@ export const useSendMessage = () => {
     mutationFn: sendMessage,
   });
 };
+
+// ─── Broadcast Message ───────────────────────────────────────────────────────
+const broadcastMessage = async (payload) => {
+  const { data } = await axiosInstance.post("/chats/broadcast", payload);
+  return data?.data || data;
+};
+
+export const useBroadcastMessage = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: broadcastMessage,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chats-list"] });
+    },
+  });
+};
+
