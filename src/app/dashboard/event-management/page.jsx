@@ -228,8 +228,8 @@ const EventManagement = () => {
           <div className="w-[260px] flex ">
             <button
               className={`text-[12px] py-3.5 px-2 rounded-l-lg w-full cursor-pointer transition ${view === "list"
-                  ? "bg-gradient text-white"
-                  : "bg-[#FFFFFF] text-[#222246]"
+                ? "bg-gradient text-white"
+                : "bg-[#FFFFFF] text-[#222246]"
                 }`}
               onClick={() => setView("list")}
             >
@@ -237,8 +237,8 @@ const EventManagement = () => {
             </button>
             <button
               className={`text-[12px] py-3.5 px-2 rounded-r-lg w-full cursor-pointer transition ${view === "calendar"
-                  ? "bg-gradient text-white"
-                  : "bg-[#FFFFFF] text-[#222246]"
+                ? "bg-gradient text-white"
+                : "bg-[#FFFFFF] text-[#222246]"
                 }`}
               onClick={() => setView("calendar")}
             >

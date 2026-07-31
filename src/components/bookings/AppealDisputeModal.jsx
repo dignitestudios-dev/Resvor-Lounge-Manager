@@ -88,6 +88,7 @@ const AppealDisputeModal = ({ open, setOpen, onSubmit, isLoading }) => {
             <textarea
               rows={4}
               value={text}
+              maxLength={250}
               onChange={(e) => setText(e.target.value)}
               placeholder="Enter appeal explanation..."
               className="w-full rounded-xl border border-gray-300 p-3.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-[#012C57] focus:border-transparent placeholder:text-gray-400 font-normal resize-none"
@@ -99,7 +100,7 @@ const AppealDisputeModal = ({ open, setOpen, onSubmit, isLoading }) => {
           {/* Single Image Upload */}
           <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold text-gray-800">
-              Upload Proof Image <span className="text-xs font-normal text-gray-500">(Single image allowed)</span>
+              Upload Proof Image <span className="text-xs font-normal text-gray-500">(Optional single image allowed)</span>
             </label>
 
             {!imagePreview ? (

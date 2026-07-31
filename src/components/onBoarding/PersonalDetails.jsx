@@ -315,13 +315,13 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
                   touched={touched?.location}
                 />
               </div>
-              <div>
+              {/* <div>
                 <img
                   src={"/images/mapImg.png"}
                   alt="map"
                   className="mt-1 rounded-xl"
                 />
-              </div>
+              </div> */}
 
               <div className="mt-4">
                 <label className="block text-[14px] font-[500] mb-2 text-white">

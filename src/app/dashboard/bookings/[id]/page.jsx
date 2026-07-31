@@ -232,42 +232,40 @@ const BookingDetails = () => {
               </div>
             </div>
 
-            <div className="border-t pt-6 mb-6">
-              <p className="text-gray-600 text-sm font-semibold mb-3">
-                Services & Packages
+            <div className="border-t pt-6 mb-8">
+              <p className="text-black font-semibold mb-3">
+                Services and Packages
               </p>
-              {bookingData.servicePackageIds &&
-                bookingData.servicePackageIds.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
-                  {bookingData.servicePackageIds.map((item, index) => (
+              <div className="flex flex-wrap gap-4">
+                {bookingData?.servicePackageIds?.length > 0 ? (
+                  bookingData?.servicePackageIds?.map((service, index) => (
                     <div
-                      key={item._id}
-                      className={`flex flex-col ${index % 2 !== 0 ? "md:border-l md:pl-12" : ""
-                        }`}
+                      key={service?._id || service?.id || index}
+                      className="flex-1 min-w-[240px] max-w-[340px] rounded-lg bg-gray-50 border border-gray-100 p-3.5"
                     >
-                      <div className="flex items-start gap-4 mb-2 flex-wrap">
-                        <span className="font-semibold text-gray-800 text-sm break-words break-all">
-                          {item.name}
-                        </span>
-                        <span className="text-gray-700">
-                          (
-                          {formatCentsToUSD(Number(item.price || 0).toFixed(2))}
-                          )
-                        </span>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="font-semibold text-[#181818] text-[15px] break-words">
+                          {service.name}
+                        </h4>
+                        {service.price !== undefined && service.price !== null && (
+                          <span className="text-[#010067] font-semibold text-[14px]">
+                            ({formatCentsToUSD(Number(service?.price || 0).toFixed(2))})
+                          </span>
+                        )}
                       </div>
-                      {item.description && (
-                        <p className="text-gray-500 text-xs leading-relaxed break-words break-all">
-                          {item.description}
+                      {service.description && (
+                        <p className="mt-1 text-[13px] leading-5 text-gray-600 break-words whitespace-pre-wrap">
+                          {service.description}
                         </p>
                       )}
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-700 leading-relaxed text-sm">
-                  No services or packages selected
-                </p>
-              )}
+                  ))
+                ) : (
+                  <p className="text-gray-600 text-sm font-semibold">
+                    No services selected
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="border-t pt-6">

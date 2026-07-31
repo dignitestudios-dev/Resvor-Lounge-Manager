@@ -87,12 +87,12 @@ const Table = () => {
             No Bartenders Found.
           </div>
         ) : (
-          <table className="w-full">
+          <table className="w-full table-fixed">
             <thead className="sticky top-0 z-10">
               <tr className="bg-[#E8E8FF]">
                 <th
                   onClick={() => requestSort("fullName")}
-                  className="px-4 py-5 text-left text-nowrap cursor-pointer select-none"
+                  className="w-1/5 px-4 py-5 text-left text-nowrap cursor-pointer select-none"
                 >
                   Name
                   {sortConfig.key === "fullName" ? (
@@ -103,12 +103,12 @@ const Table = () => {
                     )
                   ) : null}
                 </th>
-                <th className="px-4 py-5 text-left text-nowrap">
+                <th className="w-1/5 px-4 py-5 text-left text-nowrap">
                   Email Address
                 </th>
-                <th className="px-4 py-5 text-left text-nowrap">Number</th>
-                <th className="px-4 py-5 text-left text-nowrap">Address</th>
-                <th className="px-4 py-5 text-center text-nowrap">Action</th>
+                <th className="w-1/5 px-4 py-5 text-left text-nowrap">Number</th>
+                <th className="w-1/5 px-4 py-5 text-left text-nowrap">Address</th>
+                <th className="w-1/5 px-4 py-5 text-center text-nowrap">Action</th>
               </tr>
             </thead>
 
@@ -123,7 +123,7 @@ const Table = () => {
                     className="px-4 py-6 cursor-pointer"
                     onClick={() => handleGoToDetailsPage(bartender._id)}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
                       <div
                         className="h-[43px] w-[43px] rounded-full bg-cover bg-center bg-primary flex-shrink-0"
                         style={{
@@ -132,30 +132,35 @@ const Table = () => {
                             : `url(/images/profile.png)`,
                         }}
                       />
-                      {bartender.fullName}
+                      <span className="truncate" title={bartender.fullName}>
+                        {bartender.fullName}
+                      </span>
                     </div>
                   </td>
 
                   {/* Email */}
                   <td
-                    className="px-4 py-6 cursor-pointer"
+                    className="px-4 py-6 cursor-pointer truncate"
                     onClick={() => handleGoToDetailsPage(bartender._id)}
+                    title={bartender.email}
                   >
                     {bartender.email}
                   </td>
 
                   {/* Phone */}
                   <td
-                    className="px-4 py-6 cursor-pointer"
+                    className="px-4 py-6 cursor-pointer truncate"
                     onClick={() => handleGoToDetailsPage(bartender._id)}
+                    title={formatPhoneNumber(bartender.phoneNumber)}
                   >
                     {formatPhoneNumber(bartender.phoneNumber)}
                   </td>
 
                   {/* Address */}
                   <td
-                    className="px-4 py-6 cursor-pointer"
+                    className="px-4 py-6 cursor-pointer truncate"
                     onClick={() => handleGoToDetailsPage(bartender._id)}
+                    title={bartender.address}
                   >
                     {bartender.address}
                   </td>

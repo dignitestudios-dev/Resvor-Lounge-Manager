@@ -11,7 +11,7 @@ import {
   useRejectEvent,
   useAcceptEvent,
 } from "@/lib/hooks/mutations/EventMutations";
-import utils, { capitalize, getStatusColor } from "@/lib/utils";
+import utils, { capitalize, getStatusColor, formatCentsToUSD } from "@/lib/utils";
 import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
 import PageLoader from "@/components/common/PageLoader";
 
@@ -265,19 +265,31 @@ const EventDetails = () => {
             </div>
 
             <div className="border-t pt-6 mb-8">
-              <p className="text-black font-semibold mb-2">
+              <p className="text-black font-semibold mb-3">
                 Services and Packages
               </p>
-              <div className="flex gap-12 flex-wrap">
+              <div className="flex flex-wrap gap-4">
                 {eventData?.servicePackageIds?.length > 0 ? (
                   eventData?.servicePackageIds?.map((service, index) => (
-                    <div key={index} className="max-w-md">
-                      <p className="text-gray-600 text-sm font-semibold break-words break-all">
-                        {service.name}
-                      </p>
-                      <p className="text-gray-600 text-sm font-semibold break-words break-all">
-                        {service.description}
-                      </p>
+                    <div
+                      key={service?._id || service?.id || index}
+                      className="flex-1 min-w-[240px] max-w-[340px] rounded-lg bg-gray-50 border border-gray-100 p-3.5"
+                    >
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="font-semibold text-[#181818] text-[15px] break-words">
+                          {service.name}
+                        </h4>
+                        {service.price !== undefined && service.price !== null && (
+                          <span className="text-[#010067] font-semibold text-[14px]">
+                            ({formatCentsToUSD(Number(service?.price || 0).toFixed(2))})
+                          </span>
+                        )}
+                      </div>
+                      {service.description && (
+                        <p className="mt-1 text-[13px] leading-5 text-gray-600 break-words whitespace-pre-wrap">
+                          {service.description}
+                        </p>
+                      )}
                     </div>
                   ))
                 ) : (
