@@ -33,12 +33,12 @@ const BartenderDetails = () => {
   const handleDelete = () => {
     deleteBartender(bartenderId, {
       onSuccess: () => {
-        SuccessToast("Bartender deleted successfully.");
+        SuccessToast("Worker deleted successfully.");
         router.push("/dashboard/bartenders");
       },
       onError: (error) => {
         ErrorToast(
-          error?.response?.data?.message || "Failed to delete bartender."
+          error?.response?.data?.message || "Failed to delete worker."
         );
         setOpenDeletePopup(false);
       },
@@ -57,7 +57,7 @@ const BartenderDetails = () => {
   if (isError || !bartender) {
     return (
       <div className="flex justify-center items-center py-20 text-red-500">
-        Failed to load bartender details.
+        Failed to load workforce details.
       </div>
     );
   }

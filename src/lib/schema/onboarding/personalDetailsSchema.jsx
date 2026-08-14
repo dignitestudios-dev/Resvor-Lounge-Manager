@@ -133,8 +133,9 @@ export const personalDetailsSchema = Yup.object({
       Yup.string()
         .min(2, "Each tag must be at least 2 characters")
         .max(25, "Each tag must not exceed 25 characters")
-    )
-    .min(1, "At least one tag is required")
-    .max(10, "Maximum of 10 tags allowed")
-    .required("Lounge tags are required"),
+    ).optional(),
 });
+
+// .min(0, "At least one tag is required")
+//     .max(10, "Maximum of 10 tags allowed")
+//     .required("Lounge tags are required")|

@@ -21,10 +21,10 @@ const DeleteBartenderPopup = ({ isOpen, onOpenChange, onDelete, isDeleting }) =>
               </div>
 
               <h3 className="text-[#181818] text-2xl font-bold text-center">
-                Delete This Bartender
+                Delete This Worker
               </h3>
               <p className="text-[#565656] text-center">
-                Are you sure you want to delete this Bartender? This action
+                Are you sure you want to delete this Worker? This action
                 cannot be undone.
               </p>
 

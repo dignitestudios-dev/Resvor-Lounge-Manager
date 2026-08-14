@@ -9,7 +9,7 @@ const ProfileUpdateModal = ({
   open,
   setOpen,
   title = "Profile Updated!",
-  message = "Bartender profile has been successfully updated.",
+  message = "Worker profile has been successfully updated.",
 }) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>

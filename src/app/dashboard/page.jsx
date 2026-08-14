@@ -66,7 +66,7 @@ const Dashboard = () => {
 
   const statsData = [
     {
-      title: "Total Bartenders",
+      title: "Total WorkForce",
       value: isLoading ? "—" : utils.formatNumber(stats?.totalBartenders ?? 0),
       icon: <Guestbook size={34} />,
     },

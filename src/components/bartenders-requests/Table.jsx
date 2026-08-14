@@ -78,16 +78,16 @@ const Table = () => {
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()?.replace(/_/g, " ")) {
-      case "completed":  return "text-[#22C55E]";
-      case "confirmed":  return "text-[#3B82F6]";
-      case "expired":    return "text-[#6B7280]";
-      case "rejected":   return "text-[#EF4444]";
-      case "approved":   return "text-[#10B981]";
-      case "published":  return "text-[#6366F1]";
-      case "cancelled":  return "text-[#DC2626]";
-      case "upcoming":   return "text-[#8B5CF6]";
-      case "pending":    return "text-[#F59E0B]";
-      default:           return "text-gray-500";
+      case "completed": return "text-[#22C55E]";
+      case "confirmed": return "text-[#3B82F6]";
+      case "expired": return "text-[#6B7280]";
+      case "rejected": return "text-[#EF4444]";
+      case "approved": return "text-[#10B981]";
+      case "published": return "text-[#6366F1]";
+      case "cancelled": return "text-[#DC2626]";
+      case "upcoming": return "text-[#8B5CF6]";
+      case "pending": return "text-[#F59E0B]";
+      default: return "text-gray-500";
     }
   };
 
@@ -146,7 +146,7 @@ const Table = () => {
       raw: req,
       isShiftSwap,
       bartender: {
-        name: req.requestorId?.fullName || "Unknown Bartender",
+        name: req.requestorId?.fullName || "Unknown Worker",
         image: profileImageUrl,
       },
       date: dateVal,
@@ -158,7 +158,7 @@ const Table = () => {
 
       // Details popup fields
       event: eventTitle,
-      role: reqShiftObj?.role || req.role || "Bartender",
+      role: reqShiftObj?.role || req.role || "Worker",
       instruction: reqShiftObj?.instructions || "Not Provided",
 
       // Detailed shift swap objects

@@ -97,7 +97,7 @@ export const navLinks = [
 // Mock Data
 export const dashboardStats = [
   {
-    title: "Total Bartenders",
+    title: "Total WorkForce",
     value: 1190,
     icon: <Guestbook size={34} />,
   },

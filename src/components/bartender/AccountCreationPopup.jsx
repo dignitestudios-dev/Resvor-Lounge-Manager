@@ -21,11 +21,11 @@ const AccountCreationPopup = ({ isOpen, onOpenChange, onSendMail, isLoading }) =
               </div>
 
               <h3 className="text-[#181818] text-2xl font-bold text-center">
-                Bartender Account Created
+                Worker Account Created
               </h3>
               <p className="text-[#565656] text-center">
                 Login credentials have been successfully generated. Click the
-                button below to send the credentials to the bartender via email.
+                button below to send the credentials to the worker via email.
               </p>
 
               <Button
@@ -36,7 +36,7 @@ const AccountCreationPopup = ({ isOpen, onOpenChange, onSendMail, isLoading }) =
                 {isLoading ? (
                   <Loader2 className="animate-spin" />
                 ) : (
-                  "Send Mail to Bartender"
+                  "Send Mail to Worker"
                 )}
               </Button>
             </div>

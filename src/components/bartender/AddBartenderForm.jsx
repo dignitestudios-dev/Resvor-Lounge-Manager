@@ -103,7 +103,7 @@ const AddBartenderForm = ({
       if (isEdit) {
         // ── Update ──────────────────────────────────────────────────────────
         if (!data?._id) {
-          ErrorToast("Bartender ID missing.");
+          ErrorToast("Worker ID missing.");
           return;
         }
         updateBartender(
@@ -123,7 +123,7 @@ const AddBartenderForm = ({
             },
             onError: (error) => {
               ErrorToast(
-                error?.response?.data?.message || "Failed to update bartender."
+                error?.response?.data?.message || "Failed to update worker."
               );
             },
           }
@@ -195,7 +195,7 @@ const AddBartenderForm = ({
         },
         onError: (error) => {
           ErrorToast(
-            error?.response?.data?.message || "Failed to create bartender."
+            error?.response?.data?.message || "Failed to create worker."
           );
         },
       }

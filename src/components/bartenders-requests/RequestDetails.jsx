@@ -124,7 +124,7 @@ const RequestDetails = ({ isOpen, onOpenChange, data, onReject, onAccept, loadin
                 <hr />
 
                 <div>
-                  <div className=" text-gray-500">Bartender</div>
+                  <div className=" text-gray-500">Workforce</div>
                   <div className="font-semibold text-black break-words break-all">
                     {data.bartender?.name || "Christine Easom"}
                   </div>

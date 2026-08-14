@@ -637,7 +637,7 @@ const AddShiftAndScheduling = ({
 
                 <div className="col-span-2 flex flex-col gap-1">
                   <Label className={"text-base text-black"}>
-                    Assign Bartenders
+                    Assign Workforce
                   </Label>
                   <Popover>
                     <PopoverTrigger asChild>
@@ -649,8 +649,8 @@ const AddShiftAndScheduling = ({
                       >
                         <span className="truncate">
                           {values.bartenderIds && values.bartenderIds.length > 0
-                            ? `${values.bartenderIds.length} Bartender(s) Selected`
-                            : "Select Bartenders"}
+                            ? `${values.bartenderIds.length} Workforce(s) Selected`
+                            : "Select Workforce"}
                         </span>
                         <IoIosArrowDown className="text-gray-500 h-5 w-5" />
                       </Button>
@@ -659,7 +659,7 @@ const AddShiftAndScheduling = ({
                       {/* Search Input */}
                       <input
                         type="text"
-                        placeholder="Search Bartender..."
+                        placeholder="Search Workforce..."
                         className="w-full px-3 py-2 border rounded-lg text-sm mb-3 outline-none focus:ring-1 focus:ring-blue-900"
                         onChange={(e) => setSearchVal(e.target.value)}
                         value={searchVal}
@@ -694,7 +694,7 @@ const AddShiftAndScheduling = ({
                             );
                           })
                         ) : (
-                          <p className="text-sm text-gray-500 text-center py-2">No Bartenders Found</p>
+                          <p className="text-sm text-gray-500 text-center py-2">No Workforce Found</p>
                         )}
                       </div>
                     </PopoverContent>

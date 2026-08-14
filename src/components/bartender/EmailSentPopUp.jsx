@@ -23,7 +23,7 @@ const EmailSentPopUp = ({ isOpen, onOpenChange }) => {
                 Email Sent Successfully{" "}
               </h3>
               <p className="text-[#565656] text-center">
-                Login credentials has been sent to bartender successfully by
+                Login credentials has been sent to workforce successfully by
                 email.
               </p>
             </div>

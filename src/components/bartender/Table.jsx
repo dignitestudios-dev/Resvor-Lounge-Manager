@@ -55,12 +55,12 @@ const Table = () => {
     if (!deleteTarget) return;
     deleteBartender(deleteTarget._id, {
       onSuccess: () => {
-        SuccessToast("Bartender deleted successfully.");
+        SuccessToast("Worker deleted successfully.");
         setDeleteTarget(null);
       },
       onError: (error) => {
         ErrorToast(
-          error?.response?.data?.message || "Failed to delete bartender."
+          error?.response?.data?.message || "Failed to delete worker."
         );
         setDeleteTarget(null);
       },
@@ -80,11 +80,11 @@ const Table = () => {
       >
         {isError ? (
           <div className="flex justify-center items-center py-20 text-red-500">
-            Failed to load bartenders. Please try again.
+            Failed to load Workforce. Please try again.
           </div>
         ) : !isLoading && bartenders.length === 0 ? (
           <div className="flex justify-center items-center py-20 text-gray-500">
-            No Bartenders Found.
+            No Workforce Found.
           </div>
         ) : (
           <table className="w-full table-fixed">

@@ -197,7 +197,7 @@ function EmptyState() {
       <div>
         <p className="text-gray-700 font-semibold text-lg">No conversation selected</p>
         <p className="text-gray-400 text-sm mt-1">
-          Choose a user or bartender from the list to start messaging
+          Choose a user or worker from the list to start messaging
         </p>
       </div>
     </div>
@@ -698,7 +698,7 @@ export default function ChatUI() {
                 filteredBartenderChats.length === 0 &&
                 filteredBartendersWithoutChat.length === 0 && (
                   <div className="flex flex-col items-center justify-center h-32 text-gray-400 px-6 text-center">
-                    <p className="text-sm">No Bartenders Conversations Yet.</p>
+                    <p className="text-sm">No Workforce Conversations Yet.</p>
                   </div>
                 )}
             </>

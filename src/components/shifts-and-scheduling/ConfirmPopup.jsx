@@ -22,7 +22,7 @@ const ConfirmPopup = ({ isOpen, onOpenChange }) => {
                 Shift Assigned!{" "}
               </h3>
               <p className="text-[#565656] text-center">
-                Shift has been assigned to the bartender and shifts are added in
+                Shift has been assigned to the workforce and shifts are added in
                 the shift scheduling section.
               </p>
             </div>

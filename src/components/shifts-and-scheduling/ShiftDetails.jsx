@@ -134,7 +134,7 @@ const ShiftDetails = ({
                     <div className="font-semibold text-black">{eventName}</div>
                   </div>
                   <div>
-                    <div className=" text-gray-500">Bartender(s)</div>
+                    <div className=" text-gray-500">Workforce(s)</div>
                     {bartendersList.length > 0 ? (
                       <div className="flex flex-col gap-2 mt-1">
                         {bartendersList.map((b, i) => (
