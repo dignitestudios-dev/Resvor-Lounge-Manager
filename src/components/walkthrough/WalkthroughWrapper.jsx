@@ -76,25 +76,20 @@ const WalkthroughWrapper = () => {
         onSkip={handleSkipWalkthrough}
       />
 
-      {/* Joyride Tour - Uncontrolled mode for 100% smooth step transitions */}
+      {/* Joyride Tour - Direct start with no beacon */}
       <Joyride
         steps={walkthroughSteps}
         run={runTour}
         continuous={true}
-        showSkipButton={true}
-        showProgress={false}
-        disableOverlayClose={false}
-        spotlightClicks={false}
-        spotlightPadding={6}
         scrollToFirstStep={true}
-        scrollOffset={100}
         tooltipComponent={CustomTooltip}
-        callback={handleJoyrideCallback}
-        styles={{
-          options: {
-            zIndex: 99999,
-            overlayColor: "rgba(0, 0, 0, 0.5)",
-          },
+        onEvent={handleJoyrideCallback}
+        options={{
+          skipBeacon: true,
+          zIndex: 99999,
+          overlayColor: "rgba(0, 0, 0, 0.5)",
+          spotlightPadding: 6,
+          scrollOffset: 100,
         }}
       />
     </>
