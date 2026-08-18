@@ -206,8 +206,8 @@ const VerifyPhone = ({ handleNext, handlePrevious }) => {
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="xxl:space-y-8 space-y-6 xxl:w-[650px] lg:w-[390px] md:w-[550px] w-[320px] mt-4">
-            <div className="xxl:w-[600px] xxl:m-4 grid grid-cols-6 gap-20 xl:w-[340px] lg:w-[360px] md:w-[550px] w-full ">
+          <div className="xxl:space-y-8 space-y-6 xxl:w-[650px] lg:w-[440px] md:w-[550px] w-[320px] mt-4">
+            <div className="xxl:w-[600px] xxl:m-4 grid grid-cols-5 ml-8 gap-20 xl:w-[340px] lg:w-[360px] md:w-[550px] w-full ">
               {otpDisplay.map((digit, index) => (
                 <input
                   inputMode="numeric"
