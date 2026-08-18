@@ -147,61 +147,85 @@ const CreateAccount = ({ setEmail }) => {
             />
           </div>
         </div>
-        <div className="mt-6 flex items-start gap-2 text-[12px] text-[#CACACA]">
-          <input
-            type="checkbox"
-            checked={values.acceptedPolicy}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            id="acceptedPolicy"
-            name="acceptedPolicy"
-            className="mt-[2px] h-3 w-3 cursor-pointer accent-indigo-600"
-          />
+        <div className="mt-6 flex items-start gap-3 xxl:w-[650px] lg:w-[350px] md:w-[550px] w-[320px]">
+          <label
+            htmlFor="acceptedPolicy"
+            className="relative flex items-center justify-center cursor-pointer mt-[1px] select-none shrink-0"
+          >
+            <input
+              type="checkbox"
+              checked={values.acceptedPolicy}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              id="acceptedPolicy"
+              name="acceptedPolicy"
+              className="sr-only"
+            />
+            <div className="w-[20px] h-[20px] rounded-[4px] border border-white bg-transparent flex items-center justify-center transition-colors">
+              {values.acceptedPolicy && (
+                <svg
+                  className="w-3.5 h-3.5 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              )}
+            </div>
+          </label>
 
-          <span>
-            I accept the{" "}
+          <p className="text-[13px] font-medium leading-[18px] tracking-[-0.0041em] text-white">
+            I agree to the{" "}
             <span
-              className="text-[#E6E6E6] font-semibold cursor-pointer"
+              className="underline underline-offset-2 font-medium cursor-pointer text-white hover:text-gray-200"
               onClick={() => router.push("/auth/terms")}
             >
               Terms & Conditions
             </span>{" "}
             and{" "}
             <span
-              className="text-[#E6E6E6] font-semibold cursor-pointer"
+              className="underline underline-offset-2 font-medium cursor-pointer text-white hover:text-gray-200"
               onClick={() => router.push("/auth/privacy")}
             >
               Privacy Policy
-            </span>
-          </span>
+            </span>{" "}
+            and authorize the collection and use of my phone number for Two-Factor Authentication.
+          </p>
         </div>
+
         {errors.acceptedPolicy && touched.acceptedPolicy && (
-          <p className="text-red-500 text-[11px] font-medium mb-2">
+          <p className="text-red-500 text-[11px] font-medium mt-1 w-full text-left xxl:w-[650px] lg:w-[350px] md:w-[550px] w-[320px]">
             {errors.acceptedPolicy}
           </p>
         )}
-        <div className="mt-1 ">
-          <div className="xxl:w-[650px] w-[350px] mt-1 mb-4">
-            <AuthButton
-              text={"Sign Up"}
-              disabled={signUpMutation.isPending}
-              loading={signUpMutation.isPending}
-            />
-          </div>
+        <div className="mt-8 xxl:w-[650px] lg:w-[350px] md:w-[550px] w-[320px]">
+          <AuthButton
+            text={"Sign Up"}
+            disabled={signUpMutation.isPending}
+            loading={signUpMutation.isPending}
+          />
         </div>
-      </form>
 
-      <div className="flex items-center justify-center gap-2 ">
-        <p className="text-center xxl:text-[26px] text-[15px] leading-[21.6px] text-white">
-          Already have an account?
-          <span
-            className="xxl:text-[26px] text-[14px] font-[600] pl-1 cursor-pointer text-white"
-            onClick={() => router.push("/auth/login")}
-          >
-            Login
-          </span>
-        </p>
-      </div>
+        <div className="mt-4 flex items-center justify-center">
+          <p className="text-center xxl:text-[20px] text-[15px] leading-[21.6px] text-white">
+            Already have an account?{" "}
+            <span
+              className="font-bold cursor-pointer hover:underline text-white pl-1"
+              onClick={() => router.push("/auth/login")}
+            >
+              Log In
+            </span>
+          </p>
+        </div>
+
+
+      </form>
     </div>
   );
 };

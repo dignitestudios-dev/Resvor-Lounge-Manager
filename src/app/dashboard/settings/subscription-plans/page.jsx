@@ -14,57 +14,7 @@ import {
 import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
 import { useQueryClient } from "@tanstack/react-query";
 
-const invoices = [
-  {
-    id: 1,
-    date: "Feb 19, 2024",
-    desc: "Subscription plan",
-    total: "$150.00",
-    status: "Paid",
-  },
-  {
-    id: 2,
-    date: "Feb 07, 2024",
-    desc: "Subscription plan",
-    total: "$150.00",
-    status: "Paid",
-  },
-  {
-    id: 3,
-    date: "Feb 02, 2024",
-    desc: "Subscription plan",
-    total: "$150.00",
-    status: "Paid",
-  },
-  {
-    id: 4,
-    date: "Jan 30, 2024",
-    desc: "Subscription plan",
-    total: "$150.00",
-    status: "Paid",
-  },
-  {
-    id: 5,
-    date: "Feb 07, 2024",
-    desc: "Subscription plan",
-    total: "$150.00",
-    status: "Paid",
-  },
-  {
-    id: 6,
-    date: "Feb 02, 2024",
-    desc: "Subscription plan",
-    total: "$150.00",
-    status: "Paid",
-  },
-  {
-    id: 7,
-    date: "Jan 30, 2024",
-    desc: "Subscription plan",
-    total: "$150.00",
-    status: "Paid",
-  },
-];
+
 
 const statusBadge = (status) => {
   const map = {
@@ -93,7 +43,7 @@ const formatDate = (dateStr) => {
 };
 
 const SubscriptionPlans = () => {
-  const [tab, setTab] = useState("wallet");
+  const [tab, setTab] = useState("plan");
   const [cancelOpen, setCancelOpen] = useState(false);
   const [purchasingPlanId, setPurchasingPlanId] = useState(null);
   const queryClient = useQueryClient();
@@ -162,7 +112,7 @@ const SubscriptionPlans = () => {
             >
               Billing
             </button> */}
-            <button
+            {/* <button
               onClick={() => setTab("wallet")}
               className={`py-4 cursor-pointer ${tab === "wallet"
                 ? "border-b-2 border-gray-800 font-semibold"
@@ -170,7 +120,7 @@ const SubscriptionPlans = () => {
                 }`}
             >
               Wallet
-            </button>
+            </button> */}
             <button
               onClick={() => setTab("plan")}
               className={`py-4 cursor-pointer ${tab === "plan"

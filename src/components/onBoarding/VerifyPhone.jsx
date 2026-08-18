@@ -19,7 +19,7 @@ const VerifyPhone = ({ handleNext, handlePrevious }) => {
   const verifyMobileMutation = useVerifyMobileNumber();
   const queryClient = useQueryClient();
 
-  const [otpDisplay, setOtpDisplay] = useState(Array(6).fill(""));
+  const [otpDisplay, setOtpDisplay] = useState(Array(5).fill(""));
   const [isActive, setIsActive] = useState(true);
   const [seconds, setSeconds] = useState(30);
   const [requestSendModal, setRequestSendModal] = useState(false);
@@ -45,7 +45,7 @@ const VerifyPhone = ({ handleNext, handlePrevious }) => {
           } else {
             ErrorToast(
               error.response?.data?.message ||
-                "An error occurred during logout. Please try again.",
+              "An error occurred during logout. Please try again.",
             );
           }
         }
@@ -142,7 +142,7 @@ const VerifyPhone = ({ handleNext, handlePrevious }) => {
 
   const handleResendOtp = async () => {
     try {
-      setOtpDisplay(Array(6).fill("")); // Reset OTP display
+      setOtpDisplay(Array(5).fill("")); // Reset OTP display
       handleChange({
         target: { name: "otp", value: "" },
       });
@@ -206,7 +206,7 @@ const VerifyPhone = ({ handleNext, handlePrevious }) => {
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="xxl:space-y-8 space-y-6 xxl:w-[650px] lg:w-[460px] md:w-[550px] w-[320px] mt-4">
+          <div className="xxl:space-y-8 space-y-6 xxl:w-[650px] lg:w-[390px] md:w-[550px] w-[320px] mt-4">
             <div className="xxl:w-[600px] xxl:m-4 grid grid-cols-6 gap-20 xl:w-[340px] lg:w-[360px] md:w-[550px] w-full ">
               {otpDisplay.map((digit, index) => (
                 <input
