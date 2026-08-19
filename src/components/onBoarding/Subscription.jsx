@@ -17,10 +17,10 @@ const Subscription = ({ handlePrevious }) => {
 
   const { mutateAsync: purchasePlan, isPending: isPurchasing } =
     usePurchaseSubscription();
-  console.log("🚀 ~ Subscription ~ isPurchasing:", isPurchasing);
+
 
   const { data: plansResponse, isLoading } = useGetSubscriptionPlans();
-  console.log("🚀 ~ Subscription ~ isLoading:", isLoading);
+
   const plans = plansResponse?.data || [];
 
   // const handleBuyNow = (plan) => {
@@ -32,12 +32,10 @@ const Subscription = ({ handlePrevious }) => {
     try {
       setActivePlanId(plan._id);
       const purchaseRes = await purchasePlan(plan._id);
-      console.log("🚀 ~ handleBuyNow ~ purchaseRes:", purchaseRes);
       if (purchaseRes?.data?.checkoutUrl) {
         window.location.href = purchaseRes.data.checkoutUrl;
       }
     } catch (error) {
-      console.log("🚀 ~ handleBuyNow ~ error:", error);
       const msg = error?.response?.data?.message || "Failed to initiate purchase. Please try again.";
       ErrorToast(msg);
       setActivePlanId(null);

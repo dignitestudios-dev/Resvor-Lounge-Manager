@@ -72,7 +72,6 @@ const ScanQrCode = () => {
 
     try {
       const response = await axios.get(`/vip-pass/verify/${passId}`);
-      console.log("VIP Pass Verification Response:", response.data);
 
       const passData = response.data?.data?.pass || response.data?.pass || response.data?.data;
       if (response.data?.success || response.status === 200) {

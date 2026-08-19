@@ -13,7 +13,7 @@ const fetchEvents = async (page = 1, limit = 10, startDate, endDate, status) => 
     url += `&status=${status}`;
   }
   const { data } = await axios.get(url);
-  console.log("🚀 ~ fetchEvents ~ data:", data);
+
   return data;
 };
 

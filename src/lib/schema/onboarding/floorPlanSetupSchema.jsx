@@ -98,14 +98,8 @@ export const floorPlanSetupSchema = Yup.object({
     .max(5, "You can upload a maximum of 5 images"),
 
   description: Yup.string()
-    .required("Lounge description is required")
-    .test(
-      "not-empty-after-trim",
-      "Description cannot be empty or just spaces.",
-      (value) => value?.trim().length > 0,
-    )
-    .min(20, "Description must be at least 20 characters long")
-    .max(500, "Description must not exceed 500 characters"),
+    .max(250, "Description must not exceed 500 characters")
+    .optional(),
 
   // From FloorPlanSetup
   floorPlan: Yup.mixed()

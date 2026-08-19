@@ -41,7 +41,7 @@ const CreateAccount = ({ setEmail }) => {
             user: { email: values.email }, // keep email available downstream
           });
         } catch (error) {
-          console.log("🚀 ~ CreateAccount ~39--->errors:", error);
+
           if (error.code === "NO_INTERNET") {
             ErrorToast(error.message);
           } else {

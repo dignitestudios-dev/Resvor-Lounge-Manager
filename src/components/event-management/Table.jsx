@@ -69,7 +69,6 @@ const Table = ({
   const displayedEvents = Object.keys(filters).some((key) => filters[key])
     ? filteredEvents
     : events;
-  console.log("🚀 ~ Table ~ displayedEvents:", displayedEvents)
 
   const handleRowClick = (eventId) => {
     router.push(`/dashboard/event-management/${eventId}`);
@@ -125,7 +124,7 @@ const Table = ({
                   (typeof event?.user?.profilePicture === "string"
                     ? event?.user?.profilePicture
                     : null);
-                console.log("🚀 ~ Table ~ profilePic:", profilePic)
+
                 const userName =
                   event?.guestName ||
                   `${event?.userId?.firstName || ""} ${event?.userId?.lastName || ""}`.trim() ||

@@ -119,10 +119,9 @@ export const personalDetailsSchema = Yup.object({
     )
     .max(5, "You can upload a maximum of 5 images"),
 
-  description: Yup.string().max(
-    250,
-    "Description must not exceed 250 characters",
-  ),
+  description: Yup.string()
+    .max(250, "Description must not exceed 500 characters")
+    .optional(),
 
   role: Yup.string()
     .required("Role is required")

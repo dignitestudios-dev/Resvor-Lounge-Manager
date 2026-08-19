@@ -29,7 +29,7 @@ const formatRange12 = (rangeStr) => {
 };
 
 const ReviewPopup = ({ isOpen, onOpenChange, onConfirm, onBack, data, isLoading = false }) => {
-  console.log("🚀 ~ ReviewPopup ~ data:", data)
+
   if (!data) return null;
 
   return (

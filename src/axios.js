@@ -15,7 +15,7 @@ export const baseUrl = "https://api-staging.resvor.com";
 async function getDeviceFingerprint() {
   const fp = await FingerprintJS.load();
   const result = await fp.get();
-  console.log(result.visitorId); // Unique device ID
+
   return result.visitorId;
 }
 
@@ -76,11 +76,6 @@ instance.interceptors.request.use(async (request) => {
 
 instance.interceptors.response.use(
   (response) => {
-    console.log("✅ Response received:", response.config.url, {
-      status: response.status,
-      headers: response.headers,
-      data: response.data,
-    });
 
     const token =
       response.data?.token ||
@@ -105,10 +100,7 @@ instance.interceptors.response.use(
     return response;
   },
   (error) => {
-    console.error("❌ Request error:", error.config?.url, {
-      status: error.response?.status,
-      message: error.message,
-    });
+
 
     // ── Handle no-internet / network errors first ──
     // Catches: NO_INTERNET (from request interceptor), ERR_NETWORK (axios native when DNS/TCP fails)

@@ -3,7 +3,7 @@ import axios from "../../../axios";
 
 const fetchBookingDetail = async (bookingId) => {
   const { data } = await axios.get(`/bookings/${bookingId}`);
-  console.log("🚀 ~ fetchBookingDetail ~ data:", data);
+
   return data?.data || {};
 };
 

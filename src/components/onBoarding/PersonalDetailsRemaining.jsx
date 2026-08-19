@@ -199,7 +199,10 @@ const PersonalDetailsRemaining = ({
 
             <div>
               <label className="block text-[14px] font-[500] mb-2 text-white">
-                Lounge Description
+                Lounge Description{" "}
+                <span className="text-white/50 text-[12px] font-normal">
+                  (Optional)
+                </span>
               </label>
               <textarea
                 name="description"
@@ -208,7 +211,7 @@ const PersonalDetailsRemaining = ({
                 onChange={handleChange}
                 onBlur={handleBlur}
                 maxLength={250}
-                placeholder="Describe Your Business"
+                placeholder="Describe Your Business (Optional)"
                 className="w-full h-20 px-4 py-3 text-sm text-white rounded-[15px] bg-white/10 backdrop-blur-[28px] border border-white/20 placeholder:text-gray-300 placeholder:text-[12px] placeholder:font-light focus:outline-none focus:border-white/40 focus:ring-2 focus:ring-white/20 transition-all duration-200 resize-none"
               />
               {touched.description && errors.description && (

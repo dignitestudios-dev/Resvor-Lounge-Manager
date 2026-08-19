@@ -112,7 +112,7 @@ export const submitCreateLounge = async (payload) => {
   formData.append("businessEmail", payload.email);
   formData.append("businessPhone", phoneToE164(payload.phone));
   formData.append("specialization", payload.specialization);
-  formData.append("description", payload.description);
+  formData.append("description", payload.description || "");
   // formData.append("role", payload.role);
   // formData.append("offers", payload.offers);
 

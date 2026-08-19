@@ -202,8 +202,6 @@ const AddBartenderForm = ({
     );
   };
 
-  console.log("formik.dirty 206 ==> ", formik.dirty)
-
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onOpenChange}>

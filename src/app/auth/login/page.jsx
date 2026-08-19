@@ -34,7 +34,7 @@ const Login = () => {
           });
 
           const { tokenType, onboardingStep, user, token, accessToken } = response?.data ?? {};
-          console.log(response?.data, "--response?.data--- 37---");
+
           const activeToken = token || accessToken || response?.token || response?.accessToken;
 
           if (activeToken) {

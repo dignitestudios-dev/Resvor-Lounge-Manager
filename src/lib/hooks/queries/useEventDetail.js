@@ -3,7 +3,7 @@ import axios from "../../../axios";
 
 const fetchEventDetail = async (eventId) => {
   const { data } = await axios.get(`/events/${eventId}`);
-  console.log("🚀 ~ fetchEventDetail ~ data:", data);
+
   return data?.data || {};
 };
 

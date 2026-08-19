@@ -32,13 +32,13 @@ const Sidebar = () => {
       setIsLogoutModalOpen(false);
       router.push("/auth/login");
     } catch (error) {
-      console.log(error, "error===<12");
+
       if (error.code === "NO_INTERNET") {
         ErrorToast(error.message);
       } else {
         ErrorToast(
           error.response?.data?.message ||
-            "An error occurred during logout. Please try again.",
+          "An error occurred during logout. Please try again.",
         );
       }
       setIsLogoutModalOpen(false);
@@ -60,9 +60,8 @@ const Sidebar = () => {
                 <li key={index}>
                   <Link
                     href={link.path}
-                    className={`flex items-center text-[13px] font-medium gap-2 py-2.5 px-5 rounded-lg ${joyrideClass} ${
-                      isActive ? "text-primary bg-white" : "text-white"
-                    }`}
+                    className={`flex items-center text-[13px] font-medium gap-2 py-2.5 px-5 rounded-lg ${joyrideClass} ${isActive ? "text-primary bg-white" : "text-white"
+                      }`}
                   >
                     {isActive ? link.selectedIcon : link.icon}
                     <span>{link.name}</span>

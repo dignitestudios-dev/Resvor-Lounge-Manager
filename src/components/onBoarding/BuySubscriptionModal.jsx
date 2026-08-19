@@ -70,7 +70,7 @@ const BuySubscriptionModalContent = ({ onClick, setCompleted, plan }) => {
       // 1. Tell the backend which plan we're buying. It should create/prepare
       // the Stripe subscription and return a client secret to confirm with.
       const purchaseRes = await purchasePlan(plan._id);
-      console.log("🚀 ~ handlePayNow ~ purchaseRes:", purchaseRes);
+
       const { clientSecret, paymentMethodId } = purchaseRes?.data || {};
 
       if (!clientSecret) {

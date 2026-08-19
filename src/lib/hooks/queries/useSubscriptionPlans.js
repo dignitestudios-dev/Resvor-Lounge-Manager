@@ -3,7 +3,7 @@ import axios from "../../../axios";
 
 const fetchSubscriptionPlans = async () => {
   const { data } = await axios.get(`/subscriptions/plans`);
-  console.log("🚀 ~ fetchSubscriptionPlans ~ data:", data);
+
   return data;
 };
 

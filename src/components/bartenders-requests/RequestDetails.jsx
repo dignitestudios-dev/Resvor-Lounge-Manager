@@ -10,7 +10,7 @@ import { Button } from "../ui/button";
 import utils from "@/lib/utils";
 
 const RequestDetails = ({ isOpen, onOpenChange, data, onReject, onAccept, loading }) => {
-  console.log("🚀 ~ RequestDetails ~ data:", data)
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="min-w-xl! w-xl!">

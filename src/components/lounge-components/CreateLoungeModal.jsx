@@ -246,7 +246,6 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
         // Reset to step 1 for next time the modal opens
         setStep(1);
       } catch (error) {
-        console.log("error==> 44", error);
         if (error.code === "NO_INTERNET") {
           ErrorToast(error.message);
         } else {
@@ -661,7 +660,10 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
 
                 <div>
                   <label className="text-[14px] font-medium text-black block mb-1">
-                    Lounge Description
+                    Lounge Description{" "}
+                    <span className="text-gray-400 text-[12px] font-normal">
+                      (Optional)
+                    </span>
                   </label>
                   <textarea
                     name="description"
@@ -669,7 +671,8 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
                     value={v2.description}
                     onChange={handleChange2}
                     onBlur={handleBlur2}
-                    placeholder="Describe your business"
+                    maxLength={250}
+                    placeholder="Describe your business (Optional)"
                     className="w-full h-20 rounded-[12px] border-2 border-gray-300 bg-white/10 placeholder:text-gray-400 text-black p-3"
                   />
                   {touched2.description && errors2.description && (

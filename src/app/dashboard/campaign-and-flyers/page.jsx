@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import CampaignAndFlyersGrid from "@/components/campaign-and-flyers/Grid";
-import AddFlyerForm from "@/components/campaign-and-flyers/AddFlyerForm";
+import AddCustomFlyerModal from "@/components/campaign-and-flyers/AddCustomFlyerModal";
 import { Button } from "@/components/ui/button";
 import { History } from "lucide-react";
 import Link from "next/link";
@@ -26,7 +26,16 @@ const CampaignAndFlyers = () => {
             </Button>
           </Link>
 
-          {/* <AddFlyerForm isOpen={openForm} onOpenChange={setOpenForm} /> */}
+          {/* Add Custom Flyer Button */}
+          <Button
+            onClick={() => setOpenForm(true)}
+            className="h-12 text-[14px] px-6 bg-gradient text-white hover:opacity-95 transition-all rounded-[12px] font-semibold"
+          >
+            Add Custom Flyer
+          </Button>
+
+          {/* Add Custom Flyer Modal */}
+          <AddCustomFlyerModal isOpen={openForm} onOpenChange={setOpenForm} />
         </div>
       </div>
 
