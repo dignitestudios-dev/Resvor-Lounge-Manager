@@ -27,9 +27,8 @@ export default function AuthInput({
     <div>
       {/* Label */}
       <label
-        className={`block text-[14px] font-[500] mb-2 ${
-          isDark ? "text-white" : "text-gray-700"
-        }`}
+        className={`block text-[14px] font-[500] mb-2 ${isDark ? "text-white" : "text-gray-700"
+          }`}
       >
         {label}
       </label>
@@ -53,9 +52,8 @@ export default function AuthInput({
             disabled:opacity-50 disabled:cursor-not-allowed
             ${showToggle ? "pr-12" : ""}
             
-            ${
-              isDark
-                ? `
+            ${isDark
+              ? `
                   text-white
                   bg-white/10
                   backdrop-blur-[28px]
@@ -64,7 +62,7 @@ export default function AuthInput({
                   focus:border-white/40
                   focus:ring-2 focus:ring-white/20
                 `
-                : `
+              : `
                   text-gray-800
                   bg-white
                   border border-gray-300
@@ -83,11 +81,10 @@ export default function AuthInput({
           <button
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
-            className={`absolute right-4 top-1/2 -translate-y-1/2 transition-colors ${
-              isDark
+            className={`absolute right-4 top-1/2 -translate-y-1/2 transition-colors ${isDark
                 ? "text-gray-300 hover:text-white"
                 : "text-gray-500 hover:text-gray-800"
-            }`}
+              }`}
           >
             {showPassword ? <FaEye /> : <FaEyeSlash />}
           </button>

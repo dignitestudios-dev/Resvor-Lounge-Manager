@@ -43,6 +43,7 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
     onSubmit: async (values) => {
       try {
         // Pass data to next step
+        setCombinedData((prev) => ({ ...prev, ...values }));
         setRemainingDetails("remainingDetails");
       } catch (error) {
         if (error.code === "NO_INTERNET") {
@@ -93,7 +94,7 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
   };
 
   const handleRemainingData = (data) => {
-    setCombinedData(data);
+    setCombinedData((prev) => ({ ...prev, ...data }));
     setRemainingDetails("floorPlan");
   };
 
@@ -118,13 +119,27 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
       {remainingDetails === "remainingDetails" ? (
         <PersonalDetailsRemaining
           handleNext={handleRemainingData}
-          handlePrevious={handlePrevious}
-          previousData={{ ...values, operatingHours: operatingHours }}
+          handlePrevious={(remainingData) => {
+            if (remainingData) {
+              setCombinedData((prev) => ({ ...prev, ...remainingData }));
+            }
+            setRemainingDetails(false);
+          }}
+          previousData={{
+            ...values,
+            ...combinedData,
+            operatingHours: operatingHours,
+          }}
         />
       ) : remainingDetails === "floorPlan" ? (
         <FloorPlanSetup
           handleNext={handleNext}
-          handlePrevious={handlePrevious}
+          handlePrevious={(floorPlanData) => {
+            if (floorPlanData) {
+              setCombinedData((prev) => ({ ...prev, ...floorPlanData }));
+            }
+            setRemainingDetails("remainingDetails");
+          }}
           combinedData={combinedData}
           setCurrentState={setCurrentState}
         />
@@ -300,20 +315,24 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
               </div>
 
               <div className="mt-4">
-                <AuthInput
-                  label={"Business Location"}
-                  text={"location"}
-                  placeholder={"Enter your Location"}
-                  type={"text"}
-                  id={"location"}
-                  name={"location"}
-                  maxLength={100}
+                <label className="block text-[14px] font-[500] mb-2 text-white">
+                  Business Location
+                </label>
+                <textarea
+                  name="location"
+                  id="location"
                   value={values.location}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  error={errors?.location}
-                  touched={touched?.location}
+                  maxLength={100}
+                  placeholder="Enter your Location"
+                  className="w-full h-20 px-4 py-3 text-sm text-white rounded-[15px] bg-white/10 backdrop-blur-[28px] border border-white/20 placeholder:text-gray-300 placeholder:text-[12px] placeholder:font-light focus:outline-none focus:border-white/40 focus:ring-2 focus:ring-white/20 transition-all duration-200 resize-none"
                 />
+                {touched.location && errors.location && (
+                  <p className="text-red-600 text-xs mt-1">
+                    {errors.location}
+                  </p>
+                )}
               </div>
               {/* <div>
                 <img

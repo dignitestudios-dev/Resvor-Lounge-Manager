@@ -11,6 +11,7 @@ import CreateLoungeModal from "@/components/lounge-components/CreateLoungeModal"
 import AddGalleryImagesModal from "@/components/profile/AddGalleryImagesModal";
 import { useQueryClient } from "@tanstack/react-query";
 import { useGetActiveLounge } from "@/lib/hooks/queries/useLounges";
+import { useAuthMe } from "@/lib/hooks/queries/useQueries";
 import { useUpdateLounge } from "@/lib/hooks/mutations/LoungeMutations";
 import PageLoader from "@/components/common/PageLoader";
 import { ErrorToast } from "@/components/ui/toaster";
@@ -18,6 +19,9 @@ import { ErrorToast } from "@/components/ui/toaster";
 const Profile = () => {
   const queryClient = useQueryClient();
   const { data: activeLounge, isLoading } = useGetActiveLounge();
+  const { data: authMe } = useAuthMe();
+  console.log("activeLounge----> ", authMe)
+
   const updateLoungeMutation = useUpdateLounge();
   const [openEditProfile, setOpenEditProfile] = useState(false);
   const [openEditFloorPlan, setOpenEditFloorPlan] = useState(false);
@@ -68,117 +72,115 @@ const Profile = () => {
     <div className="w-full bg-gray-50 p-6 space-y-6 overflow-auto">
       {/* Business Details */}
       <div className="grid grid-cols-2 gap-2">
-        {/* Multiple Locations */}
-        {/* {selectedLounge && (
-          <div className="bg-white rounded-xl shadow-sm p-6 flex flex-col h-[370px]">
+
+        <div className="flex flex-col gap-3">
+          {/* User Profile Card */}
+          <section className="bg-white rounded-xl shadow-sm p-6 h-full">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold ">Locations</h2>
+              <h2 className="text-xl font-semibold">User Profile</h2>
+            </div>
+
+            <div className="flex justify-center items-center gap-4 mb-4">
+              <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-xl font-bold text-gray-600 uppercase shrink-0">
+                {authMe?.user?.firstName?.[0] || "U"}{authMe?.user?.lastName?.[0] || ""}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-12 gap-2">
+              <div className="bg-gray-100 rounded-md p-3 col-span-6">
+                <p className="text-xs text-gray-500">First Name</p>
+                <p className="text-sm font-medium">{authMe?.user?.firstName || ""}</p>
+              </div>
+              <div className="bg-gray-100 rounded-md p-3 col-span-6">
+                <p className="text-xs text-gray-500">Last Name</p>
+                <p className="text-sm font-medium">{authMe?.user?.lastName || ""}</p>
+              </div>
+              <div className="bg-gray-100 rounded-md p-3 col-span-6">
+                <p className="text-xs text-gray-500">Phone Number</p>
+                <p className="text-sm font-medium">{authMe?.user?.phoneNumber || "—"}</p>
+              </div>
+              <div className="bg-gray-100 rounded-md p-3 col-span-6">
+                <p className="text-xs text-gray-500">Email</p>
+                <p className="text-sm font-medium">{authMe?.user?.email || "—"}</p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <section className="bg-white rounded-xl shadow-sm p-6">
+
+          <div className="flex justify-end mb-3">
+            <button
+              onClick={() => setAddLocation(true)}
+              className="text-black underline cursor-pointer font-medium hover:underline"
+            >
+              Add New Lounge
+            </button>
+          </div>
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Lounge Details</h2>
               <button
-                onClick={() => setAddLocation(true)}
-                className="text-black underline cursor-pointer font-medium hover:underline"
+                onClick={() => setOpenEditProfile(true)}
+                className="cursor-pointer"
               >
-                Add New Lounge
+                <Edit />
               </button>
             </div>
 
-            <div className="overflow-y-auto pr-2 space-y-3">
-              {locations.map((loc, index) => (
-                <div
-                  onClick={() => setSelectedLounge(loc)}
-                  key={index}
-                  className="flex justify-between items-center border-b pb-3 cursor-pointer"
-                >
-                  <div>
-                    <h3 className="font-medium text-sm">{loc.name}</h3>
-                    <p className="text-gray-500 text-sm">{loc.address}</p>
-                    <p className="text-gray-500 text-xs mt-1">{loc.hours}</p>
-                  </div>
-                  {loc._id === selectedLounge?._id && (
-                    <div className="flex gap-3 me-2">
-                      <span className="bg-[#010067] text-white text-[12px] py-2 px-4 rounded-2xl">
-                        Selected
-                      </span>
-                    </div>
-                  )}
-                </div>
-              ))}
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-16 h-16 rounded-full overflow-hidden relative border border-gray-200">
+                <Image
+                  src={activeLounge?.logo?.location || "/images/lounge.jfif"}
+                  alt="Business"
+                  width={64}
+                  height={64}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold">{activeLounge?.name || "Lounge Name"}</h3>
+                <p className="text-gray-500 text-sm">{formattedRole}</p>
+              </div>
             </div>
-          </div>
-        )} */}
 
-
-
-        <section className="bg-white rounded-xl shadow-sm p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Lounge Details</h2>
-            <button
-              onClick={() => setOpenEditProfile(true)}
-              className="cursor-pointer"
-            >
-              <Edit />
-            </button>
-          </div>
-
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 rounded-full overflow-hidden relative border border-gray-200">
-              <Image
-                src={activeLounge?.logo?.location || "/images/lounge.jfif"}
-                alt="Business"
-                width={64}
-                height={64}
-                className="w-full h-full object-cover"
-              />
+            <div className="grid grid-cols-12 gap-2">
+              <div className="bg-gray-100 rounded-md p-3 col-span-6">
+                <p className="text-xs text-gray-500">Business Email Address</p>
+                <p className="text-sm font-medium">{activeLounge?.businessEmail || "designer@gmail.com"}</p>
+              </div>
+              <div className="bg-gray-100 rounded-md p-3 col-span-6">
+                <p className="text-xs text-gray-500">Business Phone Number</p>
+                <p className="text-sm font-medium">{activeLounge?.businessPhone || "+1 856 558 0215"}</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-lg font-semibold">{activeLounge?.name || "Lounge Name"}</h3>
-              <p className="text-gray-500 text-sm">{formattedRole}</p>
+            <div className="grid grid-cols-12 gap-2 mt-2">
+              <div className="bg-gray-100 rounded-md p-3 col-span-6">
+                <p className="text-xs text-gray-500">Operating Hours</p>
+                <p className="text-sm font-medium">
+                  {activeLounge?.operatingHours?.open && activeLounge?.operatingHours?.close
+                    ? `${activeLounge.operatingHours.open} - ${activeLounge.operatingHours.close}`
+                    : "08:00 AM - 10:00 PM"}
+                </p>
+              </div>
+              <div className="bg-gray-100 rounded-md p-3 col-span-6">
+                <p className="text-xs text-gray-500">
+                  Highlight Specialization
+                </p>
+                <p className="text-sm font-medium">{activeLounge?.specialization || "Lorem Ipsum dollar"}</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-12 gap-2 mt-2">
+              <div className="bg-gray-100 rounded-md p-3 col-span-12">
+                <p className="text-xs text-gray-500">Business Location</p>
+                <p className="text-sm font-medium">
+                  {activeLounge?.location?.address || "456 Maple Street, Anytown, NY 12345"}
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-12 gap-2">
-            <div className="bg-gray-100 rounded-md p-3 col-span-6">
-              <p className="text-xs text-gray-500">Business Email Address</p>
-              <p className="text-sm font-medium">{activeLounge?.businessEmail || "designer@gmail.com"}</p>
-            </div>
-            <div className="bg-gray-100 rounded-md p-3 col-span-6">
-              <p className="text-xs text-gray-500">Business Phone Number</p>
-              <p className="text-sm font-medium">{activeLounge?.businessPhone || "+1 856 558 0215"}</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-12 gap-2 mt-2">
-            <div className="bg-gray-100 rounded-md p-3 col-span-6">
-              <p className="text-xs text-gray-500">Operating Hours</p>
-              <p className="text-sm font-medium">
-                {activeLounge?.operatingHours?.open && activeLounge?.operatingHours?.close
-                  ? `${activeLounge.operatingHours.open} - ${activeLounge.operatingHours.close}`
-                  : "08:00 AM - 10:00 PM"}
-              </p>
-            </div>
-            <div className="bg-gray-100 rounded-md p-3 col-span-6">
-              <p className="text-xs text-gray-500">
-                Highlight Specialization
-              </p>
-              <p className="text-sm font-medium">{activeLounge?.specialization || "Lorem Ipsum dollar"}</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-12 gap-2 mt-2">
-            <div className="bg-gray-100 rounded-md p-3 col-span-12">
-              <p className="text-xs text-gray-500">Business Location</p>
-              <p className="text-sm font-medium">
-                {activeLounge?.location?.address || "456 Maple Street, Anytown, NY 12345"}
-              </p>
-            </div>
-          </div>
         </section>
-
-        <div className="flex justify-end items-start mb-4">
-          <button
-            onClick={() => setAddLocation(true)}
-            className="text-black underline cursor-pointer font-medium hover:underline"
-          >
-            Add New Lounge
-          </button>
-        </div>
 
       </div>
 

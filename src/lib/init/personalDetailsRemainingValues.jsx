@@ -8,6 +8,8 @@ export const personalDetailsRemainingValues = (previousData = {}) => ({
   offers: previousData.offers || "",
   location: previousData.location || "",
   role: previousData.role || "lounge_manager",
+  openingTime: previousData.openingTime || "",
+  closingTime: previousData.closingTime || "",
 
   // From PersonalDetailsRemaining (new)
   specialization: previousData.specialization || "",

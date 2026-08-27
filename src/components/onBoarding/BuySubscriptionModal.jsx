@@ -330,10 +330,16 @@ const BuySubscriptionModalContent = ({ onClick, setCompleted, plan }) => {
   );
 };
 
-const BuySubscriptionModal = (props) => (
-  <Elements stripe={getStripe()}>
-    <BuySubscriptionModalContent {...props} />
-  </Elements>
-);
+const BuySubscriptionModal = (props) => {
+  const stripePromise = getStripe();
+  if (!stripePromise) {
+    return <BuySubscriptionModalContent {...props} />;
+  }
+  return (
+    <Elements stripe={stripePromise}>
+      <BuySubscriptionModalContent {...props} />
+    </Elements>
+  );
+};
 
 export default BuySubscriptionModal;

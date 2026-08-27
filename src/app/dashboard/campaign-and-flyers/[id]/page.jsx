@@ -320,14 +320,18 @@ const CampaignAndFlyersDetails = () => {
             <h3 className="section-heading text-2xl font-bold">Location</h3>
             <div className="flex flex-col gap-1">
               <Label className="text-sm font-medium text-black">Address</Label>
-              <Input
+              <textarea
                 name="address"
+                rows={2}
                 value={values.address}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 maxLength={200}
                 placeholder="Enter event address"
-                className={`h-12 ${errors.address && touched.address ? "border-red-500 ring-red-500" : ""}`}
+                className={`w-full px-3 py-2 text-sm rounded-md border border-input bg-transparent text-black placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-primary focus-visible:ring-[3px] outline-none resize-none transition-[color,box-shadow] md:text-sm ${errors.address && touched.address
+                    ? "border-red-500 ring-red-500"
+                    : ""
+                  }`}
               />
               {errors.address && touched.address && (
                 <p className="text-red-600 text-[12px] mt-1">
@@ -434,7 +438,7 @@ const CampaignAndFlyersDetails = () => {
                             <span className="text-[11px] text-white/60 font-semibold min-w-[56px] shrink-0">
                               Location:
                             </span>
-                            <span className="text-[11px] text-white/90 leading-snug break-words">
+                            <span className="text-[11px] text-white/90 leading-snug break-words min-w-0 overflow-hidden">
                               {values.address
                                 ? `${values.address}${values.city ? `, ${values.city}` : ""}`
                                 : "—"}

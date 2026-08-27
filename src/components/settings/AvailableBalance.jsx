@@ -807,8 +807,12 @@ const WithdrawalModalContent = ({ onClose }) => {
 };
 
 const WithdrawalModal = ({ onClose }) => {
+  const stripePromise = getStripe();
+  if (!stripePromise) {
+    return <WithdrawalModalContent onClose={onClose} />;
+  }
   return (
-    <Elements stripe={getStripe()}>
+    <Elements stripe={stripePromise}>
       <WithdrawalModalContent onClose={onClose} />
     </Elements>
   );

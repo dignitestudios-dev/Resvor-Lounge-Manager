@@ -219,7 +219,10 @@ const AddBartenderForm = ({
           </DialogTrigger>
         )}
 
-        <DialogContent>
+        <DialogContent
+          onInteractOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle className={"text-3xl font-bold"}>
               {isEdit ? "Update Worker" : "Add New Worker"}

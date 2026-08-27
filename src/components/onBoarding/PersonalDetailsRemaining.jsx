@@ -2,11 +2,10 @@
 
 import AuthButton from "../auth/AuthButton";
 import { useFormik } from "formik";
-import { LogOutIcon, Upload } from "lucide-react";
+import { ArrowLeft, Upload } from "lucide-react";
 import { personalDetailsRemainingValues } from "@/lib/init/personalDetailsRemainingValues";
 import { personalDetailsRemainingSchema } from "@/lib/schema/onboarding/personalDetailsRemainingSchema";
 import { ErrorToast } from "../ui/toaster";
-import { validateImageResolution } from "@/lib/utils";
 import AddServicesAndPackages from "./Servicespackages";
 
 const PersonalDetailsRemaining = ({
@@ -93,16 +92,16 @@ const PersonalDetailsRemaining = ({
     <div className="flex flex-col justify-center items-center h-auto ">
       <div className="flex justify-end absolute top-20 w-[600px]">
         <button
-          className="group relative bg-white rounded-md p-2 cursor-po inter"
+          className="group relative bg-white rounded-md p-2 cursor-pointer"
           type="button"
-          onClick={() => handlePrevious()}
+          onClick={() => handlePrevious(values)}
         >
           {/* Tooltip text */}
           <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 scale-0 rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-all group-hover:scale-100 group-hover:opacity-100">
-            Logout
+            Back
           </span>
 
-          <LogOutIcon color="black" size={24} />
+          <ArrowLeft color="black" size={24} />
         </button>
       </div>
       <div className="mt-4 xxl:w-[400px] xl:w-[450px] xxl:ml-12 text-center space-y-4">

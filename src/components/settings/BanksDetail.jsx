@@ -391,8 +391,12 @@ const BanksDetailContent = () => {
 };
 
 const BanksDetail = () => {
+  const stripePromise = getStripe();
+  if (!stripePromise) {
+    return <BanksDetailContent />;
+  }
   return (
-    <Elements stripe={getStripe()}>
+    <Elements stripe={stripePromise}>
       <BanksDetailContent />
     </Elements>
   );

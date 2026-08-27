@@ -196,7 +196,7 @@ const EditServiceModal = ({
             className={`text-[22px] font-bold ${isDark ? "text-white" : "text-gray-900"
               }`}
           >
-            Edit Service
+            {initial ? "Edit Service" : "Add Service"}
           </h2>
 
           <button

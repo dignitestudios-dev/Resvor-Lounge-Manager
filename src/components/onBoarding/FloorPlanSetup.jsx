@@ -3,14 +3,13 @@
 import AuthButton from "../auth/AuthButton";
 import { useFormik } from "formik";
 import AuthInput from "../auth/AuthInput";
-import { FaArrowLeftLong } from "react-icons/fa6";
 import { floorPlanSetupValues } from "@/lib/init/floorPlanSetupValues";
 import { floorPlanSetupSchema } from "@/lib/schema/onboarding/floorPlanSetupSchema";
 import { ErrorToast } from "../ui/toaster";
 import { useCreateLounge } from "@/lib/hooks/mutations/OnBoardingMutations";
 import { useUpdateFcmToken } from "@/lib/hooks/mutations/AuthMutations";
 import { updateAuthCache, validateImageResolution } from "@/lib/utils";
-import { LogOutIcon } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { requestForToken } from "@/lib/firebase";
 import Cookies from "js-cookie";
@@ -111,14 +110,14 @@ const FloorPlanSetup = ({ handlePrevious, combinedData = {} }) => {
         <button
           className="group relative bg-white rounded-md p-2 cursor-pointer"
           type="button"
-          onClick={() => handlePrevious()}
+          onClick={() => handlePrevious(values)}
         >
           {/* Tooltip text */}
           <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 scale-0 rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-all group-hover:scale-100 group-hover:opacity-100">
-            Logout
+            Back
           </span>
 
-          <LogOutIcon color="black" size={24} />
+          <ArrowLeft color="black" size={24} />
         </button>
       </div>
       <div className="mt-4 xxl:w-[400px] xxl:ml-12 text-center space-y-4">
