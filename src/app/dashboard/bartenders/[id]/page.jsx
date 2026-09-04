@@ -83,6 +83,11 @@ const BartenderDetails = () => {
                     <p className="text-black text-3xl! font-bold">
                       {bartender.fullName}
                     </p>
+                    {bartender.jobTitle && (
+                      <p className="text-sm font-semibold text-[#0B0E52] mt-0.5">
+                        {bartender.jobTitle}
+                      </p>
+                    )}
                     <p className="text-gray-500">{bartender.email}</p>
                   </div>
                 </div>
@@ -125,6 +130,13 @@ const BartenderDetails = () => {
                 <p className="text-gray-500">Full Name</p>
                 <p className="text-black font-medium text-lg">
                   {bartender.fullName || "—"}
+                </p>
+              </div>
+
+              <div className="py-4 border-b">
+                <p className="text-gray-500">Job Title</p>
+                <p className="text-black font-medium text-lg">
+                  {bartender.jobTitle || "—"}
                 </p>
               </div>
 

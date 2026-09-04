@@ -7,6 +7,9 @@ const createBartender = async (data) => {
   formData.append("fullName", data.fullName);
   formData.append("email", data.email);
   formData.append("password", data.password);
+  if (data.jobTitle) {
+    formData.append("jobTitle", data.jobTitle);
+  }
   formData.append("phoneNumber", data.phoneNumber);
   formData.append("address", data.address);
   if (data.profileImage) {
@@ -34,6 +37,7 @@ const updateBartender = async ({ id, ...data }) => {
     const formData = new FormData();
     if (data.fullName) formData.append("fullName", data.fullName);
     if (data.email) formData.append("email", data.email);
+    if (data.jobTitle) formData.append("jobTitle", data.jobTitle);
     if (data.phoneNumber) formData.append("phoneNumber", data.phoneNumber);
     if (data.address) formData.append("address", data.address);
     formData.append("profileImage", data.profileImage);
@@ -44,6 +48,7 @@ const updateBartender = async ({ id, ...data }) => {
     const payload = {};
     if (data.fullName) payload.fullName = data.fullName;
     if (data.email) payload.email = data.email;
+    if (data.jobTitle) payload.jobTitle = data.jobTitle;
     if (data.phoneNumber) payload.phoneNumber = data.phoneNumber;
     if (data.address) payload.address = data.address;
     if (data.removePFP !== undefined) payload.removePFP = data.removePFP;

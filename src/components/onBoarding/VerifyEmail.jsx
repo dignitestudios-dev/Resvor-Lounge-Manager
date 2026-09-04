@@ -261,8 +261,8 @@ const VerifyEmail = ({ email, handlePrevious }) => {
                 )}
               </span>
             </div>
-            <div className="w-full flex justify-center pl-4 mt-4 space-y-4 ">
-              <div className="w-[360px] ">
+            <div className="w-full flex justify-center pl-4 mt-4 space-y-4">
+              <div className="w-[360px]">
                 <AuthButton
                   text="Verify"
                   disabled={verifyEmailMutation.isPending}
@@ -270,18 +270,15 @@ const VerifyEmail = ({ email, handlePrevious }) => {
                 />
               </div>
             </div>
-            {/* <div className="w-full flex justify-center pl-4 mt-4 space-y-4 ">
+            <div className="w-full flex justify-center pl-4 mt-3">
               <button
-                onClick={() => handlePrevious()}
+                onClick={() => handlePrevious?.()}
                 type="button"
-                className="w-[360px] px-4 py-2 text-sm font-semibold text-red-500 
-             border border-red-400 rounded-lg 
-             hover:bg-red-50 hover:text-red-600 
-             transition-colors duration-200 ease-in-out"
+                className="w-[360px] h-[52px] rounded-[15px] font-semibold text-[15px] text-white/90 border border-white/30 hover:bg-white/10 transition-colors flex items-center justify-center cursor-pointer"
               >
-                Wrong email? Change it
+                Change Email
               </button>
-            </div> */}
+            </div>
           </div>
         </form>
       </div>

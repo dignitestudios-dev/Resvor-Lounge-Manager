@@ -83,6 +83,7 @@ const AddBartenderForm = ({
         profileImage: null,
         fullName: data?.fullName || "",
         email: data?.email || "",
+        jobTitle: data?.jobTitle || "",
         phoneNumber: stripCountryCode(data?.phoneNumber) || "",
         address: data?.address || "",
       }
@@ -90,6 +91,7 @@ const AddBartenderForm = ({
         profileImage: null,
         fullName: "",
         email: "",
+        jobTitle: "",
         phoneNumber: "",
         address: "",
         password: "",
@@ -111,6 +113,7 @@ const AddBartenderForm = ({
             id: data._id,
             fullName: values.fullName,
             email: values.email,
+            jobTitle: values.jobTitle,
             phoneNumber: phoneToE164(values.phoneNumber),
             address: values.address,
             removePFP: values.profileImage === "remove" ? true : undefined,
@@ -183,6 +186,7 @@ const AddBartenderForm = ({
         fullName: pendingCreateData.fullName,
         email: pendingCreateData.email,
         password: pendingCreateData.password,
+        jobTitle: pendingCreateData.jobTitle,
         phoneNumber: phoneToE164(pendingCreateData.phoneNumber),
         address: pendingCreateData.address,
         profileImage: pendingCreateData.profileImage instanceof File ? pendingCreateData.profileImage : null,
@@ -352,7 +356,26 @@ const AddBartenderForm = ({
                     autoComplete="off"
                   />
                 </div>
-
+                {/* ── Job Title ── */}
+                <div className="w-full flex flex-col gap-1">
+                  <Label className={"text-base text-black"}>Job Title</Label>
+                  <Input
+                    id="jobTitle"
+                    name="jobTitle"
+                    placeholder="Job Title"
+                    className={`h-14 ${formik.touched.jobTitle && formik.errors.jobTitle
+                      ? "border-red-500"
+                      : ""
+                      }`}
+                    value={formik.values.jobTitle}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
+                  <FieldError
+                    touched={formik.touched.jobTitle}
+                    error={formik.errors.jobTitle}
+                  />
+                </div>
                 {/* ── Address ── */}
                 <div className="w-full flex flex-col gap-1">
                   <Label className={"text-base text-black"}>Address</Label>

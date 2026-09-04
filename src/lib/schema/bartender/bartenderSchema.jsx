@@ -79,6 +79,61 @@ export const createBartenderSchema = Yup.object({
             .every((word) => /^[A-ZÀ-Ÿ][\p{L}'-]*$/u.test(word))
           : true
     ),
+  jobTitle: Yup.string()
+    .required("Job Title is required.")
+    .min(1, "Job Title must be at least 1 character.")
+    .max(100, "Job Title cannot exceed 100 characters.")
+
+    // Not empty after trim
+    .test(
+      "not-empty-after-trim",
+      "Full name cannot be empty or only spaces.",
+      (value) => value?.trim().length > 0
+    )
+
+    // No leading spaces
+    .test(
+      "no-leading-space",
+      "Job Title cannot start with a space.",
+      (value) => (value ? !value.startsWith(" ") : true)
+    )
+
+    // No multiple consecutive spaces
+    .test(
+      "no-multiple-spaces",
+      "Job Title cannot contain multiple consecutive spaces.",
+      (value) => (value ? !/ {2,}/.test(value) : true)
+    )
+
+    // Only allowed characters:
+    // Unicode letters, spaces, apostrophes, hyphens
+    .matches(
+      /^[\p{L}' -]+$/u,
+      "Job Title can only contain letters, spaces, hyphens (-), and apostrophes (')."
+    )
+
+    // Prevent numbers
+    .test("no-numbers", "Job Title cannot contain numbers.", (value) =>
+      value ? !/\d/.test(value) : true
+    )
+
+    // Prevent HTML/script tags
+    .test("no-html", "HTML or script content is not allowed.", (value) =>
+      value ? !/<[^>]*>|<\/[^>]*>/g.test(value) : true
+    )
+
+    // Sentence Case / Title Case validation
+    .test(
+      "sentence-case",
+      "Each word must start with a capital letter.",
+      (value) =>
+        value
+          ? value
+            .trim()
+            .split(" ")
+            .every((word) => /^[A-ZÀ-Ÿ][\p{L}'-]*$/u.test(word))
+          : true
+    ),
 
   email: Yup.string()
     .required("Email address is required")
@@ -146,6 +201,61 @@ export const editBartenderSchema = Yup.object({
       return value.size <= 5 * 1024 * 1024;
     }),
 
+  jobTitle: Yup.string()
+    .required("Job Title is required.")
+    .min(1, "Job Title must be at least 1 character.")
+    .max(100, "Job Title cannot exceed 100 characters.")
+
+    // Not empty after trim
+    .test(
+      "not-empty-after-trim",
+      "Full name cannot be empty or only spaces.",
+      (value) => value?.trim().length > 0
+    )
+
+    // No leading spaces
+    .test(
+      "no-leading-space",
+      "Job Title cannot start with a space.",
+      (value) => (value ? !value.startsWith(" ") : true)
+    )
+
+    // No multiple consecutive spaces
+    .test(
+      "no-multiple-spaces",
+      "Job Title cannot contain multiple consecutive spaces.",
+      (value) => (value ? !/ {2,}/.test(value) : true)
+    )
+
+    // Only allowed characters:
+    // Unicode letters, spaces, apostrophes, hyphens
+    .matches(
+      /^[\p{L}' -]+$/u,
+      "Job Title can only contain letters, spaces, hyphens (-), and apostrophes (')."
+    )
+
+    // Prevent numbers
+    .test("no-numbers", "Job Title cannot contain numbers.", (value) =>
+      value ? !/\d/.test(value) : true
+    )
+
+    // Prevent HTML/script tags
+    .test("no-html", "HTML or script content is not allowed.", (value) =>
+      value ? !/<[^>]*>|<\/[^>]*>/g.test(value) : true
+    )
+
+    // Sentence Case / Title Case validation
+    .test(
+      "sentence-case",
+      "Each word must start with a capital letter.",
+      (value) =>
+        value
+          ? value
+            .trim()
+            .split(" ")
+            .every((word) => /^[A-ZÀ-Ÿ][\p{L}'-]*$/u.test(word))
+          : true
+    ),
 
   address: Yup.string()
     .required("Address is required")

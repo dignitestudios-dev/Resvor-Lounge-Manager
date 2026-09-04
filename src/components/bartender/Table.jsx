@@ -92,7 +92,7 @@ const Table = () => {
               <tr className="bg-[#E8E8FF]">
                 <th
                   onClick={() => requestSort("fullName")}
-                  className="w-1/5 px-4 py-5 text-left text-nowrap cursor-pointer select-none"
+                  className="w-[20%] px-4 py-5 text-left text-nowrap cursor-pointer select-none"
                 >
                   Name
                   {sortConfig.key === "fullName" ? (
@@ -103,12 +103,25 @@ const Table = () => {
                     )
                   ) : null}
                 </th>
-                <th className="w-1/5 px-4 py-5 text-left text-nowrap">
+                <th
+                  onClick={() => requestSort("jobTitle")}
+                  className="w-[15%] px-4 py-5 text-left text-nowrap cursor-pointer select-none"
+                >
+                  Job Title
+                  {sortConfig.key === "jobTitle" ? (
+                    sortConfig.direction === "asc" ? (
+                      <span> ↑</span>
+                    ) : (
+                      <span> ↓</span>
+                    )
+                  ) : null}
+                </th>
+                <th className="w-[20%] px-4 py-5 text-left text-nowrap">
                   Email Address
                 </th>
-                <th className="w-1/5 px-4 py-5 text-left text-nowrap">Number</th>
-                <th className="w-1/5 px-4 py-5 text-left text-nowrap">Address</th>
-                <th className="w-1/5 px-4 py-5 text-center text-nowrap">Action</th>
+                <th className="w-[15%] px-4 py-5 text-left text-nowrap">Number</th>
+                <th className="w-[20%] px-4 py-5 text-left text-nowrap">Address</th>
+                <th className="w-[10%] px-4 py-5 text-center text-nowrap">Action</th>
               </tr>
             </thead>
 
@@ -136,6 +149,15 @@ const Table = () => {
                         {bartender.fullName}
                       </span>
                     </div>
+                  </td>
+
+                  {/* Job Title */}
+                  <td
+                    className="px-4 py-6 cursor-pointer truncate"
+                    onClick={() => handleGoToDetailsPage(bartender._id)}
+                    title={bartender.jobTitle}
+                  >
+                    {bartender.jobTitle || "—"}
                   </td>
 
                   {/* Email */}

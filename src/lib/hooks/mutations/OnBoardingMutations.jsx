@@ -4,6 +4,7 @@ import {
   submitSignUp,
   submitVerifyEmail,
   submitVerifyMobileNumber,
+  submitUpdatePhoneNumber,
   submitWalletTopup,
 } from "../api/Post";
 
@@ -20,6 +21,11 @@ export const useVerifyEmail = () =>
 export const useVerifyMobileNumber = () =>
   useMutation({
     mutationFn: submitVerifyMobileNumber,
+  });
+
+export const useUpdatePhoneNumber = () =>
+  useMutation({
+    mutationFn: submitUpdatePhoneNumber,
   });
 
 export const useCreateLounge = () =>

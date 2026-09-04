@@ -362,3 +362,8 @@ export const submitChangePassword = async (payload) => {
 
   return data;
 };
+
+export const submitUpdatePhoneNumber = async (payload) => {
+  const { data } = await axios.patch("/auth/onboarding/phone-number", payload);
+  return data;
+};

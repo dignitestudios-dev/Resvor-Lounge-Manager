@@ -466,7 +466,7 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
                     />
                   </div>
                 </div>
-
+{/* 
                 <div className="grid grid-cols-1 gap-3">
                   <div className="w-full">
                     <AuthInput
@@ -485,7 +485,7 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
                       touched={touched1?.offers}
                     />
                   </div>
-                </div>
+                </div> */}
 
                 <div>
                   <LoungeTags

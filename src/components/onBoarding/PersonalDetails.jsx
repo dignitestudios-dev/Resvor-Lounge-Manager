@@ -284,7 +284,7 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-3">
+              {/* <div className="grid grid-cols-1 gap-3">
                 <div className="w-full">
                   <AuthInput
                     label={"Highlight Offers"}
@@ -301,7 +301,7 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
                     touched={touched?.offers}
                   />
                 </div>
-              </div>
+              </div> */}
 
               <div className="mt-4">
                 <LoungeTags

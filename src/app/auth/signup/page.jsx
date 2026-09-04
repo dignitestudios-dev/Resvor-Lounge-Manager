@@ -174,7 +174,11 @@ function SignUpContent() {
         );
       case "verify_mobile":
         return (
-          <VerifyPhone email={email || user?.email} handlePrevious={handleSoftLogout} />
+          <VerifyPhone
+            email={email || user?.email}
+            phoneNumber={user?.phoneNumber}
+            handlePrevious={handleSoftLogout}
+          />
         );
       case "buy_subscription":
         return <Subscription handlePrevious={handleSoftLogout} />;

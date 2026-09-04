@@ -83,8 +83,10 @@ const AddShiftAndScheduling = ({
   const isPublished = (data?.status || "").toLowerCase() === "published";
 
   const bartendersData = bartendersResponse?.data || [];
-  const filteredBartenders = bartendersData.filter((b) =>
-    b.fullName?.toLowerCase().includes(searchVal.toLowerCase())
+  const filteredBartenders = bartendersData.filter(
+    (b) =>
+      b.fullName?.toLowerCase().includes(searchVal.toLowerCase()) ||
+      b.jobTitle?.toLowerCase().includes(searchVal.toLowerCase())
   );
 
   // Formik configuration
@@ -689,7 +691,12 @@ const AddShiftAndScheduling = ({
                                   }}
                                   className="h-4 w-4 rounded text-blue-900 border-gray-300 focus:ring-blue-800"
                                 />
-                                <span className="text-black font-medium">{bartender.fullName}</span>
+                                <div className="flex flex-col min-w-0">
+                                  <span className="text-black font-medium truncate">{bartender.fullName}</span>
+                                  {bartender.jobTitle && (
+                                    <span className="text-xs text-gray-500 truncate">{bartender.jobTitle}</span>
+                                  )}
+                                </div>
                               </label>
                             );
                           })

@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFormik } from "formik";
 import AuthButton from "../auth/AuthButton";
 // import { forgotLogo } from "../../assets/export";
@@ -12,12 +12,26 @@ import { useVerifyMobileNumber } from "@/lib/hooks/mutations/OnBoardingMutations
 import { ErrorToast } from "../ui/toaster";
 import { LogOutIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { updateAuthCache } from "@/lib/utils";
+import { formatPhoneNumber, updateAuthCache } from "@/lib/utils";
+import ChangePhoneModal from "./ChangePhoneModal";
+import { useAuthContext } from "@/lib/context/AuthProvider";
 
-const VerifyPhone = ({ handleNext, handlePrevious }) => {
+const VerifyPhone = ({ handleNext, handlePrevious, phoneNumber }) => {
   const inputs = useRef([]);
   const verifyMobileMutation = useVerifyMobileNumber();
   const queryClient = useQueryClient();
+  const { user } = useAuthContext();
+
+  const [displayPhone, setDisplayPhone] = useState(
+    phoneNumber || user?.phoneNumber || ""
+  );
+  const [openChangePhone, setOpenChangePhone] = useState(false);
+
+  useEffect(() => {
+    if (phoneNumber || user?.phoneNumber) {
+      setDisplayPhone(phoneNumber || user?.phoneNumber);
+    }
+  }, [phoneNumber, user?.phoneNumber]);
 
   const [otpDisplay, setOtpDisplay] = useState(Array(5).fill(""));
   const [isActive, setIsActive] = useState(true);
@@ -201,7 +215,8 @@ const VerifyPhone = ({ handleNext, handlePrevious }) => {
             verification
           </p>
           <p className="xxl:text-[26px] text-[16px] text-[#E6E6E6] w-[384px] ">
-            Please enter OTP sent to your phone.
+            Please enter OTP sent to your phone
+            {displayPhone ? ` (${formatPhoneNumber(displayPhone)})` : ""}.
           </p>
         </div>
 
@@ -263,6 +278,15 @@ const VerifyPhone = ({ handleNext, handlePrevious }) => {
                 />
               </div>
             </div>
+            <div className="w-full flex justify-center pl-4 mt-3">
+              <button
+                onClick={() => setOpenChangePhone(true)}
+                type="button"
+                className="w-[360px] h-[52px] rounded-[15px] font-semibold text-[15px] text-white/90 border border-white/30 hover:bg-white/10 transition-colors flex items-center justify-center cursor-pointer"
+              >
+                Change Phone Number
+              </button>
+            </div>
           </div>
         </form>
       </div>
@@ -276,6 +300,21 @@ const VerifyPhone = ({ handleNext, handlePrevious }) => {
           description="Your number has been verified successfully."
         />
       )}
+
+      {/* Change Phone Number Modal */}
+      <ChangePhoneModal
+        isOpen={openChangePhone}
+        onOpenChange={setOpenChangePhone}
+        currentPhone={displayPhone}
+        onSuccess={(newPhone) => {
+          setDisplayPhone(newPhone);
+          setOtpDisplay(Array(5).fill(""));
+          handleChange({
+            target: { name: "otp", value: "" },
+          });
+          handleRestart();
+        }}
+      />
     </div>
   );
 };
