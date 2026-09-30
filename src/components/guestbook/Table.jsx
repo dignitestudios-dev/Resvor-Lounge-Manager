@@ -139,13 +139,51 @@ const Table = ({
                   >
                     <td className="px-4 py-6">
                       <div className="flex items-center gap-3">
-                        {/* <div
-                          className="h-[43px] w-[43px] rounded-full bg-cover bg-center bg-primary"
-                          style={{
-                            backgroundImage: `url(${"/images/profile.png"})`,
-                          }}
-                        /> */}
-                        {guest.fullName.slice(0, 20)}...{""}
+                        {(() => {
+                          const photoUrl =
+                            guest.photo?.location ||
+                            guest.photo?.url ||
+                            (typeof guest.photo === "string" ? guest.photo : null) ||
+                            guest.profileImage?.location ||
+                            guest.profileImage?.url ||
+                            (typeof guest.profileImage === "string"
+                              ? guest.profileImage
+                              : null);
+
+                          const displayName =
+                            guest.fullName ||
+                            `${guest.firstName || ""} ${guest.lastName || ""}`.trim() ||
+                            "Guest";
+
+                          if (photoUrl) {
+                            return (
+                              <img
+                                src={photoUrl}
+                                alt={displayName}
+                                className="h-[43px] w-[43px] rounded-full object-cover shrink-0 border border-gray-200"
+                              />
+                            );
+                          }
+
+                          return (
+                            <div className="h-[43px] w-[43px] rounded-full bg-[#E8E8FF] text-primary font-semibold flex items-center justify-center text-sm shrink-0">
+                              {(
+                                guest.firstName?.[0] ||
+                                guest.fullName?.[0] ||
+                                "G"
+                              ).toUpperCase()}
+                            </div>
+                          );
+                        })()}
+                        <span className="font-medium text-gray-900">
+                          {(() => {
+                            const name =
+                              guest.fullName ||
+                              `${guest.firstName || ""} ${guest.lastName || ""}`.trim() ||
+                              "Guest";
+                            return name.length > 30 ? `${name.slice(0, 30)}...` : name;
+                          })()}
+                        </span>
                       </div>
                     </td>
                     <td className="px-4 py-6">{guest.email}</td>
