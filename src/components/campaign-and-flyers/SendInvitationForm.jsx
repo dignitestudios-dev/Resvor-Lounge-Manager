@@ -46,9 +46,35 @@ const SendInvitationForm = ({ isOpen, onOpenChange, onSendInvitation, image, add
     setSelectedGuests(selectedGuests.filter((g) => g !== email));
   };
 
-  const handleGuestSelect = (email) => {
-    if (!selectedGuests.includes(email)) {
-      setSelectedGuests([email, ...selectedGuests]);
+  const handleGuestToggle = (email) => {
+    if (!email) return;
+    if (selectedGuests.includes(email)) {
+      setSelectedGuests(selectedGuests.filter((g) => g !== email));
+    } else {
+      setSelectedGuests([...selectedGuests, email]);
+    }
+  };
+
+  const validGuestEmails = guests.map((g) => g.email).filter(Boolean);
+  const isAllSelected =
+    validGuestEmails.length > 0 &&
+    validGuestEmails.every((email) => selectedGuests.includes(email));
+
+  const handleToggleSelectAll = () => {
+    if (isAllSelected) {
+      // Deselect all guestbook emails, keep custom ones if any
+      setSelectedGuests(
+        selectedGuests.filter((email) => !validGuestEmails.includes(email))
+      );
+    } else {
+      // Select all guestbook emails
+      const newSelected = [...selectedGuests];
+      validGuestEmails.forEach((email) => {
+        if (!newSelected.includes(email)) {
+          newSelected.push(email);
+        }
+      });
+      setSelectedGuests(newSelected);
     }
   };
 
@@ -191,31 +217,56 @@ const SendInvitationForm = ({ isOpen, onOpenChange, onSendInvitation, image, add
 
                   {/* Selected Guests Tags */}
                   {selectedGuests?.length > 0 && (
-                    <div className="border-2 rounded-xl p-4 max-h-28 overflow-y-auto flex flex-wrap gap-2 mt-2">
-                      {selectedGuests.map((email, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-lg"
+                    <div className="flex flex-col gap-1.5 mt-2">
+                      <div className="flex items-center justify-between px-0.5">
+                        <span className="text-xs font-semibold text-gray-600">
+                          Selected Recipients ({selectedGuests.length})
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedGuests([])}
+                          className="text-xs text-red-500 hover:text-red-700 hover:underline cursor-pointer"
                         >
-                          <span className="text-sm text-gray-700">{email}</span>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveGuest(email)}
-                            className="text-gray-500 hover:text-gray-700 cursor-pointer"
+                          Clear all
+                        </button>
+                      </div>
+                      <div className="border-2 rounded-xl p-3 max-h-28 overflow-y-auto flex flex-wrap gap-2">
+                        {selectedGuests.map((email, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-1.5 bg-gray-100 px-2.5 py-1 rounded-lg"
                           >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
+                            <span className="text-xs text-gray-700 font-medium">{email}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveGuest(email)}
+                              className="text-gray-400 hover:text-gray-700 cursor-pointer"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
 
                 {/* Guests List */}
                 <div className="flex flex-col gap-2">
-                  <Label className="text-base font-medium text-black">
-                    Guests
-                  </Label>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-base font-medium text-black">
+                      Guests {validGuestEmails.length > 0 && `(${selectedGuests.filter((e) => validGuestEmails.includes(e)).length}/${validGuestEmails.length})`}
+                    </Label>
+                    {validGuestEmails.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={handleToggleSelectAll}
+                        className="text-xs font-semibold text-primary hover:underline cursor-pointer focus:outline-none"
+                      >
+                        {isAllSelected ? "Deselect All" : "Select All"}
+                      </button>
+                    )}
+                  </div>
                   <div className="border-2 rounded-xl p-4 max-h-[240px] overflow-y-auto">
                     {isGuestsLoading ? (
                       <div className="flex justify-center items-center py-8">
@@ -228,33 +279,37 @@ const SendInvitationForm = ({ isOpen, onOpenChange, onSendInvitation, image, add
                           return (
                             <div
                               key={guest._id}
-                              onClick={() => handleGuestSelect(guest.email)}
-                              className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer truncate transition-all ${isSelected
-                                ? "bg-primary/8 border border-primary/20"
-                                : "hover:bg-gray-50 border border-transparent"
+                              onClick={() => handleGuestToggle(guest.email)}
+                              className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-all select-none border ${isSelected
+                                ? "bg-primary/10 border-primary/30"
+                                : "hover:bg-gray-50 border-gray-100"
                                 }`}
                             >
+                              {/* Checkbox indicator */}
+                              <div
+                                className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 transition-colors border ${
+                                  isSelected
+                                    ? "bg-primary border-primary text-white"
+                                    : "border-gray-300 bg-white"
+                                }`}
+                              >
+                                {isSelected && <Check className="w-3.5 h-3.5 stroke-[2.5]" />}
+                              </div>
+
                               {/* Avatar */}
-                              <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-base flex-shrink-0">
+                              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm flex-shrink-0">
                                 👤
                               </div>
 
                               {/* Name + Email */}
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-gray-900 truncate overflow-x-hidden w-[280px]">
-                                  {guest.fullName}
+                                <p className="text-sm font-medium text-gray-900 truncate">
+                                  {guest.fullName || "Guest"}
                                 </p>
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs text-gray-500 truncate">
                                   {guest.email}
                                 </p>
                               </div>
-
-                              {/* Checkmark when selected */}
-                              {isSelected && (
-                                <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                                  <Check className="w-3 h-3 text-white" />
-                                </div>
-                              )}
                             </div>
                           );
                         })}

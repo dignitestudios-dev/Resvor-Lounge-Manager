@@ -350,7 +350,7 @@ const AddServiceForm = ({
               </Button>
             ) : (
               <Button className={"border-2 h-12 text-[14px] px-6"}>
-                Add New Service
+                Add  Services & Event Offerings
               </Button>
             )}
           </DialogTrigger>
@@ -358,7 +358,7 @@ const AddServiceForm = ({
         <DialogContent className="max-w-md rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold">
-              {isEdit ? "Edit Service" : "Add New Service"}
+              {isEdit ? "Edit Service" : "Add  Services & Event Offerings"}
             </DialogTitle>
             <DialogDescription asChild>
               <form onSubmit={handleSubmit} className="space-y-4 mt-4">
