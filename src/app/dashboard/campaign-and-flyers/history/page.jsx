@@ -120,7 +120,7 @@ const CampaignHistoryPage = () => {
                         </div>
                       </td>
                       <td className="px-4 py-6 font-semibold text-gray-800 capitalize">
-                        {campaign.channel || "Email"} Campaign
+                        {campaign.channel?.toLowerCase() === "sms" ? "SMS" : campaign.channel || "Email"} Campaign
                       </td>
                       <td className="px-4 py-6 text-gray-500 text-sm">
                         {formatDate(campaign.sentAt || campaign.createdAt)}

@@ -170,7 +170,9 @@ const CampaignDetailPage = () => {
 
                   <div>
                     <p className="text-xs text-gray-400 font-semibold uppercase">Channel</p>
-                    <p className="text-sm font-semibold text-gray-800 mt-2 capitalize">{campaign.channel || "email"}</p>
+                    <p className="text-sm font-semibold text-gray-800 mt-2 capitalize">
+                      {campaign.channel?.toLowerCase() === "sms" ? "SMS" : campaign.channel || "email"}
+                    </p>
                   </div>
 
                   <div>

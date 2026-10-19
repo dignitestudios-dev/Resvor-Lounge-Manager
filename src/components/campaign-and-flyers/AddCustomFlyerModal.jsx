@@ -141,7 +141,10 @@ const AddCustomFlyerModal = ({ isOpen, onOpenChange }) => {
     setOpenInvForm(true);
   };
 
-  const handleSendInvitation = () => {
+  const [invitationChannel, setInvitationChannel] = useState("email");
+
+  const handleSendInvitation = (channel) => {
+    setInvitationChannel(channel || "email");
     setOpenInvForm(false);
     setConfirmPopup(true);
   };
@@ -290,6 +293,7 @@ const AddCustomFlyerModal = ({ isOpen, onOpenChange }) => {
       {/* Step 3: Confirmation Popup */}
       <ConfirmPopup
         isOpen={confirmPopup}
+        channel={invitationChannel}
         onOpenChange={(open) => {
           setConfirmPopup(open);
           if (!open) {

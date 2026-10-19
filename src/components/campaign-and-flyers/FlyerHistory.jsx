@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, RefreshCw, X, ChevronLeft, Mail, Users, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { Loader2, RefreshCw, X, ChevronLeft, Mail, Smartphone, Users, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import { useGetCampaigns, useGetCampaignById } from "@/lib/hooks/queries/useQueries";
 import { useRetryCampaign } from "@/lib/hooks/mutations/CampaignMutations";
 import { useQueryClient } from "@tanstack/react-query";
@@ -167,9 +167,18 @@ const CampaignDetail = ({ campaignId, onBack }) => {
       <div className="grid grid-cols-2 gap-3 mb-5">
         <div className="bg-gray-50 rounded-xl p-4">
           <p className="text-xs text-gray-400 mb-1 flex items-center gap-1">
-            <Mail className="w-3.5 h-3.5" /> Channel
+            {campaign.channel === "phone" || campaign.channel === "sms" ? (
+              <Smartphone className="w-3.5 h-3.5" />
+            ) : (
+              <Mail className="w-3.5 h-3.5" />
+            )}{" "}
+            Channel
           </p>
-          <p className="text-sm font-semibold capitalize">{campaign.channel || "email"}</p>
+          <p className="text-sm font-semibold capitalize">
+            {campaign.channel === "sms" || campaign.channel === "phone"
+              ? "SMS"
+              : campaign.channel || "email"}
+          </p>
         </div>
         <div className="bg-gray-50 rounded-xl p-4">
           <p className="text-xs text-gray-400 mb-1 flex items-center gap-1">
@@ -262,7 +271,11 @@ const CampaignList = ({ onSelect }) => {
                 <img src={imgUrl} alt="flyer" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <Mail className="w-6 h-6 text-gray-300" />
+                  {campaign.channel === "phone" || campaign.channel === "sms" ? (
+                    <Smartphone className="w-6 h-6 text-gray-300" />
+                  ) : (
+                    <Mail className="w-6 h-6 text-gray-300" />
+                  )}
                 </div>
               )}
             </div>
@@ -271,7 +284,10 @@ const CampaignList = ({ onSelect }) => {
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2 mb-1">
                 <p className="text-sm font-semibold text-gray-800 truncate capitalize">
-                  {campaign.channel || "Email"} Campaign
+                  {campaign.channel === "sms" || campaign.channel === "phone"
+                    ? "SMS"
+                    : campaign.channel || "Email"}{" "}
+                  Campaign
                 </p>
                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold flex-shrink-0 ${st.cls}`}>
                   {st.icon} {st.label}
