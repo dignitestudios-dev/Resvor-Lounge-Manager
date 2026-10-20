@@ -173,7 +173,10 @@ const CampaignAndFlyersDetails = () => {
     }
   };
 
-  const handleSendSuccess = () => {
+  const [invitationChannel, setInvitationChannel] = useState("email");
+
+  const handleSendSuccess = (channel) => {
+    setInvitationChannel(channel || "email");
     setOpenInvForm(false);
     setConfirmPopup(true);
   };
@@ -489,6 +492,7 @@ const CampaignAndFlyersDetails = () => {
       {/* Confirmation Modal */}
       <ConfirmPopup
         isOpen={confirmPopup}
+        channel={invitationChannel}
         onOpenChange={(open) => {
           setConfirmPopup(open);
           if (!open) {

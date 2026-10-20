@@ -7,7 +7,10 @@ import {
   DialogHeader,
 } from "@/components/ui/dialog";
 
-const ConfirmPopup = ({ isOpen, onOpenChange }) => {
+const ConfirmPopup = ({ isOpen, onOpenChange, channel = "email" }) => {
+  const isPhone = channel === "phone" || channel === "sms";
+  const channelLabel = isPhone ? "SMS" : "Email";
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -19,10 +22,10 @@ const ConfirmPopup = ({ isOpen, onOpenChange }) => {
               </div>
 
               <h3 className="text-[#181818] text-2xl font-bold text-center">
-                Invitation Sent{" "}
+                Invitation Sent
               </h3>
               <p className="text-[#565656] text-center">
-                Your invitation sent to all guests via Email and SMS
+                Your invitation was sent to all guests via {channelLabel}
               </p>
             </div>
           </DialogDescription>

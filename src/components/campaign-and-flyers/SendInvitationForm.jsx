@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,19 +10,102 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { X, Plus, Loader2, Check } from "lucide-react";
+import {
+  X,
+  Plus,
+  Loader2,
+  Check,
+  Mail,
+  Phone,
+  Smartphone,
+  ArrowLeft,
+  Search,
+  ChevronRight,
+  CheckCircle2,
+} from "lucide-react";
 import { useGetGuestbook } from "@/lib/hooks/queries/useGuestbook";
 import { useCreateCampaign } from "@/lib/hooks/mutations/CampaignMutations";
 import { useGetMySubscription } from "@/lib/hooks/queries/useSubscriptionPlans";
 import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
+import { phoneFormatter } from "@/lib/utils";
 import FlyerLimitModal from "./FlyerLimitModal";
 
-const SendInvitationForm = ({ isOpen, onOpenChange, onSendInvitation, image, additionalInfo }) => {
-  const [selectedGuests, setSelectedGuests] = useState([]);
+// Strict email regex
+const emailRegex =
+  /^(?!.*\.\.)(?!.*\.$)[A-Za-z0-9][A-Za-z0-9._+-]*@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
+
+// Helper to normalize phone numbers to E.164 (+1XXXXXXXXXX)
+const normalizePhone = (input) => {
+  if (!input) return "";
+  const trimmed = String(input).trim();
+  if (trimmed.startsWith("+")) {
+    const digits = trimmed.slice(1).replace(/\D/g, "");
+    return `+${digits}`;
+  }
+  const digits = trimmed.replace(/\D/g, "");
+  if (digits.length === 11 && digits.startsWith("1")) {
+    return `+${digits}`;
+  }
+  if (digits.length === 10) {
+    return `+1${digits}`;
+  }
+  if (digits.length > 10) {
+    return `+${digits}`;
+  }
+  return digits ? `+1${digits}` : "";
+};
+
+// Validate phone digits length
+const isValidPhone = (input) => {
+  if (!input) return false;
+  const digits = String(input).replace(/\D/g, "");
+  return digits.length >= 10 && digits.length <= 15;
+};
+
+// Helper to format phone for tag/chip display
+const formatPhoneTag = (phone) => {
+  if (!phone) return "";
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length === 11 && digits.startsWith("1")) {
+    return phoneFormatter(digits.slice(1));
+  }
+  if (digits.length === 10) {
+    return phoneFormatter(digits);
+  }
+  return phone;
+};
+
+const SendInvitationForm = ({
+  isOpen,
+  onOpenChange,
+  onSendInvitation,
+  image,
+  additionalInfo,
+}) => {
+  // Step 1: "channel", Step 2: "recipients"
+  const [step, setStep] = useState("channel");
+  const [selectedChannel, setSelectedChannel] = useState("email"); // "email" | "sms"
+
+  // Recipients per channel so switching channel does not lose data
+  const [emailRecipients, setEmailRecipients] = useState([]);
+  const [phoneRecipients, setPhoneRecipients] = useState([]);
+
+  // Inputs
   const [customEmail, setCustomEmail] = useState("");
+  const [customPhone, setCustomPhone] = useState("");
+  const [searchGuestQuery, setSearchGuestQuery] = useState("");
+
   const [showLimitModal, setShowLimitModal] = useState(false);
 
-  // Fetch all guests from guestbook API (high limit to load all)
+  // Reset to channel step whenever dialog is opened
+  useEffect(() => {
+    if (isOpen) {
+      setStep("channel");
+      setSearchGuestQuery("");
+    }
+  }, [isOpen]);
+
+  // Fetch all guests from guestbook API
   const { data: guestbookData, isLoading: isGuestsLoading } = useGetGuestbook({
     page: 1,
     limit: 100,
@@ -42,9 +125,20 @@ const SendInvitationForm = ({ isOpen, onOpenChange, onSendInvitation, image, add
   const planLabel = subscription?.planId?.label || "Current";
   const isAtFlyerLimit = flyerUsage >= flyerLimit;
 
-  const handleRemoveGuest = (email) => {
-    setSelectedGuests(selectedGuests.filter((g) => g !== email));
-  };
+  // Active recipients depending on channel
+  const activeRecipients =
+    selectedChannel === "sms" ? phoneRecipients : emailRecipients;
+
+  // ─── Email Management ─────────────────────────────────────
+  const addEmail = () => {
+    const raw = customEmail.trim();
+    if (!raw) return;
+
+    // Support comma, semicolon, space, or newline separated batch emails
+    const emails = raw
+      .split(/[\s,;]+/)
+      .map((e) => e.trim())
+      .filter(Boolean);
 
   const handleGuestToggle = (email) => {
     if (!email) return;
@@ -78,74 +172,139 @@ const SendInvitationForm = ({ isOpen, onOpenChange, onSendInvitation, image, add
     }
   };
 
-  const handleAddCustomEmail = (e) => {
+  const handleEmailKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
       addEmail();
     }
   };
 
-  const addEmail = () => {
-    const email = customEmail.trim();
-
-    // Rule 1: no leading space (pre-trim we check original value)
-    if (customEmail && customEmail[0] === " ") {
-      ErrorToast("Email cannot start with a space.");
-      return;
-    }
-
-    // Rule 2: no internal or trailing spaces
-    if (!email || /\s/.test(email)) {
-      ErrorToast("Email cannot contain spaces.");
-      return;
-    }
-
-    // Rule 3: strict email format (same regex as userDetailsSchema)
-    const emailRegex =
-      /^(?!.*\.\.)(?!.*\.$)[A-Za-z0-9][A-Za-z0-9._+-]*@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
-    if (!emailRegex.test(email)) {
-      ErrorToast("Invalid email format.");
-      return;
-    }
-
-    if (!selectedGuests.includes(email)) {
-      setSelectedGuests([...selectedGuests, email]);
-    }
-    setCustomEmail("");
+  const handleRemoveEmail = (email) => {
+    setEmailRecipients(emailRecipients.filter((e) => e !== email));
   };
 
-  // Open the limit modal and close the invitation form
+  const handleToggleGuestEmail = (email) => {
+    if (!email) return;
+    if (emailRecipients.includes(email)) {
+      setEmailRecipients(emailRecipients.filter((e) => e !== email));
+    } else {
+      setEmailRecipients([email, ...emailRecipients]);
+    }
+  };
+
+  // ─── Phone Management ─────────────────────────────────────
+  const handlePhoneInputChange = (e) => {
+    const raw = e.target.value;
+    // Format numeric input progressively
+    const formatted = phoneFormatter(raw);
+    setCustomPhone(formatted);
+  };
+
+  const addPhone = () => {
+    const raw = customPhone.trim();
+    if (!raw) return;
+
+    // Support comma, semicolon, or newline separated batch phone numbers
+    const phones = raw
+      .split(/[\n,;]+/)
+      .map((p) => p.trim())
+      .filter(Boolean);
+
+    if (phones.length === 0) return;
+
+    let addedCount = 0;
+    const nextList = [...phoneRecipients];
+
+    for (const phone of phones) {
+      if (!isValidPhone(phone)) {
+        ErrorToast(`Please enter a valid 10-digit phone number: ${phone}`);
+        return;
+      }
+      const normalized = normalizePhone(phone);
+      if (!nextList.includes(normalized)) {
+        nextList.push(normalized);
+        addedCount++;
+      }
+    }
+
+    if (addedCount === 0 && phones.length > 0) {
+      ErrorToast("Phone number(s) already added.");
+    } else {
+      setPhoneRecipients(nextList);
+      setCustomPhone("");
+    }
+  };
+
+  const handlePhoneKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addPhone();
+    }
+  };
+
+  const handleRemovePhone = (phone) => {
+    setPhoneRecipients(phoneRecipients.filter((p) => p !== phone));
+  };
+
+  const handleToggleGuestPhone = (phone) => {
+    if (!phone) return;
+    const normalized = normalizePhone(phone);
+    if (!normalized) return;
+    if (phoneRecipients.includes(normalized)) {
+      setPhoneRecipients(phoneRecipients.filter((p) => p !== normalized));
+    } else {
+      setPhoneRecipients([normalized, ...phoneRecipients]);
+    }
+  };
+
+  // ─── Filtered Guests ──────────────────────────────────────
+  const filteredGuests = useMemo(() => {
+    if (!guests || !Array.isArray(guests)) return [];
+    if (!searchGuestQuery.trim()) return guests;
+    const q = searchGuestQuery.toLowerCase().trim();
+    return guests.filter((g) => {
+      const name = (g.fullName || `${g.firstName || ""} ${g.lastName || ""}`).toLowerCase();
+      const email = (g.email || "").toLowerCase();
+      const phone = (g.phoneNumber || "").toLowerCase();
+      return name.includes(q) || email.includes(q) || phone.includes(q);
+    });
+  }, [guests, searchGuestQuery]);
+
+  // ─── Limit Modal Handlers ─────────────────────────────────
   const openLimitModal = () => {
-    onOpenChange(false); // close SendInvitationForm dialog
+    onOpenChange(false);
     setShowLimitModal(true);
   };
 
-  // When user accepts the limit modal, close it and reopen the invitation form
   const handleLimitAccept = () => {
     setShowLimitModal(false);
-    onOpenChange(true); // reopen SendInvitationForm dialog
-    handleSend(true); // call handleSend, bypassing limit check
+    onOpenChange(true);
+    handleSend(true);
   };
 
-  // When user closes the limit modal
   const handleLimitClose = () => {
     setShowLimitModal(false);
-    onOpenChange(true); // reopen SendInvitationForm dialog
+    onOpenChange(true);
   };
 
+  // ─── Send Campaign Mutation ───────────────────────────────
   const handleSend = async (bypassLimit = false) => {
     const shouldBypass = bypassLimit === true;
 
-    if (selectedGuests.length === 0) {
-      ErrorToast("Please select or enter at least one email recipient.");
+    if (activeRecipients.length === 0) {
+      ErrorToast(
+        selectedChannel === "sms"
+          ? "Please select or enter at least one phone number recipient."
+          : "Please select or enter at least one email recipient."
+      );
       return;
     }
+
     if (!image) {
       ErrorToast("No flyer designed or uploaded yet.");
       return;
     }
 
-    // Check flyer limit before sending
     if (isAtFlyerLimit && !shouldBypass) {
       openLimitModal();
       return;
@@ -153,21 +312,24 @@ const SendInvitationForm = ({ isOpen, onOpenChange, onSendInvitation, image, add
 
     try {
       await createCampaignMutation.mutateAsync({
-        channel: "email",
-        recipients: selectedGuests,
+        channel: selectedChannel,
+        recipients: activeRecipients,
         additionalInfo: additionalInfo || "",
         image: image,
       });
 
       SuccessToast("Flyer campaign created successfully");
-      setSelectedGuests([]); // reset selected guests on success
+      setEmailRecipients([]);
+      setPhoneRecipients([]);
+      setCustomEmail("");
+      setCustomPhone("");
+      setStep("channel");
       if (onSendInvitation) {
-        onSendInvitation();
+        onSendInvitation(selectedChannel);
       }
     } catch (error) {
       const apiMessage = error?.response?.data?.message || "";
       if (apiMessage.toLowerCase().includes("insufficient wallet balance")) {
-        // openLimitModal();
         ErrorToast(apiMessage || "Insufficient wallet balance");
       } else {
         ErrorToast(apiMessage || "Failed to create flyer campaign");
@@ -179,41 +341,176 @@ const SendInvitationForm = ({ isOpen, onOpenChange, onSendInvitation, image, add
     <>
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
         <DialogContent
-          className="max-w-lg rounded-2xl"
+          className="max-w-lg rounded-2xl p-6 sm:p-7"
           onInteractOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
-          <DialogHeader>
-            <DialogTitle className="text-3xl font-bold">
-              Send Invitation
-            </DialogTitle>
-            <DialogDescription asChild>
-              <div className="mt-4 space-y-4">
-                {/* Email Input */}
-                <div className="flex flex-col gap-2">
-                  <Label className="text-base font-medium text-black">
-                    Email
-                  </Label>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Enter Email"
-                      className="h-14 flex-1"
-                      type="email"
-                      value={customEmail}
-                      onChange={(e) => setCustomEmail(e.target.value)}
-                      onKeyDown={handleAddCustomEmail}
-                    />
-                    <Button
-                      type="button"
-                      onClick={addEmail}
-                      className="h-14 px-4 bg-primary text-white hover:bg-primary/90"
+          {step === "channel" ? (
+            /* ─────────────────────────────────────────────────────────
+               STEP 1: CHOOSE INVITATION CHANNEL
+               ───────────────────────────────────────────────────────── */
+            <div>
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold text-gray-900">
+                  Send Invitation
+                </DialogTitle>
+                <p className="text-sm text-gray-500 mt-1">
+                  Choose how you would like to send this invitation to your guests:
+                </p>
+              </DialogHeader>
+
+              <div className="mt-6 space-y-3.5">
+                {/* Email Option Card */}
+                <div
+                  onClick={() => setSelectedChannel("email")}
+                  className={`flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    selectedChannel === "email"
+                      ? "border-primary bg-primary/5 shadow-sm"
+                      : "border-gray-200 hover:border-gray-300 hover:bg-gray-50/70"
+                  }`}
+                >
+                  <div className="flex items-center gap-3.5">
+                    <div
+                      className={`w-11 h-11 rounded-xl flex items-center justify-center transition-colors ${
+                        selectedChannel === "email"
+                          ? "bg-primary text-white"
+                          : "bg-gray-100 text-gray-600"
+                      }`}
                     >
-                      <Plus className="w-5 h-5" />
-                    </Button>
+                      <Mail className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-gray-900">
+                        Email Address
+                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Send flyer invitations directly to guests&apos; email inboxes
+                      </p>
+                    </div>
                   </div>
+
+                  <div className="flex items-center justify-center pl-2">
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                        selectedChannel === "email"
+                          ? "border-primary bg-primary"
+                          : "border-gray-300 bg-white"
+                      }`}
+                    >
+                      {selectedChannel === "email" && (
+                        <Check className="w-3 h-3 text-white" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Phone Number Option Card */}
+                <div
+                  onClick={() => setSelectedChannel("sms")}
+                  className={`flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    selectedChannel === "sms"
+                      ? "border-primary bg-primary/5 shadow-sm"
+                      : "border-gray-200 hover:border-gray-300 hover:bg-gray-50/70"
+                  }`}
+                >
+                  <div className="flex items-center gap-3.5">
+                    <div
+                      className={`w-11 h-11 rounded-xl flex items-center justify-center transition-colors ${
+                        selectedChannel === "sms"
+                          ? "bg-primary text-white"
+                          : "bg-gray-100 text-gray-600"
+                      }`}
+                    >
+                      <Smartphone className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-gray-900">
+                        Phone Number (SMS)
+                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Send flyer text invitations directly to guests&apos; mobile phones
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-center pl-2">
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                        selectedChannel === "sms"
+                          ? "border-primary bg-primary"
+                          : "border-gray-300 bg-white"
+                      }`}
+                    >
+                      {selectedChannel === "sms" && (
+                        <Check className="w-3 h-3 text-white" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="mt-7 flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  className="flex-1 h-12 text-sm font-medium"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => setStep("recipients")}
+                  className="flex-1 h-12 text-sm font-medium bg-primary text-white hover:bg-primary/95 flex items-center justify-center gap-1.5"
+                >
+                  Continue
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          ) : (
+            /* ─────────────────────────────────────────────────────────
+               STEP 2: ADD RECIPIENTS & SELECT GUESTS
+               ───────────────────────────────────────────────────────── */
+            <div>
+              <DialogHeader>
+                <div className="flex items-center justify-between mb-1">
+                  <button
+                    type="button"
+                    onClick={() => setStep("channel")}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline cursor-pointer"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    Change Channel
+                  </button>
+
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary">
+                    {selectedChannel === "sms" ? (
+                      <>
+                        <Smartphone className="w-3.5 h-3.5" /> Phone Number (SMS)
+                      </>
+                    ) : (
+                      <>
+                        <Mail className="w-3.5 h-3.5" /> Email
+                      </>
+                    )}
+                  </span>
+                </div>
+
+                <DialogTitle className="text-2xl font-bold text-gray-900">
+                  {selectedChannel === "sms"
+                    ? "Add Phone Recipients"
+                    : "Add Email Recipients"}
+                </DialogTitle>
+                <DialogDescription asChild>
                   <p className="text-xs text-gray-500">
-                    Type an email and press Enter or click the &quot;+&quot; button to add.
+                    {selectedChannel === "sms"
+                      ? "Add phone numbers or choose from your guestbook to receive SMS flyer invitations."
+                      : "Add email addresses or choose from your guestbook to receive flyer invitations."}
                   </p>
+                </DialogDescription>
+              </DialogHeader>
 
                   {/* Selected Guests Tags */}
                   {selectedGuests?.length > 0 && (
@@ -248,10 +545,10 @@ const SendInvitationForm = ({ isOpen, onOpenChange, onSendInvitation, image, add
                         ))}
                       </div>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
 
-                {/* Guests List */}
+                {/* ── Guestbook Selection ── */}
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
                     <Label className="text-base font-medium text-black">
@@ -270,12 +567,23 @@ const SendInvitationForm = ({ isOpen, onOpenChange, onSendInvitation, image, add
                   <div className="border-2 rounded-xl p-4 max-h-[240px] overflow-y-auto">
                     {isGuestsLoading ? (
                       <div className="flex justify-center items-center py-8">
-                        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
                       </div>
-                    ) : guests && guests.length > 0 ? (
-                      <div className="space-y-2">
-                        {guests.map((guest) => {
-                          const isSelected = selectedGuests.includes(guest.email);
+                    ) : filteredGuests && filteredGuests.length > 0 ? (
+                      filteredGuests.map((guest) => {
+                        const guestName =
+                          guest.fullName ||
+                          `${guest.firstName || ""} ${guest.lastName || ""}`.trim() ||
+                          "Guest";
+
+                        if (selectedChannel === "sms") {
+                          const hasPhone = !!guest.phoneNumber?.trim();
+                          const normPhone = hasPhone
+                            ? normalizePhone(guest.phoneNumber)
+                            : "";
+                          const isSelected =
+                            hasPhone && phoneRecipients.includes(normPhone);
+
                           return (
                             <div
                               key={guest._id}
@@ -301,7 +609,6 @@ const SendInvitationForm = ({ isOpen, onOpenChange, onSendInvitation, image, add
                                 👤
                               </div>
 
-                              {/* Name + Email */}
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium text-gray-900 truncate">
                                   {guest.fullName || "Guest"}
@@ -312,39 +619,105 @@ const SendInvitationForm = ({ isOpen, onOpenChange, onSendInvitation, image, add
                               </div>
                             </div>
                           );
-                        })}
-                      </div>
+                        } else {
+                          // Email channel
+                          const hasEmail = !!guest.email?.trim();
+                          const isSelected =
+                            hasEmail && emailRecipients.includes(guest.email);
+
+                          return (
+                            <div
+                              key={guest._id}
+                              onClick={() => {
+                                if (hasEmail) {
+                                  handleToggleGuestEmail(guest.email);
+                                }
+                              }}
+                              className={`flex items-center gap-3 p-2 rounded-lg transition-all ${
+                                !hasEmail
+                                  ? "opacity-50 cursor-not-allowed bg-transparent"
+                                  : isSelected
+                                  ? "bg-primary/8 border border-primary/20 cursor-pointer"
+                                  : "hover:bg-gray-50 border border-transparent cursor-pointer"
+                              }`}
+                            >
+                              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs shrink-0 font-medium text-gray-700">
+                                {guestName.charAt(0).toUpperCase()}
+                              </div>
+
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-semibold text-gray-900 truncate">
+                                  {guestName}
+                                </p>
+                                <p className="text-[11px] text-gray-500 truncate">
+                                  {hasEmail ? (
+                                    guest.email
+                                  ) : (
+                                    <span className="italic text-gray-400">
+                                      No email on file
+                                    </span>
+                                  )}
+                                </p>
+                              </div>
+
+                              {isSelected && (
+                                <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center shrink-0">
+                                  <Check className="w-2.5 h-2.5 text-white" />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        }
+                      })
                     ) : (
-                      <p className="text-sm text-gray-500 text-center py-8">
-                        No guests found in guestbook.
+                      <p className="text-xs text-gray-500 text-center py-6">
+                        No guests matching search.
                       </p>
                     )}
                   </div>
                 </div>
 
-                {/* Flyer Usage Counter */}
+                {/* ── Flyer Usage Counter ── */}
                 {flyerLimit !== Infinity && (
                   <p className="text-xs text-gray-500 text-right">
-                    Flyers used: <span className="font-semibold text-gray-700">{flyerUsage}</span> / {flyerLimit}
+                    Flyers used:{" "}
+                    <span className="font-semibold text-gray-700">
+                      {flyerUsage}
+                    </span>{" "}
+                    / {flyerLimit}
                   </p>
                 )}
 
-                {/* Send Button */}
-                <Button
-                  onClick={handleSend}
-                  disabled={createCampaignMutation.isPending}
-                  className="w-full h-14 text-lg flex items-center justify-center gap-2"
-                >
-                  {createCampaignMutation.isPending && (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  )}
-                  {createCampaignMutation.isPending
-                    ? "Sending..."
-                    : "Send Invitation"}
-                </Button>
+                {/* ── Action Buttons ── */}
+                <div className="flex gap-2.5 pt-1">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setStep("channel")}
+                    className="h-12 px-4 text-xs font-medium"
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => handleSend(false)}
+                    disabled={
+                      activeRecipients.length === 0 ||
+                      createCampaignMutation.isPending
+                    }
+                    className="flex-1 h-12 text-sm font-semibold flex items-center justify-center gap-2 bg-primary text-white hover:bg-primary/95"
+                  >
+                    {createCampaignMutation.isPending && (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    )}
+                    {createCampaignMutation.isPending
+                      ? "Sending..."
+                      : `Send Invitation (${activeRecipients.length})`}
+                  </Button>
+                </div>
               </div>
-            </DialogDescription>
-          </DialogHeader>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
