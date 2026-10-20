@@ -140,35 +140,35 @@ const SendInvitationForm = ({
       .map((e) => e.trim())
       .filter(Boolean);
 
-    if (emails.length === 0) return;
-
-    let addedCount = 0;
-    const nextList = [...emailRecipients];
-
-    for (const email of emails) {
-      if (email.startsWith(" ")) {
-        ErrorToast("Email cannot start with a space.");
-        return;
-      }
-      if (/\s/.test(email)) {
-        ErrorToast("Email cannot contain spaces.");
-        return;
-      }
-      if (!emailRegex.test(email)) {
-        ErrorToast(`Invalid email format: ${email}`);
-        return;
-      }
-      if (!nextList.includes(email)) {
-        nextList.push(email);
-        addedCount++;
-      }
-    }
-
-    if (addedCount === 0 && emails.length > 0) {
-      ErrorToast("Email(s) already added.");
+  const handleGuestToggle = (email) => {
+    if (!email) return;
+    if (selectedGuests.includes(email)) {
+      setSelectedGuests(selectedGuests.filter((g) => g !== email));
     } else {
-      setEmailRecipients(nextList);
-      setCustomEmail("");
+      setSelectedGuests([...selectedGuests, email]);
+    }
+  };
+
+  const validGuestEmails = guests.map((g) => g.email).filter(Boolean);
+  const isAllSelected =
+    validGuestEmails.length > 0 &&
+    validGuestEmails.every((email) => selectedGuests.includes(email));
+
+  const handleToggleSelectAll = () => {
+    if (isAllSelected) {
+      // Deselect all guestbook emails, keep custom ones if any
+      setSelectedGuests(
+        selectedGuests.filter((email) => !validGuestEmails.includes(email))
+      );
+    } else {
+      // Select all guestbook emails
+      const newSelected = [...selectedGuests];
+      validGuestEmails.forEach((email) => {
+        if (!newSelected.includes(email)) {
+          newSelected.push(email);
+        }
+      });
+      setSelectedGuests(newSelected);
     }
   };
 
@@ -512,123 +512,38 @@ const SendInvitationForm = ({
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="mt-4 space-y-4">
-                {/* ── Direct Input Section ── */}
-                {selectedChannel === "email" ? (
-                  <div className="flex flex-col gap-1.5">
-                    <Label className="text-sm font-medium text-black">
-                      Recipient Email
-                    </Label>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Enter email (e.g. guest@example.com)"
-                        className="h-12 flex-1 text-sm"
-                        type="email"
-                        value={customEmail}
-                        onChange={(e) => setCustomEmail(e.target.value)}
-                        onKeyDown={handleEmailKeyDown}
-                      />
-                      <Button
-                        type="button"
-                        onClick={addEmail}
-                        className="h-12 px-4 bg-primary text-white hover:bg-primary/90"
-                      >
-                        <Plus className="w-5 h-5" />
-                      </Button>
-                    </div>
-                    <p className="text-[11px] text-gray-500">
-                      Type an email and press Enter or &quot;+&quot; to add. You can also paste comma-separated emails.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-1.5">
-                    <Label className="text-sm font-medium text-black">
-                      Recipient Phone Number
-                    </Label>
-                    <div className="flex gap-2">
-                      {/* Formatted Phone Input with US flag */}
-                      <div className="flex-1 flex items-center h-12 px-3 border border-gray-300 rounded-md bg-white focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
-                        <img
-                          src="https://flagcdn.com/w320/us.png"
-                          alt="US"
-                          className="w-5 h-3.5 rounded-xs object-cover mr-1.5"
-                        />
-                        <span className="text-xs font-medium text-gray-600 mr-2">
-                          +1
+                  {/* Selected Guests Tags */}
+                  {selectedGuests?.length > 0 && (
+                    <div className="flex flex-col gap-1.5 mt-2">
+                      <div className="flex items-center justify-between px-0.5">
+                        <span className="text-xs font-semibold text-gray-600">
+                          Selected Recipients ({selectedGuests.length})
                         </span>
-                        <div className="h-4 border-l border-gray-300 mr-2" />
-                        <input
-                          type="text"
-                          value={customPhone}
-                          onChange={handlePhoneInputChange}
-                          onKeyDown={handlePhoneKeyDown}
-                          maxLength={14}
-                          placeholder="(555) 000-0000"
-                          className="w-full bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400"
-                        />
-                      </div>
-
-                      <Button
-                        type="button"
-                        onClick={addPhone}
-                        className="h-12 px-4 bg-primary text-white hover:bg-primary/90"
-                      >
-                        <Plus className="w-5 h-5" />
-                      </Button>
-                    </div>
-                    <p className="text-[11px] text-gray-500">
-                      Type a 10-digit number and press Enter or &quot;+&quot; to add. You can also paste comma-separated numbers.
-                    </p>
-                  </div>
-                )}
-
-                {/* ── Selected Recipients Chips ── */}
-                {activeRecipients.length > 0 && (
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between text-xs font-semibold text-gray-700">
-                      <span>
-                        Selected Recipients ({activeRecipients.length})
-                      </span>
-                      {activeRecipients.length > 1 && (
                         <button
                           type="button"
-                          onClick={() => {
-                            if (selectedChannel === "sms") {
-                              setPhoneRecipients([]);
-                            } else {
-                              setEmailRecipients([]);
-                            }
-                          }}
-                          className="text-red-500 hover:text-red-700 font-normal cursor-pointer"
+                          onClick={() => setSelectedGuests([])}
+                          className="text-xs text-red-500 hover:text-red-700 hover:underline cursor-pointer"
                         >
                           Clear all
                         </button>
-                      )}
-                    </div>
-                    <div className="border rounded-xl p-2.5 max-h-24 overflow-y-auto flex flex-wrap gap-1.5 bg-gray-50/50">
-                      {activeRecipients.map((rec, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center gap-1.5 bg-white border border-gray-200 px-2.5 py-1 rounded-lg text-xs shadow-xs"
-                        >
-                          <span className="text-gray-800 font-medium truncate max-w-[190px]">
-                            {selectedChannel === "sms"
-                              ? formatPhoneTag(rec)
-                              : rec}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              selectedChannel === "sms"
-                                ? handleRemovePhone(rec)
-                                : handleRemoveEmail(rec)
-                            }
-                            className="text-gray-400 hover:text-red-500 cursor-pointer"
+                      </div>
+                      <div className="border-2 rounded-xl p-3 max-h-28 overflow-y-auto flex flex-wrap gap-2">
+                        {selectedGuests.map((email, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-1.5 bg-gray-100 px-2.5 py-1 rounded-lg"
                           >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      ))}
+                            <span className="text-xs text-gray-700 font-medium">{email}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveGuest(email)}
+                              className="text-gray-400 hover:text-gray-700 cursor-pointer"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -636,27 +551,20 @@ const SendInvitationForm = ({
                 {/* ── Guestbook Selection ── */}
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium text-black">
-                      Select from Guestbook
+                    <Label className="text-base font-medium text-black">
+                      Guests {validGuestEmails.length > 0 && `(${selectedGuests.filter((e) => validGuestEmails.includes(e)).length}/${validGuestEmails.length})`}
                     </Label>
-                    <span className="text-xs text-gray-500">
-                      {filteredGuests.length} guest{filteredGuests.length !== 1 ? "s" : ""}
-                    </span>
+                    {validGuestEmails.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={handleToggleSelectAll}
+                        className="text-xs font-semibold text-primary hover:underline cursor-pointer focus:outline-none"
+                      >
+                        {isAllSelected ? "Deselect All" : "Select All"}
+                      </button>
+                    )}
                   </div>
-
-                  {/* Search Guests */}
-                  <div className="relative">
-                    <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <Input
-                      placeholder="Search guests by name or details..."
-                      value={searchGuestQuery}
-                      onChange={(e) => setSearchGuestQuery(e.target.value)}
-                      className="h-10 pl-9 text-xs"
-                    />
-                  </div>
-
-                  {/* Guests List */}
-                  <div className="border rounded-xl p-2.5 max-h-[190px] overflow-y-auto divide-y divide-gray-100">
+                  <div className="border-2 rounded-xl p-4 max-h-[240px] overflow-y-auto">
                     {isGuestsLoading ? (
                       <div className="flex justify-center items-center py-8">
                         <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
@@ -679,43 +587,36 @@ const SendInvitationForm = ({
                           return (
                             <div
                               key={guest._id}
-                              onClick={() => {
-                                if (hasPhone) {
-                                  handleToggleGuestPhone(guest.phoneNumber);
-                                }
-                              }}
-                              className={`flex items-center gap-3 p-2 rounded-lg transition-all ${
-                                !hasPhone
-                                  ? "opacity-50 cursor-not-allowed bg-transparent"
-                                  : isSelected
-                                  ? "bg-primary/8 border border-primary/20 cursor-pointer"
-                                  : "hover:bg-gray-50 border border-transparent cursor-pointer"
-                              }`}
+                              onClick={() => handleGuestToggle(guest.email)}
+                              className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-all select-none border ${isSelected
+                                ? "bg-primary/10 border-primary/30"
+                                : "hover:bg-gray-50 border-gray-100"
+                                }`}
                             >
-                              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs shrink-0 font-medium text-gray-700">
-                                {guestName.charAt(0).toUpperCase()}
+                              {/* Checkbox indicator */}
+                              <div
+                                className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 transition-colors border ${
+                                  isSelected
+                                    ? "bg-primary border-primary text-white"
+                                    : "border-gray-300 bg-white"
+                                }`}
+                              >
+                                {isSelected && <Check className="w-3.5 h-3.5 stroke-[2.5]" />}
+                              </div>
+
+                              {/* Avatar */}
+                              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm flex-shrink-0">
+                                👤
                               </div>
 
                               <div className="flex-1 min-w-0">
-                                <p className="text-xs font-semibold text-gray-900 truncate">
-                                  {guestName}
+                                <p className="text-sm font-medium text-gray-900 truncate">
+                                  {guest.fullName || "Guest"}
                                 </p>
-                                <p className="text-[11px] text-gray-500 truncate">
-                                  {hasPhone ? (
-                                    phoneFormatter(guest.phoneNumber)
-                                  ) : (
-                                    <span className="italic text-gray-400">
-                                      No phone number on file
-                                    </span>
-                                  )}
+                                <p className="text-xs text-gray-500 truncate">
+                                  {guest.email}
                                 </p>
                               </div>
-
-                              {isSelected && (
-                                <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center shrink-0">
-                                  <Check className="w-2.5 h-2.5 text-white" />
-                                </div>
-                              )}
                             </div>
                           );
                         } else {
