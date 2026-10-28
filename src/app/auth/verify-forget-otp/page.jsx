@@ -20,7 +20,7 @@ const VerifyForgotOtp = () => {
   const inputs = useRef([]);
 
   const [isActive, setIsActive] = useState(true);
-  const [seconds, setSeconds] = useState(30);
+  const [seconds, setSeconds] = useState(90);
   const [email, setEmail] = useState("");
   const [validationError, setValidationError] = useState("");
 
@@ -148,7 +148,7 @@ const VerifyForgotOtp = () => {
     try {
       await resendOtpMutation.mutateAsync({ email, role: "lounge_manager" });
       setOtp(Array(5).fill(""));
-      setSeconds(30);
+      setSeconds(90);
       setIsActive(true);
       setValidationError("");
       SuccessToast("OTP resent successfully");
