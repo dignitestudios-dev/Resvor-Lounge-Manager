@@ -7,7 +7,7 @@ import { personalDetailsRemainingValues } from "@/lib/init/personalDetailsRemain
 import { personalDetailsRemainingSchema } from "@/lib/schema/onboarding/personalDetailsRemainingSchema";
 import { ErrorToast } from "../ui/toaster";
 import AddServicesAndPackages from "./Servicespackages";
-
+import imageCompression from "browser-image-compression";
 const PersonalDetailsRemaining = ({
   handleNext,
   handlePrevious,
@@ -45,47 +45,56 @@ const PersonalDetailsRemaining = ({
 
   const handleMultipleImagesChange = async (e) => {
     const selectedFiles = Array.from(e.target.files || []);
-
-    // Existing images
     const existingImages = values.images || [];
 
-    // Max 5 images validation
-    if (existingImages.length + selectedFiles.length > 5) {
-      ErrorToast("Maximum 5 images are allowed");
-      return;
-    }
+    if (!selectedFiles.length) return;
 
-    const validFiles = [];
+    try {
+      const validFiles = [];
 
-    for (const file of selectedFiles) {
-      // File type validation
-      if (!["image/jpeg", "image/png"].includes(file.type)) {
-        ErrorToast(`${file.name}: Only JPEG and PNG formats are allowed`);
-        continue;
+      for (const file of selectedFiles) {
+        if (!["image/jpeg", "image/png"].includes(file.type)) {
+          ErrorToast(`${file.name}: Only JPEG and PNG formats are allowed`);
+          continue;
+        }
+
+        // Compress large images before storing
+        const compressedFile = await imageCompression(file, {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+          initialQuality: 0.8,
+        });
+
+        validFiles.push(
+          new File([compressedFile], file.name, {
+            type: compressedFile.type,
+            lastModified: Date.now(),
+          })
+        );
       }
 
-      // File size validation (10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        ErrorToast(`${file.name}: File size must not exceed 10MB`);
-        continue;
+      // Recheck latest Formik state after async compression
+      const currentImages = values.images || [];
+      const availableSlots = Math.max(0, 5 - currentImages.length);
+
+      if (validFiles.length > availableSlots) {
+        ErrorToast(
+          `You can upload only ${availableSlots} more image(s). Maximum 5 images are allowed.`
+        );
       }
 
-      // Resolution validation
-      // const isValidResolution = await validateImageResolution(file);
+      const imagesToAdd = validFiles.slice(0, availableSlots);
 
-      // if (!isValidResolution) {
-      //   ErrorToast(`${file.name}: Image resolution must be at least 215x215`);
-      //   continue;
-      // }
-
-      validFiles.push(file);
+      if (imagesToAdd.length > 0) {
+        setFieldValue("images", [...currentImages, ...imagesToAdd]);
+      }
+    } catch (error) {
+      console.error("Image compression error:", error);
+      ErrorToast("Unable to process images. Please try again.");
+    } finally {
+      e.target.value = "";
     }
-
-    // Merge previous + new images
-    setFieldValue("images", [...existingImages, ...validFiles]);
-
-    // Reset input value so same image can be selected again
-    e.target.value = "";
   };
 
   return (
@@ -178,7 +187,7 @@ const PersonalDetailsRemaining = ({
                         type="button"
                         onClick={() => {
                           const updatedImages = values.images.filter(
-                            (_, index) => index !== i,
+                            (_, index) => index !== i
                           );
 
                           setFieldValue("images", updatedImages);

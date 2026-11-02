@@ -13,7 +13,7 @@ import { ArrowLeft } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { requestForToken } from "@/lib/firebase";
 import Cookies from "js-cookie";
-
+import imageCompression from   "browser-image-compression"; 
 const FloorPlanSetup = ({ handlePrevious, combinedData = {} }) => {
   const createLoungeMutation = useCreateLounge();
   const updateFcmMutation = useUpdateFcmToken();
@@ -73,36 +73,57 @@ const FloorPlanSetup = ({ handlePrevious, combinedData = {} }) => {
       },
     });
 
-  const handleFloorPlanChange = async (e) => {
-    const file = e.currentTarget.files?.[0];
+ const handleFloorPlanChange = async (e) => {
+  const file = e.currentTarget.files?.[0];
 
-    if (file) {
-      // JPEG/PNG validation
-      if (!["image/jpeg", "image/png"].includes(file.type)) {
-        ErrorToast("Only JPEG and PNG formats are allowed");
-        return;
-      }
+  if (!file) return;
 
-      // 10MB validation
-      if (file.size > 10 * 1024 * 1024) {
-        ErrorToast("File size must not exceed 10MB");
-        return;
-      }
-
-      // Resolution validation
-      const isValidResolution = await validateImageResolution(file);
-
-      if (!isValidResolution) {
-        ErrorToast("Image resolution must be at least 215x215");
-        return;
-      }
-
-      setFieldValue("floorPlan", file);
-
-      // Reset input
-      e.target.value = "";
+  try {
+    if (!["image/jpeg", "image/png"].includes(file.type)) {
+      ErrorToast("Only JPEG and PNG formats are allowed");
+      return;
     }
-  };
+
+    // Validate original image resolution
+    const isValidResolution = await validateImageResolution(file);
+
+    if (!isValidResolution) {
+      ErrorToast("Image resolution must be at least 215x215");
+      return;
+    }
+
+    // Compress image
+    const compressedFile = await imageCompression(file, {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1920,
+      useWebWorker: true,
+      initialQuality: 0.8,
+    });
+
+    // Final compressed size validation
+    if (compressedFile.size > 5 * 1024 * 1024) {
+      ErrorToast("Floor plan must be under 5MB after compression.");
+      return;
+    }
+
+    const optimizedFile = new File(
+      [compressedFile],
+      file.name,
+      {
+        type: compressedFile.type,
+        lastModified: Date.now(),
+      }
+    );
+
+    setFieldValue("floorPlan", optimizedFile);
+
+  } catch (error) {
+    console.error("Floor plan compression error:", error);
+    ErrorToast("Unable to process floor plan. Please try another image.");
+  } finally {
+    e.target.value = "";
+  }
+};
 
   return (
     <div className="flex flex-col justify-center items-center h-auto">

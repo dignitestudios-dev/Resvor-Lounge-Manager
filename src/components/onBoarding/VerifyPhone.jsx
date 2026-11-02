@@ -8,7 +8,7 @@ import AuthSuccessModal from "../auth/AuthSuccessModal";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { verifyPhoneValues } from "@/lib/init/verifyPhoneValues";
 import { verifyPhoneSchema } from "@/lib/schema/authentication/verifyPhoneSchema";
-import { useVerifyMobileNumber } from "@/lib/hooks/mutations/OnBoardingMutations";
+import { useSendOnboardingOtp, useVerifyMobileNumber } from "@/lib/hooks/mutations/OnBoardingMutations";
 import { ErrorToast } from "../ui/toaster";
 import { LogOutIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -21,7 +21,7 @@ const VerifyPhone = ({ handleNext, handlePrevious, phoneNumber }) => {
   const verifyMobileMutation = useVerifyMobileNumber();
   const queryClient = useQueryClient();
   const { user } = useAuthContext();
-
+  const resendOtpMutation = useSendOnboardingOtp();
   const [displayPhone, setDisplayPhone] = useState(
     phoneNumber || user?.phoneNumber || ""
   );
@@ -156,13 +156,26 @@ const VerifyPhone = ({ handleNext, handlePrevious, phoneNumber }) => {
 
   const handleResendOtp = async () => {
     try {
-      setOtpDisplay(Array(5).fill("")); // Reset OTP display
+      await resendOtpMutation.mutateAsync();
+
+      // Clear previous OTP only after successful API response
+      setOtpDisplay(Array(5).fill(""));
+
       handleChange({
         target: { name: "otp", value: "" },
       });
+
+      // Restart countdown
       handleRestart();
-    } catch (err) {
-      console.log("🚀 ~ handleResendOtp ~ err:", err);
+
+      // Focus first OTP input
+      inputs.current[0]?.focus();
+
+    } catch (error) {
+      ErrorToast(
+        error?.response?.data?.message ||
+        "Failed to resend OTP. Please try again."
+      );
     }
   };
 
@@ -257,15 +270,14 @@ const VerifyPhone = ({ handleNext, handlePrevious, phoneNumber }) => {
                     setSeconds={setSeconds}
                   />
                 ) : (
-                  <span
+                  <button
                     type="button"
-                    // disabled={resendLoading}
+                    disabled={isActive || resendOtpMutation.isPending}
                     onClick={handleResendOtp}
-                    className="font-[600] pl-1 cursor-pointer"
+                    className="font-[600] pl-1 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Resend
-                    {/* {resendLoading ? "Resending..." : "Resend"} */}
-                  </span>
+                    {resendOtpMutation.isPending ? "Sending..." : "Resend"}
+                  </button>
                 )}
               </p>
             </div>

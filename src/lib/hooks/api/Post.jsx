@@ -102,7 +102,10 @@ export const submitVerifyMobileNumber = async (credentials) => {
   );
   return data;
 };
-
+export const submitSendOnboardingOtp = async () => {
+  const { data } = await axios.post("/auth/onboarding/send-otp");
+  return data;
+};
 export const submitCreateLounge = async (payload) => {
   // Format combined data into FormData
   const formData = new FormData();

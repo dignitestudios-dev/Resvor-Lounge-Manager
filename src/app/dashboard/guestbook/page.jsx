@@ -19,7 +19,7 @@ const Guest = () => {
   const [showQRSection, setShowQRSection] = useState(true);
   const fileInputRef = useRef(null);
   const queryClient = useQueryClient();
-
+  const [search, setSearch] = useState("");
   // Pagination state
   const [page, setPage] = useState(1);
 
@@ -29,8 +29,7 @@ const Guest = () => {
 
   const { data: guestbookData, isLoading } = useGetGuestbook({
     page,
-    startDate,
-    endDate,
+    search
   });
 
   const importGuestbookMutation = useImportGuestbook();
@@ -73,35 +72,88 @@ const Guest = () => {
   const handleExportCSV = async () => {
     try {
       const data = await exportGuestbookMutation.mutateAsync();
-      const blob = new Blob([data], { type: "text/csv;charset=utf-8;" });
+
+      const csvText =
+        data instanceof Blob ? await data.text() : data;
+
+      const lines = csvText.split(/\r?\n/);
+
+      const updatedCSV = lines.map((line, index) => {
+        if (index === 0 || !line.trim()) return line;
+
+        // CSV row ke quoted fields ko correctly parse karo
+        const columns = [];
+        let value = "";
+        let insideQuotes = false;
+
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+
+          if (char === '"') {
+            if (insideQuotes && line[i + 1] === '"') {
+              value += '"';
+              i++;
+            } else {
+              insideQuotes = !insideQuotes;
+            }
+          } else if (char === "," && !insideQuotes) {
+            columns.push(value);
+            value = "";
+          } else {
+            value += char;
+          }
+        }
+
+        columns.push(value);
+
+        // specialDates column index = 6
+        try {
+          const dates = JSON.parse(columns[6] || "[]");
+
+          columns[6] = JSON.stringify(
+            dates.map((item) => ({
+              ...item,
+              date: item.date
+                ? String(item.date).slice(0, 10)
+                : "",
+            }))
+          );
+        } catch {
+          return line;
+        }
+
+        // CSV escaping
+        return columns
+          .map((column) => {
+            const escaped = String(column).replace(/"/g, '""');
+            return /[",\n\r]/.test(escaped)
+              ? `"${escaped}"`
+              : escaped;
+          })
+          .join(",");
+      });
+
+      const blob = new Blob([updatedCSV.join("\n")], {
+        type: "text/csv;charset=utf-8;",
+      });
+
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
+
       link.href = url;
-      link.setAttribute("download", `guestbook_${new Date().toISOString().slice(0, 10)}.csv`);
+      link.download = `guestbook_${new Date().toISOString().slice(0, 10)}.csv`;
+
       document.body.appendChild(link);
       link.click();
-      link.parentNode?.removeChild(link);
+      link.remove();
+
       window.URL.revokeObjectURL(url);
+
       SuccessToast("Guestbook exported successfully!");
     } catch (error) {
-      let errorMsg = "Failed to export guestbook CSV.";
-      if (error?.response?.data instanceof Blob) {
-        try {
-          const text = await error.response.data.text();
-          const parsed = JSON.parse(text);
-          errorMsg = parsed?.message || errorMsg;
-        } catch {
-          // ignore
-        }
-      } else if (error?.response?.data?.message) {
-        errorMsg = error.response.data.message;
-      } else if (error?.message) {
-        errorMsg = error.message;
-      }
-      ErrorToast(errorMsg);
+      ErrorToast("Failed to export guestbook.");
     }
   };
-
   return (
     <div>
       <input
@@ -159,10 +211,22 @@ const Guest = () => {
 
           <AddGuestForm isOpen={openForm} onOpenChange={setOpenForm} />
 
-          <DateAndMonthFilter onFilterChange={handleFilterChange} />
+          {/* <DateAndMonthFilter onFilterChange={handleFilterChange} /> */}
         </div>
       </div>
       {showQRSection && <GuestbookQRCodeSection />}
+      <div className="bg-white p-2 rounded-md">
+        <input
+          type="text"
+          placeholder="Search guests..."
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
+          className="h-12 w-full rounded-md border border-gray-300 px-4 text-sm outline-none focus:border-primary"
+        />
+      </div>
       <div className="mt-4">
         <Table
           guests={guests}

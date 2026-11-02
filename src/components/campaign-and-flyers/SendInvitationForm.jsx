@@ -485,7 +485,7 @@ const SendInvitationForm = ({
                     Change Channel
                   </button>
 
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary mx-4">
                     {selectedChannel === "sms" ? (
                       <>
                         <Smartphone className="w-3.5 h-3.5" /> Phone Number (SMS)

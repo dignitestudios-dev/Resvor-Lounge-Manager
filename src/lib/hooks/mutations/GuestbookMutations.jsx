@@ -105,7 +105,9 @@ export const useDeleteGuest = () => {
 const importGuestbook = async (file) => {
   const formData = new FormData();
   formData.append("file", file);
-  const response = await axiosInstance.post("/guestbook/import", formData);
+  const response = await axiosInstance.post("/guestbook/import", formData, {
+    timeout: 600000, // 10 minutes
+  });
   return response.data;
 };
 

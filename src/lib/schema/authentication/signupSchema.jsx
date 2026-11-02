@@ -71,7 +71,16 @@ export const userDetailsSchema = Yup.object({
       "Invalid email format.",
     ),
   number: Yup.string()
-    .transform((value) => value.replace(/\D/g, "")) // Remove all non-numeric chars
+    .transform((value) => {
+      let digits = String(value || "").replace(/\D/g, "");
+
+      // Remove US country code if included
+      if (digits.length === 11 && digits.startsWith("1")) {
+        digits = digits.substring(1);
+      }
+
+      return digits;
+    })
     .matches(/^[0-9]{10}$/, "Phone number must be exactly 10 digits.")
     .required("Phone number is required."),
 

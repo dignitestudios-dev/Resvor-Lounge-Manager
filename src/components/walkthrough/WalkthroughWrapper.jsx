@@ -51,22 +51,32 @@ const WalkthroughWrapper = () => {
     clearWalkthroughFlags();
   };
 
-  const handleJoyrideCallback = (data) => {
-    const { status, type, action } = data;
+  // const handleJoyrideCallback = (data) => {
+  //   const { status, type, action } = data;
 
-    const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
+  //   const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
+  //   if (
+  //     finishedStatuses.includes(status) ||
+  //     type === "tour:end" ||
+  //     action === "close" ||
+  //     action === "reset" ||
+  //     action === "stop"
+  //   ) {
+  //     setRunTour(false);
+  //     clearWalkthroughFlags();
+  //   }
+  // };
+  const handleJoyrideCallback = (data) => {
+    const { status } = data;
+
     if (
-      finishedStatuses.includes(status) ||
-      type === "tour:end" ||
-      action === "close" ||
-      action === "reset" ||
-      action === "stop"
+      status === STATUS.FINISHED ||
+      status === STATUS.SKIPPED
     ) {
       setRunTour(false);
       clearWalkthroughFlags();
     }
   };
-
   return (
     <>
       {/* Welcome Modal */}
@@ -90,6 +100,8 @@ const WalkthroughWrapper = () => {
           overlayColor: "rgba(0, 0, 0, 0.5)",
           spotlightPadding: 6,
           scrollOffset: 100,
+          clickToClose: false,
+
         }}
       />
     </>

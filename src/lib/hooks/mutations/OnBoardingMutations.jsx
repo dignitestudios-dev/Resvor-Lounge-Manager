@@ -6,6 +6,8 @@ import {
   submitVerifyMobileNumber,
   submitUpdatePhoneNumber,
   submitWalletTopup,
+  submitSendOnboardingOtp,
+
 } from "../api/Post";
 
 export const useSignUp = () =>
@@ -27,7 +29,10 @@ export const useUpdatePhoneNumber = () =>
   useMutation({
     mutationFn: submitUpdatePhoneNumber,
   });
-
+export const useSendOnboardingOtp = () =>
+  useMutation({
+    mutationFn: submitSendOnboardingOtp,
+  });
 export const useCreateLounge = () =>
   useMutation({
     mutationFn: submitCreateLounge,

@@ -24,7 +24,7 @@ import {
 } from "@/lib/hooks/mutations/ServiceMutations";
 import { useQueryClient } from "@tanstack/react-query";
 import { ErrorToast } from "../ui/toaster";
-
+import imageCompression from "browser-image-compression";
 const BASE_IMAGE_URL =
   process.env.NEXT_PUBLIC_API_URL
     ? `${process.env.NEXT_PUBLIC_API_URL}/uploads`
@@ -134,12 +134,33 @@ const AddServiceForm = ({
       [name]: value,
     }));
   };
+  const compressServiceImage = async (file) => {
+    const options = {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1920,
+      useWebWorker: true,
+      initialQuality: 0.8,
+    };
 
+    try {
+      const compressedFile = await imageCompression(file, options);
+
+      return new File([compressedFile], file.name, {
+        type: compressedFile.type,
+        lastModified: Date.now(),
+      });
+    } catch (error) {
+      console.error("Image compression failed:", error);
+      throw error;
+    }
+  };
   const handleImageChange = async (e) => {
     const selectedFiles = Array.from(e.target.files || []);
+
     if (!selectedFiles.length) return;
 
     const remainingSlots = 5 - serviceImages.length;
+
     if (remainingSlots <= 0) {
       e.target.value = "";
       return;
@@ -148,30 +169,24 @@ const AddServiceForm = ({
     const validFiles = [];
 
     for (const file of selectedFiles.slice(0, remainingSlots)) {
-      // Check file type
       if (!["image/jpeg", "image/png"].includes(file.type)) {
-        const errorMsg = "Only JPEG and PNG formats are allowed";
-        ErrorToast(errorMsg);
+        ErrorToast("Only JPEG and PNG formats are allowed");
         continue;
       }
 
-      // Check file size (10MB limit)
-      // Check file size (5MB limit)
-      const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
-
-      if (file.size > MAX_FILE_SIZE) {
-        ErrorToast("File size must not exceed 5 MB");
+      // Original image maximum size: 10 MB
+      if (file.size > 10 * 1024 * 1024) {
+        ErrorToast("Image size must not exceed 10 MB");
         continue;
       }
-      // Check image resolution (215x215)
-      // const isValidResolution = await validateImageResolution(file);
-      // if (!isValidResolution) {
-      //   const errorMsg = "Image resolution must be at least 215x215";
-      //   ErrorToast(errorMsg);
-      //   continue;
-      // }
 
-      validFiles.push(file);
+      try {
+        const compressedFile = await compressServiceImage(file);
+
+        validFiles.push(compressedFile);
+      } catch {
+        ErrorToast(`${file.name}: Image compression failed`);
+      }
     }
 
     if (!validFiles.length) {
@@ -182,6 +197,7 @@ const AddServiceForm = ({
     const readFile = (file) =>
       new Promise((resolve) => {
         const reader = new FileReader();
+
         reader.onload = (event) => {
           resolve({
             id: `${Date.now()}-${Math.random()}`,
@@ -191,10 +207,12 @@ const AddServiceForm = ({
             isExisting: false,
           });
         };
+
         reader.readAsDataURL(file);
       });
 
     const newImages = await Promise.all(validFiles.map(readFile));
+
     setServiceImages((prev) => [...prev, ...newImages]);
 
     if (errors.serviceImages) {
@@ -216,24 +234,28 @@ const AddServiceForm = ({
     });
   };
 
-  const replaceImage = (index, e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+ const replaceImage = async (index, e) => {
+  const file = e.target.files?.[0];
 
-    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
-    if (!["image/jpeg", "image/png"].includes(file.type)) {
-      ErrorToast("Only JPEG and PNG formats are allowed");
-      e.target.value = "";
-      return;
-    }
+  if (!file) return;
 
-    if (file.size > MAX_FILE_SIZE) {
-      ErrorToast("File size must not exceed 10 MB");
-      e.target.value = "";
-      return;
-    }
+  if (!["image/jpeg", "image/png"].includes(file.type)) {
+    ErrorToast("Only JPEG and PNG formats are allowed");
+    e.target.value = "";
+    return;
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    ErrorToast("Image size must not exceed 10 MB");
+    e.target.value = "";
+    return;
+  }
+
+  try {
+    const compressedFile = await compressServiceImage(file);
 
     const reader = new FileReader();
+
     reader.onload = (event) => {
       setServiceImages((prev) => {
         const updated = [...prev];
@@ -247,7 +269,7 @@ const AddServiceForm = ({
 
         updated[index] = {
           ...target,
-          file,
+          file: compressedFile,
           url: event.target.result,
           name: file.name,
           isExisting: false,
@@ -257,9 +279,14 @@ const AddServiceForm = ({
       });
     };
 
-    reader.readAsDataURL(file);
-    e.target.value = "";
-  };
+    reader.readAsDataURL(compressedFile);
+  } catch (error) {
+    console.error("Image compression failed:", error);
+    ErrorToast("Image compression failed. Please try another image.");
+  }
+
+  e.target.value = "";
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -392,11 +419,10 @@ const AddServiceForm = ({
                     max="99999.99"
                     step="0.01"
                     placeholder="0.00"
-                    className={`h-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-                      errors.price
+                    className={`h-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${errors.price
                         ? "border-red-500 focus-visible:ring-red-500"
                         : ""
-                    }`}
+                      }`}
                     value={formData.price}
                     onChange={handleInputChange}
                   />
@@ -414,8 +440,8 @@ const AddServiceForm = ({
                     name="description"
                     placeholder="Describe your service"
                     className={`min-h-[100px] w-full resize-none break-all whitespace-pre-wrap overflow-x-hidden ${errors.description
-                        ? "border-red-500 focus-visible:ring-red-500"
-                        : ""
+                      ? "border-red-500 focus-visible:ring-red-500"
+                      : ""
                       }`}
                     value={formData.description}
                     onChange={handleInputChange}

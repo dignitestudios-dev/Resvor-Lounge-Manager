@@ -426,7 +426,7 @@ const ServiceCard = ({ service, onEdit, onDelete, variant = "dark" }) => {
           className={`flex items-center gap-3 text-[13px] font-medium ${isDark ? "text-white" : "text-gray-800"
             }`}
         >
-          <span className="break-words [overflow-wrap:anywhere]">{service.serviceName}</span>
+          <span className="break-words [overflow-wrap:anywhere] break-all">{service.serviceName}</span>
 
           <span className={isDark ? "text-white/40" : "text-gray-400"}>|</span>
 

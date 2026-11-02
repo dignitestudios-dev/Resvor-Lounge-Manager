@@ -88,7 +88,6 @@ export const serviceSchema = (isEdit = false) =>
 
  serviceImages: Yup.array()
   .of(imageValidation)
-  .min(1, "At least one image is required")
-  .required("Service image is required")
-  .max(5, "Maximum 5 images are allowed"),
+  .max(5, "Maximum 5 images are allowed")
+  .optional(),
   });

@@ -1,25 +1,38 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "../../../axios";
 
-const fetchGuestbook = async ({ page = 1, startDate = "", endDate = "", limit = 10 }) => {
+const fetchGuestbook = async ({
+  page = 1,
+  search = "",
+  startDate = "",
+  endDate = "",
+  limit = 10,
+}) => {
   const params = { page, limit };
 
-  // Only add date filters when they are actually selected
+  if (search.trim()) params.search = search.trim();
   if (startDate) params.startDate = startDate;
   if (endDate) params.endDate = endDate;
 
   const { data } = await axios.get("/guestbook", { params });
-  // Return both the array and pagination meta
+
   return {
     data: data?.data || [],
     pagination: data?.pagination || null,
   };
 };
 
-export const useGetGuestbook = ({ page = 1, startDate = "", endDate = "", limit = 10 } = {}) => {
+export const useGetGuestbook = ({
+  page = 1,
+  search = "",
+  startDate = "",
+  endDate = "",
+  limit = 10,
+} = {}) => {
   return useQuery({
-    queryKey: ["guestbook-list", page, startDate, endDate, limit],
-    queryFn: () => fetchGuestbook({ page, startDate, endDate, limit }),
+    queryKey: ["guestbook-list", page, search, startDate, endDate, limit],
+    queryFn: () =>
+      fetchGuestbook({ page, search, startDate, endDate, limit }),
     keepPreviousData: true,
   });
 };

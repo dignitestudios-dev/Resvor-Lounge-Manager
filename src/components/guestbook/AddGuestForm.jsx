@@ -63,16 +63,25 @@ const stripCountryCode = (phone) => {
 
 const parseSpecialDates = (raw) => {
   if (!raw) return [];
-  if (Array.isArray(raw)) return raw;
+
+  let dates = raw;
+
   if (typeof raw === "string") {
     try {
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
+      dates = JSON.parse(raw);
     } catch {
       return [];
     }
   }
-  return [];
+
+  if (!Array.isArray(dates)) return [];
+
+  return dates.map((item) => ({
+    title: item?.title || "",
+    date: item?.date
+      ? String(item.date).slice(0, 10)
+      : "",
+  }));
 };
 
 const FieldError = ({ touched, error }) =>
@@ -122,13 +131,14 @@ const AddGuestForm = ({
       details: guestData?.details || guestData?.notes || "",
     };
   };
+  console.log(selectedLoungeId,"selectedLoungeId")
 
   const formik = useFormik({
     initialValues: getInitialValues(data),
     validationSchema: addGuestSchema,
     validateOnChange: true,
     validateOnBlur: true,
-    enableReinitialize: true,
+    enableReinitialize: false,
     onSubmit: async (values) => {
       try {
         if (!isEdit && !selectedLoungeId) {
@@ -141,7 +151,7 @@ const AddGuestForm = ({
           : "";
 
         const payload = {
-          loungeId: selectedLoungeId,
+          // loungeId: selectedLoungeId,
           firstName: values.firstName.trim(),
           lastName: values.lastName.trim(),
           email: values.email.trim(),
@@ -152,14 +162,17 @@ const AddGuestForm = ({
           photo: values.photo,
         };
 
-        if (isEdit && data?._id) {
-          await updateGuestMutation.mutateAsync({
-            entryId: data._id,
-            ...payload,
-          });
-        } else {
-          await createGuestMutation.mutateAsync(payload);
-        }
+       if (isEdit && data?._id) {
+  await updateGuestMutation.mutateAsync({
+    entryId: data._id,
+    ...payload,
+  });
+} else {
+  await createGuestMutation.mutateAsync({
+    loungeId: selectedLoungeId,
+    ...payload,
+  });
+}
 
         queryClient.invalidateQueries({ queryKey: ["guestbook-list"] });
 
@@ -171,8 +184,8 @@ const AddGuestForm = ({
       } catch (error) {
         ErrorToast(
           error?.response?.data?.message ||
-            error?.message ||
-            `Failed to ${isEdit ? "update" : "add"} guest. Please try again.`
+          error?.message ||
+          `Failed to ${isEdit ? "update" : "add"} guest. Please try again.`
         );
         console.error(`${isEdit ? "Update" : "Add"} guest error:`, error);
       }
@@ -211,22 +224,27 @@ const AddGuestForm = ({
 
   // Sync initial values and image preview when editing
   useEffect(() => {
-    if (isOpen) {
-      if (isEdit && data) {
-        const existingPhoto =
-          data.photo?.location ||
-          data.photo?.url ||
-          (typeof data.photo === "string" ? data.photo : null) ||
-          data.profileImage?.location ||
-          data.profileImage?.url ||
-          (typeof data.profileImage === "string" ? data.profileImage : null);
-        setProfileImagePreview(existingPhoto);
-      } else {
-        formik.resetForm();
-        setProfileImagePreview(null);
-      }
+    if (isOpen && isEdit && data) {
+      formik.resetForm({
+        values: getInitialValues(data),
+      });
+
+      const existingPhoto =
+        data.photo?.location ||
+        data.photo?.url ||
+        (typeof data.photo === "string" ? data.photo : null) ||
+        data.profileImage?.location ||
+        data.profileImage?.url ||
+        (typeof data.profileImage === "string" ? data.profileImage : null);
+
+      setProfileImagePreview(existingPhoto);
     }
-  }, [isOpen, isEdit, data]);
+
+    if (isOpen && !isEdit) {
+      formik.resetForm();
+      setProfileImagePreview(null);
+    }
+  }, [isOpen, isEdit, data?._id]);
 
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
