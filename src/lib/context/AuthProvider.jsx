@@ -127,9 +127,11 @@ export const AuthProvider = ({ children }) => {
   );
   const isAuthRoute = pathname.startsWith("/auth");
   const isOnboardingRoute = pathname === ONBOARDING_ROUTE;
+  const isPublicRoute = pathname?.startsWith("/guestbook-entry");
 
   const redirectTarget = useMemo(() => {
     if (!isResolved) return null;
+    if (isPublicRoute) return null;
 
     if (
       isAuthenticated &&
@@ -169,6 +171,7 @@ export const AuthProvider = ({ children }) => {
     isAuthRoute,
     isOnboardingRoute,
     isProtectedRoute,
+    isPublicRoute,
   ]);
 
   useEffect(() => {

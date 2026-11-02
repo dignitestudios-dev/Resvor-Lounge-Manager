@@ -22,6 +22,7 @@ export const PUBLIC_ROUTES = [
   "/auth/forget-password",
   "/auth/update-password",
   "/auth/verify-forget-otp",
+  "/guestbook-entry",
 ];
 
 export const PROTECTED_ROUTES = ["/dashboard"];

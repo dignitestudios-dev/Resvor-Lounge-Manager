@@ -86,12 +86,12 @@ export const navLinks = [
     icon: <Chat />,
     selectedIcon: <Chat color="#010053" />,
   },
-  {
-    name: "Scan Qr Code",
-    path: "/dashboard/scan-qr-code",
-    icon: <ScanQrCode />,
-    selectedIcon: <ScanQrCode color="#010053" />,
-  },
+  // {
+  //   name: "Scan Qr Code",
+  //   path: "/dashboard/scan-qr-code",
+  //   icon: <ScanQrCode />,
+  //   selectedIcon: <ScanQrCode color="#010053" />,
+  // },
 ];
 
 // Mock Data

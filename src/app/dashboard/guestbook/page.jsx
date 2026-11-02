@@ -11,10 +11,12 @@ import {
 } from "@/lib/hooks/mutations/GuestbookMutations";
 import { SuccessToast, ErrorToast } from "@/components/ui/toaster";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Loader2, QrCode } from "lucide-react";
+import GuestbookQRCodeSection from "@/components/guestbook/GuestbookQRCodeSection";
 
 const Guest = () => {
   const [openForm, setOpenForm] = useState(false);
+  const [showQRSection, setShowQRSection] = useState(true);
   const fileInputRef = useRef(null);
   const queryClient = useQueryClient();
 
@@ -145,11 +147,22 @@ const Guest = () => {
             )}
           </Button>
 
+          <Button
+            variant={"outline"}
+            className={"border-2 h-12 text-[14px] px-5 flex items-center gap-2"}
+            onClick={() => setShowQRSection((prev) => !prev)}
+            aria-expanded={showQRSection}
+          >
+            <QrCode className="w-4 h-4" />
+            {showQRSection ? "Hide QR Code" : "Guestbook QR Code"}
+          </Button>
+
           <AddGuestForm isOpen={openForm} onOpenChange={setOpenForm} />
 
           <DateAndMonthFilter onFilterChange={handleFilterChange} />
         </div>
       </div>
+      {showQRSection && <GuestbookQRCodeSection />}
       <div className="mt-4">
         <Table
           guests={guests}
