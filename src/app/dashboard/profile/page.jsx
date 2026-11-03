@@ -8,7 +8,7 @@ import Edit from "@/components/icons/Edit";
 import Delete from "@/components/icons/sidebar/Delete";
 import EditFloorPlanModal from "@/components/profile/EditFloorPlanModal";
 import CreateLoungeModal from "@/components/lounge-components/CreateLoungeModal";
-import AddGalleryImagesModal from "@/components/profile/AddGalleryImagesModal";
+import LoungeGallerySection from "@/components/profile/LoungeGallerySection";
 import { useQueryClient } from "@tanstack/react-query";
 import { useGetActiveLounge } from "@/lib/hooks/queries/useLounges";
 import { useAuthMe } from "@/lib/hooks/queries/useQueries";
@@ -20,33 +20,16 @@ const Profile = () => {
   const queryClient = useQueryClient();
   const { data: activeLounge, isLoading } = useGetActiveLounge();
   const { data: authMe } = useAuthMe();
-  console.log("activeLounge----> ", authMe)
+  
 
   const updateLoungeMutation = useUpdateLounge();
   const [openEditProfile, setOpenEditProfile] = useState(false);
   const [openEditFloorPlan, setOpenEditFloorPlan] = useState(false);
   const [addLocation, setAddLocation] = useState(false);
   const [editingFloorPlan, setEditingFloorPlan] = useState(false);
-  const [openAddGalleryImages, setOpenAddGalleryImages] = useState(false);
+
 
   const [openSuccess, setOpenSuccess] = useState(false);
-
-
-  const handleAddNewImages = (images) => {
-    if (images && images.length > 0) {
-      updateLoungeMutation.mutate({ images }, {
-        onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: ["active-lounge"] });
-          setOpenAddGalleryImages(false);
-          setOpenSuccess(true);
-        },
-        onError: (error) => {
-          ErrorToast(error.response?.data?.message || "Failed to add gallery images. Please try again.");
-        }
-      });
-    }
-  };
-
   const onOpenEditFloorPlan = () => {
     setOpenEditFloorPlan(true);
     setEditingFloorPlan(true);
@@ -61,10 +44,6 @@ const Profile = () => {
     : activeLounge?.role === "promoter"
       ? "Promoter"
       : activeLounge?.role || "Lounge Manager";
-
-  const displayGalleryImages = activeLounge?.images && activeLounge.images.length > 0
-    ? activeLounge.images.map((img) => img.location)
-    : [];
 
   const totalTablesCount = (activeLounge?.floorPlan?.regularTables || 0) + (activeLounge?.floorPlan?.vipTables || 0);
 
@@ -167,7 +146,7 @@ const Profile = () => {
                 <p className="text-xs text-gray-500">
                   Highlight Specialization
                 </p>
-                <p className="text-sm font-medium">{activeLounge?.specialization || "Lorem Ipsum dollar"}</p>
+                <p className="text-sm font-medium break-all">{activeLounge?.specialization || "Lorem Ipsum dollar"}</p>
               </div>
             </div>
             <div className="grid grid-cols-12 gap-2 mt-2">
@@ -222,37 +201,7 @@ const Profile = () => {
             </div>
           </div>
         </section>
-        <section className="grid md:grid-cols-1 gap-6">
-          {/* Gallery */}
-          <div className="bg-white rounded-xl shadow-sm p-6 flex flex-col h-[450px]">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Gallery</h2>
-              {/* <button
-                onClick={() => setOpenAddGalleryImages(true)}
-                className="text-black underline font-medium hover:underline cursor-pointer"
-              >
-                Add New Images
-              </button> */}
-            </div>{" "}
-            <div className="grid grid-cols-4 gap-3 overflow-y-auto pr-2">
-              {displayGalleryImages.length > 0 ? (
-                displayGalleryImages.map((img, index) => (
-                  <div
-                    key={index}
-                    className="w-full h-[200px] bg-cover bg-center rounded-md overflow-hidden border border-gray-200"
-                    style={{
-                      backgroundImage: `url(${img})`,
-                    }}
-                  />
-                ))
-              ) : (
-                <p className="text-gray-500 text-sm italic col-span-4 text-center my-8">
-                  No gallery images uploaded yet.
-                </p>
-              )}
-            </div>
-          </div>
-        </section>
+        <LoungeGallerySection activeLounge={activeLounge} />
       </>
 
       <CreateLoungeModal
@@ -262,13 +211,6 @@ const Profile = () => {
           setAddLocation(false);
           queryClient.invalidateQueries({ queryKey: ["lounges-list"] });
         }}
-      />
-
-      <AddGalleryImagesModal
-        open={openAddGalleryImages}
-        setOpen={setOpenAddGalleryImages}
-        isLoading={updateLoungeMutation.isPending}
-        onAdd={handleAddNewImages}
       />
 
       <EditFloorPlanModal

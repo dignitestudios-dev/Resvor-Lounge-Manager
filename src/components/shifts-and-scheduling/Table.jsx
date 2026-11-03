@@ -187,7 +187,7 @@ const Table = () => {
                                 {b.name ? b.name.charAt(0).toUpperCase() : "B"}
                               </div>
                             )}
-                            <span className="text-sm font-medium">{b.name}</span>
+                            <span className="text-sm font-medium break-all  ">{b.name}</span>
                           </div>
                         ))}
                       </div>

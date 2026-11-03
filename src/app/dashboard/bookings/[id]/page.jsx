@@ -117,28 +117,20 @@ const BookingDetails = () => {
                 }}
               />
 
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <h3 className="text-xl font-bold mb-2">
                   {bookingData.loungeId?.name || "Unknown Lounge"}
                 </h3>
-                {bookingData?.loungeId?.tags.length > 0 && (
-                  <div className="flex gap-2 mb-4">
-                    {bookingData?.loungeId?.tags?.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="bg-blue-800/20 text-blue-950 px-3 py-1 rounded-full text-sm font-medium"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                    {/* <span className="bg-blue-800/20 text-blue-950 px-3 py-1 rounded-full text-sm font-medium">
-                    Booking
-                  </span>
-                  <span className="bg-blue-800/20 text-blue-950 px-3 py-1 rounded-full text-sm font-medium">
-                    Active
-                  </span> */}
-                  </div>
-                )}
+                <div className="flex flex-wrap items-center gap-2 mb-4">
+                  {bookingData?.loungeId?.tags?.map((tag, index) => (
+                    <span
+                      key={index}
+                      className="bg-blue-800/20 text-blue-950 px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
                 <div className="flex items-center gap-2 text-gray-700">
                   <IoLocation className="text-xl text-[#010067] mt-0.5 flex-shrink-0" />
                   <span>

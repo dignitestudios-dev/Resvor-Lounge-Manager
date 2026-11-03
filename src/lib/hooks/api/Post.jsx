@@ -252,7 +252,7 @@ export const submitUpdateLounge = async (payload) => {
     formData.append("logo", payload.userImage);
   }
 
-  // Images Array (Gallery)
+  // Images Array (New Gallery Files to upload)
   if (payload.images !== undefined && Array.isArray(payload.images)) {
     payload.images.forEach((image, index) => {
       let imageFile = image;
@@ -261,6 +261,18 @@ export const submitUpdateLounge = async (payload) => {
       }
       if (imageFile) {
         formData.append("images", imageFile);
+      }
+    });
+  }
+
+  // Delete Images Array (Gallery images to remove)
+  if (payload.deleteImages !== undefined) {
+    const toDelete = Array.isArray(payload.deleteImages)
+      ? payload.deleteImages
+      : [payload.deleteImages];
+    toDelete.forEach((id) => {
+      if (id) {
+        formData.append("deleteImages", id);
       }
     });
   }

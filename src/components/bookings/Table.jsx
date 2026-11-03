@@ -183,12 +183,12 @@ const Table = ({
                 >
                   <td className="px-4 py-6">
                     <div className="flex items-center gap-3">
-                      <div
+                      {/* <div
                         className="h-[43px] w-[43px] rounded-full bg-cover bg-center bg-gray-200 border border-gray-100 shrink-0"
                         style={{
                           backgroundImage: `url(${booking?.user?.profileImage})`,
                         }}
-                      />
+                      /> */}
                       <span className="font-semibold text-gray-900">{booking?.user?.name}</span>
                     </div>
                   </td>

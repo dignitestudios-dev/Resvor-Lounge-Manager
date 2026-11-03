@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,7 +21,7 @@ import {
   ArrowLeft,
   Search,
   ChevronRight,
-  CheckCircle2,
+  ChevronLeft,
 } from "lucide-react";
 import { useGetGuestbook } from "@/lib/hooks/queries/useGuestbook";
 import { useCreateCampaign } from "@/lib/hooks/mutations/CampaignMutations";
@@ -94,7 +94,18 @@ const SendInvitationForm = ({
   const [customEmail, setCustomEmail] = useState("");
   const [customPhone, setCustomPhone] = useState("");
   const [searchGuestQuery, setSearchGuestQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [guestPage, setGuestPage] = useState(1);
 
+  const GUESTS_PER_PAGE = 100;
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchGuestQuery.trim());
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [searchGuestQuery]);
   const [showLimitModal, setShowLimitModal] = useState(false);
 
   // Reset to channel step whenever dialog is opened
@@ -102,15 +113,28 @@ const SendInvitationForm = ({
     if (isOpen) {
       setStep("channel");
       setSearchGuestQuery("");
+      setDebouncedSearch("");
+      setGuestPage(1);
     }
   }, [isOpen]);
 
   // Fetch all guests from guestbook API
-  const { data: guestbookData, isLoading: isGuestsLoading } = useGetGuestbook({
-    page: 1,
-    limit: 100,
+  const {
+    data: guestbookData,
+    isLoading: isGuestsLoading,
+    isFetching: isGuestsFetching,
+  } = useGetGuestbook({
+    page: guestPage,
+    limit: GUESTS_PER_PAGE,
+    search: debouncedSearch,
   });
+
   const guests = guestbookData?.data || [];
+  const pagination = guestbookData?.pagination;
+
+  const totalPages = pagination?.totalPages || 1;
+
+  const filteredGuests = guests;
 
   // Fetch subscription data
   const { data: subscriptionData } = useGetMySubscription();
@@ -258,17 +282,17 @@ const SendInvitationForm = ({
   };
 
   // ─── Filtered Guests ──────────────────────────────────────
-  const filteredGuests = useMemo(() => {
-    if (!guests || !Array.isArray(guests)) return [];
-    if (!searchGuestQuery.trim()) return guests;
-    const q = searchGuestQuery.toLowerCase().trim();
-    return guests.filter((g) => {
-      const name = (g.fullName || `${g.firstName || ""} ${g.lastName || ""}`).toLowerCase();
-      const email = (g.email || "").toLowerCase();
-      const phone = (g.phoneNumber || "").toLowerCase();
-      return name.includes(q) || email.includes(q) || phone.includes(q);
-    });
-  }, [guests, searchGuestQuery]);
+  // const filteredGuests = useMemo(() => {
+  //   if (!guests || !Array.isArray(guests)) return [];
+  //   if (!searchGuestQuery.trim()) return guests;
+  //   const q = searchGuestQuery.toLowerCase().trim();
+  //   return guests.filter((g) => {
+  //     const name = (g.fullName || `${g.firstName || ""} ${g.lastName || ""}`).toLowerCase();
+  //     const email = (g.email || "").toLowerCase();
+  //     const phone = (g.phoneNumber || "").toLowerCase();
+  //     return name.includes(q) || email.includes(q) || phone.includes(q);
+  //   });
+  // }, [guests, searchGuestQuery]);
 
   // ─── Limit Modal Handlers ─────────────────────────────────
   const openLimitModal = () => {
@@ -363,19 +387,17 @@ const SendInvitationForm = ({
                 {/* Email Option Card */}
                 <div
                   onClick={() => setSelectedChannel("email")}
-                  className={`flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                    selectedChannel === "email"
-                      ? "border-primary bg-primary/5 shadow-sm"
-                      : "border-gray-200 hover:border-gray-300 hover:bg-gray-50/70"
-                  }`}
+                  className={`flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedChannel === "email"
+                    ? "border-primary bg-primary/5 shadow-sm"
+                    : "border-gray-200 hover:border-gray-300 hover:bg-gray-50/70"
+                    }`}
                 >
                   <div className="flex items-center gap-3.5">
                     <div
-                      className={`w-11 h-11 rounded-xl flex items-center justify-center transition-colors ${
-                        selectedChannel === "email"
-                          ? "bg-primary text-white"
-                          : "bg-gray-100 text-gray-600"
-                      }`}
+                      className={`w-11 h-11 rounded-xl flex items-center justify-center transition-colors ${selectedChannel === "email"
+                        ? "bg-primary text-white"
+                        : "bg-gray-100 text-gray-600"
+                        }`}
                     >
                       <Mail className="w-5 h-5" />
                     </div>
@@ -391,11 +413,10 @@ const SendInvitationForm = ({
 
                   <div className="flex items-center justify-center pl-2">
                     <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                        selectedChannel === "email"
-                          ? "border-primary bg-primary"
-                          : "border-gray-300 bg-white"
-                      }`}
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${selectedChannel === "email"
+                        ? "border-primary bg-primary"
+                        : "border-gray-300 bg-white"
+                        }`}
                     >
                       {selectedChannel === "email" && (
                         <Check className="w-3 h-3 text-white" />
@@ -407,19 +428,17 @@ const SendInvitationForm = ({
                 {/* Phone Number Option Card */}
                 <div
                   onClick={() => setSelectedChannel("sms")}
-                  className={`flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                    selectedChannel === "sms"
-                      ? "border-primary bg-primary/5 shadow-sm"
-                      : "border-gray-200 hover:border-gray-300 hover:bg-gray-50/70"
-                  }`}
+                  className={`flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedChannel === "sms"
+                    ? "border-primary bg-primary/5 shadow-sm"
+                    : "border-gray-200 hover:border-gray-300 hover:bg-gray-50/70"
+                    }`}
                 >
                   <div className="flex items-center gap-3.5">
                     <div
-                      className={`w-11 h-11 rounded-xl flex items-center justify-center transition-colors ${
-                        selectedChannel === "sms"
-                          ? "bg-primary text-white"
-                          : "bg-gray-100 text-gray-600"
-                      }`}
+                      className={`w-11 h-11 rounded-xl flex items-center justify-center transition-colors ${selectedChannel === "sms"
+                        ? "bg-primary text-white"
+                        : "bg-gray-100 text-gray-600"
+                        }`}
                     >
                       <Smartphone className="w-5 h-5" />
                     </div>
@@ -435,11 +454,10 @@ const SendInvitationForm = ({
 
                   <div className="flex items-center justify-center pl-2">
                     <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                        selectedChannel === "sms"
-                          ? "border-primary bg-primary"
-                          : "border-gray-300 bg-white"
-                      }`}
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${selectedChannel === "sms"
+                        ? "border-primary bg-primary"
+                        : "border-gray-300 bg-white"
+                        }`}
                     >
                       {selectedChannel === "sms" && (
                         <Check className="w-3 h-3 text-white" />
@@ -648,16 +666,19 @@ const SendInvitationForm = ({
                   <div className="relative">
                     <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                     <Input
-                      placeholder="Search guests by name or details..."
+                      placeholder="Search guests by name, email or phone..."
                       value={searchGuestQuery}
-                      onChange={(e) => setSearchGuestQuery(e.target.value)}
+                      onChange={(e) => {
+                        setSearchGuestQuery(e.target.value);
+                        setGuestPage(1);
+                      }}
                       className="h-10 pl-9 text-xs"
                     />
                   </div>
 
                   {/* Guests List */}
                   <div className="border rounded-xl p-2.5 max-h-[190px] overflow-y-auto divide-y divide-gray-100">
-                    {isGuestsLoading ? (
+                    {isGuestsLoading  ? (
                       <div className="flex justify-center items-center py-8">
                         <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
                       </div>
@@ -684,13 +705,12 @@ const SendInvitationForm = ({
                                   handleToggleGuestPhone(guest.phoneNumber);
                                 }
                               }}
-                              className={`flex items-center gap-3 p-2 rounded-lg transition-all ${
-                                !hasPhone
-                                  ? "opacity-50 cursor-not-allowed bg-transparent"
-                                  : isSelected
+                              className={`flex items-center gap-3 p-2 rounded-lg transition-all ${!hasPhone
+                                ? "opacity-50 cursor-not-allowed bg-transparent"
+                                : isSelected
                                   ? "bg-primary/8 border border-primary/20 cursor-pointer"
                                   : "hover:bg-gray-50 border border-transparent cursor-pointer"
-                              }`}
+                                }`}
                             >
                               <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs shrink-0 font-medium text-gray-700">
                                 {guestName.charAt(0).toUpperCase()}
@@ -732,13 +752,12 @@ const SendInvitationForm = ({
                                   handleToggleGuestEmail(guest.email);
                                 }
                               }}
-                              className={`flex items-center gap-3 p-2 rounded-lg transition-all ${
-                                !hasEmail
-                                  ? "opacity-50 cursor-not-allowed bg-transparent"
-                                  : isSelected
+                              className={`flex items-center gap-3 p-2 rounded-lg transition-all ${!hasEmail
+                                ? "opacity-50 cursor-not-allowed bg-transparent"
+                                : isSelected
                                   ? "bg-primary/8 border border-primary/20 cursor-pointer"
                                   : "hover:bg-gray-50 border border-transparent cursor-pointer"
-                              }`}
+                                }`}
                             >
                               <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs shrink-0 font-medium text-gray-700">
                                 {guestName.charAt(0).toUpperCase()}
@@ -774,6 +793,39 @@ const SendInvitationForm = ({
                       </p>
                     )}
                   </div>
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-between pt-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={guestPage === 1 }
+                        onClick={() => setGuestPage((prev) => Math.max(1, prev - 1))}
+                        className="h-8 gap-1 text-xs"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                        Previous
+                      </Button>
+
+                      <span className="text-xs text-gray-500">
+                        Page {guestPage} of {totalPages}
+                      </span>
+
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={guestPage >= totalPages }
+                        onClick={() =>
+                          setGuestPage((prev) => Math.min(totalPages, prev + 1))
+                        }
+                        className="h-8 gap-1 text-xs"
+                      >
+                        Next
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
 
                 {/* ── Flyer Usage Counter ── */}

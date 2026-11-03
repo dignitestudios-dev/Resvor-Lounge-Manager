@@ -67,7 +67,7 @@ const ReviewPopup = ({ isOpen, onOpenChange, onConfirm, onBack, data, isLoading 
               </div>
               <div className="text-right">
                 <p className="text-sm text-gray-500">Workforce</p>
-                <p className="font-medium text-black">{data.bartender}</p>
+                <p className="font-medium text-black break-all">{data.bartender}</p>
               </div>
             </div>
 

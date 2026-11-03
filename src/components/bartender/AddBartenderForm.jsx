@@ -326,6 +326,8 @@ const AddBartenderForm = ({
                     type="email"
                     placeholder="email@example.com"
                     disabled={isEdit}
+                    maxLength={255}
+
                     className={`h-14 ${formik.touched.email && formik.errors.email
                       ? "border-red-500"
                       : ""
@@ -333,6 +335,7 @@ const AddBartenderForm = ({
                     value={formik.values.email}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
+
                   />
                   <FieldError
                     touched={formik.touched.email}
@@ -415,6 +418,8 @@ const AddBartenderForm = ({
                           value={formik.values.password}
                           onChange={formik.handleChange}
                           onBlur={formik.handleBlur}
+                          maxLength={255}
+
                         />
                         <button
                           type="button"
@@ -452,6 +457,8 @@ const AddBartenderForm = ({
                           value={formik.values.confirmPassword}
                           onChange={formik.handleChange}
                           onBlur={formik.handleBlur}
+                          maxLength={255}
+
                         />
                         <button
                           type="button"

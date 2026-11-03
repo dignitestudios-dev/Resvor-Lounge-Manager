@@ -41,8 +41,9 @@ const Bookings = () => {
             isLounge={true}
             onFilterChange={handleFilterChange}
             statusOptions={[
-              "pending",
               "awaiting_payment",
+              "pending",
+              "accepted",
               "confirmed",
               "failed",
               "cancelled",

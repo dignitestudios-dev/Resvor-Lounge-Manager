@@ -541,6 +541,8 @@ const AddShiftAndScheduling = ({
                     id="role"
                     name="role"
                     placeholder="Role"
+                      maxLength={100}
+
                     className={"h-14"}
                     value={values.role}
                     onChange={handleChange}
@@ -718,7 +720,7 @@ const AddShiftAndScheduling = ({
                             key={id}
                             className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-900 text-white text-xs rounded-full font-medium"
                           >
-                            {b.fullName}
+                           <div className="break-all"> {b.fullName}</div>
                             {!isEdit && (
                               <button
                                 type="button"

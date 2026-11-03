@@ -92,6 +92,8 @@ const UpdatePasswordModal = ({ isOpen, onOpenChange, bartenderId }) => {
                     value={formik.values.currentPassword}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
+                      maxLength={255}
+
                   />
                   <button
                     type="button"
@@ -128,6 +130,7 @@ const UpdatePasswordModal = ({ isOpen, onOpenChange, bartenderId }) => {
                     value={formik.values.newPassword}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
+                    maxLength={255}
                   />
                   <button
                     type="button"

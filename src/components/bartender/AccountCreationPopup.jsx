@@ -11,8 +11,10 @@ import { Loader2 } from "lucide-react";
 
 const AccountCreationPopup = ({ isOpen, onOpenChange, onSendMail, isLoading }) => {
   return (
-    <Dialog open={isOpen} onOpenChange={isLoading ? undefined : onOpenChange}>
-      <DialogContent showCloseButton={false}>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}
+    >
+      <DialogContent showCloseButton={false} onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogDescription>
             <div className="flex flex-col justify-center items-center gap-3">

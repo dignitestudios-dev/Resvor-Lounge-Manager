@@ -9,6 +9,8 @@ export const addShiftSchema = Yup.object({
 
   role: Yup.string()
     .required("Role is required.")
+    .max(100, "Role must not exceed 100 characters")
+
     .test(
       "not-empty-after-trim",
       "Role cannot be empty or only spaces.",

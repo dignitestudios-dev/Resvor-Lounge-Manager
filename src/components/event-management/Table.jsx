@@ -70,6 +70,8 @@ const Table = ({
     ? filteredEvents
     : events;
 
+    console.log(displayedEvents,"displayedEvents")
+
   const handleRowClick = (eventId) => {
     router.push(`/dashboard/event-management/${eventId}`);
   };
@@ -143,7 +145,7 @@ const Table = ({
                     </td>
                     <td className="px-4 py-6">
                       <div className="flex items-center gap-3">
-                        {profilePic ? (
+                        {/* {profilePic ? (
                           <div
                             className="h-[43px] w-[43px] rounded-full bg-cover bg-center bg-gray-200 border border-gray-100 shrink-0"
                             style={{
@@ -154,7 +156,7 @@ const Table = ({
                           <div className="h-[43px] w-[43px] rounded-full bg-[#012C57] text-white font-semibold flex items-center justify-center text-sm shrink-0 border border-gray-100">
                             {getInitials(userName)}
                           </div>
-                        )}
+                        )} */}
                         <span className="font-semibold text-gray-900">{userName}</span>
                       </div>
                     </td>

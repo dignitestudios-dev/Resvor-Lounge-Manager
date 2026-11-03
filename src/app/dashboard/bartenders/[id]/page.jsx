@@ -80,7 +80,7 @@ const BartenderDetails = () => {
                     style={{ backgroundImage: `url(${profileImageUrl})` }}
                   />
                   <div>
-                    <p className="text-black text-3xl! font-bold">
+                    <p className="text-black text-3xl! font-bold break-all">
                       {bartender.fullName}
                     </p>
                     {bartender.jobTitle && (
@@ -128,7 +128,7 @@ const BartenderDetails = () => {
 
               <div className="py-4 border-b">
                 <p className="text-gray-500">Full Name</p>
-                <p className="text-black font-medium text-lg">
+                <p className="text-black font-medium text-lg break-all">
                   {bartender.fullName || "—"}
                 </p>
               </div>
@@ -156,7 +156,7 @@ const BartenderDetails = () => {
 
               <div className="py-4 border-b">
                 <p className="text-gray-500">Address</p>
-                <p className="text-black font-medium text-lg">
+                <p className="text-black font-medium text-lg break-all">
                   {bartender.address || "—"}
                 </p>
               </div>
