@@ -154,7 +154,7 @@ const ShiftDetails = ({
                                 {b.name ? b.name.charAt(0).toUpperCase() : "B"}
                               </div>
                             )}
-                            <span className="font-semibold text-black text-sm">{b.name}</span>
+                            <span className="font-semibold text-black text-sm break-all">{b.name}</span>
                           </div>
                         ))}
                       </div>

@@ -14,6 +14,7 @@ import {
 import utils, { capitalize, getStatusColor, formatCentsToUSD } from "@/lib/utils";
 import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
 import PageLoader from "@/components/common/PageLoader";
+import { Mail, Phone, UserRound } from "lucide-react";
 
 const EventDetails = () => {
   const params = useParams();
@@ -193,8 +194,60 @@ const EventDetails = () => {
                 </div>
               </div>
             </div>
+            {/* Organizer Information */}
+
+
+
+            {/* Organizer Information */}
+            <div className="border-t border-gray-200 pt-5 mt-5 mb-6">
+             
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {/* Organizer Name */}
+                <div className="flex items-center gap-3 bg-[#F8F9FC] border border-gray-100 rounded-xl p-4">
+                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                    <UserRound className="w-5 h-5 text-blue-900" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-gray-500 mb-1">Organizer Name</p>
+                    <p className="text-sm font-semibold text-gray-800 break-all">
+                      {eventData.guestName ||
+                        `${eventData.userId?.firstName || ""} ${eventData.userId?.lastName || ""}`.trim() ||
+                        "N/A"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Organizer Email */}
+                <div className="flex items-center gap-3 bg-[#F8F9FC] border border-gray-100 rounded-xl p-4">
+                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                    <Mail className="w-5 h-5 text-green-700" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-gray-500 mb-1">Email Address</p>
+                    <p className="text-sm font-semibold text-gray-800 break-all">
+                      {eventData.guestEmail || eventData.userId?.email || "N/A"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Organizer Phone */}
+                <div className="flex items-center gap-3 bg-[#F8F9FC] border border-gray-100 rounded-xl p-4">
+                  <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
+                    <Phone className="w-5 h-5 text-orange-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-gray-500 mb-1">Phone Number</p>
+                    <p className="text-sm font-semibold text-gray-800 break-all">
+                      {eventData.guestPhone || eventData.userId?.phone || "N/A"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <div className="grid grid-cols-5 gap-6 py-5">
+
               <div>
                 <p className="text-black font-semibold mb-2">Event Type</p>
                 <p className="text-gray-600 text-sm font-semibold break-words break-all">

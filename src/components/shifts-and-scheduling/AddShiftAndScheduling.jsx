@@ -272,16 +272,22 @@ const AddShiftAndScheduling = ({
 
   // Handle Event selection change to auto-fill eventName
   const handleEventSelect = (val) => {
-    if (!val || val === "none") {
+    if (val === "__remove_event__") {
       setFieldValue("eventId", "");
       setFieldValue("eventName", "");
       return;
     }
+
     setFieldValue("eventId", val);
-    const eventsList = eventsData?.events || (Array.isArray(eventsData) ? eventsData : []);
+
+    const eventsList = eventsData?.events || [];
     const selectedEvent = eventsList.find((e) => e._id === val);
+
     if (selectedEvent) {
-      setFieldValue("eventName", selectedEvent.title || selectedEvent.name || selectedEvent.eventName || "");
+      setFieldValue(
+        "eventName",
+        selectedEvent.title || selectedEvent.name || selectedEvent.eventName || ""
+      );
     }
   };
 
@@ -541,7 +547,7 @@ const AddShiftAndScheduling = ({
                     id="role"
                     name="role"
                     placeholder="Role"
-                      maxLength={100}
+                    maxLength={100}
 
                     className={"h-14"}
                     value={values.role}
@@ -556,6 +562,7 @@ const AddShiftAndScheduling = ({
                 <div className="w-full flex flex-col gap-1 col-span-2">
                   <Label className={"text-base text-black flex items-center justify-between"}>
                     <span>Event</span>
+
                     {!isEdit && isEventsLoading && (
                       <span className="text-xs text-blue-900 flex items-center gap-1 font-normal">
                         <Loader2 className="h-3 w-3 animate-spin" /> Loading events...
@@ -572,10 +579,11 @@ const AddShiftAndScheduling = ({
                   ) : (
                     <Select
                       value={values.eventId}
-                      onValueChange={(val) => handleEventSelect(val)}
+                      onValueChange={handleEventSelect}
                       disabled={isEventsLoading}
                     >
-                      <SelectTrigger className={"w-full !h-14"}>
+                      <SelectTrigger className="w-full !h-14">
+
                         {isEventsLoading ? (
                           <div className="flex items-center gap-2 text-gray-500">
                             <Loader2 className="h-4 w-4 animate-spin text-blue-900" />
@@ -587,31 +595,49 @@ const AddShiftAndScheduling = ({
                           </SelectValue>
                         )}
                       </SelectTrigger>
-                      <SelectContent className={"h-[200px]"}>
+
+                      <SelectContent className="h-[240px]">
                         <SelectGroup>
-                          <SelectLabel>Events</SelectLabel>
-                          {values.eventId && !eventsData?.events?.some((e) => e._id === values.eventId) && (
-                            <SelectItem key={values.eventId} value={values.eventId}>
-                              {values.eventName || "Selected Event"}
-                            </SelectItem>
-                          )}
-                          {isEventsLoading ? (
-                            <div className="flex items-center justify-center p-4 text-sm text-gray-500 gap-2">
-                              <Loader2 className="h-4 w-4 animate-spin text-blue-900" />
-                              Loading events...
+                          <div className=" flex items-center justify-between ">
+                            <SelectLabel>Events</SelectLabel>
+                            <div className="px-2">
+                              {!isEdit && values.eventId && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setFieldValue("eventId", "");
+                                    setFieldValue("eventName", "");
+                                  }}
+                                  className="flex items-center gap-1 text-xs font-medium text-red-500 hover:text-red-700 transition-colors"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                  Remove
+                                </button>
+                              )}
                             </div>
-                          ) : eventsData?.events?.length > 0 ? (
-                            eventsData?.events?.map((event) => (
+                          </div>
+
+                          {values.eventId &&
+                            !eventsData?.events?.some((e) => e._id === values.eventId) && (
+                              <SelectItem value={values.eventId}>
+                                {values.eventName || "Selected Event"}
+                              </SelectItem>
+                            )}
+
+                          {eventsData?.events?.length > 0 ? (
+                            eventsData.events.map((event) => (
                               <SelectItem value={event._id} key={event._id}>
                                 {event.title || event.name || event.eventName}
                               </SelectItem>
                             ))
                           ) : (
                             <div className="p-4 text-sm text-gray-500 text-center">
-                              {values.date ? "No events found for selected date" : "Please select a date first"}
+                              No events found for selected date
                             </div>
                           )}
                         </SelectGroup>
+
+                       
                       </SelectContent>
                     </Select>
                   )}
@@ -720,7 +746,7 @@ const AddShiftAndScheduling = ({
                             key={id}
                             className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-900 text-white text-xs rounded-full font-medium"
                           >
-                           <div className="break-all"> {b.fullName}</div>
+                            <div className="break-all"> {b.fullName}</div>
                             {!isEdit && (
                               <button
                                 type="button"
