@@ -1,16 +1,13 @@
 import * as Yup from "yup";
 
 export const addShiftSchema = Yup.object({
-  eventName: Yup.string()
-    .optional(),
+  eventName: Yup.string().optional(),
 
-  eventId: Yup.string()
-    .optional(),
+  eventId: Yup.string().optional(),
 
   role: Yup.string()
     .required("Role is required.")
     .max(100, "Role must not exceed 100 characters")
-
     .test(
       "not-empty-after-trim",
       "Role cannot be empty or only spaces.",
@@ -24,11 +21,14 @@ export const addShiftSchema = Yup.object({
       "Date must be today or a future date.",
       (value) => {
         if (!value) return false;
+
         const dateObj = new Date();
         const yyyy = dateObj.getFullYear();
         const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
         const dd = String(dateObj.getDate()).padStart(2, "0");
+
         const todayStr = `${yyyy}-${mm}-${dd}`;
+
         return value >= todayStr;
       }
     ),
@@ -39,12 +39,14 @@ export const addShiftSchema = Yup.object({
   endTime: Yup.string()
     .required("End time is required.")
     .test(
-      "is-after-start",
-      "Start time must be before end time.",
+      "different-time",
+      "End time must be different from start time.",
       function (value) {
         const { startTime } = this.parent;
+
         if (!startTime || !value) return true;
-        return value > startTime;
+
+        return value !== startTime;
       }
     ),
 

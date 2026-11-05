@@ -51,6 +51,21 @@ const formatTimeForInput = (isoString) => {
   const mm = String(dateObj.getMinutes()).padStart(2, "0");
   return `${hh}:${mm}`;
 };
+const getShiftDateTimes = (date, startTime, endTime) => {
+  const startDateTime = new Date(`${date}T${startTime}`);
+  const endDateTime = new Date(`${date}T${endTime}`);
+
+  if (endTime <= startTime) {
+    endDateTime.setDate(endDateTime.getDate() + 1);
+  }
+
+  return {
+    startDateTime: startDateTime.toISOString(),
+    endDateTime: endDateTime.toISOString(),
+    startObj: startDateTime,
+    endObj: endDateTime,
+  };
+};
 
 const getTodayString = () => {
   const dateObj = new Date();
@@ -200,13 +215,22 @@ const AddShiftAndScheduling = ({
           status: "published",
         };
 
+        // if (values.date && values.startTime && values.endTime) {
+        //   const startObj = new Date(`${values.date}T${values.startTime}`);
+        //   const endObj = new Date(`${values.date}T${values.endTime}`);
+        //   updatePayload.startDateTime = startObj.toISOString();
+        //   updatePayload.endDateTime = endObj.toISOString();
+        // }
         if (values.date && values.startTime && values.endTime) {
-          const startObj = new Date(`${values.date}T${values.startTime}`);
-          const endObj = new Date(`${values.date}T${values.endTime}`);
-          updatePayload.startDateTime = startObj.toISOString();
-          updatePayload.endDateTime = endObj.toISOString();
-        }
+          const { startDateTime, endDateTime } = getShiftDateTimes(
+            values.date,
+            values.startTime,
+            values.endTime
+          );
 
+          updatePayload.startDateTime = startDateTime;
+          updatePayload.endDateTime = endDateTime;
+        }
         if (values.instructions !== undefined) {
           updatePayload.instructions = values.instructions;
         }
@@ -309,28 +333,34 @@ const AddShiftAndScheduling = ({
     formik.validateForm().then((errors) => {
       if (Object.keys(errors).length > 0) {
         formik.setTouched(
-          Object.keys(values).reduce((acc, key) => ({ ...acc, [key]: true }), {})
+          Object.keys(values).reduce(
+            (acc, key) => ({ ...acc, [key]: true }),
+            {}
+          )
         );
+
         ErrorToast("Please fill all the required fields.");
         return;
       }
 
       setActionType("template");
 
-      const startObj = new Date(`${values.date}T${values.startTime}`);
-      const endObj = new Date(`${values.date}T${values.endTime}`);
-
-      const startDateTime = startObj.toISOString();
-      const endDateTime = endObj.toISOString();
+      const { startDateTime, endDateTime, endObj } =
+        getShiftDateTimes(
+          values.date,
+          values.startTime,
+          values.endTime
+        );
 
       if (isEdit) {
-        const isDraftStatus = (data?.status || "").toLowerCase() === "draft";
-        if (isDraftStatus && values.date && values.endTime) {
-          const endObj = new Date(`${values.date}T${values.endTime}`);
-          if (!isNaN(endObj.getTime()) && endObj < new Date()) {
-            ErrorToast("Cannot update a draft shift whose end time is in the past. Please select an ongoing or upcoming end time.");
-            return;
-          }
+        const isDraftStatus =
+          (data?.status || "").toLowerCase() === "draft";
+
+        if (isDraftStatus && endObj < new Date()) {
+          ErrorToast(
+            "Cannot update a draft shift whose end time is in the past. Please select an ongoing or upcoming end time."
+          );
+          return;
         }
 
         const updatePayload = {
@@ -340,124 +370,131 @@ const AddShiftAndScheduling = ({
         };
 
         if (values.date && values.startTime && values.endTime) {
-          const startObj = new Date(`${values.date}T${values.startTime}`);
-          const endObj = new Date(`${values.date}T${values.endTime}`);
-          updatePayload.startDateTime = startObj.toISOString();
-          updatePayload.endDateTime = endObj.toISOString();
+          updatePayload.startDateTime = startDateTime;
+          updatePayload.endDateTime = endDateTime;
         }
 
         if (values.instructions !== undefined) {
           updatePayload.instructions = values.instructions;
         }
 
-        updateShift(
-          updatePayload,
-          {
-            onSuccess: () => {
-              setActionType(null);
-              SuccessToast("Shift template saved as draft.");
-              onOpenChange(false);
-              if (typeof onUpdateSubmit === "function") {
-                onUpdateSubmit();
-              } else {
-                setUpdatedOpen(true);
-              }
-            },
-            onError: (error) => {
-              setActionType(null);
-              ErrorToast(
-                error?.response?.data?.message ||
-                error?.message ||
-                "Failed to update shift template."
-              );
-            },
-          }
-        );
+        updateShift(updatePayload, {
+          onSuccess: () => {
+            setActionType(null);
+            SuccessToast("Shift template saved as draft.");
+            onOpenChange(false);
+
+            if (typeof onUpdateSubmit === "function") {
+              onUpdateSubmit();
+            } else {
+              setUpdatedOpen(true);
+            }
+          },
+          onError: (error) => {
+            setActionType(null);
+            ErrorToast(
+              error?.response?.data?.message ||
+              error?.message ||
+              "Failed to update shift template."
+            );
+          },
+        });
       } else {
         const createPayload = {
           role: values.role,
-          startDateTime: startDateTime,
-          endDateTime: endDateTime,
+          startDateTime,
+          endDateTime,
           bartenderIds: values.bartenderIds,
           instructions: values.instructions,
           status: "draft",
         };
 
         if (values.eventId) {
-          const eventsList = eventsData?.events || (Array.isArray(eventsData) ? eventsData : []);
-          const selectedItem = eventsList.find((e) => e._id === values.eventId);
-          createPayload.referenceType = getReferenceType(values.eventId, selectedItem);
+          const eventsList =
+            eventsData?.events ||
+            (Array.isArray(eventsData) ? eventsData : []);
+
+          const selectedItem = eventsList.find(
+            (e) => e._id === values.eventId
+          );
+
+          createPayload.referenceType = getReferenceType(
+            values.eventId,
+            selectedItem
+          );
           createPayload.referenceId = values.eventId;
           createPayload.eventId = values.eventId;
         }
 
-        createShift(
-          createPayload,
-          {
-            onSuccess: () => {
-              setActionType(null);
-              SuccessToast("Shift template saved as draft.");
-              onOpenChange(false);
-            },
-            onError: (error) => {
-              setActionType(null);
-              ErrorToast(
-                error?.response?.data?.message ||
-                error?.message ||
-                "Failed to save shift template."
-              );
-            },
-          }
-        );
+        createShift(createPayload, {
+          onSuccess: () => {
+            setActionType(null);
+            SuccessToast("Shift template saved as draft.");
+            onOpenChange(false);
+          },
+          onError: (error) => {
+            setActionType(null);
+            ErrorToast(
+              error?.response?.data?.message ||
+              error?.message ||
+              "Failed to save shift template."
+            );
+          },
+        });
       }
     });
   };
 
   const handleConfirm = () => {
     setActionType("submit");
-    // Parse input date and times to ISO strings
-    const startObj = new Date(`${values.date}T${values.startTime}`);
-    let endObj = new Date(`${values.date}T${values.endTime}`);
 
-    const startDateTime = startObj.toISOString();
-    const endDateTime = endObj.toISOString();
+    const { startDateTime, endDateTime } = getShiftDateTimes(
+      values.date,
+      values.startTime,
+      values.endTime
+    );
 
     const createPayload = {
       role: values.role,
-      startDateTime: startDateTime,
-      endDateTime: endDateTime,
+      startDateTime,
+      endDateTime,
       bartenderIds: values.bartenderIds,
       instructions: values.instructions,
       status: "published",
     };
 
     if (values.eventId) {
-      const eventsList = eventsData?.events || (Array.isArray(eventsData) ? eventsData : []);
-      const selectedEvent = eventsList.find((e) => e._id === values.eventId);
-      createPayload.referenceType = getReferenceType(values.eventId, selectedEvent);
+      const eventsList =
+        eventsData?.events || (Array.isArray(eventsData) ? eventsData : []);
+
+      const selectedEvent = eventsList.find(
+        (e) => e._id === values.eventId
+      );
+
+      createPayload.referenceType = getReferenceType(
+        values.eventId,
+        selectedEvent
+      );
       createPayload.referenceId = values.eventId;
       createPayload.eventId = values.eventId;
     }
 
-    createShift(
-      createPayload,
-      {
-        onSuccess: () => {
-          setActionType(null);
-          SuccessToast("Shift created successfully.");
-          setReviewPopup(false);
-          setConfirmPopup(true);
-        },
-        onError: (error) => {
-          setActionType(null);
-          ErrorToast(
-            error?.response?.data?.message ||
-            error?.message ||
-            "Failed to create shift."
-          );
-        },
-      }
-    );
+    createShift(createPayload, {
+      onSuccess: () => {
+        setActionType(null);
+        SuccessToast("Shift created successfully.");
+        setReviewPopup(false);
+        setConfirmPopup(true);
+      },
+      onError: (error) => {
+        setActionType(null);
+        ErrorToast(
+          error?.response?.data?.message ||
+          error?.message ||
+          "Failed to create shift."
+        );
+      },
+    });
   };
 
   const handleBack = () => {
@@ -637,7 +674,7 @@ const AddShiftAndScheduling = ({
                           )}
                         </SelectGroup>
 
-                       
+
                       </SelectContent>
                     </Select>
                   )}
