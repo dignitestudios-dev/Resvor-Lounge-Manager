@@ -9,6 +9,8 @@ import TagsInputField from "./TagsInputField";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { personalDetailsValues } from "@/lib/init/personalDetailsValues";
 import { personalDetailsSchema } from "@/lib/schema/onboarding/personalDetailsSchema";
+import ImageCropperModal from "@/components/common/ImageCropperModal";
+import { validateProfileImage } from "@/lib/utils/cropImage";
 import { ErrorToast } from "../ui/toaster";
 import {
   handleFormattedOperatingHoursChange,
@@ -26,6 +28,8 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
   const [remainingDetails, setRemainingDetails] = useState(false);
   const [combinedData, setCombinedData] = useState({});
   const [imageError, setImageError] = useState("");
+  const [isLogoCropperOpen, setIsLogoCropperOpen] = useState(false);
+  const [selectedLogoFile, setSelectedLogoFile] = useState(null);
 
   const {
     values,
@@ -63,34 +67,31 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
     setImageError("");
 
     if (file) {
-      // Check file type
-      if (!["image/jpeg", "image/png"].includes(file.type)) {
-        const errorMsg = "Only JPEG and PNG formats are allowed";
-        setImageError(errorMsg);
-        ErrorToast(errorMsg);
+      const validation = validateProfileImage(file);
+      if (!validation.valid) {
+        setImageError(validation.error);
+        ErrorToast(validation.error);
+        e.currentTarget.value = "";
         return;
       }
 
-      // Check file size (10MB)
-      if (file.size > 11 * 1024 * 1024) {
-        const errorMsg = "File size must not exceed 10MB";
-        setImageError(errorMsg);
-        ErrorToast(errorMsg);
-        return;
-      }
-
-      // Check image resolution (215x215)
-      // const isValidResolution = await validateImageResolution(file);
-      // if (!isValidResolution) {
-      //   const errorMsg = "Image resolution must be at least 215x215";
-      //   setImageError(errorMsg);
-      //   ErrorToast(errorMsg);
-      //   return;
-      // }
-
-      setUserImage(file);
-      setFieldValue("userImage", file);
+      setSelectedLogoFile(file);
+      setIsLogoCropperOpen(true);
+      e.currentTarget.value = "";
     }
+  };
+
+  const handleLogoCropSave = (croppedFile, previewUrl) => {
+    setImageError("");
+    setUserImage(croppedFile);
+    setFieldValue("userImage", croppedFile);
+    setIsLogoCropperOpen(false);
+    setSelectedLogoFile(null);
+  };
+
+  const handleLogoCropCancel = () => {
+    setIsLogoCropperOpen(false);
+    setSelectedLogoFile(null);
   };
 
   const handleRemainingData = (data) => {
@@ -191,7 +192,7 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
                       Business Logo
                       <input
                         type="file"
-                        accept=".jpg,.jpeg,.png"
+                        accept="image/jpeg,image/jpg,image/png,image/webp"
                         onChange={(e) => handleFileChange(e)}
                         className="absolute inset-0 opacity-0 cursor-pointer -left-24"
                       />
@@ -378,6 +379,15 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
           </form>
         </div>
       )}
+
+      <ImageCropperModal
+        open={isLogoCropperOpen}
+        onClose={handleLogoCropCancel}
+        imageFile={selectedLogoFile}
+        onCropSave={handleLogoCropSave}
+        targetSize={500}
+        title="Crop Lounge Logo"
+      />
     </>
   );
 };

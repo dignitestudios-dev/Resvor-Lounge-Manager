@@ -28,6 +28,8 @@ import {
 import { useFormik } from "formik";
 import { useState } from "react";
 import { phoneFormatter, phoneToE164 } from "@/lib/utils";
+import ImageCropperModal from "@/components/common/ImageCropperModal";
+import { validateProfileImage } from "@/lib/utils/cropImage";
 import PhoneInput from "../auth/PhoneInput";
 
 const stripCountryCode = (phone) => {
@@ -60,6 +62,8 @@ const AddBartenderForm = ({
   const fileInputRef = useRef(null);
 
   const [profileImagePreview, setProfileImagePreview] = useState(null);
+  const [isCropperOpen, setIsCropperOpen] = useState(false);
+  const [selectedCropFile, setSelectedCropFile] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -161,11 +165,33 @@ const AddBartenderForm = ({
   }, [isEdit, data, isOpen]);
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (file) {
-      formik.setFieldValue("profileImage", file);
-      setProfileImagePreview(URL.createObjectURL(file));
+      const validation = validateProfileImage(file);
+      if (!validation.valid) {
+        formik.setFieldError("profileImage", validation.error);
+        formik.setFieldTouched("profileImage", true, false);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        return;
+      }
+      setSelectedCropFile(file);
+      setIsCropperOpen(true);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
+  };
+
+  const handleCropSave = (croppedFile, previewUrl) => {
+    formik.setFieldError("profileImage", undefined);
+    formik.setFieldValue("profileImage", croppedFile);
+    formik.setFieldTouched("profileImage", true, false);
+    setProfileImagePreview(previewUrl);
+    setIsCropperOpen(false);
+    setSelectedCropFile(null);
+  };
+
+  const handleCropCancel = () => {
+    setIsCropperOpen(false);
+    setSelectedCropFile(null);
   };
 
   const handleRemoveImage = (e) => {
@@ -263,7 +289,7 @@ const AddBartenderForm = ({
                           ref={fileInputRef}
                           type="file"
                           className="hidden"
-                          accept="image/jpeg,image/jpg,image/png"
+                          accept="image/jpeg,image/jpg,image/png,image/webp"
                           onChange={handleImageChange}
                         />
                       </Label>
@@ -516,6 +542,16 @@ const AddBartenderForm = ({
 
       {/* Profile Update Success */}
       <ProfileUpdateModal open={updateProfile} setOpen={setUpdateProfile} />
+
+      {/* Profile Picture Image Cropper */}
+      <ImageCropperModal
+        open={isCropperOpen}
+        onClose={handleCropCancel}
+        imageFile={selectedCropFile}
+        onCropSave={handleCropSave}
+        targetSize={500}
+        title={isEdit ? "Crop Staff Profile Picture" : "Crop Bartender Profile Picture"}
+      />
     </>
   );
 };

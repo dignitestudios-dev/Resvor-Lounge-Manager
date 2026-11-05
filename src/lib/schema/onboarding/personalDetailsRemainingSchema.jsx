@@ -4,9 +4,9 @@ export const personalDetailsRemainingSchema = Yup.object({
   // From PersonalDetails (preserved validation)
   userImage: Yup.mixed()
     .required("Business logo is required")
-    .test("fileType", "Only JPG, JPEG, PNG files are allowed", (value) => {
+    .test("fileType", "Only JPG, JPEG, PNG, and WEBP files are allowed", (value) => {
       if (!value) return false;
-      return ["image/jpeg", "image/png"].includes(value.type);
+      return ["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(value?.type);
     })
     .test("fileSize", "File size must be less than 5MB", (value) => {
       if (!value) return false;

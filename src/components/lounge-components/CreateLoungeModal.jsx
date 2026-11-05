@@ -28,6 +28,8 @@ import {
 } from "@/lib/utils";
 
 import { personalDetailsSchema } from "@/lib/schema/onboarding/personalDetailsSchema";
+import ImageCropperModal from "@/components/common/ImageCropperModal";
+import { validateProfileImage } from "@/lib/utils/cropImage";
 import { personalDetailsRemainingSchema } from "@/lib/schema/onboarding/personalDetailsRemainingSchema";
 import { floorPlanSetupSchema } from "@/lib/schema/onboarding/floorPlanSetupSchema";
 
@@ -62,6 +64,8 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
   const [step, setStep] = useState(1);
   const [combinedData, setCombinedData] = useState({});
   const [imageError, setImageError] = useState("");
+  const [isLogoCropperOpen, setIsLogoCropperOpen] = useState(false);
+  const [selectedLogoFile, setSelectedLogoFile] = useState(null);
 
   const queryClient = useQueryClient();
   const createLoungeMutation = useCreateLounge();
@@ -104,33 +108,30 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
     setImageError("");
 
     if (file) {
-      // Check file type
-      if (!["image/jpeg", "image/png"].includes(file.type)) {
-        const errorMsg = "Only JPEG and PNG formats are allowed";
-        setImageError(errorMsg);
-        ErrorToast(errorMsg);
+      const validation = validateProfileImage(file);
+      if (!validation.valid) {
+        setImageError(validation.error);
+        ErrorToast(validation.error);
+        e.currentTarget.value = "";
         return;
       }
 
-      // Check file size (10MB)
-      if (file.size > 11 * 1024 * 1024) {
-        const errorMsg = "File size must not exceed 10MB";
-        setImageError(errorMsg);
-        ErrorToast(errorMsg);
-        return;
-      }
-
-      // Check image resolution (215x215)
-      // const isValidResolution = await validateImageResolution(file);
-      // if (!isValidResolution) {
-      //   const errorMsg = "Image resolution must be at least 215x215";
-      //   setImageError(errorMsg);
-      //   ErrorToast(errorMsg);
-      //   return;
-      // }
-
-      setFieldValue1("userImage", file);
+      setSelectedLogoFile(file);
+      setIsLogoCropperOpen(true);
+      e.currentTarget.value = "";
     }
+  };
+
+  const handleLogoCropSave = (croppedFile, previewUrl) => {
+    setImageError("");
+    setFieldValue1("userImage", croppedFile);
+    setIsLogoCropperOpen(false);
+    setSelectedLogoFile(null);
+  };
+
+  const handleLogoCropCancel = () => {
+    setIsLogoCropperOpen(false);
+    setSelectedLogoFile(null);
   };
 
   const formatTo12Hour = (time) => {
@@ -315,6 +316,7 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="min-w-4xl max-w-full">
         <DialogHeader>
@@ -353,7 +355,7 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
                       {/* Hidden file input */}
                       <input
                         type="file"
-                        accept=".jpg,.jpeg,.png"
+                        accept="image/jpeg,image/jpg,image/png,image/webp"
                         onChange={handleFileChange}
                         className="absolute inset-0 opacity-0 cursor-pointer w-full h-full rounded-full"
                       />
@@ -817,6 +819,16 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
         )}
       </DialogContent>
     </Dialog>
+
+    <ImageCropperModal
+      open={isLogoCropperOpen}
+      onClose={handleLogoCropCancel}
+      imageFile={selectedLogoFile}
+      onCropSave={handleLogoCropSave}
+      targetSize={500}
+      title="Crop Lounge Logo"
+    />
+  </>
   );
 };
 

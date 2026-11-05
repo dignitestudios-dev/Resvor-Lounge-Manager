@@ -11,6 +11,9 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import ImageCropperModal from "@/components/common/ImageCropperModal";
+import { validateProfileImage } from "@/lib/utils/cropImage";
+import { ErrorToast } from "@/components/ui/toaster";
 
 const AddLocationModal = ({
   open,
@@ -27,6 +30,9 @@ const AddLocationModal = ({
   const [businessLocation, setBusinessLocation] = useState("");
   const [businessLocation2, setBusinessLocation2] = useState("");
   const [loungeImages, setLoungeImages] = useState([]);
+  const [logoFile, setLogoFile] = useState(null);
+  const [isLogoCropperOpen, setIsLogoCropperOpen] = useState(false);
+  const [selectedLogoFile, setSelectedLogoFile] = useState(null);
 
   const handleImagesChange = (e) => {
     const files = Array.from(e.target.files || []);
@@ -36,13 +42,29 @@ const AddLocationModal = ({
   function handleImageChange(e) {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setLoungeLogo(event.target?.result || "/images/profile.png");
-      };
-      reader.readAsDataURL(file);
+      const validation = validateProfileImage(file);
+      if (!validation.valid) {
+        ErrorToast(validation.error);
+        e.target.value = "";
+        return;
+      }
+      setSelectedLogoFile(file);
+      setIsLogoCropperOpen(true);
+      e.target.value = "";
     }
   }
+
+  const handleLogoCropSave = (croppedFile, previewUrl) => {
+    setLogoFile(croppedFile);
+    setLoungeLogo(previewUrl);
+    setIsLogoCropperOpen(false);
+    setSelectedLogoFile(null);
+  };
+
+  const handleLogoCropCancel = () => {
+    setIsLogoCropperOpen(false);
+    setSelectedLogoFile(null);
+  };
 
   function handleSave() {
     setOpen(false);
@@ -54,11 +76,13 @@ const AddLocationModal = ({
         specialization,
         businessLocation,
         businessLocation2,
+        logoFile,
       });
     }
   }
 
   return (
+    <>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="min-w-4xl max-w-full">
         <DialogHeader>
@@ -82,7 +106,7 @@ const AddLocationModal = ({
                   Business Logo
                   <input
                     type="file"
-                    accept=".jpg,.jpeg,.png"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
                     onChange={handleImageChange}
                     className="absolute inset-0 opacity-0 cursor-pointer -left-24"
                   />
@@ -274,6 +298,16 @@ const AddLocationModal = ({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <ImageCropperModal
+      open={isLogoCropperOpen}
+      onClose={handleLogoCropCancel}
+      imageFile={selectedLogoFile}
+      onCropSave={handleLogoCropSave}
+      targetSize={500}
+      title="Crop Business Logo"
+    />
+  </>
   );
 };
 

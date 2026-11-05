@@ -55,12 +55,12 @@ export const editProfileSchema = Yup.object({
 
   logoFile: Yup.mixed()
     .nullable()
-    .test("fileType", "Only JPG, JPEG, PNG files are allowed", (value) => {
+    .test("fileType", "Only JPG, JPEG, PNG, and WEBP files are allowed", (value) => {
       if (!value) return true; // optional during edit
-      return ["image/jpeg", "image/png"].includes(value.type);
+      return ["image/jpeg", "image/png", "image/webp", "image/jpg"].includes(value?.type);
     })
     .test("fileSize", "File size must be less than 5MB", (value) => {
       if (!value) return true; // optional during edit
-      return value.size <= 5 * 1024 * 1024;
+      return value?.size <= 5 * 1024 * 1024;
     }),
 });

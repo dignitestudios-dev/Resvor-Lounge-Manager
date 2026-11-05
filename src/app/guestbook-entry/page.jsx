@@ -23,6 +23,8 @@ import {
   buildPublicGuestbookFormData,
 } from "@/lib/api/publicGuestbook";
 import { publicGuestbookSchema } from "@/lib/schema/guestbook/publicGuestbookSchema";
+import ImageCropperModal from "@/components/common/ImageCropperModal";
+import { validateProfileImage } from "@/lib/utils/cropImage";
 import SearchableLoungeSelector from "@/components/guestbook/SearchableLoungeSelector";
 import PhoneInput from "@/components/auth/PhoneInput";
 import { phoneFormatter } from "@/lib/utils";
@@ -69,6 +71,8 @@ const initialFormValues = {
 export default function PublicGuestbookEntryPage() {
   const fileInputRef = useRef(null);
   const [profileImagePreview, setProfileImagePreview] = useState(null);
+  const [isCropperOpen, setIsCropperOpen] = useState(false);
+  const [selectedCropFile, setSelectedCropFile] = useState(null);
 
   // Submission UI state: 'idle' | 'submitting' | 'success' | 'duplicate'
   const [submissionState, setSubmissionState] = useState("idle");
@@ -182,22 +186,30 @@ export default function PublicGuestbookEntryPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Pre-validate file type and size
-    if (!["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(file.type)) {
-      formik.setFieldError("photo", "Only JPG, JPEG, PNG, and WEBP images are allowed.");
+    const validation = validateProfileImage(file, 5 * 1024 * 1024);
+    if (!validation.valid) {
+      formik.setFieldError("photo", validation.error);
       formik.setFieldTouched("photo", true, false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      formik.setFieldError("photo", "Photo must be less than 5 MB.");
-      formik.setFieldTouched("photo", true, false);
-      return;
-    }
+    setSelectedCropFile(file);
+    setIsCropperOpen(true);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
+  const handleCropSave = (croppedFile, previewUrl) => {
     formik.setFieldError("photo", undefined);
-    formik.setFieldValue("photo", file);
-    setProfileImagePreview(URL.createObjectURL(file));
+    formik.setFieldValue("photo", croppedFile);
+    setProfileImagePreview(previewUrl);
+    setIsCropperOpen(false);
+    setSelectedCropFile(null);
+  };
+
+  const handleCropCancel = () => {
+    setIsCropperOpen(false);
+    setSelectedCropFile(null);
   };
 
   const handleRemoveImage = (e) => {
@@ -750,6 +762,16 @@ export default function PublicGuestbookEntryPage() {
       <p className="text-xs text-gray-400 mt-4 text-center">
         Powered by Resvor &bull; Lounge Guestbook
       </p>
+
+      {/* Profile Picture Image Cropper */}
+      <ImageCropperModal
+        open={isCropperOpen}
+        onClose={handleCropCancel}
+        imageFile={selectedCropFile}
+        onCropSave={handleCropSave}
+        targetSize={500}
+        title="Crop Your Profile Photo"
+      />
     </div>
   );
 }
