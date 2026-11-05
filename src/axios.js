@@ -3,7 +3,7 @@ import FingerprintJS from "@fingerprintjs/fingerprintjs";
 import { ErrorToast } from "./components/ui/toaster";
 import Cookies from "js-cookie";
 
-// Proxy configuration - similar to Vite setup
+// Proxy configuration - similar  Vite setup
 // export const baseUrl =
 //   process.env.NODE_ENV === "development"
 //     ? "/api" // Use Next.js rewrites proxy in development
