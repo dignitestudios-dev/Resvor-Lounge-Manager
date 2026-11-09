@@ -115,12 +115,7 @@ export const AuthProvider = ({ children }) => {
   // We deliberately ignore isFetching so background refetches
   // (window focus, interval, etc.) never re-trigger the full-screen loader,
   // EXCEPT when the user's cached state is incomplete (e.g., they just returned from Stripe).
-  const isResolved =
-    !isLoading &&
-    !(
-      isFetching &&
-      (sessionType === "registration_token" || user?.isSubscribed === false)
-    );
+  const isResolved = !isLoading;
 
   const isProtectedRoute = PROTECTED_ROUTES.some((route) =>
     pathname.startsWith(route),
