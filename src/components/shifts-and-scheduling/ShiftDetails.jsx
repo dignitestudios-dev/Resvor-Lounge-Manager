@@ -110,19 +110,25 @@ const ShiftDetails = ({
             ) : shiftDetail ? (
               <div className="space-y-4">
                 <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <div className=" text-gray-500">Date</div>
+                  <div className="min-w-0">
+                    <div className="text-gray-500">Date</div>
                     <div className="font-semibold text-black">
                       {dateStr}
                     </div>
                   </div>
-                  <div>
-                    <div className=" text-gray-500">Time</div>
-                    <div className="font-semibold text-black">{timeStr}</div>
+
+                  <div className="min-w-0">
+                    <div className="text-gray-500">Time</div>
+                    <div className="font-semibold text-black">
+                      {timeStr}
+                    </div>
                   </div>
-                  <div>
-                    <div className=" text-gray-500">Role</div>
-                    <div className="font-semibold text-black">{shiftDetail.role || "-"}</div>
+
+                  <div className="min-w-0">
+                    <div className="text-gray-500">Role</div>
+                    <div className="font-semibold text-black break-all whitespace-normal">
+                      {shiftDetail.role || "-"}
+                    </div>
                   </div>
                 </div>
 
