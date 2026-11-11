@@ -43,7 +43,17 @@ const stripCountryCode = (phone) => {
   }
   return cleaned;
 };
+const formatUSPhoneNumber = (phone) => {
+  let digits = phone?.replace(/\D/g, "") || "";
 
+  // Remove existing US country code if present
+  if (digits.length === 11 && digits.startsWith("1")) {
+    digits = digits.slice(1);
+  }
+
+  // Add country code only once
+  return digits.length === 10 ? `+1${digits}` : "";
+};
 
 // ─── Helper: inline error message ────────────────────────────────────────────
 const FieldError = ({ touched, error }) =>
@@ -118,7 +128,7 @@ const AddBartenderForm = ({
             fullName: values.fullName,
             email: values.email,
             jobTitle: values.jobTitle,
-            phoneNumber: phoneToE164(values.phoneNumber),
+            phoneNumber: formatUSPhoneNumber(values.phoneNumber),
             address: values.address,
             removePFP: values.profileImage === "remove" ? true : undefined,
             profileImage: values.profileImage instanceof File ? values.profileImage : undefined,
@@ -213,7 +223,7 @@ const AddBartenderForm = ({
         email: pendingCreateData.email,
         password: pendingCreateData.password,
         jobTitle: pendingCreateData.jobTitle,
-        phoneNumber: phoneToE164(pendingCreateData.phoneNumber),
+        phoneNumber: formatUSPhoneNumber(pendingCreateData.phoneNumber),
         address: pendingCreateData.address,
         profileImage: pendingCreateData.profileImage instanceof File ? pendingCreateData.profileImage : null,
       },
@@ -510,10 +520,8 @@ const AddBartenderForm = ({
 
                 <Button
                   type="submit"
-                  disabled={isPending || !formik.isValid || !formik.dirty}
-                  className={
-                    "w-full h-14 text-lg "
-                  }
+                  disabled={isPending}
+                  className="w-full h-14 text-lg"
                 >
                   {isPending ? (
                     <Loader2 className="animate-spin" />

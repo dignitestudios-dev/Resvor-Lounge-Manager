@@ -8,6 +8,7 @@ import { SuccessToast, ErrorToast } from "@/components/ui/toaster";
 import utils, { formatCentsToUSD, getBookingStatusStyles } from "@/lib/utils";
 import PageLoader from "@/components/common/PageLoader";
 import AppealDisputeModal from "@/components/bookings/AppealDisputeModal";
+import { Mail, Phone, UserRound } from "lucide-react";
 
 const BookingDetails = () => {
   const params = useParams();
@@ -140,7 +141,52 @@ const BookingDetails = () => {
                 </div>
               </div>
             </div>
+            <div className="border-t border-gray-200 pt-5 mt-5 mb-6">
 
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {/* Organizer Name */}
+                <div className="flex items-center gap-3 bg-[#F8F9FC] border border-gray-100 rounded-xl p-4">
+                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                    <UserRound className="w-5 h-5 text-blue-900" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-gray-500 mb-1">Organizer Name</p>
+                    <p className="text-sm font-semibold text-gray-800 break-all">
+                      {bookingData?.guestName ||
+                        `${bookingData?.userId?.firstName || ""} ${bookingData?.userId?.lastName || ""}`.trim() ||
+                        "N/A"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Organizer Email */}
+                <div className="flex items-center gap-3 bg-[#F8F9FC] border border-gray-100 rounded-xl p-4">
+                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                    <Mail className="w-5 h-5 text-green-700" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-gray-500 mb-1">Email Address</p>
+                    <p className="text-sm font-semibold text-gray-800 break-all">
+                      {bookingData?.guestEmail || bookingData?.userId?.email || "N/A"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Organizer Phone */}
+                <div className="flex items-center gap-3 bg-[#F8F9FC] border border-gray-100 rounded-xl p-4">
+                  <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
+                    <Phone className="w-5 h-5 text-orange-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-gray-500 mb-1">Phone Number</p>
+                    <p className="text-sm font-semibold text-gray-800 break-all">
+                      {bookingData.guestPhone || bookingData.userId?.phone || "N/A"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-6 py-5">
               <div>
                 <p className="text-gray-600 text-sm font-semibold mb-2">
@@ -278,7 +324,7 @@ const BookingDetails = () => {
               <div>
                 <p className="text-gray-600 text-sm font-semibold mb-2">Name</p>
                 <p className="text-black font-semibold break-words break-all">
-                  {bookingData?.guestName || userName}
+                  {userName || "N/A"}
                 </p>
               </div>
               <div>
@@ -286,7 +332,7 @@ const BookingDetails = () => {
                   Email Address
                 </p>
                 <p className="text-black font-semibold break-words break-all">
-                  {bookingData?.guestEmail ||
+                  {
                     bookingData?.userId?.email ||
                     "N/A"}
                 </p>
@@ -296,7 +342,7 @@ const BookingDetails = () => {
                   Phone Number
                 </p>
                 <p className="text-black font-semibold break-words break-all">
-                  {bookingData?.guestPhone ||
+                  {
                     bookingData?.userId?.phone ||
                     "N/A"}
                 </p>

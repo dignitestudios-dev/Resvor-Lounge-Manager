@@ -108,7 +108,9 @@ const EventDetails = () => {
   const checkInDate = utils.formatDateWithName(eventData.startDateTime);
 
   const loungeName = eventData.loungeId?.name || "Unknown Lounge";
-
+ const userName =
+    `${eventData.userId?.firstName || ""} ${eventData.userId?.lastName || ""}`.trim() ||
+    "Unknown";
   return (
     <div className="flex-1 flex flex-col overflow-y-auto">
       <div className="flex justify-between items-center mb-5">
@@ -200,7 +202,7 @@ const EventDetails = () => {
 
             {/* Organizer Information */}
             <div className="border-t border-gray-200 pt-5 mt-5 mb-6">
-             
+
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {/* Organizer Name */}
@@ -374,26 +376,43 @@ const EventDetails = () => {
           <h2 className="text-lg font-bold mb-3">User Information</h2>
 
           <div className="bg-white rounded-2xl p-6">
-            <div className="grid grid-cols-3 gap-12">
-              <div>
-                <p className="text-black font-semibold mb-2">Name</p>
-                <p className="text-gray-600 text-sm font-semibold break-words break-all">
-                  {eventData.userId?.firstName || eventData?.guestName || "N/A"}
-                </p>
+            {eventData.userId?.firstName ? (
+              <div className="grid grid-cols-3 gap-12">
+                <div>
+                  <p className="text-black font-semibold mb-2">Name</p>
+                  <p className="text-gray-600 text-sm font-semibold break-words break-all">
+                    {userName || "N/A"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-black font-semibold mb-2">Email Address</p>
+                  <p className="text-gray-600 text-sm font-semibold break-words break-all">
+                    {eventData.userId?.email  || "N/A"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-black font-semibold mb-2">Phone Number</p>
+                  <p className="text-gray-600 text-sm font-semibold break-words break-all">
+                    {eventData.userId?.phone || "N/A"}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-black font-semibold mb-2">Email Address</p>
-                <p className="text-gray-600 text-sm font-semibold break-words break-all">
-                  {eventData.userId?.email || eventData?.guestEmail || "N/A"}
-                </p>
+            ) : (
+              <div className="flex items-center gap-3 rounded-xl bg-gray-50 border border-gray-100 p-4">
+              
+
+                <div>
+                  <p className="text-gray-900 text-sm font-semibold">
+                    Created by Lounge Manager
+                  </p>
+                  <p className="text-gray-500 text-xs mt-1">
+                    This event was created directly by the lounge manager.
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-black font-semibold mb-2">Phone Number</p>
-                <p className="text-gray-600 text-sm font-semibold break-words break-all">
-                  {eventData.userId?.phone || eventData?.guestPhone || "N/A"}
-                </p>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
