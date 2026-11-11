@@ -159,14 +159,14 @@ const CampaignDetailPage = () => {
                 <h3 className="text-lg font-bold text-gray-800 border-b pb-3">General Information</h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
+                  {/* <div>
                     <p className="text-xs text-gray-400 font-semibold uppercase">Campaign Status</p>
                     <div className="flex items-center gap-2 mt-1.5">
                       <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${st.cls}`}>
                         {st.icon} {st.label}
                       </span>
                     </div>
-                  </div>
+                  </div> */}
 
                   <div>
                     <p className="text-xs text-gray-400 font-semibold uppercase">Channel</p>
@@ -197,7 +197,7 @@ const CampaignDetailPage = () => {
                   <div className="bg-gray-50 rounded-xl p-4 mt-4">
                     <p className="text-xs text-gray-400 font-semibold uppercase mb-2">Additional Description</p>
                     <div
-                      className="text-sm text-gray-700 leading-relaxed font-light html-content"
+                      className="text-sm text-gray-700 break-all leading-relaxed font-light html-content"
                       dangerouslySetInnerHTML={{ __html: campaign.additionalInfo }}
                     />
                   </div>
