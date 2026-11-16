@@ -584,7 +584,7 @@ const AddShiftAndScheduling = ({
                     id="role"
                     name="role"
                     placeholder="Role"
-                    maxLength={100}
+                    maxLength={40}
 
                     className={"h-14"}
                     value={values.role}
