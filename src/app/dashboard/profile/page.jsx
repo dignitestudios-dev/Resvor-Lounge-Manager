@@ -10,7 +10,7 @@ import EditFloorPlanModal from "@/components/profile/EditFloorPlanModal";
 import CreateLoungeModal from "@/components/lounge-components/CreateLoungeModal";
 import LoungeGallerySection from "@/components/profile/LoungeGallerySection";
 import { useQueryClient } from "@tanstack/react-query";
-import { useGetActiveLounge } from "@/lib/hooks/queries/useLounges";
+import { useGetActiveLounge, useGetLounges } from "@/lib/hooks/queries/useLounges";
 import { useAuthMe } from "@/lib/hooks/queries/useQueries";
 import { useUpdateLounge } from "@/lib/hooks/mutations/LoungeMutations";
 import PageLoader from "@/components/common/PageLoader";
@@ -20,6 +20,7 @@ const Profile = () => {
   const queryClient = useQueryClient();
   const { data: activeLounge, isLoading } = useGetActiveLounge();
   const { data: authMe } = useAuthMe();
+  const { data: lounges = [] } = useGetLounges();
   
 
   const updateLoungeMutation = useUpdateLounge();
@@ -88,10 +89,23 @@ const Profile = () => {
 
         <section className="bg-white rounded-xl shadow-sm p-6">
 
-          <div className="flex justify-end mb-3">
+          <div className="flex justify-end items-center gap-4 mb-3">
+            {lounges.length > 1 && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    window.dispatchEvent(new Event("openSelectLoungeModal"));
+                  }
+                }}
+                className="text-[#010067] font-semibold text-sm hover:underline cursor-pointer"
+              >
+                Manage My Lounges ({lounges.length})
+              </button>
+            )}
             <button
               onClick={() => setAddLocation(true)}
-              className="text-black underline cursor-pointer font-medium hover:underline"
+              className="text-black underline cursor-pointer font-medium hover:underline text-sm"
             >
               Add New Lounge
             </button>

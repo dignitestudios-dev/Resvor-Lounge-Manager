@@ -355,6 +355,7 @@ const ScanQrCode = () => {
               </div>
 
               {/* Detailed Info Table */}
+              {console.log(verifiedPass)}
               <div className="space-y-2.5 bg-[#F9FAFB] p-4 rounded-[16px] border border-gray-100 text-xs">
                 {verifiedPass?.user?._id && (
                   <div className="flex justify-between items-center py-1 border-b border-gray-200/60">
@@ -362,19 +363,19 @@ const ScanQrCode = () => {
                       <User className="w-3.5 h-3.5 text-gray-400" /> User ID:
                     </span>
                     <span className="font-mono font-bold text-[#181818] bg-white px-2 py-0.5 rounded border border-gray-200">
-                      {verifiedPass.user._id}
+                      {verifiedPass?.user?.firstName}  {verifiedPass?.user?.lastName}
                     </span>
                   </div>
                 )}
 
-                <div className="flex justify-between items-center py-1 border-b border-gray-200/60">
+                {/* <div className="flex justify-between items-center py-1 border-b border-gray-200/60">
                   <span className="text-[#565656] font-medium flex items-center gap-1.5">
                     <IdCard className="w-3.5 h-3.5 text-gray-400" /> Pass ID:
                   </span>
                   <span className="font-mono font-bold text-[#181818] bg-white px-2 py-0.5 rounded border border-gray-200">
                     {verifiedPass?._id || "N/A"}
                   </span>
-                </div>
+                </div> */}
 
                 <div className="flex justify-between items-center py-1 border-b border-gray-200/60">
                   <span className="text-[#565656] font-medium">VIP Status:</span>

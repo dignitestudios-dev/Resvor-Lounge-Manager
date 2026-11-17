@@ -313,7 +313,11 @@ export const submitCreateCampaign = async (payload) => {
   formData.append("channel", payload.channel || "email");
   formData.append("additionalInfo", payload.additionalInfo || "");
 
-  if (payload.recipients && Array.isArray(payload.recipients)) {
+  if (payload.sendToGuestbook !== undefined) {
+    formData.append("sendToGuestbook", payload.sendToGuestbook ? "true" : "false");
+  }
+
+  if (payload.recipients && Array.isArray(payload.recipients) && payload.recipients.length > 0) {
     payload.recipients.forEach((email, index) => {
       formData.append(`recipients[${index}]`, email);
     });
