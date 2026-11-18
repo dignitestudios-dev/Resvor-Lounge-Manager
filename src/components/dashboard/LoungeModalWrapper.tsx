@@ -6,7 +6,6 @@ import CreateLoungeModal from "../lounge-components/CreateLoungeModal";
 import { useAuthContext } from "@/lib/context/AuthProvider";
 
 export default function LoungeModalWrapper() {
-
   const [isOpen, setIsOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -20,6 +19,14 @@ export default function LoungeModalWrapper() {
       setIsOpen(true);
       localStorage.removeItem("fromLogin");
     }
+
+    const handleOpenLoungeModal = () => {
+      setIsOpen(true);
+    };
+    window.addEventListener("openSelectLoungeModal", handleOpenLoungeModal);
+    return () => {
+      window.removeEventListener("openSelectLoungeModal", handleOpenLoungeModal);
+    };
   }, []);
 
   if (!isMounted) return null;

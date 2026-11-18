@@ -23,7 +23,7 @@ import {
   ChevronRight,
   ChevronLeft,
 } from "lucide-react";
-import { useGetGuestbook } from "@/lib/hooks/queries/useGuestbook";
+import { useGetAllGuestbook } from "@/lib/hooks/queries/useGuestbook";
 import { useCreateCampaign } from "@/lib/hooks/mutations/CampaignMutations";
 import { useGetMySubscription } from "@/lib/hooks/queries/useSubscriptionPlans";
 import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
@@ -123,7 +123,7 @@ const SendInvitationForm = ({
     data: guestbookData,
     isLoading: isGuestsLoading,
     isFetching: isGuestsFetching,
-  } = useGetGuestbook({
+  } = useGetAllGuestbook({
     page: guestPage,
     limit: GUESTS_PER_PAGE,
     search: debouncedSearch,
@@ -152,6 +152,58 @@ const SendInvitationForm = ({
   // Active recipients depending on channel
   const activeRecipients =
     selectedChannel === "sms" ? phoneRecipients : emailRecipients;
+
+  // Eligible recipients on the current page for current channel
+  const eligiblePageRecipients = React.useMemo(() => {
+    if (!filteredGuests || filteredGuests.length === 0) return [];
+    if (selectedChannel === "sms") {
+      return filteredGuests
+        .map((g) => (g.phoneNumber?.trim() ? normalizePhone(g.phoneNumber) : null))
+        .filter(Boolean);
+    }
+    return filteredGuests
+      .map((g) => g.email?.trim())
+      .filter(Boolean);
+  }, [filteredGuests, selectedChannel]);
+
+  const isAllPageSelected =
+    eligiblePageRecipients.length > 0 &&
+    eligiblePageRecipients.every((rec) => activeRecipients.includes(rec));
+
+  const isSomePageSelected =
+    eligiblePageRecipients.length > 0 &&
+    eligiblePageRecipients.some((rec) => activeRecipients.includes(rec)) &&
+    !isAllPageSelected;
+
+  const handleToggleSelectAllPage = () => {
+    if (isAllPageSelected) {
+      // Deselect eligible recipients on current page only
+      if (selectedChannel === "sms") {
+        setPhoneRecipients((prev) =>
+          prev.filter((p) => !eligiblePageRecipients.includes(p))
+        );
+      } else {
+        setEmailRecipients((prev) =>
+          prev.filter((e) => !eligiblePageRecipients.includes(e))
+        );
+      }
+    } else {
+      // Select all eligible recipients on current page (preserve selections from other pages)
+      if (selectedChannel === "sms") {
+        setPhoneRecipients((prev) => {
+          const set = new Set(prev);
+          eligiblePageRecipients.forEach((p) => set.add(p));
+          return Array.from(set);
+        });
+      } else {
+        setEmailRecipients((prev) => {
+          const set = new Set(prev);
+          eligiblePageRecipients.forEach((e) => set.add(e));
+          return Array.from(set);
+        });
+      }
+    }
+  };
 
   // ─── Email Management ─────────────────────────────────────
   const addEmail = () => {
@@ -352,11 +404,17 @@ const SendInvitationForm = ({
         onSendInvitation(selectedChannel);
       }
     } catch (error) {
-      const apiMessage = error?.response?.data?.message || "";
+      const apiMessage =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        "";
       if (apiMessage.toLowerCase().includes("insufficient wallet balance")) {
         ErrorToast(apiMessage || "Insufficient wallet balance");
+      } else if (apiMessage) {
+        ErrorToast(apiMessage);
       } else {
-        ErrorToast(apiMessage || "Failed to create flyer campaign");
+        ErrorToast("Failed to create flyer campaign");
       }
     }
   };
@@ -676,6 +734,26 @@ const SendInvitationForm = ({
                     />
                   </div>
 
+                  {/* Select All on Current Page */}
+                  <div className="flex items-center justify-between px-1 py-1 bg-gray-50/80 rounded-lg border border-gray-200">
+                    <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-gray-800 hover:text-black">
+                      <input
+                        type="checkbox"
+                        checked={isAllPageSelected}
+                        ref={(el) => {
+                          if (el) el.indeterminate = isSomePageSelected;
+                        }}
+                        onChange={handleToggleSelectAllPage}
+                        disabled={eligiblePageRecipients.length === 0}
+                        className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary cursor-pointer disabled:cursor-not-allowed"
+                      />
+                      <span>Select All on this page</span>
+                    </label>
+                    <span className="text-[11px] text-gray-500 font-medium">
+                      {eligiblePageRecipients.filter((r) => activeRecipients.includes(r)).length} of {eligiblePageRecipients.length} eligible selected
+                    </span>
+                  </div>
+
                   {/* Guests List */}
                   <div className="border rounded-xl p-2.5 max-h-[190px] overflow-y-auto divide-y divide-gray-100">
                     {isGuestsLoading  ? (
@@ -708,8 +786,8 @@ const SendInvitationForm = ({
                               className={`flex items-center gap-3 p-2 rounded-lg transition-all ${!hasPhone
                                 ? "opacity-50 cursor-not-allowed bg-transparent"
                                 : isSelected
-                                  ? "bg-primary/8 border border-primary/20 cursor-pointer"
-                                  : "hover:bg-gray-50 border border-transparent cursor-pointer"
+                                  ? "bg-primary/8  border border-primary/20 cursor-pointer"
+                                  : "hover:bg-gray-50  border border-transparent cursor-pointer"
                                 }`}
                             >
                               <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs shrink-0 font-medium text-gray-700">
@@ -755,7 +833,7 @@ const SendInvitationForm = ({
                               className={`flex items-center gap-3 p-2 rounded-lg transition-all ${!hasEmail
                                 ? "opacity-50 cursor-not-allowed bg-transparent"
                                 : isSelected
-                                  ? "bg-primary/8 border border-primary/20 cursor-pointer"
+                                  ? "bg-primary/8 border mt-2 border-primary/20 cursor-pointer"
                                   : "hover:bg-gray-50 border border-transparent cursor-pointer"
                                 }`}
                             >
