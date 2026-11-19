@@ -14,9 +14,10 @@ import {
 } from "@/lib/hooks/queries/useShifts";
 import { useDeleteShift } from "@/lib/hooks/mutations/ShiftMutations";
 import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
+import { useListingUrlParams } from "@/lib/hooks/useListingUrlParams";
 
 const Table = () => {
-  const [page, setPage] = useState(1);
+  const { page, setPage } = useListingUrlParams({ page: 1 });
   const LIMIT = 10;
 
   const {
@@ -36,6 +37,7 @@ const Table = () => {
   const shifts = shiftsResponse?.data || [];
   const eventsList = eventsResponse?.data || [];
   const totalPages = shiftsResponse?.pagination?.totalPages || 1;
+  const totalRecords = shiftsResponse?.pagination?.totalDocs ?? shiftsResponse?.pagination?.total ?? shifts.length;
 
   // Normalize shift data
   const normalizedShifts = shifts.map((shift) => {
@@ -172,8 +174,11 @@ const Table = () => {
   return (
     <CustomPagination
       loading={isLoading}
-      onPageChange={onPageChange}
+      onPageChange={setPage}
       totalPages={totalPages}
+      currentPage={page}
+      totalRecords={totalRecords}
+      itemLabel="shifts"
     >
       {/* Table Wrapper */}
       <div className="w-full max-w-full bg-white rounded-xl overflow-x-hidden overflow-y-auto">

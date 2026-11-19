@@ -8,6 +8,7 @@ import { useGetCampaigns } from "@/lib/hooks/queries/useQueries";
 import { Button } from "@/components/ui/button";
 import utils from "@/lib/utils";
 import CustomPagination from "@/components/common/CustomPagination";
+import { useListingUrlParams } from "@/lib/hooks/useListingUrlParams";
 
 const formatDate = (iso) => {
   if (!iso) return "—";
@@ -43,14 +44,11 @@ const getCampaignImage = (image) => {
 
 const CampaignHistoryPage = () => {
   const router = useRouter();
-  const [currentPage, setCurrentPage] = useState(1);
+  const { page: currentPage, setPage: setCurrentPage } = useListingUrlParams({ page: 1 });
   const { data, isLoading } = useGetCampaigns({ page: currentPage, limit: 10 });
   const campaigns = data?.data || data || [];
   const totalPages = data?.pagination?.totalPages || 1;
-
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
+  const totalRecords = data?.pagination?.totalDocs ?? data?.pagination?.total ?? campaigns.length;
 
   return (
     <div className="flex-1 flex flex-col p-6 space-y-6">
@@ -84,7 +82,10 @@ const CampaignHistoryPage = () => {
         <CustomPagination
           loading={isLoading}
           totalPages={totalPages}
-          onPageChange={handlePageChange}
+          currentPage={currentPage}
+          totalRecords={totalRecords}
+          itemLabel="campaigns"
+          onPageChange={setCurrentPage}
         >
           <div className="bg-white rounded-xl overflow-y-auto">
             <table className="w-full">

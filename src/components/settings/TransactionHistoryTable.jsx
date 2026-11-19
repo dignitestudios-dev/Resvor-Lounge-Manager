@@ -30,6 +30,7 @@ const TransactionHistoryTable = ({
   transactions = [],
   isLoadingTx = false,
   totalPages = 1,
+  totalRecords,
   onPageChange = () => { },
   currentPage = 1,
 }) => {
@@ -39,6 +40,8 @@ const TransactionHistoryTable = ({
       totalPages={totalPages}
       onPageChange={onPageChange}
       currentPage={currentPage}
+      totalRecords={totalRecords ?? transactions.length}
+      itemLabel="transactions"
     >
       <div className="space-y-4">
         {/* Desktop table */}

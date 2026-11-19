@@ -8,13 +8,14 @@ import DeleteBartenderPopup from "./DeleteBartenderPopup";
 import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
 import CustomPagination from "@/components/common/CustomPagination";
 import { formatPhoneNumber } from "@/lib/utils";
+import { useListingUrlParams } from "@/lib/hooks/useListingUrlParams";
 
 const LIMIT = 10;
 
 const Table = () => {
   const router = useRouter();
 
-  const [page, setPage] = useState(1);
+  const { page, setPage } = useListingUrlParams({ page: 1 });
   const [sortConfig, setSortConfig] = useState({
     key: "fullName",
     direction: "asc",
@@ -29,6 +30,7 @@ const Table = () => {
 
   const bartenders = response?.data || [];
   const totalPages = response?.pagination?.totalPages || 1;
+  const totalRecords = response?.pagination?.totalDocs ?? response?.pagination?.total ?? bartenders.length;
 
   const handleGoToDetailsPage = (id) => {
     router.push(`/dashboard/bartenders/${id}`);
@@ -67,16 +69,15 @@ const Table = () => {
     });
   };
 
-  const handlePageChange = (newPage) => {
-    setPage(newPage);
-  };
-
   return (
     <>
       <CustomPagination
         loading={isLoading}
         totalPages={totalPages}
-        onPageChange={handlePageChange}
+        currentPage={page}
+        totalRecords={totalRecords}
+        itemLabel="workers"
+        onPageChange={setPage}
       >
         {isError ? (
           <div className="flex justify-center items-center py-20 text-red-500">

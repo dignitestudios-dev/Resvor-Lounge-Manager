@@ -2,10 +2,13 @@
 import DateAndMonthFilter from "@/components/common/DateAndMonthFilter";
 import Table from "@/components/payments/Table";
 import { Button } from "@/components/ui/button";
-import React, { useState } from "react";
+import React from "react";
+import { useListingUrlParams } from "@/lib/hooks/useListingUrlParams";
 
 const Payments = () => {
-  const [activeTab, setActiveTab] = useState("booking");
+  const { page, getParam, setPage, setParams } = useListingUrlParams({ page: 1, tab: "booking" });
+  const activeTab = getParam("tab", "booking");
+  const setActiveTab = (tab) => setParams({ tab }, { resetPage: true });
 
   // Booking Payment Data
   const bookingPayments = [
@@ -204,6 +207,8 @@ const Payments = () => {
         <Table
           data={activeTab === "booking" ? bookingPayments : eventsPayments}
           type={activeTab}
+          currentPage={page}
+          onPageChange={setPage}
         />
       </div>
     </div>

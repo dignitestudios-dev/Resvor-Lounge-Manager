@@ -63,6 +63,13 @@ const Table = ({ data = [], isLoading = false, pagination, onPageChange }) => {
       loading={isLoading}
       onPageChange={onPageChange}
       totalPages={pagination?.totalPages || 1}
+      totalRecords={
+        pagination?.totalDocs ??
+        pagination?.totalItems ??
+        pagination?.total ??
+        (data?.length ?? 0)
+      }
+      itemLabel="bookings"
     >
       <div className="bg-white rounded-xl overflow-y-auto min-h-[300px]">
         <table className="w-full">

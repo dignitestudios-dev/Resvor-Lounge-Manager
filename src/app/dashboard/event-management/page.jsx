@@ -14,6 +14,7 @@ import { useGetLounges } from "@/lib/hooks/queries/useLounges";
 import { useGetEvents } from "@/lib/hooks/queries/useEvents";
 import utils from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
+import { useListingUrlParams } from "@/lib/hooks/useListingUrlParams";
 
 /**
  * Helper to extract YYYY-MM-DD reliably without timezone conversion shifts
@@ -38,17 +39,48 @@ const EventManagement = () => {
   const [isEventDetails, setIsEventDetails] = useState(false);
   const [eventData, setEventData] = useState(null);
   const [selectedLoungeId, setSelectedLoungeId] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [view, setView] = useState("list");
   const [selectedDate, setSelectedDate] = useState(null);
 
-  const [filters, setFilters] = useState({
+  const { page: currentPage, getParam, setPage: setCurrentPage, setParams } = useListingUrlParams({
+    page: 1,
+    view: "list",
+    status: "",
     startDate: "",
     endDate: "",
-    selectedMonth: "",
-    selectedLounge: "",
-    selectedStatus: "",
+    month: "",
+    lounge: "",
   });
+
+  const view = getParam("view", "list");
+  const setView = (v) => setParams({ view: v });
+
+  const filters = useMemo(
+    () => ({
+      startDate: getParam("startDate", ""),
+      endDate: getParam("endDate", ""),
+      selectedMonth: getParam("month", ""),
+      selectedLounge: getParam("lounge", ""),
+      selectedStatus: getParam("status", ""),
+    }),
+    [getParam]
+  );
+
+  const handleFilterChange = (filterData) => {
+    setParams(
+      {
+        startDate: filterData.startDate || "",
+        endDate: filterData.endDate || "",
+        month: filterData.selectedMonth || "",
+        lounge: filterData.selectedLounge || "",
+        status: filterData.selectedStatus || "",
+      },
+      { resetPage: true }
+    );
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
 
   // Calculate parameters for API query based on view and date selection
   const queryLimit = view === "calendar" ? 100 : 10;
@@ -140,11 +172,6 @@ const EventManagement = () => {
       .filter(Boolean);
   }, [transformedEvents]);
 
-  const handleFilterChange = (filterData) => {
-    setFilters(filterData);
-    setCurrentPage(1); // Reset to first page on filter change
-  };
-
   // Filter events for the selected date on calendar view
   const filteredEventsForCalendar = useMemo(() => {
     if (!selectedDate) return transformedEvents;
@@ -207,10 +234,6 @@ const EventManagement = () => {
     }
   };
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
   return (
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center gap-10 mt-2">
@@ -259,6 +282,7 @@ const EventManagement = () => {
           {view === "list" && (
             <DateAndMonthFilter
               isLounge={true}
+              initialValues={filters}
               onFilterChange={handleFilterChange}
               statusOptions={[
                 "pending",
@@ -329,6 +353,11 @@ const EventManagement = () => {
             isLoading={isEventsLoading}
             currentPage={currentPage}
             totalPages={eventsResponse?.pagination?.totalPages || 1}
+            totalRecords={
+              eventsResponse?.pagination?.totalDocs ??
+              eventsResponse?.pagination?.total ??
+              transformedEvents.length
+            }
             onPageChange={handlePageChange}
           />
         </div>
