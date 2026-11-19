@@ -5,18 +5,20 @@ import moment from "moment";
 import { useRouter } from "next/navigation";
 import { useNotifications } from "@/lib/hooks/queries/useQueries";
 import CustomPagination from "@/components/common/CustomPagination";
+import { useListingUrlParams } from "@/lib/hooks/useListingUrlParams";
 
 const NotificationsPage = () => {
   const router = useRouter();
-  const [selectTab, setSelectTab] = useState("all");
-  const [page, setPage] = useState(1);
+  const { page, getParam, setPage, setParams } = useListingUrlParams({ page: 1, tab: "all" });
+  const selectTab = getParam("tab", "all");
 
   const { data: notificationsData, isLoading } = useNotifications(page, 10);
   const notifications = notificationsData?.data || [];
   const totalPages = notificationsData?.pagination?.totalPages || 1;
+  const totalRecords = notificationsData?.pagination?.totalDocs ?? notificationsData?.pagination?.total ?? notifications.length;
 
   const handleSelect = (val) => {
-    setSelectTab(val);
+    setParams({ tab: val }, { resetPage: true });
   };
 
   const handleItemClick = (item) => {
@@ -85,7 +87,10 @@ const NotificationsPage = () => {
         <CustomPagination
           loading={isLoading}
           totalPages={totalPages}
-          onPageChange={(newPage) => setPage(newPage)}
+          currentPage={page}
+          totalRecords={totalRecords}
+          itemLabel="notifications"
+          onPageChange={setPage}
         >
           <div>
             {filteredTasks?.length > 0 ? (

@@ -5,19 +5,28 @@ import utils from "@/lib/utils";
 import { IoIosArrowForward } from "react-icons/io";
 import PaymentDetails from "@/components/payments/PaymentDetails";
 
-const Table = ({ data, type }) => {
+const Table = ({ data = [], type, currentPage = 1, onPageChange = () => {} }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState(null);
 
-  const onPageChange = (page) => {
-    // getAllPayments(page);
-  };
+  const limit = 10;
+  const totalRecords = data.length;
+  const totalPages = Math.max(1, Math.ceil(totalRecords / limit));
+  const paginatedData = data.slice((currentPage - 1) * limit, currentPage * limit);
 
   const isBookingPayment = type === "booking";
 
   return (
     <>
-      <CustomPagination loading={false} onPageChange={onPageChange} totalPages={10}>
+      <CustomPagination
+        loading={false}
+        onPageChange={onPageChange}
+        totalPages={totalPages}
+        currentPage={currentPage}
+        totalRecords={totalRecords}
+        limit={limit}
+        itemLabel="payments"
+      >
         <div className="bg-white rounded-xl overflow-y-auto">
           <table className="w-full">
             <thead className="sticky top-0 z-10">
@@ -41,7 +50,7 @@ const Table = ({ data, type }) => {
               </tr>
             </thead>
             <tbody className="mt-10">
-              {data?.map((payment, index) => (
+              {paginatedData?.map((payment, index) => (
                 <tr key={index} className="border-b border-[#D4D4D4]">
                   <td className="px-4 py-6">
                     <div className="flex items-center gap-3">

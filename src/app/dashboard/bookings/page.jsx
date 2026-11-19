@@ -1,18 +1,30 @@
 "use client";
 import Table from "@/components/bookings/Table";
 import DateAndMonthFilter from "@/components/common/DateAndMonthFilter";
-import React, { useState } from "react";
+import React, { useMemo } from "react";
 import { useGetBookings } from "@/lib/hooks/queries/useBookings";
+import { useListingUrlParams } from "@/lib/hooks/useListingUrlParams";
 
 const Bookings = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [filters, setFilters] = useState({
+  const { page: currentPage, getParam, setPage: setCurrentPage, setParams } = useListingUrlParams({
+    page: 1,
+    status: "",
     startDate: "",
     endDate: "",
-    selectedMonth: "",
-    selectedLounge: "",
-    selectedStatus: "",
+    month: "",
+    lounge: "",
   });
+
+  const filters = useMemo(
+    () => ({
+      startDate: getParam("startDate", ""),
+      endDate: getParam("endDate", ""),
+      selectedMonth: getParam("month", ""),
+      selectedLounge: getParam("lounge", ""),
+      selectedStatus: getParam("status", ""),
+    }),
+    [getParam]
+  );
 
   const { data: bookingsResponse, isLoading } = useGetBookings(
     currentPage,
@@ -23,13 +35,23 @@ const Bookings = () => {
   );
 
   const handleFilterChange = (filterData) => {
-    setFilters(filterData);
-    setCurrentPage(1); // Reset to first page on filter change
+    setParams(
+      {
+        startDate: filterData.startDate || "",
+        endDate: filterData.endDate || "",
+        month: filterData.selectedMonth || "",
+        lounge: filterData.selectedLounge || "",
+        status: filterData.selectedStatus || "",
+      },
+      { resetPage: true }
+    );
   };
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
+  const totalRecords =
+    bookingsResponse?.pagination?.totalDocs ??
+    bookingsResponse?.pagination?.total ??
+    bookingsResponse?.pagination?.totalBookings ??
+    (bookingsResponse?.data || []).length;
 
   return (
     <div>
@@ -39,6 +61,7 @@ const Bookings = () => {
         <div>
           <DateAndMonthFilter
             isLounge={true}
+            initialValues={filters}
             onFilterChange={handleFilterChange}
             statusOptions={[
               "awaiting_payment",
@@ -61,7 +84,8 @@ const Bookings = () => {
           isLoading={isLoading}
           currentPage={currentPage}
           totalPages={bookingsResponse?.pagination?.totalPages || 1}
-          onPageChange={handlePageChange}
+          totalRecords={totalRecords}
+          onPageChange={setCurrentPage}
         />
       </div>
     </div>

@@ -12,13 +12,14 @@ import { useServices } from "@/lib/hooks/queries/useService";
 import { useQueryClient } from "@tanstack/react-query";
 import { Eye } from "lucide-react";
 import ViewServiceModal from "./ViewServiceModal";
-
+import CustomPagination from "@/components/common/CustomPagination";
+import { useListingUrlParams } from "@/lib/hooks/useListingUrlParams";
 
 const Table = () => {
-  const [currentPage] = useState(1);
+  const { page, setPage } = useListingUrlParams({ page: 1 });
 
   // Fetch services
-  const { data, isLoading } = useServices(currentPage);
+  const { data, isLoading } = useServices(page);
 
   // Delete mutation
   const { mutate: deleteService, isPending: deleting } =
@@ -80,7 +81,21 @@ const Table = () => {
 
   return (
     <>
-      <div className="bg-white rounded-xl overflow-x-auto shadow-sm">
+      <CustomPagination
+        currentPage={page}
+        onPageChange={setPage}
+        totalPages={pagination?.totalPages || pagination?.pages || 1}
+        totalRecords={
+          pagination?.totalDocs ??
+          pagination?.totalItems ??
+          pagination?.total ??
+          services.length
+        }
+        limit={pagination?.limit || 10}
+        itemLabel="services"
+        loading={isLoading}
+      >
+        <div className="bg-white rounded-xl overflow-x-auto shadow-sm">
         <table className="w-full text-sm">
           <thead className="sticky top-0 z-10 bg-[#E8E8FF]">
             <tr>
@@ -211,6 +226,7 @@ const Table = () => {
           </tbody>
         </table>
       </div>
+      </CustomPagination>
 
       <AddServiceForm
         isOpen={openEditForm}

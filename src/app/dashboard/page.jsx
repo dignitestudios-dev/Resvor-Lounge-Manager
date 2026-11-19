@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import StatsCard from "@/components/dashboard/StatsCard";
 import Table from "@/components/dashboard/Table";
 import DateAndMonthFilter from "@/components/common/DateAndMonthFilter";
@@ -12,14 +12,18 @@ import utils from "@/lib/utils";
 import { requestForToken } from "@/lib/firebase";
 import { useUpdateFcmToken } from "@/lib/hooks/mutations/AuthMutations";
 import Cookies from "js-cookie";
+import { useListingUrlParams } from "@/lib/hooks/useListingUrlParams";
 
 const Dashboard = () => {
   const updateFcmMutation = useUpdateFcmToken();
 
-  const [filterDates, setFilterDates] = useState({
+  const { params, getParam, setParams } = useListingUrlParams({
     startDate: "",
     endDate: "",
   });
+
+  const startDate = params?.startDate ?? getParam("startDate", "");
+  const endDate = params?.endDate ?? getParam("endDate", "");
 
   // Register FCM token once when the user first lands on Dashboard after login.
   // We use "fromLogin" flag set by the login page so this only runs once per login session,
@@ -49,8 +53,8 @@ const Dashboard = () => {
   }, []);
 
   const { data: dashboardResponse, isLoading } = useGetDashboard({
-    startDate: filterDates.startDate,
-    endDate: filterDates.endDate,
+    startDate,
+    endDate,
   });
 
   const stats = dashboardResponse?.stats || {};
@@ -58,7 +62,7 @@ const Dashboard = () => {
   const pagination = dashboardResponse?.pagination || {};
 
   const handleFilterChange = (filters) => {
-    setFilterDates({
+    setParams({
       startDate: filters.startDate || "",
       endDate: filters.endDate || "",
     });
@@ -93,7 +97,13 @@ const Dashboard = () => {
         <h1 className="section-heading">Dashboard</h1>
 
         <div>
-          <DateAndMonthFilter onFilterChange={handleFilterChange} />
+          <DateAndMonthFilter
+            initialValues={{
+              startDate,
+              endDate,
+            }}
+            onFilterChange={handleFilterChange}
+          />
         </div>
       </div>
 

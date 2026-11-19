@@ -1,10 +1,11 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Table from "@/components/guestbook/Table";
 import DateAndMonthFilter from "@/components/common/DateAndMonthFilter";
 import { Button } from "@/components/ui/button";
 import AddGuestForm from "@/components/guestbook/AddGuestForm";
 import { useGetGuestbook } from "@/lib/hooks/queries/useGuestbook";
+import { useListingUrlParams } from "@/lib/hooks/useListingUrlParams";
 import {
   useImportGuestbook,
   useExportGuestbook,
@@ -19,17 +20,36 @@ const Guest = () => {
   const [showQRSection, setShowQRSection] = useState(true);
   const fileInputRef = useRef(null);
   const queryClient = useQueryClient();
-  const [search, setSearch] = useState("");
-  // Pagination state
-  const [page, setPage] = useState(1);
 
-  // Date filter state — empty string means "no filter" (not sent to API)
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const { page, search, getParam, setPage, setSearch, setParams } = useListingUrlParams({
+    page: 1,
+    search: "",
+    startDate: "",
+    endDate: "",
+  });
+
+  const startDate = getParam("startDate", "");
+  const endDate = getParam("endDate", "");
+
+  const [searchInput, setSearchInput] = useState(search);
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchInput !== search) {
+        setSearch(searchInput);
+      }
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [searchInput, search, setSearch]);
 
   const { data: guestbookData, isLoading } = useGetGuestbook({
     page,
-    search
+    search,
+    startDate,
+    endDate,
   });
 
   const importGuestbookMutation = useImportGuestbook();
@@ -39,9 +59,7 @@ const Guest = () => {
   const pagination = guestbookData?.pagination || null;
 
   const handleFilterChange = ({ startDate: sd, endDate: ed }) => {
-    setStartDate(sd || "");
-    setEndDate(ed || "");
-    setPage(1); // reset to first page on every filter change
+    setParams({ startDate: sd || "", endDate: ed || "" }, { resetPage: true });
   };
 
   const handleImportClick = () => {
@@ -219,11 +237,8 @@ const Guest = () => {
         <input
           type="text"
           placeholder="Search guests..."
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
           className="h-12 w-full rounded-md border border-gray-300 px-4 text-sm outline-none focus:border-primary"
         />
       </div>

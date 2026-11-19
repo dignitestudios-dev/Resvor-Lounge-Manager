@@ -90,6 +90,7 @@ const Table = ({
   };
 
   const totalPages = pagination?.totalPages || 1;
+  const totalRecords = pagination?.totalDocs ?? pagination?.total ?? guests.length;
 
   return (
     <>
@@ -98,6 +99,8 @@ const Table = ({
         onPageChange={onPageChange}
         totalPages={totalPages}
         currentPage={currentPage}
+        totalRecords={totalRecords}
+        itemLabel="guests"
       >
         <div className="bg-white rounded-xl overflow-y-auto">
           <table className="w-full">

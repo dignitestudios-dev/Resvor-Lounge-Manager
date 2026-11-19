@@ -21,6 +21,7 @@ const Table = ({
   isLoading = false,
   currentPage = 1,
   totalPages = 1,
+  totalRecords,
   onPageChange = () => { },
 }) => {
   const router = useRouter();
@@ -82,6 +83,8 @@ const Table = ({
       onPageChange={onPageChange}
       totalPages={totalPages}
       currentPage={currentPage}
+      totalRecords={totalRecords ?? (events || []).length}
+      itemLabel="events"
     >
       <div className="bg-white rounded-xl overflow-y-auto min-h-[300px]">
         <table className="w-full">

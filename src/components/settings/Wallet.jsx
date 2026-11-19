@@ -1,11 +1,11 @@
 "use client";
-import { useState } from "react";
 import { useWalletTransactions } from "@/lib/hooks/queries/useQueries";
 import TransactionHistoryTable from "./TransactionHistoryTable";
 import AvailableBalance from "./AvailableBalance";
+import { useListingUrlParams } from "@/lib/hooks/useListingUrlParams";
 
 const Wallet = () => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const { page: currentPage, setPage: setCurrentPage } = useListingUrlParams({ page: 1 });
 
   const { data: txResponse, isLoading: isLoadingTx } = useWalletTransactions({
     page: currentPage,
@@ -15,10 +15,7 @@ const Wallet = () => {
   const transactions = txResponse?.data || [];
   const pagination = txResponse?.pagination;
   const totalPages = pagination?.totalPages || 1;
-
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
+  const totalRecords = pagination?.totalItems ?? pagination?.totalDocs ?? transactions.length;
 
   return (
     <div className="mx-auto px-6 py-8">
@@ -58,7 +55,8 @@ const Wallet = () => {
           transactions={transactions}
           isLoadingTx={isLoadingTx}
           totalPages={totalPages}
-          onPageChange={handlePageChange}
+          totalRecords={totalRecords}
+          onPageChange={setCurrentPage}
           currentPage={currentPage}
         />
       </div>

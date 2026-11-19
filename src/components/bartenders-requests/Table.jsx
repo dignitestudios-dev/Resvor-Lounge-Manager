@@ -8,12 +8,13 @@ import { useGetShiftRequests } from "@/lib/hooks/queries/useShiftRequests";
 import { useReviewShiftRequest } from "@/lib/hooks/mutations/useReviewShiftRequest";
 import { SuccessToast, ErrorToast } from "@/components/ui/toaster";
 import utils from "@/lib/utils";
+import { useListingUrlParams } from "@/lib/hooks/useListingUrlParams";
 
 const Table = () => {
   const [selected, setSelected] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [rejectReasonOpen, setRejectReasonOpen] = useState(false);
-  const [page, setPage] = useState(1);
+  const { page, setPage } = useListingUrlParams({ page: 1 });
   const LIMIT = 10;
 
   const [sortConfig, setSortConfig] = useState({
@@ -26,6 +27,7 @@ const Table = () => {
 
   const rawRequests = shiftRequestsResponse?.data || [];
   const totalPages = shiftRequestsResponse?.pagination?.totalPages || 1;
+  const totalRecords = shiftRequestsResponse?.pagination?.totalDocs ?? shiftRequestsResponse?.pagination?.total ?? rawRequests.length;
 
   const handleRowClick = (req) => {
     setSelected(req);
@@ -194,8 +196,11 @@ const Table = () => {
   return (
     <CustomPagination
       loading={isLoading}
-      onPageChange={(p) => setPage(p)}
+      onPageChange={setPage}
       totalPages={totalPages}
+      currentPage={page}
+      totalRecords={totalRecords}
+      itemLabel="requests"
     >
       <div className=" rounded-xl overflow-y-auto ">
         <table className="w-full">

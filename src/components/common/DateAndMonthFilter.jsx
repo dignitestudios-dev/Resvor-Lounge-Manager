@@ -23,13 +23,38 @@ import { Input } from "../ui/input";
 import { locations, months } from "@/lib/constants";
 import utils from "@/lib/utils";
 
-const DateAndMonthFilter = ({ isLounge, onFilterChange, statusOptions }) => {
+const DateAndMonthFilter = ({
+  isLounge,
+  onFilterChange,
+  statusOptions,
+  initialValues = {},
+}) => {
   const [open, setOpen] = React.useState(false);
-  const [startDate, setStartDate] = React.useState("");
-  const [endDate, setEndDate] = React.useState("");
-  const [selectedMonth, setSelectedMonth] = React.useState("");
-  const [selectedLounge, setSelectedLounge] = React.useState("");
-  const [selectedStatus, setSelectedStatus] = React.useState("");
+  const [startDate, setStartDate] = React.useState(initialValues?.startDate || "");
+  const [endDate, setEndDate] = React.useState(initialValues?.endDate || "");
+  const [selectedMonth, setSelectedMonth] = React.useState(initialValues?.selectedMonth || "");
+  const [selectedLounge, setSelectedLounge] = React.useState(initialValues?.selectedLounge || "");
+  const [selectedStatus, setSelectedStatus] = React.useState(initialValues?.selectedStatus || "");
+
+  React.useEffect(() => {
+    if (initialValues) {
+      setStartDate(initialValues.startDate || "");
+      setEndDate(initialValues.endDate || "");
+      setSelectedMonth(initialValues.selectedMonth || "");
+      setSelectedLounge(initialValues.selectedLounge || "");
+      setSelectedStatus(initialValues.selectedStatus || "");
+    }
+  }, [
+    initialValues?.startDate,
+    initialValues?.endDate,
+    initialValues?.selectedMonth,
+    initialValues?.selectedLounge,
+    initialValues?.selectedStatus,
+  ]);
+
+  const hasActiveFilters = Boolean(
+    startDate || endDate || selectedMonth || selectedLounge || selectedStatus
+  );
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -66,15 +91,18 @@ const DateAndMonthFilter = ({ isLounge, onFilterChange, statusOptions }) => {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button className={"h-12 w-12 bg-gradient"}>
+        <Button className={"h-12 w-12 bg-gradient relative cursor-pointer"}>
           <FaFilter className="h-6 w-6 min-h-6 min-w-6" />
+          {hasActiveFilters && (
+            <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-yellow-400 ring-2 ring-white" />
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end">
         <div className="flex gap-5 justify-between items-center border-b border-b-gray-200 pb-3">
           <p className="text-xl font-semibold">Filter</p>
           <PopoverClose asChild>
-            <button className="p-1 hover:bg-gray-100 rounded-md transition-colors">
+            <button className="p-1 hover:bg-gray-100 rounded-md transition-colors cursor-pointer">
               <RxCross2 className="h-5 w-5" />
             </button>
           </PopoverClose>
@@ -109,48 +137,6 @@ const DateAndMonthFilter = ({ isLounge, onFilterChange, statusOptions }) => {
               onChange={(e) => setEndDate(e.target.value)}
             />
           </div>
-
-          {/* <div className="col-span-2 flex flex-col gap-1">
-            <Label className={"text-base"}>Select Month</Label>
-
-            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-              <SelectTrigger className={"w-full h-14!"}>
-                <SelectValue placeholder="Select a Month" />
-              </SelectTrigger>
-              <SelectContent className={"h-[200px]"}>
-                <SelectGroup>
-                  <SelectLabel>Months</SelectLabel>
-                  {months.map((month, index) => (
-                    <SelectItem value={month} key={index}>
-                      {utils.capitalize(month)}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div> */}
-
-          {/* {isLounge && (
-            <div className="col-span-2 flex flex-col gap-1">
-              <Label className={"text-base"}>Select Lounge</Label>
-
-              <Select value={selectedLounge} onValueChange={setSelectedLounge}>
-                <SelectTrigger className={"w-full h-14!"}>
-                  <SelectValue placeholder="Select a Lounge" />
-                </SelectTrigger>
-                <SelectContent className={"h-[200px]"}>
-                  <SelectGroup>
-                    <SelectLabel>Lounge</SelectLabel>
-                    {locations.map((month) => (
-                      <SelectItem value={month.name} key={month._id}>
-                        {utils.capitalize(month.name)}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-          )} */}
 
           {statusOptions && statusOptions.length > 0 && (
             <div className="col-span-2 flex flex-col gap-1">
