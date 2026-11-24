@@ -23,6 +23,8 @@ export const PUBLIC_ROUTES = [
   "/auth/update-password",
   "/auth/verify-forget-otp",
   "/guestbook-entry",
+  "/campaigns",
+  "/campaign",
 ];
 
 export const PROTECTED_ROUTES = ["/dashboard"];

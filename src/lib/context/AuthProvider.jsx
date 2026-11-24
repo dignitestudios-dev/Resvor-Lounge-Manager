@@ -122,7 +122,10 @@ export const AuthProvider = ({ children }) => {
   );
   const isAuthRoute = pathname.startsWith("/auth");
   const isOnboardingRoute = pathname === ONBOARDING_ROUTE;
-  const isPublicRoute = pathname?.startsWith("/guestbook-entry");
+  const isPublicRoute =
+    pathname?.startsWith("/guestbook-entry") ||
+    pathname?.startsWith("/campaigns") ||
+    pathname?.startsWith("/campaign");
 
   const redirectTarget = useMemo(() => {
     if (!isResolved) return null;
@@ -204,7 +207,7 @@ export const AuthProvider = ({ children }) => {
 
   // Block render while auth state is unknown, AND while a redirect is pending —
   // this is what stops a flash of /dashboard or /auth/signup before the route swaps.
-  if (!isResolved || redirectTarget) {
+  if ((!isResolved && !isPublicRoute) || redirectTarget) {
     return (
       <div className="flex justify-center items-center h-screen w-screen text-white backgroundImage">
         Loading...
