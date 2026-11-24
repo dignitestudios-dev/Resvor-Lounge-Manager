@@ -107,6 +107,57 @@ export const buildPublicGuestbookFormData = (values = {}) => {
     formData.append("email", values.email.trim());
   }
 
+  if (typeof values.company === "string" && values.company.trim()) {
+    formData.append("company", values.company.trim());
+  }
+
+  if (typeof values.title === "string" && values.title.trim()) {
+    formData.append("title", values.title.trim());
+  }
+
+  if (typeof values.website === "string" && values.website.trim()) {
+    formData.append("website", values.website.trim());
+  }
+
+  if (typeof values.nickname === "string" && values.nickname.trim()) {
+    formData.append("nickname", values.nickname.trim());
+  }
+
+  const street = values.address?.street?.trim() || "";
+  const city = values.address?.city?.trim() || "";
+  const state = values.address?.state?.trim() || "";
+  const zip = values.address?.zip?.trim() || "";
+
+  if (street || city || state || zip) {
+    formData.append(
+      "address",
+      JSON.stringify({
+        ...(street ? { street } : {}),
+        ...(city ? { city } : {}),
+        ...(state ? { state } : {}),
+        ...(zip ? { zip } : {}),
+        country: "United States",
+      })
+    );
+  }
+
+  const facebook = values.socialNetwork?.facebook?.trim() || "";
+  const twitter = values.socialNetwork?.twitter?.trim() || "";
+  const linkedin = values.socialNetwork?.linkedin?.trim() || "";
+  const instagram = values.socialNetwork?.instagram?.trim() || "";
+
+  if (facebook || twitter || linkedin || instagram) {
+    formData.append(
+      "socialNetwork",
+      JSON.stringify({
+        ...(facebook ? { facebook } : {}),
+        ...(twitter ? { twitter } : {}),
+        ...(linkedin ? { linkedin } : {}),
+        ...(instagram ? { instagram } : {}),
+      })
+    );
+  }
+
   if (typeof values.phoneNumber === "string" && values.phoneNumber.trim()) {
     const raw = values.phoneNumber.trim();
     const formatted = raw.startsWith("+") ? raw : formatPhoneToE164(raw);

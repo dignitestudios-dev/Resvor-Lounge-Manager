@@ -35,7 +35,10 @@ const CampaignAndFlyers = () => {
           </Button>
 
           {/* Add Custom Flyer Modal */}
+          <div className="w-full">
           <AddCustomFlyerModal isOpen={openForm} onOpenChange={setOpenForm} />
+
+          </div>
         </div>
       </div>
 

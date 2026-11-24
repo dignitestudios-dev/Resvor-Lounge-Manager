@@ -87,6 +87,19 @@ export const addGuestSchema = Yup.object({
       "Invalid email format.",
     ),
 
+  company: Yup.string().nullable().max(100, "Company cannot exceed 100 characters."),
+
+  title: Yup.string().nullable().max(100, "Title cannot exceed 100 characters."),
+
+  website: Yup.string()
+    .nullable()
+    .test("valid-url", "Please enter a valid website URL.", (value) => {
+      if (!value || !value.trim()) return true;
+      return /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/i.test(value.trim());
+    }),
+
+  nickname: Yup.string().nullable().max(50, "Nickname cannot exceed 50 characters."),
+
   birthMonth: Yup.string().nullable(),
 
   phoneNumber: Yup.string()
@@ -96,6 +109,53 @@ export const addGuestSchema = Yup.object({
       const digits = value.replace(/\D/g, "");
       return digits.length === 0 || (digits.length >= 10 && digits.length <= 15);
     }),
+
+  address: Yup.object({
+    street: Yup.string().nullable().max(150, "Street cannot exceed 150 characters."),
+    state: Yup.string().nullable(),
+    city: Yup.string()
+      .nullable()
+      .test(
+        "city-required-when-state-selected",
+        "City is required when a State is selected.",
+        function (value) {
+          const { state } = this.parent || {};
+          if (state && String(state).trim()) {
+            return Boolean(value && String(value).trim());
+          }
+          return true;
+        }
+      ),
+    zip: Yup.string().nullable().max(20, "ZIP code cannot exceed 20 characters."),
+    country: Yup.string().nullable(),
+  }).nullable(),
+
+  socialNetwork: Yup.object({
+    facebook: Yup.string()
+      .nullable()
+      .test("valid-facebook-url", "Please enter a valid Facebook URL.", (value) => {
+        if (!value || !value.trim()) return true;
+        return /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/i.test(value.trim());
+      }),
+    twitter: Yup.string()
+      .nullable()
+      .test("valid-twitter-url", "Please enter a valid Twitter/X URL.", (value) => {
+        if (!value || !value.trim()) return true;
+        return /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/i.test(value.trim());
+      }),
+    linkedin: Yup.string()
+      .nullable()
+      .test("valid-linkedin-url", "Please enter a valid LinkedIn URL.", (value) => {
+        if (!value || !value.trim()) return true;
+        return /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/i.test(value.trim());
+      }),
+    instagram: Yup.string()
+      .nullable()
+      .test("valid-instagram-url", "Please enter a valid Instagram URL.", (value) => {
+        if (!value || !value.trim()) return true;
+        return /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/i.test(value.trim());
+      }),
+  }).nullable(),
 
   specialDates: Yup.array()
     .of(

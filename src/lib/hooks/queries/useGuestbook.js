@@ -74,3 +74,17 @@ export const useGetAllGuestbook = ({
     keepPreviousData: true,
   });
 };
+
+export const fetchGuestById = async (id) => {
+  if (!id) return null;
+  const { data } = await axios.get(`/guestbook/${id}`);
+  return data?.data || data;
+};
+
+export const useGetGuestById = (id) => {
+  return useQuery({
+    queryKey: ["guestbook-detail", id],
+    queryFn: () => fetchGuestById(id),
+    enabled: Boolean(id),
+  });
+};
