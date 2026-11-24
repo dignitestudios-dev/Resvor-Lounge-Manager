@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -35,6 +35,8 @@ import { addGuestSchema } from "@/lib/schema/guestbook/addGuestSchema";
 import ImageCropperModal from "@/components/common/ImageCropperModal";
 import { validateProfileImage } from "@/lib/utils/cropImage";
 import PhoneInput from "../auth/PhoneInput";
+import SearchableSelect from "../common/SearchableSelect";
+import usaStatesCities from "@/lib/data/usaStatesCities.json";
 
 const MONTHS = [
   { value: "1", label: "January" },
@@ -115,6 +117,8 @@ const AddGuestForm = ({
   const createGuestMutation = useCreateGuest();
   const updateGuestMutation = useUpdateGuest();
 
+  const stateOptions = useMemo(() => Object.keys(usaStatesCities).sort(), []);
+
   const getInitialValues = (guestData) => {
     let fName = guestData?.firstName || "";
     let lName = guestData?.lastName || "";
@@ -124,18 +128,40 @@ const AddGuestForm = ({
       lName = parts.slice(1).join(" ") || "";
     }
 
+    const addr = guestData?.address || {};
+    const social = guestData?.socialNetwork || {};
+
     return {
       photo: null,
       firstName: fName,
       lastName: lName,
       email: guestData?.email || "",
-      birthMonth: guestData?.birthMonth ? String(guestData.birthMonth) : "",
+      company: guestData?.company || "",
+      title: guestData?.title || "",
+      website: guestData?.website || "",
+      nickname: guestData?.nickname || "",
+      birthMonth:
+        guestData?.birthMonth !== undefined && guestData?.birthMonth !== null
+          ? String(guestData.birthMonth)
+          : "",
       phoneNumber: stripCountryCode(guestData?.phoneNumber) || "",
       specialDates: parseSpecialDates(guestData?.specialDates),
       details: guestData?.details || guestData?.notes || "",
+      address: {
+        street: addr?.street || "",
+        state: addr?.state || "",
+        city: addr?.city || "",
+        zip: addr?.zip || "",
+        country: "United States",
+      },
+      socialNetwork: {
+        facebook: social?.facebook || "",
+        twitter: social?.twitter || "",
+        linkedin: social?.linkedin || "",
+        instagram: social?.instagram || "",
+      },
     };
   };
-  console.log(selectedLoungeId, "selectedLoungeId")
 
   const formik = useFormik({
     initialValues: getInitialValues(data),
@@ -151,20 +177,93 @@ const AddGuestForm = ({
         }
 
         const formattedPhone = values.phoneNumber?.trim()
-          ? phoneToE164(values.phoneNumber)
+          ? (values.phoneNumber.startsWith("+")
+              ? values.phoneNumber.trim()
+              : phoneToE164(values.phoneNumber))
           : "";
 
         const payload = {
-          // loungeId: selectedLoungeId,
+          loungeId: selectedLoungeId || data?.loungeId,
           firstName: values.firstName.trim(),
           lastName: values.lastName.trim(),
           email: values.email.trim(),
-          birthMonth: values.birthMonth || undefined,
-          phoneNumber: formattedPhone || undefined,
-          details: values.details?.trim() || undefined,
-          specialDates: values.specialDates || [],
-          photo: values.photo,
         };
+
+        if (values.company?.trim()) {
+          payload.company = values.company.trim();
+        }
+
+        if (values.title?.trim()) {
+          payload.title = values.title.trim();
+        }
+
+        if (values.website?.trim()) {
+          payload.website = values.website.trim();
+        }
+
+        if (values.nickname?.trim()) {
+          payload.nickname = values.nickname.trim();
+        }
+
+        if (formattedPhone) {
+          payload.phoneNumber = formattedPhone;
+        }
+
+        if (
+          values.birthMonth !== "" &&
+          values.birthMonth !== null &&
+          values.birthMonth !== undefined
+        ) {
+          payload.birthMonth = Number(values.birthMonth);
+        }
+
+        if (values.details?.trim()) {
+          payload.details = values.details.trim();
+        }
+
+        const validSpecialDates = (values.specialDates || [])
+          .filter((d) => d?.title?.trim() && d?.date?.trim())
+          .map((d) => ({
+            title: d.title.trim(),
+            date: String(d.date).slice(0, 10),
+          }));
+
+        if (validSpecialDates.length > 0) {
+          payload.specialDates = validSpecialDates;
+        }
+
+        const street = values.address?.street?.trim() || "";
+        const city = values.address?.city?.trim() || "";
+        const state = values.address?.state?.trim() || "";
+        const zip = values.address?.zip?.trim() || "";
+
+        if (street || city || state || zip) {
+          payload.address = {
+            ...(street ? { street } : {}),
+            ...(city ? { city } : {}),
+            ...(state ? { state } : {}),
+            ...(zip ? { zip } : {}),
+            country: "United States",
+          };
+        }
+
+        const facebook = values.socialNetwork?.facebook?.trim() || "";
+        const twitter = values.socialNetwork?.twitter?.trim() || "";
+        const linkedin = values.socialNetwork?.linkedin?.trim() || "";
+        const instagram = values.socialNetwork?.instagram?.trim() || "";
+
+        if (facebook || twitter || linkedin || instagram) {
+          payload.socialNetwork = {
+            ...(facebook ? { facebook } : {}),
+            ...(twitter ? { twitter } : {}),
+            ...(linkedin ? { linkedin } : {}),
+            ...(instagram ? { instagram } : {}),
+          };
+        }
+
+        if (values.photo instanceof File) {
+          payload.photo = values.photo;
+        }
 
         if (isEdit && data?._id) {
           await updateGuestMutation.mutateAsync({
@@ -173,12 +272,13 @@ const AddGuestForm = ({
           });
         } else {
           await createGuestMutation.mutateAsync({
-            loungeId: selectedLoungeId,
             ...payload,
           });
         }
 
         queryClient.invalidateQueries({ queryKey: ["guestbook-list"] });
+        queryClient.invalidateQueries({ queryKey: ["guestbook-manager"] });
+        queryClient.invalidateQueries({ queryKey: ["guestbook-all"] });
 
         SuccessToast(
           isEdit ? "Guest updated successfully" : "Guest added successfully"
@@ -196,8 +296,26 @@ const AddGuestForm = ({
     },
   });
 
+  const selectedState = formik.values.address?.state || "";
+  const cityOptions = useMemo(() => {
+    if (!selectedState || !usaStatesCities[selectedState]) return [];
+    return Array.from(
+      new Set(
+        usaStatesCities[selectedState]
+          .map((c) => (typeof c === "string" ? c.trim() : ""))
+          .filter(Boolean)
+      )
+    ).sort();
+  }, [selectedState]);
+
+  const handleStateChange = (stateName) => {
+    formik.setFieldValue("address.state", stateName);
+    formik.setFieldValue("address.city", "");
+    formik.setFieldTouched("address.city", false);
+  };
+
   const handleResetAndClose = () => {
-    formik.resetForm();
+    formik.resetForm({ values: getInitialValues(null) });
     setProfileImagePreview(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
     onOpenChange(false);
@@ -245,7 +363,7 @@ const AddGuestForm = ({
     }
 
     if (isOpen && !isEdit) {
-      formik.resetForm();
+      formik.resetForm({ values: getInitialValues(null) });
       setProfileImagePreview(null);
     }
   }, [isOpen, isEdit, data?._id]);
@@ -498,6 +616,303 @@ const AddGuestForm = ({
                   touched={formik.touched.birthMonth}
                   error={formik.errors.birthMonth}
                 />
+              </div>
+            </div>
+
+            {/* Company & Title */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="w-full flex flex-col gap-1">
+                <Label htmlFor="company" className="text-sm font-medium text-black">
+                  Company (Optional)
+                </Label>
+                <Input
+                  placeholder="e.g. Acme Inc."
+                  className="h-12"
+                  id="company"
+                  name="company"
+                  maxLength={100}
+                  value={formik.values.company}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                <FieldError
+                  touched={formik.touched.company}
+                  error={formik.errors.company}
+                />
+              </div>
+
+              <div className="w-full flex flex-col gap-1">
+                <Label htmlFor="title" className="text-sm font-medium text-black">
+                  Title (Optional)
+                </Label>
+                <Input
+                  placeholder="e.g. Product Manager"
+                  className="h-12"
+                  id="title"
+                  name="title"
+                  maxLength={100}
+                  value={formik.values.title}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                <FieldError
+                  touched={formik.touched.title}
+                  error={formik.errors.title}
+                />
+              </div>
+            </div>
+
+            {/* Website & Nickname */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="w-full flex flex-col gap-1">
+                <Label htmlFor="website" className="text-sm font-medium text-black">
+                  Website (Optional)
+                </Label>
+                <Input
+                  placeholder="https://example.com"
+                  className="h-12"
+                  id="website"
+                  name="website"
+                  value={formik.values.website}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                <FieldError
+                  touched={formik.touched.website}
+                  error={formik.errors.website}
+                />
+              </div>
+
+              <div className="w-full flex flex-col gap-1">
+                <Label htmlFor="nickname" className="text-sm font-medium text-black">
+                  Nickname (Optional)
+                </Label>
+                <Input
+                  placeholder="e.g. Av"
+                  className="h-12"
+                  id="nickname"
+                  name="nickname"
+                  maxLength={50}
+                  value={formik.values.nickname}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                <FieldError
+                  touched={formik.touched.nickname}
+                  error={formik.errors.nickname}
+                />
+              </div>
+            </div>
+
+            {/* Address Section */}
+            <div className="w-full flex flex-col gap-3 pt-2 border-t border-gray-100">
+              <div>
+                <Label className="text-sm font-semibold text-black">
+                  Address (Optional)
+                </Label>
+                <span className="text-xs text-gray-400 block">
+                  Guest location details
+                </span>
+              </div>
+
+              <div className="w-full flex flex-col gap-1">
+                <Label htmlFor="addressStreet" className="text-sm font-medium text-black">
+                  Street Address
+                </Label>
+                <Input
+                  placeholder="123 Main Street"
+                  className="h-12"
+                  id="addressStreet"
+                  name="address.street"
+                  maxLength={150}
+                  value={formik.values.address.street}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                <FieldError
+                  touched={formik.touched.address?.street}
+                  error={formik.errors.address?.street}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="w-full flex flex-col gap-1">
+                  <Label htmlFor="addressState" className="text-sm font-medium text-black">
+                    State
+                  </Label>
+                  <SearchableSelect
+                    id="addressState"
+                    value={formik.values.address.state}
+                    onChange={handleStateChange}
+                    options={stateOptions}
+                    placeholder="Select State"
+                    searchPlaceholder="Search USA state..."
+                    error={
+                      formik.touched.address?.state &&
+                      formik.errors.address?.state
+                    }
+                  />
+                  <FieldError
+                    touched={formik.touched.address?.state}
+                    error={formik.errors.address?.state}
+                  />
+                </div>
+
+                <div className="w-full flex flex-col gap-1">
+                  <Label htmlFor="addressCity" className="text-sm font-medium text-black">
+                    City {selectedState && <span className="text-red-500">*</span>}
+                  </Label>
+                  <SearchableSelect
+                    id="addressCity"
+                    value={formik.values.address.city}
+                    onChange={(city) => {
+                      formik.setFieldValue("address.city", city);
+                      formik.setFieldTouched("address.city", true, true);
+                    }}
+                    options={cityOptions}
+                    disabled={!selectedState}
+                    placeholder={
+                      selectedState ? "Select City" : "Select a state first"
+                    }
+                    searchPlaceholder="Search city in state..."
+                    error={
+                      formik.touched.address?.city &&
+                      formik.errors.address?.city
+                    }
+                  />
+                  <FieldError
+                    touched={formik.touched.address?.city}
+                    error={formik.errors.address?.city}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="w-full flex flex-col gap-1">
+                  <Label htmlFor="addressZip" className="text-sm font-medium text-black">
+                    ZIP Code
+                  </Label>
+                  <Input
+                    placeholder="e.g. 10001"
+                    className="h-12"
+                    id="addressZip"
+                    name="address.zip"
+                    maxLength={20}
+                    value={formik.values.address.zip}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
+                  <FieldError
+                    touched={formik.touched.address?.zip}
+                    error={formik.errors.address?.zip}
+                  />
+                </div>
+
+                <div className="w-full flex flex-col gap-1">
+                  <Label htmlFor="addressCountry" className="text-sm font-medium text-black">
+                    Country
+                  </Label>
+                  <Input
+                    id="addressCountry"
+                    name="address.country"
+                    value="United States"
+                    readOnly
+                    disabled
+                    className="h-12 bg-gray-100 text-gray-600 cursor-not-allowed select-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Social Network Section */}
+            <div className="w-full flex flex-col gap-3 pt-2 border-t border-gray-100">
+              <div>
+                <Label className="text-sm font-semibold text-black">
+                  Social Network (Optional)
+                </Label>
+                <span className="text-xs text-gray-400 block">
+                  Add links to social media profiles
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="w-full flex flex-col gap-1">
+                  <Label htmlFor="socialFacebook" className="text-sm font-medium text-black">
+                    Facebook
+                  </Label>
+                  <Input
+                    placeholder="https://facebook.com/username"
+                    className="h-12"
+                    id="socialFacebook"
+                    name="socialNetwork.facebook"
+                    value={formik.values.socialNetwork.facebook}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
+                  <FieldError
+                    touched={formik.touched.socialNetwork?.facebook}
+                    error={formik.errors.socialNetwork?.facebook}
+                  />
+                </div>
+
+                <div className="w-full flex flex-col gap-1">
+                  <Label htmlFor="socialTwitter" className="text-sm font-medium text-black">
+                    Twitter / X
+                  </Label>
+                  <Input
+                    placeholder="https://x.com/username"
+                    className="h-12"
+                    id="socialTwitter"
+                    name="socialNetwork.twitter"
+                    value={formik.values.socialNetwork.twitter}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
+                  <FieldError
+                    touched={formik.touched.socialNetwork?.twitter}
+                    error={formik.errors.socialNetwork?.twitter}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="w-full flex flex-col gap-1">
+                  <Label htmlFor="socialLinkedin" className="text-sm font-medium text-black">
+                    LinkedIn
+                  </Label>
+                  <Input
+                    placeholder="https://linkedin.com/in/username"
+                    className="h-12"
+                    id="socialLinkedin"
+                    name="socialNetwork.linkedin"
+                    value={formik.values.socialNetwork.linkedin}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
+                  <FieldError
+                    touched={formik.touched.socialNetwork?.linkedin}
+                    error={formik.errors.socialNetwork?.linkedin}
+                  />
+                </div>
+
+                <div className="w-full flex flex-col gap-1">
+                  <Label htmlFor="socialInstagram" className="text-sm font-medium text-black">
+                    Instagram
+                  </Label>
+                  <Input
+                    placeholder="https://instagram.com/username"
+                    className="h-12"
+                    id="socialInstagram"
+                    name="socialNetwork.instagram"
+                    value={formik.values.socialNetwork.instagram}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
+                  <FieldError
+                    touched={formik.touched.socialNetwork?.instagram}
+                    error={formik.errors.socialNetwork?.instagram}
+                  />
+                </div>
               </div>
             </div>
 

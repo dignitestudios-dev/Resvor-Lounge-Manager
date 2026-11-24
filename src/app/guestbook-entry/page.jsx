@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { useFormik } from "formik";
 import {
@@ -27,6 +27,8 @@ import ImageCropperModal from "@/components/common/ImageCropperModal";
 import { validateProfileImage } from "@/lib/utils/cropImage";
 import SearchableLoungeSelector from "@/components/guestbook/SearchableLoungeSelector";
 import PhoneInput from "@/components/auth/PhoneInput";
+import SearchableSelect from "@/components/common/SearchableSelect";
+import usaStatesCities from "@/lib/data/usaStatesCities.json";
 import { phoneFormatter } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,11 +63,28 @@ const initialFormValues = {
   firstName: "",
   lastName: "",
   email: "",
+  company: "",
+  title: "",
+  website: "",
+  nickname: "",
   phoneNumber: "",
   birthMonth: "",
   photo: null,
   specialDates: [],
   details: "",
+  address: {
+    street: "",
+    city: "",
+    state: "",
+    zip: "",
+    country: "United States",
+  },
+  socialNetwork: {
+    facebook: "",
+    twitter: "",
+    linkedin: "",
+    instagram: "",
+  },
 };
 
 export default function PublicGuestbookEntryPage() {
@@ -232,6 +251,25 @@ export default function PublicGuestbookEntryPage() {
       "specialDates",
       current.filter((_, i) => i !== index)
     );
+  };
+
+  const stateOptions = useMemo(() => Object.keys(usaStatesCities).sort(), []);
+  const selectedState = formik.values.address?.state || "";
+  const cityOptions = useMemo(() => {
+    if (!selectedState || !usaStatesCities[selectedState]) return [];
+    return Array.from(
+      new Set(
+        usaStatesCities[selectedState]
+          .map((c) => (typeof c === "string" ? c.trim() : ""))
+          .filter(Boolean)
+      )
+    ).sort();
+  }, [selectedState]);
+
+  const handleStateChange = (stateName) => {
+    formik.setFieldValue("address.state", stateName);
+    formik.setFieldValue("address.city", "");
+    formik.setFieldTouched("address.city", false);
   };
 
   const handleAddAnotherLounge = () => {
@@ -605,6 +643,315 @@ export default function PublicGuestbookEntryPage() {
                       {formik.errors.birthMonth}
                     </p>
                   )}
+                </div>
+              </div>
+
+              {/* Company & Title */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div className="w-full flex flex-col gap-1">
+                  <Label htmlFor="company" className="text-sm font-semibold text-gray-900">
+                    Company (Optional)
+                  </Label>
+                  <Input
+                    id="company"
+                    name="company"
+                    placeholder="e.g. Acme Inc."
+                    maxLength={100}
+                    value={formik.values.company}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    className="h-12 bg-white rounded-xl text-sm border-gray-300"
+                  />
+                  {formik.touched.company && formik.errors.company && (
+                    <p className="text-red-500 text-xs mt-0.5">
+                      {formik.errors.company}
+                    </p>
+                  )}
+                </div>
+
+                <div className="w-full flex flex-col gap-1">
+                  <Label htmlFor="title" className="text-sm font-semibold text-gray-900">
+                    Title / Role (Optional)
+                  </Label>
+                  <Input
+                    id="title"
+                    name="title"
+                    placeholder="e.g. Product Manager"
+                    maxLength={100}
+                    value={formik.values.title}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    className="h-12 bg-white rounded-xl text-sm border-gray-300"
+                  />
+                  {formik.touched.title && formik.errors.title && (
+                    <p className="text-red-500 text-xs mt-0.5">
+                      {formik.errors.title}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Website & Nickname */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div className="w-full flex flex-col gap-1">
+                  <Label htmlFor="website" className="text-sm font-semibold text-gray-900">
+                    Website (Optional)
+                  </Label>
+                  <Input
+                    id="website"
+                    name="website"
+                    placeholder="https://example.com"
+                    value={formik.values.website}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    className="h-12 bg-white rounded-xl text-sm border-gray-300"
+                  />
+                  {formik.touched.website && formik.errors.website && (
+                    <p className="text-red-500 text-xs mt-0.5">
+                      {formik.errors.website}
+                    </p>
+                  )}
+                </div>
+
+                <div className="w-full flex flex-col gap-1">
+                  <Label htmlFor="nickname" className="text-sm font-semibold text-gray-900">
+                    Nickname (Optional)
+                  </Label>
+                  <Input
+                    id="nickname"
+                    name="nickname"
+                    placeholder="e.g. Alex"
+                    maxLength={50}
+                    value={formik.values.nickname}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    className="h-12 bg-white rounded-xl text-sm border-gray-300"
+                  />
+                  {formik.touched.nickname && formik.errors.nickname && (
+                    <p className="text-red-500 text-xs mt-0.5">
+                      {formik.errors.nickname}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Address Section */}
+              <div className="w-full flex flex-col gap-3 pt-2 border-t border-gray-100">
+                <div>
+                  <Label className="text-sm font-semibold text-gray-900">
+                    Address (Optional)
+                  </Label>
+                  <span className="text-[11px] text-gray-500 block">
+                    Your location details
+                  </span>
+                </div>
+
+                <div className="w-full flex flex-col gap-1">
+                  <Label htmlFor="addressStreet" className="text-sm font-medium text-gray-700">
+                    Street Address
+                  </Label>
+                  <Input
+                    id="addressStreet"
+                    name="address.street"
+                    placeholder="123 Main Street"
+                    maxLength={150}
+                    value={formik.values.address.street}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    className="h-12 bg-white rounded-xl text-sm border-gray-300"
+                  />
+                  {formik.touched.address?.street && formik.errors.address?.street && (
+                    <p className="text-red-500 text-xs mt-0.5">
+                      {formik.errors.address?.street}
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="w-full flex flex-col gap-1">
+                    <Label htmlFor="addressState" className="text-sm font-medium text-gray-700">
+                      State
+                    </Label>
+                    <SearchableSelect
+                      id="addressState"
+                      value={formik.values.address.state}
+                      onChange={handleStateChange}
+                      options={stateOptions}
+                      placeholder="Select State"
+                      searchPlaceholder="Search USA state..."
+                      error={
+                        formik.touched.address?.state &&
+                        formik.errors.address?.state
+                      }
+                    />
+                    {formik.touched.address?.state && formik.errors.address?.state && (
+                      <p className="text-red-500 text-xs mt-0.5">
+                        {formik.errors.address?.state}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="w-full flex flex-col gap-1">
+                    <Label htmlFor="addressCity" className="text-sm font-medium text-gray-700">
+                      City {selectedState && <span className="text-red-500">*</span>}
+                    </Label>
+                    <SearchableSelect
+                      id="addressCity"
+                      value={formik.values.address.city}
+                      onChange={(city) => {
+                        formik.setFieldValue("address.city", city);
+                        formik.setFieldTouched("address.city", true, true);
+                      }}
+                      options={cityOptions}
+                      disabled={!selectedState}
+                      placeholder={
+                        selectedState ? "Select City" : "Select a state first"
+                      }
+                      searchPlaceholder="Search city in state..."
+                      error={
+                        formik.touched.address?.city &&
+                        formik.errors.address?.city
+                      }
+                    />
+                    {formik.touched.address?.city && formik.errors.address?.city && (
+                      <p className="text-red-500 text-xs mt-0.5">
+                        {formik.errors.address?.city}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="w-full flex flex-col gap-1">
+                    <Label htmlFor="addressZip" className="text-sm font-medium text-gray-700">
+                      ZIP Code
+                    </Label>
+                    <Input
+                      id="addressZip"
+                      name="address.zip"
+                      placeholder="e.g. 10001"
+                      maxLength={20}
+                      value={formik.values.address.zip}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      className="h-12 bg-white rounded-xl text-sm border-gray-300"
+                    />
+                    {formik.touched.address?.zip && formik.errors.address?.zip && (
+                      <p className="text-red-500 text-xs mt-0.5">
+                        {formik.errors.address?.zip}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="w-full flex flex-col gap-1">
+                    <Label htmlFor="addressCountry" className="text-sm font-medium text-gray-700">
+                      Country
+                    </Label>
+                    <Input
+                      id="addressCountry"
+                      name="address.country"
+                      value="United States"
+                      readOnly
+                      disabled
+                      className="h-12 bg-gray-100 text-gray-600 cursor-not-allowed select-none rounded-xl text-sm border-gray-300"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Social Profiles Section */}
+              <div className="w-full flex flex-col gap-3 pt-2 border-t border-gray-100">
+                <div>
+                  <Label className="text-sm font-semibold text-gray-900">
+                    Social Profiles (Optional)
+                  </Label>
+                  <span className="text-[11px] text-gray-500 block">
+                    Share your social accounts
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="w-full flex flex-col gap-1">
+                    <Label htmlFor="socialFacebook" className="text-sm font-medium text-gray-700">
+                      Facebook
+                    </Label>
+                    <Input
+                      id="socialFacebook"
+                      name="socialNetwork.facebook"
+                      placeholder="https://facebook.com/username"
+                      value={formik.values.socialNetwork.facebook}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      className="h-12 bg-white rounded-xl text-sm border-gray-300"
+                    />
+                    {formik.touched.socialNetwork?.facebook && formik.errors.socialNetwork?.facebook && (
+                      <p className="text-red-500 text-xs mt-0.5">
+                        {formik.errors.socialNetwork?.facebook}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="w-full flex flex-col gap-1">
+                    <Label htmlFor="socialTwitter" className="text-sm font-medium text-gray-700">
+                      Twitter / X
+                    </Label>
+                    <Input
+                      id="socialTwitter"
+                      name="socialNetwork.twitter"
+                      placeholder="https://x.com/username"
+                      value={formik.values.socialNetwork.twitter}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      className="h-12 bg-white rounded-xl text-sm border-gray-300"
+                    />
+                    {formik.touched.socialNetwork?.twitter && formik.errors.socialNetwork?.twitter && (
+                      <p className="text-red-500 text-xs mt-0.5">
+                        {formik.errors.socialNetwork?.twitter}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="w-full flex flex-col gap-1">
+                    <Label htmlFor="socialLinkedin" className="text-sm font-medium text-gray-700">
+                      LinkedIn
+                    </Label>
+                    <Input
+                      id="socialLinkedin"
+                      name="socialNetwork.linkedin"
+                      placeholder="https://linkedin.com/in/username"
+                      value={formik.values.socialNetwork.linkedin}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      className="h-12 bg-white rounded-xl text-sm border-gray-300"
+                    />
+                    {formik.touched.socialNetwork?.linkedin && formik.errors.socialNetwork?.linkedin && (
+                      <p className="text-red-500 text-xs mt-0.5">
+                        {formik.errors.socialNetwork?.linkedin}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="w-full flex flex-col gap-1">
+                    <Label htmlFor="socialInstagram" className="text-sm font-medium text-gray-700">
+                      Instagram
+                    </Label>
+                    <Input
+                      id="socialInstagram"
+                      name="socialNetwork.instagram"
+                      placeholder="https://instagram.com/username"
+                      value={formik.values.socialNetwork.instagram}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      className="h-12 bg-white rounded-xl text-sm border-gray-300"
+                    />
+                    {formik.touched.socialNetwork?.instagram && formik.errors.socialNetwork?.instagram && (
+                      <p className="text-red-500 text-xs mt-0.5">
+                        {formik.errors.socialNetwork?.instagram}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 
