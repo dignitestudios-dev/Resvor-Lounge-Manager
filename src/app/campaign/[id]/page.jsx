@@ -5,8 +5,7 @@ import { useParams } from "next/navigation";
 
 const API_BASE_URL = (
   process.env.NEXT_PUBLIC_API_BASE_URL ||
-  process.env.NEXT_PUBLIC_API_URL ||
-  "https://api.resvor.com"
+  process.env.NEXT_PUBLIC_API_URL || "https://api.resvor.com"
 ).replace(/\/+$/, "");
 
 export default function CampaignRedirect() {
