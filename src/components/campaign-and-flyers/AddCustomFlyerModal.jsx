@@ -546,7 +546,7 @@ const AddCustomFlyerModal = ({ isOpen, onOpenChange }) => {
                 </div>
               </div>
 
-              {/* Right Column: Live Card Preview & Custom Image / Templates 5 cols) */}
+              {/* Right Column: Live Card Preview &stom Image / Templates 5 cols) */}
               <div className="lg:col-span-5 space-y-4">
                 <div>
                   <h3 className="text-lg font-bold text-gray-900 mb-1">
