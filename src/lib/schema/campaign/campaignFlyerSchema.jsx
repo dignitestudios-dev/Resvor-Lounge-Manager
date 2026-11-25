@@ -1,6 +1,7 @@
 import * as Yup from "yup";
 
 const validEventTypes = [
+  "Promoter Announcement",
   "Birthday Celebration",
   "Ladies Night",
   "Anniversary Celebration",
@@ -63,16 +64,32 @@ export const campaignFlyerSchema = Yup.object({
   eventEndTime: Yup.string()
     .required("End time is required.")
     .test(
-      "is-after-start",
-      "End time must be after start time.",
+      "valid-shift-duration",
+      "Shift duration cannot exceed 12 hours.",
       function (value) {
         const { eventStartTime } = this.parent;
+
         if (!eventStartTime || !value) return true;
-        const start = new Date(`2000-01-01T${eventStartTime}`);
-        const end = new Date(`2000-01-01T${value}`);
-        return end > start;
-      },
+
+        const toMinutes = (time) => {
+          const [hours, minutes] = time.split(":").map(Number);
+          return hours * 60 + minutes;
+        };
+
+        const start = toMinutes(eventStartTime);
+        let end = toMinutes(value);
+
+        // Handle overnight shifts
+        if (end <= start) {
+          end += 24 * 60;
+        }
+
+        const duration = end - start;
+
+        return duration > 0 && duration <= 12 * 60;
+      }
     ),
+
 
   address: Yup.string()
     .required("Address is required.")

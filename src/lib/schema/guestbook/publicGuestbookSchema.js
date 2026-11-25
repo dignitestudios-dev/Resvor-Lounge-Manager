@@ -49,14 +49,14 @@ export const publicGuestbookSchema = Yup.object().shape({
   nickname: Yup.string().nullable().max(50, "Nickname cannot exceed 50 characters."),
 
   phoneNumber: Yup.string()
-    .nullable()
+    .required("Phone number is required.")
     .test(
       "valid-phone",
       "Phone number must be at least 10 digits.",
       (value) => {
-        if (!value) return true;
+        if (!value) return false;
         const digits = value.replace(/\D/g, "");
-        return digits.length === 0 || (digits.length >= 10 && digits.length <= 15);
+        return digits.length >= 10 && digits.length <= 15;
       }
     ),
 

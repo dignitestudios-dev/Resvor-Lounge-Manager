@@ -1,6 +1,5 @@
 "use client";
-
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef } from "react";
 import "quill/dist/quill.snow.css";
 import { MdFormatBold, MdFormatItalic } from "react-icons/md";
 import { GrUnderline } from "react-icons/gr";
@@ -17,56 +16,65 @@ import { MdLink } from "react-icons/md";
 const RichTextEditor = ({ onChange, value = "", initialContent = "" }) => {
   const editorRef = useRef(null);
   const quillRef = useRef(null);
+  const onChangeRef = useRef(onChange);
 
-  const handleChange = useCallback(onChange, [onChange]);
-
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
   useEffect(() => {
     if (!editorRef.current || quillRef.current) return;
 
+    let quillInstance;
+
     const initQuill = async () => {
-      // Dynamically import Quill to ensure SSR-safety in Next.js
       const { default: Quill } = await import("quill");
 
-      // Initialize Quill editor
-      quillRef.current = new Quill(editorRef.current, {
+      if (!editorRef.current || quillRef.current) return;
+
+      quillInstance = new Quill(editorRef.current, {
         theme: "snow",
         modules: {
-          toolbar: false, // Disable default toolbar; we'll create custom one
+          toolbar: false,
         },
         placeholder: "Add additional details about your event...",
       });
 
-      // Set initial content (supports both HTML string or JSON-serialized Delta)
+      quillRef.current = quillInstance;
+
       const initialVal = value || initialContent;
+
       if (initialVal) {
         try {
           if (initialVal.trim().startsWith("{")) {
-            quillRef.current.setContents(JSON.parse(initialVal));
+            quillInstance.setContents(JSON.parse(initialVal));
           } else {
-            quillRef.current.root.innerHTML = initialVal;
+            quillInstance.root.innerHTML = initialVal;
           }
         } catch {
-          quillRef.current.root.innerHTML = initialVal;
+          quillInstance.root.innerHTML = initialVal;
         }
       }
 
-      // Listen for changes and propagate HTML content back
-      quillRef.current.on("text-change", () => {
-        const html = quillRef.current.root.innerHTML;
-        // If empty editor contains only default empty tags, return empty string
-        const cleanHtml = html === "<p><br></p>" ? "" : html;
-        handleChange(cleanHtml);
+      quillInstance.on("text-change", () => {
+        const text = quillInstance.getText().trim();
+        const html = quillInstance.root.innerHTML;
+
+        const cleanHtml = text ? html : "";
+
+        onChangeRef.current?.(cleanHtml);
       });
     };
 
     initQuill();
 
     return () => {
-      if (quillRef.current) {
-        quillRef.current.off("text-change");
+      if (quillInstance) {
+        quillInstance.off("text-change");
       }
+
+      quillRef.current = null;
     };
-  }, [handleChange, value, initialContent]);
+  }, []);
 
   // Toolbar action handlers
   const applyFormat = (format, value = true) => {

@@ -9,7 +9,11 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { campaignAndFlyers } from "@/lib/constants";
 
-const TemplateCarousel = ({ onSelectTemplate, selectedId: propSelectedId }) => {
+const TemplateCarousel = ({
+  onSelectTemplate,
+  selectedId: propSelectedId,
+  disabledIds = [],
+}) => {
   const swiperRef = useRef(null);
   const [localSelectedId, setLocalSelectedId] = useState(1);
   const selectedId = propSelectedId !== undefined ? propSelectedId : localSelectedId;
@@ -30,6 +34,9 @@ const TemplateCarousel = ({ onSelectTemplate, selectedId: propSelectedId }) => {
   };
 
   const handleSelectTemplate = (template) => {
+    if (disabledIds.some((id) => String(id) === String(template.id))) {
+      return;
+    }
     if (propSelectedId === undefined) {
       setLocalSelectedId(template.id);
     }
@@ -58,29 +65,42 @@ const TemplateCarousel = ({ onSelectTemplate, selectedId: propSelectedId }) => {
             loop={false}
             className="w-full"
           >
-            {templates.map((template) => (
-              <SwiperSlide key={template.id}>
-                <div
-                  onClick={() => handleSelectTemplate(template)}
-                  className="cursor-pointer group"
-                >
+            {templates.map((template) => {
+              const isDisabled = disabledIds.some(
+                (id) => String(id) === String(template.id)
+              );
+              const isSelected = String(selectedId) === String(template.id);
+
+              return (
+                <SwiperSlide key={template.id}>
                   <div
-                    className={`rounded-lg border-2 transition-all p-2 bg-white overflow-hidden hover:bg-gray-50 ${selectedId === template.id
-                      ? "border-primary"
-                      : "border-transparent"
-                      }`}
+                    onClick={() => handleSelectTemplate(template)}
+                    className={`group ${
+                      isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+                    }`}
                   >
-                    <Image
-                      src={template.image}
-                      alt={`Template ${template.id}`}
-                      width={80}
-                      height={100}
-                      className="w-full h-auto object-cover rounded"
-                    />
+                    <div
+                      className={`relative rounded-lg border-2 transition-all p-2 bg-white overflow-hidden hover:bg-gray-50 ${
+                        isSelected ? "border-primary" : "border-transparent"
+                      }`}
+                    >
+                      <Image
+                        src={template.image}
+                        alt={`Template ${template.id}`}
+                        width={80}
+                        height={100}
+                        className="w-full h-auto object-cover rounded"
+                      />
+                      {isDisabled && (
+                        <span className="absolute bottom-1.5 inset-x-1.5 text-center text-[9px] font-semibold bg-black/70 text-white rounded py-0.5">
+                          Added
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </SwiperSlide>
-            ))}
+                </SwiperSlide>
+              );
+            })}
           </Swiper>
         </div>
 
