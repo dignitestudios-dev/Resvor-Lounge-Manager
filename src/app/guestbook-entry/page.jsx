@@ -596,7 +596,11 @@ export default function PublicGuestbookEntryPage() {
                 <div className="w-full flex flex-col gap-1">
                   <PhoneInput
                     variant="light"
-                    label="Phone Number (Optional)"
+                    label={
+                      <>
+                        Phone Number <span className="text-red-500">*</span>
+                      </>
+                    }
                     value={phoneFormatter(formik.values.phoneNumber)}
                     id="phoneNumber"
                     name="phoneNumber"

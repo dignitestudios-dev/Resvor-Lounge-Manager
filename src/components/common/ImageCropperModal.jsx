@@ -42,8 +42,18 @@ export default function ImageCropperModal({
   imageSrc: externalSrc,
   onCropSave,
   targetSize = 500,
+  targetWidth,
+  targetHeight,
+  aspect = 1,
   title = "Crop Profile Picture",
+  description = "Drag to center your face in the square area. Use zoom to frame it properly.",
+  showCircularPreview = true,
+  previewLabel = "Square (1:1)",
 }) {
+  const outputWidth = targetWidth ?? targetSize;
+  const outputHeight = targetHeight ?? targetSize;
+  const previewCanvasWidth = 120;
+  const previewCanvasHeight = Math.max(1, Math.round(previewCanvasWidth / aspect));
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
@@ -162,8 +172,8 @@ export default function ImageCropperModal({
       const croppedResult = await getCroppedImg(
         internalSrc,
         croppedAreaPixels,
-        targetSize,
-        targetSize,
+        outputWidth,
+        outputHeight,
         mimeType,
         fileName
       );
@@ -198,8 +208,7 @@ export default function ImageCropperModal({
             {title}
           </DialogTitle>
           <p className="text-xs sm:text-sm text-gray-500 mt-1">
-            Drag to center your face in the square area. Use zoom to frame it
-            properly.
+            {description}
           </p>
         </DialogHeader>
 
@@ -219,7 +228,7 @@ export default function ImageCropperModal({
                 image={internalSrc}
                 crop={crop}
                 zoom={zoom}
-                aspect={1}
+                aspect={aspect}
                 cropShape="rect"
                 showGrid={true}
                 onCropChange={setCrop}
@@ -307,38 +316,43 @@ export default function ImageCropperModal({
                 Live Preview
               </h4>
               <span className="text-[11px] font-mono text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">
-                Output: {targetSize} × {targetSize} px
+                Output: {outputWidth} × {outputHeight} px
               </span>
             </div>
 
             <div className="flex items-center justify-around gap-4 pt-1">
               {/* Circular Avatar Preview */}
-              <div className="flex flex-col items-center gap-1.5">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 border-primary/60 shadow-sm bg-gray-100 relative">
-                  <canvas
-                    ref={roundCanvasRef}
-                    width={120}
-                    height={120}
-                    className="w-full h-full object-cover"
-                  />
+              {showCircularPreview && (
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 border-primary/60 shadow-sm bg-gray-100 relative">
+                    <canvas
+                      ref={roundCanvasRef}
+                      width={120}
+                      height={120}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <span className="text-[11px] text-gray-500 font-medium text-center">
+                    Circular Avatar
+                  </span>
                 </div>
-                <span className="text-[11px] text-gray-500 font-medium text-center">
-                  Circular Avatar
-                </span>
-              </div>
+              )}
 
-              {/* Square (1:1) Preview */}
+              {/* Rectangular / Square Preview */}
               <div className="flex flex-col items-center gap-1.5">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden border-2 border-gray-300 shadow-sm bg-gray-100 relative">
+                <div
+                  className="w-20 sm:w-24 rounded-xl overflow-hidden border-2 border-gray-300 shadow-sm bg-gray-100 relative"
+                  style={{ aspectRatio: aspect }}
+                >
                   <canvas
                     ref={squareCanvasRef}
-                    width={120}
-                    height={120}
+                    width={previewCanvasWidth}
+                    height={previewCanvasHeight}
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <span className="text-[11px] text-gray-500 font-medium text-center">
-                  Square (1:1)
+                  {previewLabel}
                 </span>
               </div>
             </div>

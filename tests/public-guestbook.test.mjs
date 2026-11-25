@@ -136,6 +136,7 @@ describe("Public Lounge Guestbook Flow", () => {
           assert.ok(errors.includes("firstName"), "firstName should have error");
           assert.ok(errors.includes("lastName"), "lastName should have error");
           assert.ok(errors.includes("email"), "email should have error");
+          assert.ok(errors.includes("phoneNumber"), "phoneNumber should have error");
           return true;
         }
       );

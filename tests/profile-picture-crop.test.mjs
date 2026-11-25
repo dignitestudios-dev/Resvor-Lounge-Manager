@@ -154,6 +154,7 @@ describe("Profile Picture Image Cropping Feature", () => {
         firstName: "Jordan",
         lastName: "Taylor",
         email: "jordan@example.com",
+        phoneNumber: "2125550199",
         photo: mockWebpFile,
       };
 

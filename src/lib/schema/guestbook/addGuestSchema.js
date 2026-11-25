@@ -103,11 +103,11 @@ export const addGuestSchema = Yup.object({
   birthMonth: Yup.string().nullable(),
 
   phoneNumber: Yup.string()
-    .nullable()
+    .required("Phone number is required.")
     .test("valid-phone", "Phone number must be at least 10 digits.", (value) => {
-      if (!value) return true;
+      if (!value) return false;
       const digits = value.replace(/\D/g, "");
-      return digits.length === 0 || (digits.length >= 10 && digits.length <= 15);
+      return digits.length >= 10 && digits.length <= 15;
     }),
 
   address: Yup.object({

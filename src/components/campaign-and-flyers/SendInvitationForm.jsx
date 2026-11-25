@@ -80,6 +80,7 @@ const SendInvitationForm = ({
   onOpenChange,
   onSendInvitation,
   image,
+  flyers = [],
   additionalInfo,
 }) => {
   // Step 1: "channel", Step 2: "recipients"
@@ -145,12 +146,40 @@ const SendInvitationForm = ({
   // Campaign mutation
   const createCampaignMutation = useCreateCampaign();
 
+  const flyerEntries = React.useMemo(() => {
+    if (Array.isArray(flyers) && flyers.length > 0) {
+      return flyers
+        .filter((item) => item?.file)
+        .map((item) => ({
+          ...item,
+          additionalInfo:
+            item.additionalInfo ||
+            item.editorContent ||
+            additionalInfo ||
+            "",
+        }));
+    }
+
+    return image
+      ? [
+        {
+          id: "single",
+          file: image,
+          additionalInfo: additionalInfo || "",
+        },
+      ]
+      : [];
+  }, [flyers, image, additionalInfo]);
+
   // Extract flyer limits from subscription
   const subscription = subscriptionData?.subscription;
   const flyerLimit = subscription?.planId?.limitations?.flyers ?? Infinity;
   const flyerUsage = subscription?.usage?.flyers ?? 0;
   const planLabel = subscription?.planId?.label || "Current";
-  const isAtFlyerLimit = flyerUsage >= flyerLimit;
+  const isAtFlyerLimit =
+    flyerLimit !== Infinity &&
+    (flyerUsage >= flyerLimit ||
+      flyerUsage + Math.max(1, flyerEntries.length) > flyerLimit);
 
   // Active recipients depending on channel
   const activeRecipients =
@@ -379,7 +408,7 @@ const SendInvitationForm = ({
       return;
     }
 
-    if (!image) {
+    if (flyerEntries.length === 0) {
       ErrorToast("No flyer designed or uploaded yet.");
       return;
     }
@@ -390,14 +419,35 @@ const SendInvitationForm = ({
     }
 
     try {
+      console.log("Original flyers:", flyers);
+      console.log("Flyer entries:", flyerEntries);
+    
+
+      console.log(
+        "Additional info being sent:",
+        flyerEntries.map((e) => ({
+          additionalInfo: e.additionalInfo,
+          editorContent: e.editorContent,
+        }))
+      );
       await createCampaignMutation.mutateAsync({
         channel: selectedChannel,
         recipients: activeRecipients,
-        additionalInfo: additionalInfo || "",
-        image: image,
+        images: flyerEntries.map((e) => e.file),
+        additionalInfos: flyerEntries.map(
+          (e) =>
+            e.additionalInfo ||
+            e.editorContent ||
+            additionalInfo ||
+            ""
+        ),
       });
 
-      SuccessToast("Flyer campaign created successfully");
+      SuccessToast(
+        flyerEntries.length > 1
+          ? `${flyerEntries.length} flyer campaigns created successfully`
+          : "Flyer campaign created successfully"
+      );
       setEmailRecipients([]);
       setPhoneRecipients([]);
       setCustomEmail("");
@@ -583,11 +633,18 @@ const SendInvitationForm = ({
                     : "Add Email Recipients"}
                 </DialogTitle>
                 <DialogDescription asChild>
-                  <p className="text-xs text-gray-500">
-                    {selectedChannel === "sms"
-                      ? "Add phone numbers or choose from your guestbook to receive SMS flyer invitations."
-                      : "Add email addresses or choose from your guestbook to receive flyer invitations."}
-                  </p>
+                  <div className="space-y-2">
+                    <p className="text-xs text-gray-500">
+                      {selectedChannel === "sms"
+                        ? "Add phone numbers or choose from your guestbook to receive SMS flyer invitations."
+                        : "Add email addresses or choose from your guestbook to receive flyer invitations."}
+                    </p>
+                    {flyerEntries.length > 1 && (
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-xs font-semibold">
+                        Sending {flyerEntries.length} selected flyers together
+                      </div>
+                    )}
+                  </div>
                 </DialogDescription>
               </DialogHeader>
 

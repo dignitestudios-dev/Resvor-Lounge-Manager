@@ -311,7 +311,6 @@ export const submitWalletTopup = async (payload) => {
 export const submitCreateCampaign = async (payload) => {
   const formData = new FormData();
   formData.append("channel", payload.channel || "email");
-  formData.append("additionalInfo", payload.additionalInfo || "");
 
   if (payload.sendToGuestbook !== undefined) {
     formData.append("sendToGuestbook", payload.sendToGuestbook ? "true" : "false");
@@ -323,9 +322,23 @@ export const submitCreateCampaign = async (payload) => {
     });
   }
 
-  if (payload.image) {
-    formData.append("image", payload.image);
-  }
+  // Support array of images (multi-flyer) with fallback to single image
+  const images = Array.isArray(payload.images)
+    ? payload.images
+    : payload.image
+    ? [payload.image]
+    : [];
+  images.forEach((img, i) => {
+    if (img) formData.append(`images[${i}]`, img);
+  });
+
+  // Support array of additionalInfo (one per flyer) with fallback to single string
+  const infos = Array.isArray(payload.additionalInfos)
+    ? payload.additionalInfos
+    : [payload.additionalInfo || ""];
+  infos.forEach((info, i) => {
+    formData.append(`additionalInfo[${i}]`, info || "");
+  });
 
   const { data } = await axios.post("/campaigns", formData, {
     headers: {
