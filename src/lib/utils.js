@@ -457,7 +457,45 @@ export const getBookingStatusStyles = getStatusColor;
 
 export const getEventStatusStyles = getStatusColor;
 
+export const getGuestFirstName = (guest) => {
+  const firstName = String(guest?.firstName || "").trim();
+  if (firstName) return firstName;
 
+  const fullName = String(guest?.fullName || "").trim();
+  if (!fullName) return "";
+
+  return fullName.split(/\s+/)[0] || "";
+};
+
+export const sortGuestsByFirstName = (guests = [], direction = "asc") => {
+  if (!Array.isArray(guests)) return [];
+  const factor = direction === "desc" ? -1 : 1;
+
+  return [...guests].sort((a, b) => {
+    const firstA = getGuestFirstName(a);
+    const firstB = getGuestFirstName(b);
+
+    if (!firstA && !firstB) return 0;
+    if (!firstA) return 1;
+    if (!firstB) return -1;
+
+    const firstCmp = firstA.localeCompare(firstB, undefined, {
+      sensitivity: "base",
+    });
+    if (firstCmp !== 0) return firstCmp * factor;
+
+    const fullA = String(
+      a?.fullName || `${a?.firstName || ""} ${a?.lastName || ""}`.trim()
+    ).trim();
+    const fullB = String(
+      b?.fullName || `${b?.firstName || ""} ${b?.lastName || ""}`.trim()
+    ).trim();
+
+    return (
+      fullA.localeCompare(fullB, undefined, { sensitivity: "base" }) * factor
+    );
+  });
+};
 
 const utils = {
   validateEmail,
@@ -481,6 +519,8 @@ const utils = {
   cleanPhoneNumber,
   formatPhoneNumber,
   getStatusColor,
+  getGuestFirstName,
+  sortGuestsByFirstName,
 };
 
 export default utils;

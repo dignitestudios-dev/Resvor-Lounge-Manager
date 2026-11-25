@@ -27,7 +27,7 @@ import { useGetAllGuestbook } from "@/lib/hooks/queries/useGuestbook";
 import { useCreateCampaign } from "@/lib/hooks/mutations/CampaignMutations";
 import { useGetMySubscription } from "@/lib/hooks/queries/useSubscriptionPlans";
 import { ErrorToast, SuccessToast } from "@/components/ui/toaster";
-import { phoneFormatter } from "@/lib/utils";
+import { phoneFormatter, sortGuestsByFirstName } from "@/lib/utils";
 import FlyerLimitModal from "./FlyerLimitModal";
 
 // Strict email regex
@@ -134,7 +134,10 @@ const SendInvitationForm = ({
 
   const totalPages = pagination?.totalPages || 1;
 
-  const filteredGuests = guests;
+  const filteredGuests = React.useMemo(
+    () => sortGuestsByFirstName(guests, "asc"),
+    [guests]
+  );
 
   // Fetch subscription data
   const { data: subscriptionData } = useGetMySubscription();
@@ -756,7 +759,7 @@ const SendInvitationForm = ({
 
                   {/* Guests List */}
                   <div className="border rounded-xl p-2.5 max-h-[190px] overflow-y-auto divide-y divide-gray-100">
-                    {isGuestsLoading  ? (
+                    {isGuestsLoading ? (
                       <div className="flex justify-center items-center py-8">
                         <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
                       </div>
@@ -877,7 +880,7 @@ const SendInvitationForm = ({
                         type="button"
                         variant="outline"
                         size="sm"
-                        disabled={guestPage === 1 }
+                        disabled={guestPage === 1}
                         onClick={() => setGuestPage((prev) => Math.max(1, prev - 1))}
                         className="h-8 gap-1 text-xs"
                       >
@@ -893,7 +896,7 @@ const SendInvitationForm = ({
                         type="button"
                         variant="outline"
                         size="sm"
-                        disabled={guestPage >= totalPages }
+                        disabled={guestPage >= totalPages}
                         onClick={() =>
                           setGuestPage((prev) => Math.min(totalPages, prev + 1))
                         }

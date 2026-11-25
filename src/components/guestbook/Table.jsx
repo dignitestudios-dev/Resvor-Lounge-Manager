@@ -1,6 +1,6 @@
 "use client";
-import React, { useState } from "react";
-import utils from "@/lib/utils";
+import React, { useMemo, useState } from "react";
+import utils, { sortGuestsByFirstName } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import Delete from "../icons/Delete";
 import { Button } from "../ui/button";
@@ -46,6 +46,13 @@ const Table = ({
     }
     setSortConfig({ key, direction });
   };
+
+  const sortedGuests = useMemo(() => {
+    if (sortConfig.key === "fullName") {
+      return sortGuestsByFirstName(guests, sortConfig.direction);
+    }
+    return guests;
+  }, [guests, sortConfig]);
 
   const handleDelete = async () => {
     try {
@@ -118,8 +125,8 @@ const Table = ({
               </tr>
             </thead>
             <tbody>
-              {guests && guests?.length > 0 ? (
-                guests?.map((guest) => (
+              {sortedGuests && sortedGuests?.length > 0 ? (
+                sortedGuests?.map((guest) => (
                   <tr
                     key={guest._id}
                     className="border-b border-[#D4D4D4] cursor-pointer"
