@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import {
   Dialog,
@@ -36,6 +36,7 @@ import { floorPlanSetupSchema } from "@/lib/schema/onboarding/floorPlanSetupSche
 import { personalDetailsValues } from "@/lib/init/personalDetailsValues";
 import { personalDetailsRemainingValues } from "@/lib/init/personalDetailsRemainingValues";
 import { floorPlanSetupValues } from "@/lib/init/floorPlanSetupValues";
+import GooglePlacesAddressInput from "@/components/common/GooglePlacesAddressInput";
 
 const TOTAL_STEPS = 3;
 
@@ -66,9 +67,36 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
   const [imageError, setImageError] = useState("");
   const [isLogoCropperOpen, setIsLogoCropperOpen] = useState(false);
   const [selectedLogoFile, setSelectedLogoFile] = useState(null);
+  const [businessCoordinates, setBusinessCoordinates] = useState({ lat: null, lng: null });
+  const businessCoordinatesRef = useRef({ lat: null, lng: null });
+  const updateBusinessCoordinates = (coordinates) => {
+    businessCoordinatesRef.current = coordinates;
+    setBusinessCoordinates(coordinates);
+  };
 
   const queryClient = useQueryClient();
   const createLoungeMutation = useCreateLounge();
+
+  const resetAllFormikSteps = useCallback(() => {
+    setStep(1);
+    setCombinedData({});
+    setImageError("");
+    setIsLogoCropperOpen(false);
+    setSelectedLogoFile(null);
+    setBusinessCoordinates({ lat: null, lng: null });
+    businessCoordinatesRef.current = { lat: null, lng: null };
+
+    step1Formik.resetForm({ values: { ...personalDetailsValues } });
+    step2Formik.resetForm({ values: personalDetailsRemainingValues({}) });
+    step3Formik.resetForm({ values: floorPlanSetupValues({}) });
+  }, []);
+
+  // Reset all steps & state when modal closes or opens fresh
+  useEffect(() => {
+    if (!open) {
+      resetAllFormikSteps();
+    }
+  }, [open, resetAllFormikSteps]);
 
   // ── Step 1: Personal / Business details ─────────────────────────────────
   const step1Formik = useFormik({
@@ -78,7 +106,7 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
     validateOnBlur: true,
     onSubmit: async (values) => {
       try {
-        setCombinedData((prev) => ({ ...prev, ...values, operatingHours }));
+        setCombinedData((prev) => ({ ...prev, ...values, operatingHours, businessCoordinates: businessCoordinatesRef.current }));
         setStep(2);
       } catch (error) {
         if (error.code === "NO_INTERNET") {
@@ -157,7 +185,7 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
     enableReinitialize: true,
     onSubmit: async (values) => {
       try {
-        setCombinedData((prev) => ({ ...prev, ...values }));
+        setCombinedData((prev) => ({ ...prev, ...values, businessCoordinates: businessCoordinatesRef.current }));
         setStep(3);
       } catch (error) {
         if (error.code === "NO_INTERNET") {
@@ -317,7 +345,7 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
 
   return (
     <>
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) resetAllFormikSteps(); setOpen(isOpen); }}>
       <DialogContent className="min-w-4xl max-w-full">
         <DialogHeader>
           <div className="flex items-center gap-3">
@@ -505,21 +533,11 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
                 </div>
 
                 <div>
-                  <AuthInput
-                    variant="light"
-                    label={"Business Location"}
-                    text={"location"}
-                    placeholder={"Enter your Location"}
-                    type={"text"}
-                    id={"location"}
-                    name={"location"}
-                    maxLength={100}
-                    value={v1.location}
-                    onChange={handleChange1}
-                    onBlur={handleBlur1}
-                    error={errors1?.location}
-                    touched={touched1?.location}
-                  />
+                  <div>
+                    <label className="text-[14px] font-[500] text-black block mb-2" htmlFor="location">Business Location</label>
+                    <GooglePlacesAddressInput id="location" name="location" maxLength={100} value={v1.location} onChange={(event) => { handleChange1(event); updateBusinessCoordinates({ lat: null, lng: null }); }} onBlur={handleBlur1} onPlaceSelected={updateBusinessCoordinates} placeholder="Enter your Location" className={`w-full px-4 py-3 rounded-xl border bg-white text-black ${errors1?.location && touched1?.location ? "border-red-500" : "border-gray-300"}`} />
+                    {errors1?.location && touched1?.location && <p className="text-red-600 text-xs mt-1">{errors1.location}</p>}
+                  </div>
                 </div>
 
                 {/* <div>

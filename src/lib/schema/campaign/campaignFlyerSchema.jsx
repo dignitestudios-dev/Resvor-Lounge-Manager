@@ -59,38 +59,40 @@ export const campaignFlyerSchema = Yup.object({
       }
     ),
 
+  // eventStartTime: Yup.string().required("Start time is required."),
+
+  // eventEndTime: Yup.string()
+  //   .required("End time is required.")
+  //   .test(
+  //     "valid-shift-duration",
+  //     "Shift duration cannot exceed 12 hours.",
+  //     function (value) {
+  //       const { eventStartTime } = this.parent;
+
+  //       if (!eventStartTime || !value) return true;
+
+  //       const toMinutes = (time) => {
+  //         const [hours, minutes] = time.split(":").map(Number);
+  //         return hours * 60 + minutes;
+  //       };
+
+  //       const start = toMinutes(eventStartTime);
+  //       let end = toMinutes(value);
+
+  //       // Handle overnight shifts
+  //       if (end <= start) {
+  //         end += 24 * 60;
+  //       }
+
+  //       const duration = end - start;
+
+  //       return duration > 0 && duration <= 12 * 60;
+  //     }
+  //   ),
+
   eventStartTime: Yup.string().required("Start time is required."),
 
-  eventEndTime: Yup.string()
-    .required("End time is required.")
-    .test(
-      "valid-shift-duration",
-      "Shift duration cannot exceed 12 hours.",
-      function (value) {
-        const { eventStartTime } = this.parent;
-
-        if (!eventStartTime || !value) return true;
-
-        const toMinutes = (time) => {
-          const [hours, minutes] = time.split(":").map(Number);
-          return hours * 60 + minutes;
-        };
-
-        const start = toMinutes(eventStartTime);
-        let end = toMinutes(value);
-
-        // Handle overnight shifts
-        if (end <= start) {
-          end += 24 * 60;
-        }
-
-        const duration = end - start;
-
-        return duration > 0 && duration <= 12 * 60;
-      }
-    ),
-
-
+  eventEndTime: Yup.string().required("End time is required."),
   address: Yup.string()
     .required("Address is required.")
     .min(2, "Address must be at least 2 characters.")

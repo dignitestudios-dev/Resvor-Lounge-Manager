@@ -852,13 +852,13 @@ const AddCustomFlyerModal = ({ isOpen, onOpenChange, onSaveFlyer = null }) => {
         onClose={handleCropCancel}
         imageFile={selectedCropFile}
         onCropSave={handleCropSave}
-        aspect={4 / 5}
-        targetWidth={800}
-        targetHeight={1000}
-        title="Crop Flyer Image"
-        description="Drag and zoom to frame your flyer image for the 4:5 card preview."
+        aspect={null}
+        allowResize={true}
+        allowOriginal={true}
+        title="Flyer Image"
+        description="Drag or resize the crop frame freely using any of the 8 handles, or use the original image."
         showCircularPreview={false}
-        previewLabel="Flyer (4:5)"
+        previewLabel="Crop Preview"
       />
     </>
   );

@@ -67,22 +67,24 @@ export const addEventSchema = Yup.object({
     .nullable()
     .typeError("Please select a valid date."),
 
+  // startTime: Yup.string().required("Start time is required."),
+
+  // endTime: Yup.string()
+  //   .required("End time is required.")
+  //   .test(
+  //     "is-after-start",
+  //     "End time must be after start time.",
+  //     function (value) {
+  //       const { startTime } = this.parent;
+  //       if (!startTime || !value) return true;
+  //       const start = new Date(`2000-01-01T${startTime}`);
+  //       const end = new Date(`2000-01-01T${value}`);
+  //       return end > start;
+  //     },
+  //   ),
   startTime: Yup.string().required("Start time is required."),
 
-  endTime: Yup.string()
-    .required("End time is required.")
-    .test(
-      "is-after-start",
-      "End time must be after start time.",
-      function (value) {
-        const { startTime } = this.parent;
-        if (!startTime || !value) return true;
-        const start = new Date(`2000-01-01T${startTime}`);
-        const end = new Date(`2000-01-01T${value}`);
-        return end > start;
-      },
-    ),
-
+  endTime: Yup.string().required("End time is required."),
   guestName: Yup.string()
     .required("Full name is required.")
     .min(1, "Full name must be at least 1 character.")
