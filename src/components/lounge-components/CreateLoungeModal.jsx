@@ -91,7 +91,7 @@ const AddLocationModal = ({ open, setOpen, handleNext = () => { } }) => {
     step3Formik.resetForm({ values: floorPlanSetupValues({}) });
   }, []);
 
-  // Reset all steps & state when modal closes or opens fresh
+  // Reset all steps & stte when modal closes or opens fresh
   useEffect(() => {
     if (!open) {
       resetAllFormikSteps();
