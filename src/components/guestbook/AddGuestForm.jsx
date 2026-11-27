@@ -178,15 +178,15 @@ const AddGuestForm = ({
 
         const formattedPhone = values.phoneNumber?.trim()
           ? (values.phoneNumber.startsWith("+")
-              ? values.phoneNumber.trim()
-              : phoneToE164(values.phoneNumber))
+            ? values.phoneNumber.trim()
+            : phoneToE164(values.phoneNumber))
           : "";
 
         const payload = {
-          loungeId: selectedLoungeId || data?.loungeId,
           firstName: values.firstName.trim(),
           lastName: values.lastName.trim(),
           email: values.email.trim(),
+          ...(!isEdit && { loungeId: selectedLoungeId }),
         };
 
         if (values.company?.trim()) {
@@ -272,7 +272,7 @@ const AddGuestForm = ({
           });
         } else {
           await createGuestMutation.mutateAsync({
-            ...payload,
+            payload,
           });
         }
 
@@ -771,7 +771,7 @@ const AddGuestForm = ({
                     value={formik.values.address.city}
                     onChange={(city) => {
                       formik.setFieldValue("address.city", city);
-                      formik.setFieldTouched("address.city", true, true);
+                      formik.setFieldTouched("address.city", true, false);
                     }}
                     options={cityOptions}
                     disabled={!selectedState}

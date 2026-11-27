@@ -22,6 +22,7 @@ import FloorPlanSetup from "./FloorPlanSetup";
 import { LogOutIcon } from "lucide-react";
 import TimeRangeInput from "../auth/TimeRangeInput";
 import LoungeTags from "./LoungeTags";
+import GooglePlacesAddressInput from "@/components/common/GooglePlacesAddressInput";
 
 const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
   const [userImage, setUserImage] = useState("");
@@ -319,7 +320,7 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
                 <label className="block text-[14px] font-[500] mb-2 text-white">
                   Business Location
                 </label>
-                <textarea
+                <GooglePlacesAddressInput
                   name="location"
                   id="location"
                   value={values.location}
@@ -327,7 +328,7 @@ const PersonalDetails = ({ handleNext, handlePrevious, setCurrentState }) => {
                   onBlur={handleBlur}
                   maxLength={100}
                   placeholder="Enter your Location"
-                  className="w-full h-20 px-4 py-3 text-sm text-white rounded-[15px] bg-white/10 backdrop-blur-[28px] border border-white/20 placeholder:text-gray-300 placeholder:text-[12px] placeholder:font-light focus:outline-none focus:border-white/40 focus:ring-2 focus:ring-white/20 transition-all duration-200 resize-none"
+                  className="w-full px-4 py-3 text-sm text-white rounded-[15px] bg-white/10 backdrop-blur-[28px] border border-white/20 placeholder:text-gray-300 placeholder:text-[12px] placeholder:font-light focus:outline-none focus:border-white/40 focus:ring-2 focus:ring-white/20 transition-all duration-200"
                 />
                 {touched.location && errors.location && (
                   <p className="text-red-600 text-xs mt-1">

@@ -21,7 +21,7 @@ const Profile = () => {
   const { data: activeLounge, isLoading } = useGetActiveLounge();
   const { data: authMe } = useAuthMe();
   const { data: lounges = [] } = useGetLounges();
-  
+
 
   const updateLoungeMutation = useUpdateLounge();
   const [openEditProfile, setOpenEditProfile] = useState(false);
@@ -284,8 +284,14 @@ const Profile = () => {
           if (data.specialization !== activeLounge?.specialization) {
             payload.specialization = data.specialization;
           }
-          if (data.businessLocation !== activeLounge?.location?.address) {
+          if (
+            data.businessLocation !== activeLounge?.location?.address ||
+            data.businessCoordinates?.lat != null
+          ) {
             payload.location = data.businessLocation;
+            if (data.businessCoordinates?.lat != null && data.businessCoordinates?.lng != null) {
+              payload.coordinates = data.businessCoordinates;
+            }
           }
           if (data.logoFile) {
             payload.userImage = data.logoFile;

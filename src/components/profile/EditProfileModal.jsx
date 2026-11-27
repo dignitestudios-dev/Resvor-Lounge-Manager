@@ -16,6 +16,7 @@ import TimeRangeInput from "../auth/TimeRangeInput";
 import { Loader2 } from "lucide-react";
 import ImageCropperModal from "@/components/common/ImageCropperModal";
 import { validateProfileImage } from "@/lib/utils/cropImage";
+import GooglePlacesAddressInput from "@/components/common/GooglePlacesAddressInput";
 
 const convert12hTo24h = (time12h) => {
   if (!time12h) return "";
@@ -49,7 +50,10 @@ const EditProfileModal = ({
   const [loungeImage, setLoungeImage] = useState(lounge?.logo?.location || "/images/lounge.jfif");
   const [businessEmail, setBusinessEmail] = useState(lounge?.businessEmail || "");
   const [businessPhone, setBusinessPhone] = useState(lounge?.businessPhone || "");
-
+  const [businessCoordinates, setBusinessCoordinates] = useState({
+    lat: null,
+    lng: null,
+  });
   // Image Cropping Modal State
   const [isCropperOpen, setIsCropperOpen] = useState(false);
   const [selectedCropFile, setSelectedCropFile] = useState(null);
@@ -68,6 +72,8 @@ const EditProfileModal = ({
     validateOnChange: true,
     validateOnBlur: true,
     onSubmit: (values) => {
+      console.log("Business Coordinates:", businessCoordinates);
+
       const open12h = convert24hTo12h(values.openingTime);
       const close12h = convert24hTo12h(values.closingTime);
       const formattedHours = open12h && close12h ? `${open12h} - ${close12h}` : "";
@@ -78,6 +84,7 @@ const EditProfileModal = ({
         specialization: values.specialization,
         businessLocation: values.businessLocation,
         businessLocation2: values.businessLocation2,
+        businessCoordinates,
         logoFile: values.logoFile,
       });
     },
@@ -106,6 +113,7 @@ const EditProfileModal = ({
         businessLocation2: "",
         logoFile: null,
       });
+      setBusinessCoordinates({ lat: null, lng: null });
       setLoungeImage(lounge.logo?.location || "/images/lounge.jfif");
       setBusinessEmail(lounge.businessEmail || "");
       setBusinessPhone(lounge.businessPhone || "");
@@ -197,16 +205,14 @@ const EditProfileModal = ({
                   Lounge Name
                 </label>
                 <input
-                  type="text"
                   name="loungeName"
                   value={values.loungeName}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`w-full px-3 py-2 rounded-md border ${
-                    errors.loungeName && touched.loungeName
-                      ? "border-red-500 ring-1 ring-red-500"
-                      : "border-gray-300"
-                  }`}
+                  className={`w-full px-3 py-2 rounded-md border ${errors.loungeName && touched.loungeName
+                    ? "border-red-500 ring-1 ring-red-500"
+                    : "border-gray-300"
+                    }`}
                   placeholder="Lounge Name"
                 />
                 {errors.loungeName && touched.loungeName && (
@@ -273,11 +279,10 @@ const EditProfileModal = ({
                   value={values.specialization}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`w-full px-3 py-2 rounded-md border ${
-                    errors.specialization && touched.specialization
-                      ? "border-red-500 ring-1 ring-red-500"
-                      : "border-gray-300"
-                  }`}
+                  className={`w-full px-3 py-2 rounded-md border ${errors.specialization && touched.specialization
+                    ? "border-red-500 ring-1 ring-red-500"
+                    : "border-gray-300"
+                    }`}
                   placeholder="Enter your Specialization"
                 />
                 {errors.specialization && touched.specialization && (
@@ -291,17 +296,23 @@ const EditProfileModal = ({
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Business Location
                 </label>
-                <input
+                <GooglePlacesAddressInput
                   type="text"
                   name="businessLocation"
                   value={values.businessLocation}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    handleChange(e);
+
+                    if (e.target.value !== lounge?.location?.address) {
+                      setBusinessCoordinates({ lat: null, lng: null });
+                    }
+                  }}
                   onBlur={handleBlur}
-                  className={`w-full px-3 py-2 rounded-md border ${
-                    errors.businessLocation && touched.businessLocation
-                      ? "border-red-500 ring-1 ring-red-500"
-                      : "border-gray-300"
-                  }`}
+                  onPlaceSelected={(coordinates) => setBusinessCoordinates(coordinates)}
+                  className={`w-full px-3 py-2 rounded-md border ${errors.businessLocation && touched.businessLocation
+                    ? "border-red-500 ring-1 ring-red-500"
+                    : "border-gray-300"
+                    }`}
                   placeholder="Enter your Business Location"
                 />
                 {errors.businessLocation && touched.businessLocation && (

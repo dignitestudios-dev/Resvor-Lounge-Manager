@@ -136,8 +136,10 @@ export const submitCreateLounge = async (payload) => {
 
   // Location
   formData.append("location[address]", payload.location);
-  formData.append("location[coordinates][lat]", 0); // Default or from payload
-  formData.append("location[coordinates][lng]", 1); // Default or from payload
+  if (payload.businessCoordinates?.lat != null && payload.businessCoordinates?.lng != null) {
+    formData.append("location[coordinates][lat]", payload.businessCoordinates.lat);
+    formData.append("location[coordinates][lng]", payload.businessCoordinates.lng);
+  }
   formData.append("regularTables", payload.regularTables);
   formData.append("vipTables", payload.vipTables);
 
@@ -201,6 +203,7 @@ export const submitCreateLounge = async (payload) => {
     });
   }
 
+  console.debug("Create lounge FormData:", [...formData.entries()].filter(([key]) => key.startsWith("location[")));
   const { data } = await axios.post("/lounges", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
@@ -210,7 +213,9 @@ export const submitCreateLounge = async (payload) => {
 };
 
 export const submitUpdateLounge = async (payload) => {
+
   const formData = new FormData();
+  console.log("UPDATE LOUNGE RECEIVED:", payload);
 
   // Basic fields (only add if present in payload)
   if (payload.name !== undefined) formData.append("name", payload.name);
@@ -237,11 +242,27 @@ export const submitUpdateLounge = async (payload) => {
   }
 
   // Location
+  // Location
   if (payload.location !== undefined) {
     formData.append("location[address]", payload.location);
-    formData.append("location[coordinates][lat]", 0);
-    formData.append("location[coordinates][lng]", 1);
+
+    if (
+      payload.coordinates?.lat != null &&
+      payload.coordinates?.lng != null
+    ) {
+      formData.append(
+        "location[coordinates][lat]",
+        payload.coordinates.lat
+      );
+
+      formData.append(
+        "location[coordinates][lng]",
+        payload.coordinates.lng
+      );
+    }
   }
+
+  console.debug("Update lounge FormData:", [...formData.entries()].filter(([key]) => key.startsWith("location[")));
 
   // Tables
   if (payload.regularTables !== undefined) formData.append("regularTables", payload.regularTables);
@@ -326,8 +347,8 @@ export const submitCreateCampaign = async (payload) => {
   const images = Array.isArray(payload.images)
     ? payload.images
     : payload.image
-    ? [payload.image]
-    : [];
+      ? [payload.image]
+      : [];
   images.forEach((img, i) => {
     if (img) formData.append(`images[${i}]`, img);
   });
